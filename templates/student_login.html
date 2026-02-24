@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Đăng Nhập Học Sinh{% endblock %}
+
+{% block login_content %}
+<div class="min-h-[85vh] flex items-center justify-center relative py-12 px-4">
+
+    <div class="w-full max-w-sm animate-fade-in-up">
+
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div
+                class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-600 text-white text-xl mb-4">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <h1 class="text-2xl font-semibold text-foreground tracking-tight">Cổng Học Sinh</h1>
+            <p class="text-muted-foreground text-sm mt-1.5">Nhập mã số để xem kết quả rèn luyện</p>
+        </div>
+
+        <!-- Card -->
+        <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl shadow-card p-6">
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div
+                class="mb-4 p-3 rounded-lg flex items-center gap-2.5 text-sm animate-fade-in-down bg-destructive/5 text-destructive border border-destructive/10">
+                <i class="fas fa-circle-exclamation text-xs"></i>
+                <span class="font-medium">{{ message }}</span>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('student.student_login') }}" method="POST" class="space-y-4">
+                <div class="space-y-2">
+                    <label for="student_code" class="text-sm font-medium text-foreground">Mã Số Học Sinh</label>
+                    <div class="relative">
+                        <i
+                            class="fas fa-id-card absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs"></i>
+                        <input type="text" name="student_code" id="student_code" required
+                            class="input-shadcn pl-9 py-2.5" placeholder="Ví dụ: 34TIN-001">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary w-full py-2.5 flex items-center justify-center gap-2 text-sm">
+                    Xem Kết Quả
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14"></path>
+                        <path d="m12 5 7 7-7 7"></path>
+                    </svg>
+                </button>
+            </form>
+        </div>
+
+        <!-- Teacher Login Link -->
+        <div class="mt-6 text-center">
+            <a href="{{ url_for('auth.login') }}"
+                class="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition group">
+                <i class="fas fa-chalkboard-teacher text-xs"></i>
+                <span>Giáo viên đăng nhập</span>
+                <svg class="w-3 h-3 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="m9 18 6-6-6-6" />
+                </svg>
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+{% block title %}EduMind AI - Hệ Thống Giáo Dục Tổng Hợp{% endblock %}
+
+{% block content %}
+<div class="space-y-16 pb-12 animate-fade-in-up">
+
+    <!-- Hero Section -->
+    <section class="relative text-center py-10 md:py-20 px-4">
+        <div
+            class="inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-md bg-accent border border-[hsl(240,5.9%,90%)] text-sm font-medium text-foreground">
+            <span class="relative flex h-1.5 w-1.5">
+                <span
+                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+            </span>
+            <span class="text-xs tracking-wider uppercase">Hệ Thống Giáo Dục Tổng Hợp</span>
+        </div>
+
+        <h1 class="text-4xl md:text-6xl font-bold text-foreground tracking-tight mb-5 leading-[1.1]">
+            Quản lý giáo dục <br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500">với
+                sức mạnh AI</span>
+        </h1>
+
+        <p class="text-base md:text-lg text-muted-foreground max-w-xl mx-auto mb-8 leading-relaxed">
+            Tự động hóa nề nếp, điểm số và báo cáo. Trợ lý ảo AI chạy local giúp bảo mật dữ liệu tuyệt đối.
+        </p>
+
+        <div class="flex flex-col sm:flex-row justify-center gap-3">
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('dashboard') }}"
+                class="btn-primary px-6 py-3 text-sm flex items-center justify-center gap-2">
+                <i class="fas fa-chart-pie text-xs"></i> Vào Dashboard
+            </a>
+            <a href="{{ url_for('index') }}"
+                class="btn-outline px-6 py-3 text-sm flex items-center justify-center gap-2">
+                <i class="fas fa-list-ul text-xs"></i> Bảng Rèn Luyện
+            </a>
+            {% else %}
+            <a href="{{ url_for('student.student_login') }}"
+                class="btn-primary px-6 py-3 text-sm flex items-center justify-center gap-2">
+                <i class="fas fa-user-graduate text-xs"></i> Học Sinh Đăng Nhập
+            </a>
+            <a href="{{ url_for('auth.login') }}"
+                class="btn-outline px-6 py-3 text-sm flex items-center justify-center gap-2">
+                <i class="fas fa-chalkboard-teacher text-xs"></i> Giáo Viên Đăng Nhập
+            </a>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Mission & Vision -->
+    <section>
+        <div
+            class="bg-white border border-[hsl(240,5.9%,90%)] p-8 md:p-10 rounded-xl shadow-card relative overflow-hidden">
+            <div
+                class="absolute top-0 right-0 w-80 h-80 bg-indigo-100/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2">
+            </div>
+
+            <div class="relative z-10 grid md:grid-cols-2 gap-10 items-center">
+                <div class="space-y-5">
+                    <span class="badge badge-secondary px-3 py-1 text-xs"><i class="fas fa-rocket mr-1.5"></i> Sứ Mệnh &
+                        Tầm Nhìn</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-foreground leading-tight tracking-tight">
+                        Kiến tạo nền giáo dục <br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Thông
+                            Minh & Nhân Văn</span>
+                    </h2>
+                    <p class="text-muted-foreground leading-relaxed">
+                        EduMind AI ra đời với khát vọng giải phóng sức lao động cho nhà giáo thông qua trí tuệ nhân tạo,
+                        mang lại sự công bằng, minh bạch trong đánh giá học sinh.
+                    </p>
+                    <div class="flex gap-3 pt-2">
+                        <div class="flex-1 p-3 bg-accent rounded-lg border border-[hsl(240,5.9%,90%)]">
+                            <div class="text-xl font-bold text-indigo-600 mb-0.5">4.0</div>
+                            <div class="text-xs text-muted-foreground font-medium">Công nghệ lõi</div>
+                        </div>
+                        <div class="flex-1 p-3 bg-accent rounded-lg border border-[hsl(240,5.9%,90%)]">
+                            <div class="text-xl font-bold text-emerald-600 mb-0.5">100%</div>
+                            <div class="text-xs text-muted-foreground font-medium">Bảo mật</div>
+                        </div>
+                        <div class="flex-1 p-3 bg-accent rounded-lg border border-[hsl(240,5.9%,90%)]">
+                            <div class="text-xl font-bold text-rose-600 mb-0.5">24/7</div>
+                            <div class="text-xs text-muted-foreground font-medium">Hỗ trợ AI</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div
+                        class="aspect-video bg-[hsl(240,5.9%,10%)] rounded-xl flex items-center justify-center relative overflow-hidden">
+                        <i class="fas fa-brain text-white text-7xl opacity-10 absolute"></i>
+                        <div class="relative z-10 text-center text-white px-8">
+                            <i class="fas fa-quote-left text-3xl opacity-30 mb-3 block"></i>
+                            <p class="text-base font-medium italic opacity-90">"Giáo dục không phải là việc đổ đầy một
+                                cái bình, mà là thắp sáng một ngọn lửa."</p>
+                            <p class="mt-3 text-sm font-medium opacity-60">— W.B. Yeats</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Bento Grid -->
+    <section>
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-foreground tracking-tight">Tính năng nổi bật</h2>
+            <a href="{{ url_for('docs') }}"
+                class="text-sm font-medium text-muted-foreground hover:text-foreground transition flex items-center gap-1">
+                Xem tất cả <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path d="m9 18 6-6-6-6" />
+                </svg>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-[minmax(160px,auto)]">
+            <!-- Card 1: OCR Grades & Vision -->
+            <div
+                class="md:col-span-2 md:row-span-2 bg-white border border-[hsl(240,5.9%,90%)] p-6 rounded-xl shadow-card hover-card relative overflow-hidden stagger-item">
+                <div
+                    class="absolute top-0 right-0 w-48 h-48 bg-indigo-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2">
+                </div>
+                <div class="relative z-10 h-full flex flex-col justify-between">
+                    <div>
+                        <div
+                            class="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600 text-lg mb-3">
+                            <i class="fas fa-expand"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-foreground mb-1.5">OCR Vision & Số Hóa Điểm</h3>
+                        <p class="text-sm text-muted-foreground">Tự động nhận diện thẻ học sinh và trích xuất điểm từ
+                            bảng điểm tay của giáo viên với độ chính xác cực cao.</p>
+                    </div>
+                    <div class="mt-4">
+                        <span class="badge badge-secondary text-xs"><i class="fas fa-check mr-1"></i> Gemini Vision
+                            OCR</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: AI Predict Trend -->
+            <div
+                class="md:col-span-1 md:row-span-2 bg-white border border-[hsl(240,5.9%,90%)] p-5 rounded-xl shadow-card hover-card stagger-item">
+                <div class="h-full flex flex-col">
+                    <div
+                        class="w-10 h-10 bg-rose-50 rounded-lg flex items-center justify-center text-rose-600 text-lg mb-3">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3 class="text-base font-semibold text-foreground mb-1">Dự Báo Xu Hướng</h3>
+                    <p class="text-sm text-muted-foreground mb-3 flex-1">Phân tích dữ liệu học tập và nề nếp để cảnh báo
+                        sớm các nguy cơ sút giảm học lực hoặc vấn đề tâm lý.</p>
+                    <div
+                        class="bg-rose-50/50 rounded-lg p-3 border border-rose-100 text-[11px] text-rose-800 space-y-1 italic">
+                        <div class="flex items-center gap-2"><i class="fas fa-exclamation-triangle"></i> Cảnh báo: Nguy
+                            cơ sút giảm GPA</div>
+                        <div class="flex items-center gap-2"><i class="fas fa-info-circle"></i> Đề xuất: GVCN cần trao
+                            đổi riêng</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Voice-to-Text Normalizer -->
+            <div class="bg-white border border-[hsl(240,5.9%,90%)] p-5 rounded-xl shadow-card hover-card stagger-item">
+                <div
+                    class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center text-white mb-3 shadow-md shadow-indigo-200">
+                    <i class="fas fa-microphone-alt"></i>
+                </div>
+                <h3 class="text-sm font-semibold text-foreground mb-1">Chuẩn Hóa Nhận Xét</h3>
+                <p class="text-xs text-muted-foreground">Biến giọng nói hoặc văn bản thô thành lời nhận xét sư phạm
+                    chuyên nghiệp chỉ trong vài giây.</p>
+            </div>
+
+            <!-- Card 4: AI Assistant -->
+            <div class="bg-white border border-[hsl(240,5.9%,90%)] p-5 rounded-xl shadow-card hover-card stagger-item">
+                <div class="w-9 h-9 bg-purple-50 rounded-lg flex items-center justify-center text-purple-600 mb-3">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h3 class="text-sm font-semibold text-foreground mb-1">Trợ Lý AI Đa Năng</h3>
+                <p class="text-xs text-muted-foreground">Tra cứu dữ liệu, lên lịch công tác và hỗ trợ giáo viên soạn
+                    thảo văn bản học đường.</p>
+            </div>
+
+            <!-- Card 5: Grade & Report Management -->
+            <div
+                class="md:col-span-2 bg-white border border-[hsl(240,5.9%,90%)] p-5 rounded-xl shadow-card hover-card stagger-item">
+                <div class="flex items-start gap-4">
+                    <div
+                        class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600 text-lg flex-shrink-0">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-semibold text-foreground mb-1">Báo Cáo & Liên Lạc Tự Động</h3>
+                        <p class="text-sm text-muted-foreground">Tự động tổng hợp báo cáo tuần, phiếu điểm rèn luyện gửi
+                            trực tiếp đến phụ huynh qua nhiều kênh.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 6: Security -->
+            <div class="bg-white border border-[hsl(240,5.9%,90%)] p-5 rounded-xl shadow-card hover-card stagger-item">
+                <div class="w-9 h-9 bg-slate-50 rounded-lg flex items-center justify-center text-slate-600 mb-3">
+                    <i class="fas fa-shield-halved"></i>
+                </div>
+                <h3 class="text-sm font-semibold text-foreground mb-1">Bảo Mật Offline</h3>
+                <p class="text-xs text-muted-foreground">AI chạy local 100%, bảo mật thông tin học sinh tuyệt đối.</p>
+            </div>
+
+            <!-- Card 7: Competition -->
+            <div class="bg-white border border-[hsl(240,5.9%,90%)] p-5 rounded-xl shadow-card hover-card stagger-item">
+                <div class="w-9 h-9 bg-amber-50 rounded-lg flex items-center justify-center text-amber-600 mb-3">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h3 class="text-sm font-semibold text-foreground mb-1">Thi Đua Tự Động</h3>
+                <p class="text-xs text-muted-foreground">Bảng xếp hạng thi đua cập nhật thời gian thực dựa trên nề nếp.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="overflow-hidden">
+        <h2 class="text-xl font-semibold text-foreground tracking-tight mb-8 text-center">Người dùng nói gì?</h2>
+
+        <style>
+            @keyframes marquee-ltr {
+                0% {
+                    transform: translateX(-50%);
+                }
+
+                100% {
+                    transform: translateX(0);
+                }
+            }
+
+            .animate-marquee-ltr {
+                animation: marquee-ltr 15s linear infinite;
+            }
+
+            .animate-marquee-ltr:hover {
+                animation-play-state: paused;
+            }
+
+            .mask-fade-x {
+                -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+                mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            }
+        </style>
+
+        <div class="relative mask-fade-x py-8">
+            <div class="flex gap-6 animate-marquee-ltr">
+                {% set testimonials = [
+                {"text": "Hệ thống giúp tôi tiết kiệm 50% thời gian tổng hợp báo cáo tuần. Giao diện mới rất đẹp và dễ
+                dùng.", "name": "Cô Nguyễn Thị Hương", "role": "GVCN 10A1", "initial": "H", "bg": "bg-indigo-100
+                text-indigo-700"},
+                {"text": "Chatbot tra cứu cực nhanh, tôi không cần phải lật sổ điểm để xem học sinh nào vi phạm nữa.",
+                "name": "Thầy Trần Văn Minh", "role": "GVCN 11B2", "initial": "M", "bg": "bg-emerald-100
+                text-emerald-700"},
+                {"text": "Em rất thích tính năng xem điểm rèn luyện và chat với giáo viên. Giao diện nhìn rất hiện
+                đại!", "name": "Em Hoàng Minh Tuấn", "role": "Học sinh 12C1", "initial": "T", "bg": "bg-amber-100
+                text-amber-700"},
+                {"text": "Tôi rất yên tâm khi nhận được thông báo ngay khi con có vi phạm. Sự minh bạch giúp gia đình
+                đồng hành tốt hơn.", "name": "Chị Lê Thị Lan", "role": "Phụ huynh 10A2", "initial": "L", "bg":
+                "bg-rose-100 text-rose-700"},
+                {"text": "EduMind AI là bước đột phá trong quản lý nề nếp. Số liệu trực quan giúp BGH đưa ra quyết định
+                chính xác.", "name": "Thầy Phạm Văn Dũng", "role": "Hiệu Trưởng", "initial": "D", "bg": "bg-purple-100
+                text-purple-700"},
+                {"text": "Giao diện web rất đẹp, giống như một ứng dụng hiện đại. Em thích nhất có thể tra cứu điểm số
+                mọi lúc.", "name": "Em Trần Ngọc Nhi", "role": "Học sinh 11A5", "initial": "N", "bg": "bg-sky-100
+                text-sky-700"}
+                ] %}
+
+                {# Render twice for infinite loop #}
+                {% for i in range(2) %}
+                {% for t in testimonials %}
+                <div
+                    class="bg-white border border-[hsl(240,5.9%,90%)] p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow min-w-[300px] md:min-w-[350px] flex flex-col group">
+                    <div class="flex items-center gap-1 text-amber-400 mb-4 text-xs">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                            class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                    <p class="text-[15px] text-muted-foreground leading-relaxed italic mb-6 flex-1">"{{ t.text }}"</p>
+                    <div class="flex items-center gap-3 pt-4 border-t border-[hsl(240,5.9%,90%)]">
+                        <div
+                            class="w-10 h-10 rounded-xl {{ t.bg }} flex items-center justify-center font-bold text-sm shadow-sm group-hover:scale-110 transition-transform">
+                            {{ t.initial }}</div>
+                        <div>
+                            <p class="text-sm font-bold text-foreground">{{ t.name }}</p>
+                            <p class="text-xs text-muted-foreground font-medium">{{ t.role }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center text-muted-foreground text-xs pt-6 border-t border-[hsl(240,5.9%,90%)]">
+        <div class="flex justify-center gap-3 mb-1.5">
+            <a href="{{ url_for('terms') }}" class="hover:text-foreground transition">Điều khoản</a>
+            <span class="text-muted-foreground/40">•</span>
+            <a href="{{ url_for('privacy') }}" class="hover:text-foreground transition">Bảo mật</a>
+        </div>
+        <p>Bản quyền © Agent_LLM — Trường THPT Chuyên Nguyễn Tất Thành</p>
+    </footer>
+</div>
+{% endblock %}

@@ -1,0 +1,404 @@
+{% extends "base.html" %}
+{% block title %}Nhập Điểm Bằng AI Vision{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto page-enter">
+    <div class="mb-8">
+        <h1 class="text-2xl font-semibold tracking-tight text-foreground mb-2">
+            <i class="fas fa-magic text-indigo-600 mr-2"></i> Nhập Điểm Tự Động (AI Vision)
+        </h1>
+        <p class="text-muted-foreground">Chụp ảnh bảng điểm tay của giáo viên để AI tự động nhận diện và nhập điểm.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Cấu hình quét -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="bg-white rounded-xl shadow-card p-6 border border-[hsl(240,5.9%,90%)]">
+                <h3 class="text-lg font-semibold mb-4 border-b pb-2">1. Cấu hình điểm</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-foreground mb-2">Môn học</label>
+                        <select id="subject_id"
+                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 input-shadcn">
+                            {% for subject in subjects %}
+                            <option value="{{ subject.id }}">{{ subject.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-foreground mb-2">Học kỳ</label>
+                            <select id="semester"
+                                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 input-shadcn">
+                                <option value="1" {% if semester==1 %}selected{% endif %}>Học kỳ 1</option>
+                                <option value="2" {% if semester==2 %}selected{% endif %}>Học kỳ 2</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-card p-6 border border-[hsl(240,5.9%,90%)]"
+                style="animation-delay: 0.1s;">
+                <h3 class="text-lg font-semibold mb-4 border-b pb-2">2. Chụp ảnh/Tải lên</h3>
+                <div class="space-y-4">
+                    <div id="upload-area"
+                        class="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:border-indigo-500 hover:bg-slate-50 transition cursor-pointer group">
+                        <input type="file" id="image-upload" accept="image/*" capture="environment" class="hidden">
+                        <i class="fas fa-camera text-4xl text-slate-300 group-hover:text-indigo-500 mb-3 block"></i>
+                        <p class="text-sm font-medium text-slate-600">Nhấp để chụp hoặc chọn ảnh</p>
+                        <p class="text-xs text-slate-400 mt-1">Hỗ trợ JPG, PNG</p>
+                    </div>
+
+                    <div id="image-preview-container" class="hidden relative rounded-xl overflow-hidden border">
+                        <img id="image-preview" src="" class="w-full h-auto">
+                        <button id="remove-image"
+                            class="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <button id="process-ocr-btn" disabled
+                        class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed shadow-lg shadow-indigo-100 transition flex items-center justify-center gap-2">
+                        <i class="fas fa-brain"></i> Bắt đầu nhận diện
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kết quả nhận diện -->
+        <div class="lg:col-span-2 space-y-6">
+            <div id="ocr-results-card"
+                class="bg-white rounded-xl shadow-card border border-[hsl(240,5.9%,90%)] overflow-hidden hidden"
+                style="animation-delay: 0.2s;">
+                <div
+                    class="px-6 py-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-[hsl(240,5.9%,90%)] flex justify-between items-center">
+                    <h2 class="text-lg font-bold text-foreground">
+                        <i class="fas fa-clipboard-check text-indigo-600 mr-2"></i> Kết quả nhận diện (AI)
+                    </h2>
+                    <span id="detected-count" class="badge badge-secondary">0 học sinh</span>
+                </div>
+
+                <div class="p-4 bg-amber-50 border-b border-amber-100 text-amber-800 text-sm flex gap-3 italic">
+                    <i class="fas fa-info-circle mt-0.5"></i>
+                    <p>Vui lòng soát lại dữ liệu bên dưới trước khi lưu. Những ô trống AI sẽ bỏ qua không thay đổi trong
+                        hệ thống.</p>
+                </div>
+
+                <div class="max-h-[500px] overflow-y-auto">
+                    <table class="w-full table-shadcn">
+                        <thead class="bg-slate-50 sticky top-0 z-10">
+                            <tr>
+                                <th class="w-20">Mã Số</th>
+                                <th>Họ Tên</th>
+                                <th class="w-28 text-center">Loại Điểm</th>
+                                <th class="w-24 text-center">Cột Số</th>
+                                <th class="w-32 text-center">Điểm</th>
+                                <th class="w-16"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="ocr-tbody">
+                            <!-- Kết quả sẽ được render bằng JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-6 bg-slate-50 border-t border-[hsl(240,5.9%,90%)] flex justify-end gap-3">
+                    <button id="cancel-ocr" class="btn-outline">Hủy bỏ</button>
+                    <button id="save-ocr-btn" class="btn-primary px-8">
+                        <i class="fas fa-save mr-2"></i> Lưu vào hệ thống
+                    </button>
+                </div>
+            </div>
+
+            <!-- Trạng thái chờ -->
+            <div id="loading-state"
+                class="hidden bg-white rounded-xl shadow-card border border-[hsl(240,5.9%,90%)] p-12 text-center">
+                <div
+                    class="inline-flex w-16 h-16 rounded-full bg-indigo-50 items-center justify-center animate-bounce mb-6">
+                    <i class="fas fa-brain text-indigo-500 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Đang xử lý dữ liệu...</h3>
+                <p class="text-muted-foreground max-w-sm mx-auto mb-8">Gemini AI đang đọc ảnh và trích xuất điểm số. Quá
+                    trình này có thể mất vài giây tuỳ vào độ phức tạp của ảnh.</p>
+                <div class="space-y-4 max-w-md mx-auto">
+                    <div class="skeleton h-4 w-full"></div>
+                    <div class="skeleton h-4 w-3/4 mx-auto"></div>
+                    <div class="skeleton h-4 w-1/2 mx-auto"></div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state"
+                class="bg-white rounded-xl shadow-card border border-[hsl(240,5.9%,90%)] p-12 text-center">
+                <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-image text-3xl text-slate-300"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Chưa có dữ liệu ảnh</h3>
+                <p class="text-muted-foreground mb-8">Hãy chọn hoặc chụp ảnh bảng điểm tay của bạn ở bên trái để bắt
+                    đầu.</p>
+                <div
+                    class="inline-block p-4 bg-blue-50 rounded-lg text-left text-sm text-blue-700 max-w-md border border-blue-100">
+                    <h4 class="font-bold mb-1"><i class="fas fa-lightbulb"></i> Mẹo:</h4>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Nên chụp ảnh vuông góc, đủ sáng.</li>
+                        <li>Chụp rõ danh sách tên/mã số và cột điểm tương ứng.</li>
+                        <li>Tránh để ngón tay che khuất thông tin.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const uploadArea = document.getElementById('upload-area');
+        const imageUpload = document.getElementById('image-upload');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const removeImageBtn = document.getElementById('remove-image');
+        const processOcrBtn = document.getElementById('process-ocr-btn');
+        const loadingState = document.getElementById('loading-state');
+        const resultsCard = document.getElementById('ocr-results-card');
+        const emptyState = document.getElementById('empty-state');
+        const ocrTbody = document.getElementById('ocr-tbody');
+        const detectedCount = document.getElementById('detected-count');
+        const saveOcrBtn = document.getElementById('save-ocr-btn');
+        const cancelOcrBtn = document.getElementById('cancel-ocr');
+
+        // Mở file dialog khi nhấn vào upload-area
+        uploadArea.addEventListener('click', () => imageUpload.click());
+
+        // Xử lý khi chọn ảnh
+        imageUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.src = e.target.result;
+                    imagePreviewContainer.classList.remove('hidden');
+                    uploadArea.classList.add('hidden');
+                    processOcrBtn.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Xóa ảnh đã chọn
+        removeImageBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            imageUpload.value = '';
+            imagePreview.src = '';
+            imagePreviewContainer.classList.add('hidden');
+            uploadArea.classList.remove('hidden');
+            processOcrBtn.disabled = true;
+        });
+
+        // Bắt đầu quá trình OCR
+        processOcrBtn.addEventListener('click', async () => {
+            const formData = new FormData();
+            formData.append('image', imageUpload.files[0]);
+
+            // Trạng thái loading
+            emptyState.classList.add('hidden');
+            resultsCard.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            try {
+                const response = await fetch('/api/ocr-grades', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (data.error) {
+                    alert('Lỗi: ' + data.error);
+                    loadingState.classList.add('hidden');
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+
+                renderResults(data.results);
+                loadingState.classList.add('hidden');
+                resultsCard.classList.remove('hidden');
+            } catch (err) {
+                alert('Lỗi kết nối: ' + err.message);
+                loadingState.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+            }
+        });
+
+        // Render kết quả ra bảng
+        function renderResults(results) {
+            ocrTbody.innerHTML = '';
+            if (!results || results.length === 0) {
+                ocrTbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-muted-foreground">Không tìm thấy dữ liệu học sinh nào.</td></tr>';
+                detectedCount.textContent = '0 học sinh';
+                return;
+            }
+
+            let studentCount = 0;
+
+            results.forEach((student, index) => {
+                if (!student.grades || student.grades.length === 0) return;
+                studentCount++;
+
+                student.grades.forEach(grade => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                    <td class="px-3 py-4">
+                        <input type="text" value="${student.student_code || ''}" class="student-code-input w-full bg-transparent border-none focus:ring-1 focus:ring-indigo-200 rounded p-1 font-mono text-sm" placeholder="Mã số">
+                    </td>
+                    <td class="px-3 py-4">
+                        <input type="text" value="${student.student_name || ''}" class="student-name-input w-full bg-transparent border-none focus:ring-1 focus:ring-indigo-200 rounded p-1 font-medium" placeholder="Họ và tên">
+                    </td>
+                    <td class="px-3 py-4">
+                        <select class="grade-type-input w-full bg-white border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500">
+                            <option value="TX" ${grade.grade_type === 'TX' ? 'selected' : ''}>TX</option>
+                            <option value="GK" ${grade.grade_type === 'GK' ? 'selected' : ''}>GK</option>
+                            <option value="HK" ${grade.grade_type === 'HK' ? 'selected' : ''}>HK</option>
+                        </select>
+                    </td>
+                    <td class="px-3 py-4">
+                        <input type="number" min="1" max="10" value="${grade.column_index || 1}" class="column-index-input w-full text-center bg-white border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500">
+                    </td>
+                    <td class="px-3 py-4">
+                        <input type="number" step="0.1" min="0" max="10" value="${grade.score !== null ? grade.score : ''}" 
+                               class="score-input w-24 mx-auto block text-center bg-white border border-slate-200 rounded-lg p-2 font-bold text-indigo-600 focus:ring-2 focus:ring-indigo-500" 
+                               placeholder="-">
+                    </td>
+                    <td class="px-3 py-4 text-right">
+                        <button class="remove-row-btn text-slate-300 hover:text-red-500 transition">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                `;
+
+                    // Xóa dòng
+                    row.querySelector('.remove-row-btn').addEventListener('click', () => {
+                        row.remove();
+                    });
+
+                    ocrTbody.appendChild(row);
+                });
+            });
+
+            detectedCount.textContent = studentCount + ' học sinh';
+        }
+
+        // Hủy bỏ
+        cancelOcrBtn.addEventListener('click', () => {
+            if (confirm('Bạn có chắc muốn hủy kết quả này?')) {
+                resultsCard.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                removeImageBtn.click();
+            }
+        });
+
+        // Lưu kết quả vào DB
+        saveOcrBtn.addEventListener('click', async () => {
+            const grades = [];
+            const rows = document.querySelectorAll('#ocr-tbody tr');
+
+            rows.forEach((row, index) => {
+                row.dataset.rowIndex = index;
+                // Bỏ qua dòng đã lưu thành công (bị disable)
+                if (row.querySelector('.student-code-input').disabled) return;
+
+                const student_code = row.querySelector('.student-code-input').value;
+                const student_name = row.querySelector('.student-name-input').value;
+                const grade_type = row.querySelector('.grade-type-input').value;
+                const column_index = row.querySelector('.column-index-input').value;
+                const score = row.querySelector('.score-input').value;
+
+                if ((student_code || student_name) && score) {
+                    grades.push({ rowIndex: index, student_code, student_name, grade_type, column_index, score });
+                }
+            });
+
+            if (grades.length === 0) {
+                alert('Không có dữ liệu điểm để lưu.');
+                return;
+            }
+
+            const payload = {
+                subject_id: document.getElementById('subject_id').value,
+                semester: document.getElementById('semester').value,
+                grades: grades
+            };
+
+            saveOcrBtn.disabled = true;
+            saveOcrBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang lưu...';
+
+            try {
+                const response = await fetch('/api/confirm-ocr-grades', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                // Xóa các thông báo cũ
+                document.querySelectorAll('.status-msg').forEach(el => el.remove());
+                rows.forEach(r => {
+                    r.classList.remove('bg-red-50', 'bg-green-50');
+                });
+
+                if (result.item_results) {
+                    let hasErrors = false;
+                    result.item_results.forEach(res => {
+                        const row = document.querySelector(`#ocr-tbody tr[data-row-index="${res.rowIndex}"]`);
+                        if (row) {
+                            let msgDiv = document.createElement('div');
+                            msgDiv.className = 'status-msg text-xs mt-1 font-medium';
+                            if (res.status === 'success') {
+                                row.classList.add('bg-green-50');
+                                msgDiv.textContent = '✅ ' + res.message;
+                                msgDiv.classList.add('text-green-600');
+                                // Disable dòng thành công
+                                row.querySelectorAll('input, select').forEach(input => input.disabled = true);
+                                const removeBtn = row.querySelector('.remove-row-btn');
+                                if (removeBtn) removeBtn.remove();
+                            } else if (res.status === 'error') {
+                                row.classList.add('bg-red-50');
+                                msgDiv.textContent = '❌ ' + res.message;
+                                msgDiv.classList.add('text-red-600');
+                                hasErrors = true;
+                            } else {
+                                msgDiv.textContent = 'ℹ️ ' + res.message;
+                                msgDiv.classList.add('text-slate-500');
+                            }
+                            // Gắn thông báo vào dưới ô Tên học sinh
+                            row.querySelector('td:nth-child(2)').appendChild(msgDiv);
+                        }
+                    });
+
+                    if (!hasErrors) {
+                        alert(result.message + " Đang chuyển về Quản lý điểm...");
+                        window.location.href = "{{ url_for('grades.manage_grades') }}";
+                    } else {
+                        alert("Đã lưu các điểm hợp lệ. Tuy nhiên có một số học sinh bị lỗi (tô màu đỏ). Vui lòng sửa thông tin và nhấn Lưu tiếp các học sinh đó.");
+                        saveOcrBtn.disabled = false;
+                        saveOcrBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Lưu lại các lỗi';
+                    }
+                } else if (result.success) {
+                    alert(result.message);
+                    window.location.href = "{{ url_for('grades.manage_grades') }}";
+                } else {
+                    alert('Lỗi: ' + result.error);
+                    saveOcrBtn.disabled = false;
+                    saveOcrBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Lưu vào hệ thống';
+                }
+            } catch (err) {
+                alert('Lỗi kết nối: ' + err.message);
+                saveOcrBtn.disabled = false;
+                saveOcrBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Lưu vào hệ thống';
+            }
+        });
+    });
+</script>
+{% endblock %}

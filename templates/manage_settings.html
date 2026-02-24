@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Cài đặt hệ thống{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6 animate-fade-in-up">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-semibold text-foreground tracking-tight">Cài đặt hệ thống</h1>
+            <p class="text-sm text-muted-foreground mt-0.5">Quản lý các tham số cấu hình toàn cục của EduMind AI.</p>
+        </div>
+        <div class="p-2 bg-primary/5 rounded-lg">
+            <i class="fas fa-cog text-xl text-primary/60"></i>
+        </div>
+    </div>
+
+    <!-- Settings Form -->
+    <div class="glass-panel p-6 md:p-8">
+        <form method="POST" action="{{ url_for('manage_settings') }}" class="space-y-8">
+
+            <!-- School Information Section -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-2 pb-2 border-b border-border">
+                    <i class="fas fa-school text-indigo-500 text-sm"></i>
+                    <h3 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground/80">Thông tin trường
+                        & Lớp</h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="school_name" class="text-sm font-medium text-foreground">Tên trường mặc định</label>
+                        <input type="text" id="school_name" name="school_name" value="{{ configs.school_name }}"
+                            class="input-shadcn" placeholder="VD: THPT Chuyên Nguyễn Tất Thành">
+                        <p class="text-[11px] text-muted-foreground italic">Dùng làm giá trị mặc định cho tài khoản giáo
+                            viên mới.</p>
+                    </div>
+                    <div class="space-y-2">
+                        <label for="school_year" class="text-sm font-medium text-foreground">Năm học</label>
+                        <input type="text" id="school_year" name="school_year" value="{{ configs.school_year }}"
+                            class="input-shadcn" placeholder="VD: 2025-2026">
+                        <p class="text-[11px] text-muted-foreground italic">Niên khóa hiện tại của hệ thống.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Behavior Section -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-2 pb-2 border-b border-border">
+                    <i class="fas fa-calendar-alt text-emerald-500 text-sm"></i>
+                    <h3 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground/80">Cấu hình thời
+                        gian</h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="current_week" class="text-sm font-medium text-foreground">Tuần học hiện tại</label>
+                        <div class="flex items-center gap-3">
+                            <input type="number" id="current_week" name="current_week"
+                                value="{{ configs.current_week }}" class="input-shadcn w-32" min="1" max="52">
+                            <span class="text-xs text-muted-foreground">Tuần học đang diễn ra.</span>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label for="current_semester" class="text-sm font-medium text-foreground">Học kỳ hiện
+                            tại</label>
+                        <div class="flex items-center gap-3">
+                            <select id="current_semester" name="current_semester" class="input-shadcn w-32">
+                                <option value="1" {% if configs.current_semester=='1' %}selected{% endif %}>Học kỳ 1
+                                </option>
+                                <option value="2" {% if configs.current_semester=='2' %}selected{% endif %}>Học kỳ 2
+                                </option>
+                            </select>
+                            <span class="text-xs text-muted-foreground">Dùng để lọc điểm và báo cáo mặc định.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danger Zone or Important Action -->
+            <div class="bg-muted/30 rounded-lg p-5 border border-border/50">
+                <div class="flex items-start gap-3">
+                    <div class="p-2 bg-amber-100 rounded-md text-amber-600 mt-0.5">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-foreground">Lưu ý quan trọng</h4>
+                        <p class="text-xs text-muted-foreground mt-1 leading-relaxed">
+                            Việc thay đổi các tham số hệ thống có thể ảnh hưởng đến trải nghiệm của tất cả giáo viên và
+                            cách hiển thị dữ liệu báo cáo. Vui lòng kiểm tra kỹ số liệu trước khi lưu.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-border">
+                <a href="{{ url_for('dashboard') }}" class="btn-outline">Hủy bỏ</a>
+                <button type="submit" class="btn-primary flex items-center gap-2">
+                    <i class="fas fa-check text-xs"></i> Lưu cấu hình
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Info Section -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="glass-panel p-4 flex items-center gap-4">
+            <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div>
+                <p class="text-[11px] font-semibold text-muted-foreground uppercase tracking-tight">Database Status</p>
+                <p class="text-sm font-medium text-foreground">Connected (SQLite)</p>
+            </div>
+        </div>
+        <div class="glass-panel p-4 flex items-center gap-4">
+            <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-500">
+                <i class="fas fa-server"></i>
+            </div>
+            <div>
+                <p class="text-[11px] font-semibold text-muted-foreground uppercase tracking-tight">Environment</p>
+                <p class="text-sm font-medium text-foreground">Production/Vercel</p>
+            </div>
+        </div>
+        <div class="glass-panel p-4 flex items-center gap-4">
+            <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <div>
+                <p class="text-[11px] font-semibold text-muted-foreground uppercase tracking-tight">Access Level</p>
+                <p class="text-sm font-medium text-foreground">Root Administrator</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

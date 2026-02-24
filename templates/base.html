@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind & Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Driver.js Library -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css" />
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
+
+    <title>{% block title %}EduMind AI - Hệ Thống Giáo Dục Tổng Hợp{% endblock %}</title>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Be Vietnam Pro"', 'Inter', 'system-ui', 'sans-serif'],
+                        body: ['"Be Vietnam Pro"', 'Inter', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        glass: {
+                            100: 'rgba(255, 255, 255, 0.08)',
+                            200: 'rgba(255, 255, 255, 0.15)',
+                            300: 'rgba(255, 255, 255, 0.25)',
+                            400: 'rgba(255, 255, 255, 0.4)',
+                            border: 'rgba(255, 255, 255, 0.18)',
+                        },
+                        border: 'hsl(240 5.9% 90%)',
+                        input: 'hsl(240 5.9% 90%)',
+                        ring: 'hsl(240 5.9% 10%)',
+                        background: 'hsl(0 0% 100%)',
+                        foreground: 'hsl(240 10% 3.9%)',
+                        card: { DEFAULT: 'hsl(0 0% 100%)', foreground: 'hsl(240 10% 3.9%)' },
+                        muted: { DEFAULT: 'hsl(240 4.8% 95.9%)', foreground: 'hsl(240 3.8% 46.1%)' },
+                        accent: { DEFAULT: 'hsl(240 4.8% 95.9%)', foreground: 'hsl(240 5.9% 10%)' },
+                        destructive: { DEFAULT: 'hsl(0 84.2% 60.2%)', foreground: 'hsl(0 0% 98%)' },
+                        primary: {
+                            DEFAULT: 'hsl(240 5.9% 10%)',
+                            foreground: 'hsl(0 0% 98%)',
+                            50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe',
+                            500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 900: '#312e81'
+                        },
+                    },
+                    boxShadow: {
+                        'glass': '0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04)',
+                        'glass-hover': '0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05)',
+                        'card': '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+                        'card-hover': '0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05)',
+                        'glow': '0 0 20px rgba(99, 102, 241, 0.15)',
+                        'input': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+                    },
+                    borderRadius: {
+                        'shadcn': '0.75rem',
+                    },
+                    keyframes: {
+                        'fade-in': { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        'fade-in-up': { '0%': { opacity: '0', transform: 'translateY(16px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        'fade-in-down': { '0%': { opacity: '0', transform: 'translateY(-10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        'slide-in-left': { '0%': { opacity: '0', transform: 'translateX(-20px)' }, '100%': { opacity: '1', transform: 'translateX(0)' } },
+                        'slide-in-right': { '0%': { opacity: '0', transform: 'translateX(20px)' }, '100%': { opacity: '1', transform: 'translateX(0)' } },
+                        'scale-in': { '0%': { opacity: '0', transform: 'scale(0.95)' }, '100%': { opacity: '1', transform: 'scale(1)' } },
+                        'shimmer': { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
+                        'pulse-soft': { '0%, 100%': { opacity: '1' }, '50%': { opacity: '0.7' } },
+                        'bounce-subtle': { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-4px)' } },
+                    },
+                    animation: {
+                        'fade-in': 'fade-in 0.4s ease-out',
+                        'fade-in-up': 'fade-in-up 0.5s ease-out',
+                        'fade-in-down': 'fade-in-down 0.4s ease-out',
+                        'slide-in-left': 'slide-in-left 0.4s ease-out',
+                        'slide-in-right': 'slide-in-right 0.4s ease-out',
+                        'scale-in': 'scale-in 0.3s ease-out',
+                        'shimmer': 'shimmer 2s linear infinite',
+                        'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
+                        'bounce-subtle': 'bounce-subtle 2s ease-in-out infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* ========== SHADCN UI DESIGN SYSTEM ========== */
+
+        /* Global Reset & Base */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Be Vietnam Pro', 'Inter', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            color: hsl(240 10% 3.9%);
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Be Vietnam Pro', 'Inter', system-ui, sans-serif;
+            letter-spacing: -0.025em;
+        }
+
+        /* === Shadcn Card & Panel System === */
+        .glass-panel {
+            background: hsl(0 0% 100%);
+            border: 1px solid hsl(240 5.9% 90%);
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .glass-panel:hover {
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+        }
+
+        .glass-sidebar {
+            background: hsl(0 0% 100%);
+            border-right: 1px solid hsl(240 5.9% 90%);
+            border-radius: 0;
+        }
+
+        /* === Shadcn Scrollbar === */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: hsl(240 3.8% 46.1% / 0.2);
+            border-radius: 9999px;
+            border: 2px solid transparent;
+            background-clip: content-box;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: hsl(240 3.8% 46.1% / 0.35);
+            background-clip: content-box;
+        }
+
+        /* === Float Animation === */
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* === Navigation Items (Shadcn Style) === */
+        .nav-item {
+            position: relative;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0.5rem;
+        }
+
+        .nav-item.active {
+            background: hsl(240 4.8% 95.9%);
+            color: hsl(240 5.9% 10%);
+            font-weight: 600;
+            box-shadow: none;
+        }
+
+        .nav-item.active i {
+            color: hsl(243 75% 59%);
+        }
+
+        .nav-item:hover:not(.active) {
+            background: hsl(240 4.8% 95.9% / 0.6);
+            color: hsl(240 5.9% 10%);
+        }
+
+        /* === Ambient Background === */
+        .ambient-mesh {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: hsl(0 0% 98%);
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.35;
+        }
+
+        /* === Shadcn Button Utilities === */
+        .btn-primary {
+            background: hsl(240 5.9% 10%);
+            color: hsl(0 0% 98%);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: background 0.15s ease, transform 0.1s ease;
+        }
+
+        .btn-primary:hover {
+            background: hsl(240 5.9% 20%);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: hsl(240 5.9% 10%);
+            border: 1px solid hsl(240 5.9% 90%);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-outline:hover {
+            background: hsl(240 4.8% 95.9%);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: hsl(240 3.8% 46.1%);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-ghost:hover {
+            background: hsl(240 4.8% 95.9%);
+            color: hsl(240 5.9% 10%);
+        }
+
+        .btn-destructive {
+            background: hsl(0 84.2% 60.2%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-destructive:hover {
+            background: hsl(0 72% 51%);
+        }
+
+        /* === Shadcn Input === */
+        .input-shadcn {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid hsl(240 5.9% 90%);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            background: transparent;
+            color: hsl(240 10% 3.9%);
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            outline: none;
+        }
+
+        .input-shadcn:focus {
+            border-color: hsl(240 5.9% 10%);
+            box-shadow: 0 0 0 2px hsl(240 5.9% 10% / 0.1);
+        }
+
+        .input-shadcn::placeholder {
+            color: hsl(240 3.8% 46.1%);
+        }
+
+        /* === Shadcn Badge === */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 9999px;
+            padding: 0.125rem 0.625rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.15s ease;
+        }
+
+        .badge-default {
+            background: hsl(240 5.9% 10%);
+            color: hsl(0 0% 98%);
+        }
+
+        .badge-secondary {
+            background: hsl(240 4.8% 95.9%);
+            color: hsl(240 5.9% 10%);
+        }
+
+        .badge-success {
+            background: hsl(142 76% 36%);
+            color: white;
+        }
+
+        .badge-destructive {
+            background: hsl(0 84.2% 60.2%);
+            color: white;
+        }
+
+        .badge-outline {
+            background: transparent;
+            border: 1px solid hsl(240 5.9% 90%);
+            color: hsl(240 10% 3.9%);
+        }
+
+        /* === Shadcn Table === */
+        .table-shadcn {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .table-shadcn thead th {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 500;
+            font-size: 0.75rem;
+            color: hsl(240 3.8% 46.1%);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid hsl(240 5.9% 90%);
+        }
+
+        .table-shadcn tbody td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid hsl(240 5.9% 90%);
+            color: hsl(240 10% 3.9%);
+        }
+
+        .table-shadcn tbody tr {
+            transition: background 0.15s ease;
+        }
+
+        .table-shadcn tbody tr:hover {
+            background: hsl(240 4.8% 95.9% / 0.5);
+        }
+
+        /* === Shadcn Separator === */
+        .separator {
+            border: none;
+            border-top: 1px solid hsl(240 5.9% 90%);
+            margin: 1rem 0;
+        }
+
+        /* === Stagger Animation Utility === */
+        .stagger-item {
+            opacity: 0;
+            transform: translateY(12px);
+            animation: fade-in-up 0.4s ease-out forwards;
+        }
+
+        .stagger-item:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .stagger-item:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .stagger-item:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+
+        .stagger-item:nth-child(4) {
+            animation-delay: 0.2s;
+        }
+
+        .stagger-item:nth-child(5) {
+            animation-delay: 0.25s;
+        }
+
+        .stagger-item:nth-child(6) {
+            animation-delay: 0.3s;
+        }
+
+        .stagger-item:nth-child(7) {
+            animation-delay: 0.35s;
+        }
+
+        .stagger-item:nth-child(8) {
+            animation-delay: 0.4s;
+        }
+
+        /* === Skeleton Loading === */
+        .skeleton {
+            background: linear-gradient(90deg, hsl(240 4.8% 95.9%) 25%, hsl(240 5.9% 90%) 50%, hsl(240 4.8% 95.9%) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s ease-in-out infinite;
+            border-radius: 0.5rem;
+        }
+
+        /* === Hover Card Effect === */
+        .hover-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .hover-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+        }
+
+        /* === Page Content Entrance === */
+        .page-enter {
+            animation: fade-in-up 0.4s ease-out;
+        }
+
+        /* --- DRIVER.JS SHADCN THEME --- */
+        .driver-popover {
+            font-family: 'Be Vietnam Pro', 'Inter', system-ui, sans-serif !important;
+            border-radius: 0.75rem !important;
+            padding: 24px !important;
+            background: hsl(0 0% 100%) !important;
+            backdrop-filter: none !important;
+            border: 1px solid hsl(240 5.9% 90%) !important;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+            max-width: 420px !important;
+            color: hsl(240 10% 3.9%) !important;
+        }
+
+        .driver-popover * {
+            font-family: 'Be Vietnam Pro', 'Inter', system-ui, sans-serif !important;
+        }
+
+        .driver-popover-title {
+            font-size: 18px !important;
+            font-weight: 700 !important;
+            color: hsl(240 10% 3.9%) !important;
+            margin-bottom: 8px !important;
+            letter-spacing: -0.025em !important;
+        }
+
+        .driver-popover-description {
+            font-size: 14px !important;
+            color: hsl(240 3.8% 46.1%) !important;
+            line-height: 1.6 !important;
+        }
+
+        .driver-popover-description p {
+            margin-bottom: 6px !important;
+        }
+
+        .driver-popover-description p:last-child {
+            margin-bottom: 0 !important;
+        }
+
+        .driver-popover-footer {
+            margin-top: 16px !important;
+            padding-top: 12px !important;
+            border-top: 1px solid hsl(240 5.9% 90%) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+        }
+
+        .driver-popover-progress-text {
+            font-size: 12px !important;
+            color: hsl(240 3.8% 46.1%) !important;
+            font-weight: 500 !important;
+            background: hsl(240 4.8% 95.9%) !important;
+            padding: 4px 10px !important;
+            border-radius: 9999px !important;
+        }
+
+        .driver-popover-navigation-btns {
+            display: flex !important;
+            gap: 8px !important;
+            margin-left: auto !important;
+        }
+
+        .driver-popover-prev-btn {
+            background: transparent !important;
+            color: hsl(240 3.8% 46.1%) !important;
+            border: 1px solid hsl(240 5.9% 90%) !important;
+            padding: 8px 16px !important;
+            border-radius: 0.5rem !important;
+            font-weight: 500 !important;
+            font-size: 14px !important;
+            text-shadow: none !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease !important;
+        }
+
+        .driver-popover-prev-btn:hover {
+            background: hsl(240 4.8% 95.9%) !important;
+            color: hsl(240 5.9% 10%) !important;
+        }
+
+        .driver-popover-next-btn,
+        .driver-popover-done-btn {
+            background: hsl(240 5.9% 10%) !important;
+            color: hsl(0 0% 98%) !important;
+            border: none !important;
+            padding: 8px 20px !important;
+            border-radius: 0.5rem !important;
+            font-weight: 500 !important;
+            font-size: 14px !important;
+            text-shadow: none !important;
+            box-shadow: none !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease !important;
+        }
+
+        .driver-popover-next-btn:hover,
+        .driver-popover-done-btn:hover {
+            background: hsl(240 5.9% 20%) !important;
+        }
+
+        .driver-popover-close-btn {
+            position: absolute !important;
+            top: 12px !important;
+            right: 12px !important;
+            width: 28px !important;
+            height: 28px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: hsl(240 3.8% 46.1%) !important;
+            font-size: 16px !important;
+            background: transparent !important;
+            border-radius: 0.375rem !important;
+            cursor: pointer !important;
+            transition: all 0.15s !important;
+        }
+
+        .driver-popover-close-btn:hover {
+            background: hsl(240 4.8% 95.9%) !important;
+            color: hsl(240 5.9% 10%) !important;
+        }
+
+        .driver-popover-arrow {
+            border-color: hsl(0 0% 100%) !important;
+        }
+
+        .driver-overlay {
+            background: rgba(0, 0, 0, 0.5) !important;
+        }
+    </style>
+</head>
+
+<body
+    class="h-screen w-screen overflow-hidden bg-[hsl(0,0%,98%)] text-foreground selection:bg-indigo-500 selection:text-white">
+
+    <!-- Ambient Background -->
+    <div class="ambient-mesh">
+        <div class="orb w-[600px] h-[600px] bg-indigo-200/20 top-[-15%] left-[-10%] animate-float"
+            style="animation-delay: 0s;"></div>
+        <div class="orb w-[500px] h-[500px] bg-violet-200/15 bottom-[-15%] right-[-10%] animate-float"
+            style="animation-delay: 2s;"></div>
+        <div class="orb w-[400px] h-[400px] bg-sky-200/10 top-[30%] left-[50%] animate-float"
+            style="animation-delay: 4s;"></div>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div id="sidebar-overlay"
+        class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity"
+        onclick="toggleSidebar()"></div>
+
+    <!-- Layout Wrapper -->
+    <div class="flex h-full">
+
+        <!-- SIDEBAR -->
+        <aside id="sidebar"
+            class="glass-sidebar fixed lg:static inset-y-0 left-0 w-[260px] z-50 flex flex-col transform -translate-x-[120%] lg:translate-x-0 transition-transform duration-300 ease-out">
+
+            <!-- Logo Area -->
+            <div class="h-14 flex items-center px-6 border-b border-[hsl(240,5.9%,90%)]">
+                <div class="flex items-center gap-2.5">
+                    <div
+                        class="w-8 h-8 rounded-lg bg-[hsl(240,5.9%,10%)] flex items-center justify-center text-white text-sm">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-sm font-semibold text-foreground tracking-tight leading-none">EduMind</h1>
+                        <span class="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">AI
+                            System</span>
+                    </div>
+                </div>
+                <!-- Close Button Mobile -->
+                <button onclick="toggleSidebar()"
+                    class="lg:hidden ml-auto p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Scrollable Nav -->
+            <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-6 scroll-smooth">
+
+                <!-- Group: Tổng quan -->
+                <div>
+                    <h3 class="px-3 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
+                        Tổng quan</h3>
+                    <div class="space-y-1">
+                        <a href="{{ url_for('welcome') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'welcome' %}active{% endif %}">
+                            <i class="fas fa-home w-6 text-center text-lg mr-3 transition-colors"></i>
+                            <span class="text-sm">Trang chủ</span>
+                        </a>
+                        <a href="{{ url_for('dashboard') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                            <i class="fas fa-chart-pie w-6 text-center text-lg mr-3 transition-colors"></i>
+                            <span class="text-sm">Dashboard</span>
+                        </a>
+                        <a href="{{ url_for('index') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'index' %}active{% endif %}">
+                            <i class="fas fa-list-ul w-6 text-center text-lg mr-3 transition-colors"></i>
+                            <span class="text-sm">Bảng điểm rèn luyện</span>
+                        </a>
+                        <a href="{{ url_for('ai_engine.assistant_chatbot') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'ai_engine.assistant_chatbot' %}active bg-gradient-to-r from-teal-400 to-emerald-500 text-white shadow-lg{% endif %}">
+                            <i class="fas fa-robot w-6 text-center text-lg mr-3 transition-colors"></i>
+                            <span class="text-sm">Trợ lý AI</span>
+                            <span
+                                class="ml-auto bg-white/20 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">NEW</span>
+                        </a>
+                        <a href="{{ url_for('ai_engine.chatbot') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'ai_engine.chatbot' %}active{% endif %}">
+                            <i class="fas fa-search w-6 text-center text-lg mr-3 transition-colors"></i>
+                            <span class="text-sm">Tra cứu học sinh</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Group: Báo cáo -->
+                <div>
+                    <h3 class="px-3 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
+                        Báo cáo</h3>
+                    <div class="space-y-1">
+                        <a href="{{ url_for('weekly_report') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'weekly_report' %}active{% endif %}">
+                            <i class="fas fa-clipboard-check w-6 text-center text-lg mr-3"></i>
+                            <span class="text-sm">Báo cáo tuần</span>
+                        </a>
+                        <a href="{{ url_for('history') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'history' %}active{% endif %}">
+                            <i class="fas fa-history w-6 text-center text-lg mr-3"></i>
+                            <span class="text-sm">Lịch sử tuần</span>
+                        </a>
+                        {% if current_user.role in ['admin', 'homeroom_teacher'] %}
+                        <a href="{{ url_for('changelog') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'changelog' %}active{% endif %}">
+                            <i class="fas fa-database w-6 text-center text-lg mr-3"></i>
+                            <span class="text-sm">Nhật ký thay đổi</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Group: Quản lý -->
+                <div>
+                    <h3 class="px-3 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
+                        Quản lý</h3>
+                    <div class="space-y-1">
+                        <a href="{{ url_for('grades.manage_grades') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'grades.manage_grades' %}active{% endif %}">
+                            <i class="fas fa-pencil-alt w-6 text-center text-lg mr-3"></i>
+                            <span class="text-sm">Nhập điểm số</span>
+                        </a>
+                        <a href="{{ url_for('ai_engine.ocr_grades') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'ai_engine.ocr_grades' %}active bg-indigo-50 text-indigo-600 font-semibold{% endif %}">
+                            <i class="fas fa-magic w-6 text-center text-lg mr-3"></i>
+                            <span class="text-sm">Nhập điểm OCR</span>
+                            <span
+                                class="ml-auto bg-indigo-100 text-indigo-600 text-[10px] font-bold px-1.5 py-0.5 rounded">AI</span>
+                        </a>
+                        <a href="{{ url_for('manage_students') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'manage_students' %}active{% endif %}">
+                            <i class="fas fa-user-graduate w-6 text-center text-lg mr-3"></i>
+                            <span class="text-sm">Quản lý học sinh</span>
+                        </a>
+
+                        {% if current_user.role == 'admin' %}
+                        <a href="{{ url_for('manage_teachers') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'manage_teachers' %}active{% endif %}">
+                            <i class="fas fa-chalkboard-teacher w-6 text-center text-lg mr-3"></i>
+                            <span class="text-sm">Quản lý giáo viên</span>
+                        </a>
+                        <a href="{{ url_for('manage_subjects') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'manage_subjects' %}active{% endif %}">
+                            <i class="fas fa-book w-6 text-center text-lg mr-3"></i>
+                            <span class="text-sm">Quản lý môn học</span>
+                        </a>
+                        <a href="{{ url_for('manage_settings') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'manage_settings' %}active{% endif %}">
+                            <i class="fas fa-cog w-6 text-center text-lg mr-3"></i>
+                            <span class="text-sm">Cài đặt hệ thống</span>
+                        </a>
+                        {% endif %}
+
+                        {% if current_user.role in ['admin', 'homeroom_teacher'] %}
+                        <a href="{{ url_for('manage_rules') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'manage_rules' %}active{% endif %}">
+                            <i class="fas fa-gavel w-6 text-center text-lg mr-3"></i>
+                            <span class="text-sm">Quy định & Điểm trừ</span>
+                        </a>
+                        <a href="{{ url_for('add_violation') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'add_violation' %}active{% endif %}">
+                            <i
+                                class="fas fa-bolt w-6 text-center text-lg mr-3 text-red-400 group-hover:text-red-500"></i>
+                            <span class="text-sm">Ghi nhận vi phạm</span>
+                        </a>
+                        <a href="{{ url_for('manage_bonus_types') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'manage_bonus_types' %}active{% endif %}">
+                            <i class="fas fa-award w-6 text-center text-lg mr-3"></i>
+                            <span class="text-sm">Loại điểm cộng</span>
+                        </a>
+                        <a href="{{ url_for('add_bonus') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'add_bonus' %}active{% endif %}">
+                            <i
+                                class="fas fa-star w-6 text-center text-lg mr-3 text-amber-400 group-hover:text-amber-500"></i>
+                            <span class="text-sm">Cộng điểm</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Group: Tiện ích -->
+                <div>
+                    <h3 class="px-3 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
+                        Tiện ích</h3>
+                    <div class="space-y-1">
+                        <a href="{{ url_for('group_chat') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'group_chat' %}active{% endif %}">
+                            <i class="fas fa-comments w-6 text-center text-lg mr-3 text-blue-400"></i>
+                            <span class="text-sm">Phòng chat chung</span>
+                        </a>
+                        <a href="{{ url_for('private_chats') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'private_chats' %}active{% endif %}">
+                            <i class="fas fa-envelope w-6 text-center text-lg mr-3 text-indigo-400"></i>
+                            <span class="text-sm">Tin nhắn riêng</span>
+                        </a>
+
+                        {% if current_user.role == 'admin' %}
+                        <a href="{{ url_for('send_notification') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'send_notification' %}active{% endif %}">
+                            <i class="fas fa-paper-plane w-6 text-center text-lg mr-3 text-emerald-500"></i>
+                            <span class="text-sm">Gửi thông báo</span>
+                        </a>
+                        {% endif %}
+
+                        <a href="{{ url_for('ai_engine.voice_to_text') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'ai_engine.voice_to_text' %}active bg-red-50 text-red-600 font-semibold{% endif %}">
+                            <i class="fas fa-microphone-alt w-6 text-center text-lg mr-3"></i>
+                            <span class="text-sm">Chuẩn hóa nhận xét</span>
+                            <span
+                                class="ml-auto bg-red-100 text-red-600 text-[10px] font-bold px-1.5 py-0.5 rounded">NEW</span>
+                        </a>
+
+                        <a href="{{ url_for('docs') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'docs' %}active{% endif %}">
+                            <i class="fas fa-book-open w-6 text-center text-lg mr-3"></i>
+                            <span class="text-sm">Tài liệu hướng dẫn</span>
+                        </a>
+                    </div>
+                </div>
+
+            </nav>
+
+            <!-- User Profile (Bottom) -->
+            {% if current_user.is_authenticated %}
+            <div class="p-3 border-t border-[hsl(240,5.9%,90%)]">
+                <div class="flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-accent transition cursor-pointer">
+                    <div
+                        class="w-8 h-8 rounded-lg bg-[hsl(240,5.9%,10%)] flex items-center justify-center text-white text-xs font-medium">
+                        {{ current_user.full_name[0] | upper }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-sm font-medium text-foreground truncate">{{ current_user.full_name }}</h4>
+                        <p class="text-[11px] text-muted-foreground truncate">{{ role_display }}</p>
+                    </div>
+                    <a href="{{ url_for('auth.logout') }}"
+                        class="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition"
+                        title="Đăng xuất">
+                        <i class="fas fa-sign-out-alt text-sm"></i>
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </aside>
+
+        <!-- MAIN CONTENT WRAPPER -->
+        <div class="flex-1 flex flex-col min-w-0 h-full relative">
+
+            <!-- Header -->
+            <header
+                class="h-14 border-b border-[hsl(240,5.9%,90%)] bg-white/80 backdrop-blur-sm flex items-center justify-between px-6 flex-shrink-0 z-30">
+                <!-- Left: Mobile Toggle & Page Title -->
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleSidebar()"
+                        class="lg:hidden p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="hidden sm:block">
+                        <h2 class="text-sm font-semibold text-foreground">
+                            {% if self.title() %}{{ self.title() }}{% else %}EduMind AI{% endif %}
+                        </h2>
+                    </div>
+                </div>
+
+                <!-- Right: Actions -->
+                <div class="flex items-center gap-2">
+                    {% if current_user.is_authenticated %}
+                    <!-- Help Button -->
+                    <button id="start-tour-btn"
+                        onclick="if(window.replayTour) { window.replayTour(); } else { window.location.href='{{ url_for('dashboard') }}?tour=1'; }"
+                        class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[hsl(240,5.9%,90%)] text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition">
+                        <i class="fas fa-route text-xs"></i>
+                        <span>Hướng dẫn</span>
+                    </button>
+
+                    <!-- Week Badge -->
+                    <div
+                        class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-accent text-sm font-medium text-foreground">
+                        <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                        <span>Tuần {{ current_week_number }}</span>
+                    </div>
+
+                    <!-- Notifications -->
+                    <a href="{{ url_for('notifications') }}"
+                        class="relative w-9 h-9 flex items-center justify-center rounded-md hover:bg-accent transition text-muted-foreground hover:text-foreground">
+                        <i class="far fa-bell"></i>
+                        {% set unread_count = current_user.notifications | selectattr('is_read', 'equalto', False) |
+                        list | length %}
+                        {% if unread_count > 0 %}
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full"></span>
+                        {% endif %}
+                    </a>
+                    {% endif %}
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-y-auto overflow-x-hidden relative scroll-smooth">
+                <!-- Flash Messages Toast Container -->
+                <div id="flash-container"
+                    class="fixed top-16 right-6 z-50 w-full max-w-sm space-y-2 pointer-events-none">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    {% for category, message in messages %}
+                    <div
+                        class="flash-toast pointer-events-auto p-3 rounded-lg bg-white border border-[hsl(240,5.9%,90%)] shadow-lg flex items-start gap-3 transform translate-x-full transition-all duration-300 ease-out">
+                        <div class="flex-shrink-0 mt-0.5">
+                            {% if category == 'error' %}
+                            <div
+                                class="w-5 h-5 rounded-full bg-destructive/10 flex items-center justify-center text-destructive">
+                                <i class="fas fa-x text-[10px]"></i>
+                            </div>
+                            {% else %}
+                            <div
+                                class="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+                                <i class="fas fa-check text-[10px]"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-foreground">{{ message }}</p>
+                        </div>
+                        <button onclick="this.parentElement.remove()"
+                            class="text-muted-foreground hover:text-foreground transition p-0.5"><i
+                                class="fas fa-times text-xs"></i></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+                </div>
+
+                <!-- Page Content -->
+                <div class="p-6 pb-10 min-h-full page-enter">
+                    {% block content %}{% endblock %}
+                    {% block login_content %}{% endblock %}
+                </div>
+            </main>
+
+        </div>
+    </div>
+
+    <!-- Modals -->
+    {% block modals %}{% endblock %}
+
+    <script>
+        // Sidebar Toggle Logic
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        function toggleSidebar() {
+            const isClosed = sidebar.classList.contains('-translate-x-[120%]');
+            if (isClosed) {
+                sidebar.classList.remove('-translate-x-[120%]');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-[120%]');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // Auto-show toasts
+        document.addEventListener('DOMContentLoaded', () => {
+            const toasts = document.querySelectorAll('.flash-toast');
+            toasts.forEach((toast, index) => {
+                setTimeout(() => {
+                    toast.classList.remove('translate-x-full');
+                }, index * 200); // Stagger animation
+
+                // Auto dismiss after 5s
+                setTimeout(() => {
+                    toast.classList.add('translate-x-full', 'opacity-0');
+                    setTimeout(() => toast.remove(), 500);
+                }, 5000 + (index * 200));
+            });
+        });
+    </script>
+</body>
+
+</html>

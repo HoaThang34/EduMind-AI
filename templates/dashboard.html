@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="space-y-6 animate-fade-in-up">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-semibold text-foreground tracking-tight">Tổng Quan</h1>
+            <p class="text-sm text-muted-foreground mt-0.5">Số liệu thống kê vi phạm và nề nếp tuần {{
+                current_week_number }}.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <form method="GET" action="{{ url_for('dashboard') }}" class="relative">
+                <i class="fas fa-filter absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs"></i>
+                <select name="class_select" onchange="this.form.submit()"
+                    class="input-shadcn pl-9 pr-8 py-2 text-sm cursor-pointer min-w-[160px]">
+                    <option value="">-- Toàn Trường --</option>
+                    {% for class_name in all_classes %}
+                    <option value="{{ class_name }}" {% if class_name==selected_class %}selected{% endif %}>
+                        {{ class_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </form>
+
+            <button id="btn-analyze-ai" onclick="analyzeClass()" type="button"
+                class="btn-primary flex items-center gap-2 py-2 px-4">
+                <i class="fas fa-sparkles text-xs"></i> <span class="text-sm">AI Phân tích</span>
+            </button>
+
+            <form action="{{ url_for('reset_week') }}" method="POST"
+                onsubmit="return confirm('Hành động này sẽ reset điểm của toàn bộ học sinh về 100. Bạn có chắc chắn không?');">
+                <button type="submit" class="btn-outline flex items-center gap-2 py-2 px-4">
+                    <span class="text-sm">Tuần Mới</span> <i class="fas fa-arrow-right text-xs"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Clock Card -->
+    <div
+        class="bg-[hsl(240,5.9%,10%)] rounded-xl p-5 text-white flex flex-col md:flex-row items-center justify-between relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2">
+        </div>
+        <div class="z-10 flex items-center gap-3">
+            <div class="p-2.5 bg-white/10 rounded-lg">
+                <i class="far fa-clock text-xl text-indigo-300"></i>
+            </div>
+            <div>
+                <h3 class="text-xs font-medium text-white/60 uppercase tracking-wider">Thời gian thực</h3>
+                <div id="clock-date" class="text-sm font-medium text-white/80">Đang tải...</div>
+            </div>
+        </div>
+        <div id="clock-time"
+            class="z-10 text-4xl md:text-5xl font-mono font-bold tracking-widest mt-3 md:mt-0 text-white/90">
+            00:00:00
+        </div>
+    </div>
+
+    <!-- AI Analysis Box -->
+    <div id="ai-analysis-box"
+        class="hidden bg-white border border-[hsl(240,5.9%,90%)] rounded-xl shadow-card p-5 relative overflow-hidden animate-fade-in-up">
+        <div class="flex gap-4 relative z-10">
+            <div class="flex-shrink-0">
+                <div class="w-9 h-9 bg-accent rounded-lg flex items-center justify-center text-foreground text-sm">
+                    <i class="fas fa-robot"></i>
+                </div>
+            </div>
+            <div class="flex-grow">
+                <h3 class="text-sm font-semibold text-foreground mb-1.5">Trợ Lý AI Nhận Xét</h3>
+                <div id="ai-content" class="text-sm text-muted-foreground leading-relaxed whitespace-pre-line"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div
+            class="bg-white border border-[hsl(240,5.9%,90%)] p-5 rounded-xl shadow-card flex flex-col h-[420px] hover-card">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <i class="fas fa-chart-pie text-indigo-500 text-xs"></i> Tỉ Lệ Xếp Loại
+                </h3>
+            </div>
+            <div class="flex-1 relative">
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
+
+        <div
+            class="bg-white border border-[hsl(240,5.9%,90%)] p-5 rounded-xl shadow-card flex flex-col h-[420px] lg:col-span-2 hover-card">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <i class="fas fa-chart-bar text-destructive text-xs"></i> Top Vi Phạm Phổ Biến
+                </h3>
+                <span class="badge badge-secondary text-[11px]">Top 5</span>
+            </div>
+            <div class="flex-1 relative">
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // 1. Clock
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('clock-time').innerText = now.toLocaleTimeString('vi-VN', { hour12: false });
+        const dateString = now.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        document.getElementById('clock-date').innerText = dateString.charAt(0).toUpperCase() + dateString.slice(1);
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 2. Charts
+    Chart.defaults.font.family = "'Be Vietnam Pro', 'Inter', system-ui, sans-serif";
+    Chart.defaults.color = 'hsl(240, 3.8%, 46.1%)';
+
+    const pieLabels = {{ pie_labels | safe }};
+    const pieData = {{ pie_data | safe }};
+    const barLabels = {{ bar_labels | safe }};
+    const barData = {{ bar_data | safe }};
+
+    new Chart(document.getElementById('pieChart'), {
+        type: 'doughnut',
+        data: {
+            labels: pieLabels,
+            datasets: [{
+                data: pieData,
+                backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 16, font: { size: 12 } } } },
+            cutout: '72%'
+        }
+    });
+
+    new Chart(document.getElementById('barChart'), {
+        type: 'bar',
+        data: {
+            labels: barLabels,
+            datasets: [{
+                label: 'Số lần vi phạm',
+                data: barData,
+                backgroundColor: 'hsl(240, 5.9%, 10%)',
+                borderRadius: 6,
+                barThickness: 28
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, grid: { borderDash: [2, 4], color: 'hsl(240, 5.9%, 95%)' }, ticks: { font: { size: 11 } } },
+                x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    // 3. AI Analysis
+    async function analyzeClass() {
+        const btn = document.getElementById('btn-analyze-ai');
+        const box = document.getElementById('ai-analysis-box');
+        const content = document.getElementById('ai-content');
+        const selectElement = document.querySelector('select[name="class_select"]');
+        const className = selectElement ? selectElement.value : "";
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin text-xs"></i> <span class="text-sm">Đang suy nghĩ...</span>';
+        box.classList.remove('hidden');
+        content.innerHTML = '<span class="text-muted-foreground italic">Đang phân tích dữ liệu...</span>';
+        try {
+            const response = await fetch('/api/analyze_class_stats', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ class_name: className })
+            });
+            const data = await response.json();
+            if (data.error) {
+                content.innerHTML = `<span class="text-destructive">Lỗi: ${data.error}</span>`;
+            } else {
+                typeWriterEffect(data.analysis, content);
+            }
+        } catch (err) {
+            console.error(err);
+            content.innerHTML = '<span class="text-destructive">Lỗi kết nối server.</span>';
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+
+    function typeWriterEffect(text, element) {
+        element.innerHTML = "";
+        let i = 0;
+        function type() {
+            if (i < text.length) {
+                element.innerHTML += (text.charAt(i) === '\n') ? '<br>' : text.charAt(i);
+                i++;
+                setTimeout(type, 12);
+            }
+        }
+        type();
+    }
+
+    // 4. Driver.js Tour
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!window.driver) { console.warn("Driver.js not loaded."); return; }
+        const driverObj = window.driver.js.driver({
+            showProgress: true,
+            animate: true,
+            nextBtnText: 'Tiếp',
+            prevBtnText: 'Quay lại',
+            doneBtnText: 'Hoàn thành',
+            steps: [
+                {
+                    popover: {
+                        title: 'Khám phá EduMind!',
+                        description: '<p style="font-size:14px;margin-bottom:6px;">Chào mừng bạn đến với <b>Hệ Sinh Thái Giáo Dục Thông Minh</b>.</p><p>Hãy cùng dành 1 phút để điểm qua các tính năng cốt lõi!</p>',
+                        align: 'center'
+                    }
+                },
+                {
+                    element: '#sidebar',
+                    popover: {
+                        title: 'Menu Điều Hướng',
+                        description: '<p>Trung tâm kiểm soát. Truy cập nhanh đến Bảng Điểm, Báo Cáo và thiết lập quản trị.</p>',
+                        side: "right", align: 'start'
+                    }
+                },
+                {
+                    element: '#btn-analyze-ai',
+                    popover: {
+                        title: 'Phân tích tự động',
+                        description: '<p>Chỉ 1 click, AI sẽ tóm tắt thống kê và đưa ra đánh giá ngay lập tức.</p>',
+                        side: "bottom", align: 'start'
+                    }
+                },
+                {
+                    element: '#start-tour-btn',
+                    popover: {
+                        title: 'Xem lại hướng dẫn',
+                        description: '<p>Bất cứ khi nào cần trợ giúp, gọi lại hộp thoại này.</p><p><i>Chúc bạn một ngày làm việc hiệu quả!</i></p>',
+                        side: "left", align: 'start'
+                    }
+                }
+            ]
+        });
+        window.replayTour = () => {
+            if (window.innerWidth < 1024) {
+                const sidebarEl = document.getElementById('sidebar');
+                if (sidebarEl && sidebarEl.classList.contains('-translate-x-[120%]')) { toggleSidebar(); }
+            }
+            driverObj.drive();
+        };
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('tour') === '1') {
+            window.history.replaceState({}, document.title, window.location.pathname);
+            setTimeout(window.replayTour, 500);
+        } else if (!localStorage.getItem('edu_tour_done')) {
+            setTimeout(() => { window.replayTour(); localStorage.setItem('edu_tour_done', 'true'); }, 1000);
+        }
+    });
+</script>
+{% endblock %}

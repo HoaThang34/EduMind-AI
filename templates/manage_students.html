@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% block title %}Quản Lý Học Sinh{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6 animate-fade-in-up">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-semibold text-foreground tracking-tight flex items-center gap-2">
+                <svg class="w-6 h-6 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                Quản Lý Học Sinh & Lớp Học
+            </h1>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        <!-- Add Student Form -->
+        <div class="md:col-span-2 bg-white border border-[hsl(240,5.9%,90%)] p-6 rounded-xl shadow-card">
+            <div class="flex justify-between items-center mb-5">
+                <h2 class="text-base font-semibold text-foreground">Thêm Học Sinh Mới</h2>
+                <a href="{{ url_for('import_students') }}"
+                    class="btn-outline flex items-center gap-2 text-sm py-2 px-3">
+                    <i class="fas fa-file-excel text-xs"></i> Nhập từ Excel
+                </a>
+            </div>
+            <form method="POST" action="{{ url_for('add_student') }}" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-foreground">Mã Số HS</label>
+                        <input type="text" name="student_code" placeholder="Ví dụ: 34TIN-006" required
+                            class="input-shadcn py-2.5">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-foreground">Tên Học Sinh</label>
+                        <input type="text" name="student_name" placeholder="Nguyễn Văn A" required
+                            class="input-shadcn py-2.5">
+                    </div>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-sm font-medium text-foreground">Lớp</label>
+                    <select name="student_class" required class="input-shadcn py-2.5 cursor-pointer">
+                        <option value="">-- Chọn lớp --</option>
+                        {% for class_name in all_classes %}
+                        <option value="{{ class_name }}">{{ class_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary w-full py-2.5 text-sm">Thêm Học Sinh</button>
+            </form>
+        </div>
+
+        <!-- Right Column -->
+        <div class="md:col-span-1 space-y-4">
+            <!-- Add Class -->
+            <div class="bg-white border border-[hsl(240,5.9%,90%)] p-5 rounded-xl shadow-card">
+                <h2 class="text-base font-semibold text-foreground mb-4">Thêm Lớp Mới</h2>
+                <form method="POST" action="{{ url_for('add_class') }}" class="space-y-3">
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-foreground">Tên Lớp</label>
+                        <input type="text" name="class_name" placeholder="Ví dụ: 10A1" required
+                            class="input-shadcn py-2.5">
+                    </div>
+                    <button type="submit"
+                        class="btn-primary w-full py-2.5 text-sm flex items-center justify-center gap-2">
+                        <i class="fas fa-plus text-xs"></i> Tạo Lớp
+                    </button>
+                </form>
+            </div>
+
+            <!-- Class List -->
+            <div class="bg-white border border-[hsl(240,5.9%,90%)] p-5 rounded-xl shadow-card">
+                <h2 class="text-sm font-semibold text-foreground mb-3 pb-2 border-b border-[hsl(240,5.9%,90%)]">Danh
+                    Sách Lớp</h2>
+                <div class="max-h-[350px] overflow-y-auto space-y-1">
+                    {% for cls in class_list %}
+                    <div
+                        class="flex items-center justify-between px-3 py-2 rounded-lg group hover:bg-accent transition">
+                        <span class="text-sm font-medium text-foreground">{{ cls.name }}</span>
+                        <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition">
+                            <button type="button" onclick="openEditClassModal('{{ cls.id }}', '{{ cls.name }}')"
+                                class="btn-ghost p-1.5 text-xs" title="Đổi tên">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <form action="{{ url_for('delete_class', class_id=cls.id) }}" method="POST"
+                                onsubmit="return confirm('⚠️ Bạn có chắc chắn muốn xóa lớp {{ cls.name }}?');">
+                                <button type="submit"
+                                    class="btn-ghost p-1.5 text-xs text-destructive hover:text-destructive"
+                                    title="Xóa lớp">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% if not class_list %}
+                    <p class="text-sm text-muted-foreground italic text-center py-4">Chưa có lớp nào.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Table -->
+    <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl shadow-card overflow-hidden">
+        <h2 class="text-base font-semibold text-foreground p-5 border-b border-[hsl(240,5.9%,90%)]">Danh Sách Học Sinh
+            Hiện Tại</h2>
+        <div class="overflow-x-auto">
+            <table class="table-shadcn">
+                <thead>
+                    <tr>
+                        <th>Mã Số</th>
+                        <th>Tên</th>
+                        <th>Lớp</th>
+                        <th>Điểm</th>
+                        <th class="text-right">Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td class="text-muted-foreground font-mono text-xs">{{ student.student_code }}</td>
+                        <td class="font-medium">{{ student.name }}</td>
+                        <td><span class="badge badge-secondary">{{ student.student_class }}</span></td>
+                        <td><span
+                                class="font-semibold {% if student.current_score >= 90 %}text-emerald-600{% elif student.current_score >= 70 %}text-amber-600{% else %}text-destructive{% endif %}">{{
+                                student.current_score }}</span></td>
+                        <td class="text-right space-x-1">
+                            <a href="{{ url_for('edit_student', student_id=student.id) }}"
+                                class="btn-ghost text-xs px-2 py-1">Sửa</a>
+                            <form action="{{ url_for('delete_student', student_id=student.id) }}" method="POST"
+                                class="inline" onsubmit="return confirm('Xóa học sinh này?');">
+                                <button type="submit"
+                                    class="btn-ghost text-xs px-2 py-1 text-destructive hover:text-destructive">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Class Modal -->
+<div id="editClassModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full animate-scale-in border border-[hsl(240,5.9%,90%)]">
+        <h3 class="text-lg font-semibold text-foreground mb-4">Đổi Tên Lớp</h3>
+        <form id="editClassForm" method="POST" action="" class="space-y-4">
+            <div class="space-y-1.5">
+                <label class="text-sm font-medium text-foreground">Tên mới</label>
+                <input type="text" id="newClassNameInput" name="new_name" required class="input-shadcn py-2.5">
+                <p class="text-xs text-amber-600 bg-amber-50 p-2 rounded-md mt-2 flex items-start gap-1.5">
+                    <i class="fas fa-triangle-exclamation mt-0.5 text-[10px]"></i>
+                    <span>Tất cả học sinh thuộc lớp cũ sẽ được chuyển sang tên mới.</span>
+                </p>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="document.getElementById('editClassModal').classList.add('hidden')"
+                    class="btn-outline py-2 px-4 text-sm">Hủy</button>
+                <button type="submit" class="btn-primary py-2 px-4 text-sm">Lưu Thay Đổi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openEditClassModal(id, currentName) {
+        const modal = document.getElementById('editClassModal');
+        const form = document.getElementById('editClassForm');
+        const input = document.getElementById('newClassNameInput');
+        form.action = "/edit_class/" + id;
+        input.value = currentName;
+        modal.classList.remove('hidden');
+        input.focus();
+    }
+    window.onclick = function (event) {
+        const modal = document.getElementById('editClassModal');
+        if (event.target == modal) { modal.classList.add('hidden'); }
+    }
+</script>
+{% endblock %}

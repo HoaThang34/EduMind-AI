@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Bảng Điểm{% endblock %}
+
+{% block content %}
+<div class="space-y-5 animate-fade-in-up">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <h1 class="text-2xl font-semibold text-foreground tracking-tight">Bảng Điểm Rèn Luyện</h1>
+
+        <div class="flex items-center gap-2 bg-white border border-[hsl(240,5.9%,90%)] rounded-lg p-1 shadow-card">
+            <form method="GET" action="{{ url_for('index') }}" class="flex items-center gap-1">
+                <select name="class_select" onchange="this.form.submit()"
+                    class="bg-transparent border-none text-sm focus:ring-0 text-foreground font-medium cursor-pointer py-1.5 pl-3 pr-7">
+                    <option value="">Tất cả lớp</option>
+                    {% for class_name in all_classes %}
+                    <option value="{{ class_name }}" {% if class_name==selected_class %}selected{% endif %}>{{
+                        class_name }}</option>
+                    {% endfor %}
+                </select>
+                <div class="w-px h-6 bg-[hsl(240,5.9%,90%)]"></div>
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Tìm tên, mã số..."
+                    class="flex-1 min-w-[180px] border-none focus:ring-0 text-sm px-3 bg-transparent placeholder-muted-foreground">
+                <button type="submit" class="btn-primary px-3 py-1.5 text-xs rounded-md">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {% if search_query %}
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-accent text-foreground rounded-md text-sm font-medium">
+        <span>Kết quả cho: "{{ search_query }}"</span>
+        <a href="{{ url_for('index') }}"
+            class="w-4 h-4 flex items-center justify-center rounded bg-foreground/10 hover:bg-foreground/20 text-foreground transition">
+            <i class="fas fa-times text-[8px]"></i>
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Table -->
+    <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl shadow-card overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="table-shadcn">
+                <thead>
+                    <tr>
+                        <th>Học Sinh</th>
+                        <th>Lớp</th>
+                        <th>Điểm Rèn Luyện</th>
+                        <th>GPA</th>
+                        <th>Lịch Sử Vi Phạm</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded-lg bg-[hsl(240,5.9%,10%)] flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
+                                    {{ student.name.split()[-1][0] }}
+                                </div>
+                                <div>
+                                    <a href="{{ url_for('student_detail', student_id=student.id) }}"
+                                        class="text-sm font-medium text-foreground hover:underline">{{ student.name
+                                        }}</a>
+                                    <div class="text-xs text-muted-foreground font-mono">{{ student.student_code }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge badge-secondary">{{ student.student_class }}</span></td>
+                        <td>
+                            {% if student.current_score >= 90 %}
+                            <span class="badge badge-success">{{ student.current_score }} Tốt</span>
+                            {% elif student.current_score >= 70 %}
+                            <span class="badge" style="background:hsl(45 93% 47%);color:white;">{{ student.current_score
+                                }} Khá</span>
+                            {% else %}
+                            <span class="badge badge-destructive">{{ student.current_score }} Yếu</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% set gpa = student_gpas.get(student.id) %}
+                            {% if gpa %}
+                            {% if gpa >= 8.5 %}
+                            <span class="badge" style="background:hsl(221 83% 53%);color:white;">{{ gpa }} Giỏi</span>
+                            {% elif gpa >= 7.0 %}
+                            <span class="badge badge-success">{{ gpa }} Khá</span>
+                            {% elif gpa >= 5.0 %}
+                            <span class="badge" style="background:hsl(45 93% 47%);color:white;">{{ gpa }} TB</span>
+                            {% else %}
+                            <span class="badge badge-destructive">{{ gpa }} Yếu</span>
+                            {% endif %}
+                            {% else %}
+                            <span class="text-muted-foreground text-xs italic">Chưa có điểm</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if student.violations %}
+                            <div class="flex flex-wrap gap-1">
+                                {% for vio in student.violations[-3:] %}
+                                <span class="badge badge-outline text-destructive border-destructive/20 text-[11px]"
+                                    title="{{ vio.date_committed }}">
+                                    {{ vio.violation_type_name }}
+                                </span>
+                                {% endfor %}
+                                {% if student.violations|length > 3 %}
+                                <span class="text-xs text-muted-foreground">+{{ student.violations|length - 3 }}</span>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <span class="text-muted-foreground text-xs flex items-center gap-1">
+                                <i class="fas fa-check-circle text-emerald-500 text-[10px]"></i> Không vi phạm
+                            </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-12">
+                            <div class="flex flex-col items-center text-muted-foreground">
+                                <i class="fas fa-search text-2xl mb-2 opacity-40"></i>
+                                <p class="text-sm">Không tìm thấy học sinh nào phù hợp.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

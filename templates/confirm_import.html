@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Xác Nhận Nhập Liệu{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <div class="flex justify-between items-end mb-4">
+        <div>
+            <h1 class="text-2xl font-bold text-foreground">Kiểm Tra & Xác Nhận</h1>
+            <p class="text-muted-foreground">Vui lòng rà soát lại mã số học sinh trước khi lưu.</p>
+        </div>
+        <div class="text-sm text-indigo-600 font-bold bg-indigo-50 px-3 py-1 rounded-full">
+            Số lượng: {{ students|length }} học sinh
+        </div>
+    </div>
+
+    <form action="{{ url_for('save_imported_students') }}" method="POST">
+        <input type="hidden" name="file_path" value="{{ file_path }}">
+
+        <div class="bg-white shadow-md rounded-lg overflow-hidden border border-[hsl(240,5.9%,90%)] mb-6">
+            <div class="overflow-x-auto max-h-[600px]">
+                <table class="table-shadcn">
+                    <thead class="bg-accent sticky top-0 z-10">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase">STT</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase">Họ Tên</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase">Lớp</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-indigo-600 uppercase">Mã Học Sinh</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-[hsl(240,5.9%,90%)]">
+                        {% for s in students %}
+                        <tr class="hover:bg-accent transition">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{{ loop.index }}</td>
+
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-sm font-bold text-foreground">{{ s.name }}</span>
+                            </td>
+
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-sm text-muted-foreground">{{ s['class'] }}</span>
+                            </td>
+
+                            <td class="px-6 py-2 whitespace-nowrap">
+                                <span class="text-sm font-bold text-indigo-700">{{ s.student_code }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="alert alert-info bg-blue-50 text-blue-700 p-4 rounded-lg mb-4 border border-blue-200">
+            <i class="fas fa-info-circle mr-2"></i>
+            Nếu thông tin chưa chính xác, vui lòng chỉnh sửa trực tiếp trên file Excel và nhập lại.
+        </div>
+
+        <div class="flex justify-end gap-3 pb-8">
+            <a href="{{ url_for('import_students') }}"
+                class="px-6 py-3 bg-accent text-foreground rounded-lg font-bold hover:bg-slate-200 transition">
+                Hủy & Làm lại
+            </a>
+            <button type="submit"
+                class="px-6 py-3 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 shadow-card transition flex items-center">
+                <i class="fas fa-save mr-2"></i> Xác Nhận & Lưu ({{ students|length }} học sinh)
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

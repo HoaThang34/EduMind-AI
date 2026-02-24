@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+{% block title %}Tài liệu & Hướng dẫn sử dụng — EduMind AI{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto pb-20 animate-fade-in-up">
+    <!-- Breadcrumb & Header -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <nav class="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                <a href="{{ url_for('welcome') }}" class="hover:text-indigo-600 transition">Trang chủ</a>
+                <i class="fas fa-chevron-right text-[10px]"></i>
+                <span class="text-foreground font-medium">Tài liệu hệ thống</span>
+            </nav>
+            <h1 class="text-3xl md:text-4xl font-bold text-foreground tracking-tight">Tài liệu & Tính năng</h1>
+            <p class="text-muted-foreground mt-2">Hướng dẫn chi tiết về cách vận hành và khai thác sức mạnh của EduMind
+                AI — Hệ Thống Giáo Dục Thông Minh.</p>
+        </div>
+        <div class="shrink-0">
+            <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-4 flex items-center gap-4">
+                <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white text-lg">
+                    <i class="fas fa-book-reader"></i>
+                </div>
+                <div>
+                    <div class="text-[11px] font-bold text-indigo-600 uppercase tracking-widest">Phiên bản</div>
+                    <div class="text-sm font-bold text-indigo-900">v2.5.0 (AI Enhanced)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Sidebar/Quick links -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <aside class="lg:col-span-3">
+            <div class="sticky top-6 space-y-1">
+                <p class="px-3 text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Mục lục</p>
+                <a href="#overview"
+                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition group">
+                    <i class="fas fa-info-circle w-4 text-indigo-500"></i> Tổng quan
+                </a>
+                <a href="#ai-features"
+                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition group">
+                    <i class="fas fa-magic w-4 text-purple-500"></i> Tính năng AI
+                </a>
+                <a href="#management"
+                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition group">
+                    <i class="fas fa-tasks w-4 text-emerald-500"></i> Quản lý & Nề nếp
+                </a>
+                <a href="#grades"
+                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition group">
+                    <i class="fas fa-graduation-cap w-4 text-amber-500"></i> Điểm số & Học tập
+                </a>
+                <a href="#communication"
+                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition group">
+                    <i class="fas fa-comments w-4 text-blue-500"></i> Kết nối & Liên lạc
+                </a>
+                <a href="#security"
+                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition group">
+                    <i class="fas fa-shield-alt w-4 text-rose-500"></i> Bảo mật & Tech
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="lg:col-span-9 space-y-12">
+            <!-- 1. Overview -->
+            <section id="overview" class="glass-panel p-8 md:p-10 scroll-mt-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <div
+                        class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 text-xl border border-indigo-100">
+                        <i class="fas fa-shapes"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-foreground">1. Giới thiệu EduMind AI</h2>
+                        <p class="text-sm text-muted-foreground">Giải pháp quản lý giáo dục 4.0</p>
+                    </div>
+                </div>
+                <div class="prose prose-slate max-w-none text-muted-foreground leading-relaxed space-y-4 text-base">
+                    <p>
+                        <strong>EduMind AI</strong> không chỉ là một phần mềm quản lý học sinh thông thường. Đây là một
+                        <strong>Hệ sinh thái Giáo dục Thông minh</strong> được xây dựng trên nền tảng Trí tuệ Nhân tạo
+                        hiện đại, nhằm giải quyết triệt để các bài toán về hành chính sư phạm, theo dõi nề nếp và đánh
+                        giá học tập.
+                    </p>
+                    <p>
+                        Với triết lý "Trường học Hạnh phúc", EduMind AI hỗ trợ giáo viên chủ nhiệm và ban giám hiệu giảm
+                        bớt 80% thời gian xử lý giấy tờ, báo cáo, từ đó có thêm thời gian để đồng hành và thấu hiểu tâm
+                        lý học sinh.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                        <div class="p-4 bg-accent/50 rounded-xl border border-[hsl(240,5.9%,90%)]">
+                            <h4 class="font-bold text-foreground text-sm mb-2 flex items-center gap-2">
+                                <i class="fas fa-user-tie text-indigo-500"></i> Dành cho Giáo viên
+                            </h4>
+                            <p class="text-xs">Tự động hóa báo cáo tuần, hỗ trợ soạn nhận xét sư phạm và cảnh báo sớm
+                                học sinh yếu kém.</p>
+                        </div>
+                        <div class="p-4 bg-accent/50 rounded-xl border border-[hsl(240,5.9%,90%)]">
+                            <h4 class="font-bold text-foreground text-sm mb-2 flex items-center gap-2">
+                                <i class="fas fa-university text-emerald-500"></i> Dành cho Ban Giám Hiệu
+                            </h4>
+                            <p class="text-xs">Số liệu thi đua trực quan, báo cáo thống kê toàn trường theo thời gian
+                                thực một cách minh bạch.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. AI Capabilities -->
+            <section id="ai-features" class="glass-panel p-8 md:p-10 scroll-mt-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <div
+                        class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600 text-xl border border-purple-100">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-foreground">2. Sức mạnh Trí tuệ Nhân tạo</h2>
+                        <p class="text-sm text-muted-foreground">Tích hợp mô hình ngôn ngữ lớn (LLM) chạy local</p>
+                    </div>
+                </div>
+                <div class="space-y-8">
+                    <div class="border-l-4 border-indigo-200 pl-6 space-y-4">
+                        <h3 class="text-lg font-bold text-foreground flex items-center gap-3">
+                            <i class="fas fa-expand text-indigo-600"></i> OCR Vision & Số Hóa Dữ Liệu
+                        </h3>
+                        <p class="text-muted-foreground text-sm leading-relaxed">
+                            Công nghệ nhận diện hình ảnh (Gemini-3-Flash) cho phép quét thẻ học sinh để ghi nhận vi phạm
+                            ngay lập tức hoặc đọc bảng điểm viết tay của giáo viên để chuyển thành dữ liệu số trong vài
+                            giây.
+                        </p>
+                    </div>
+
+                    <div class="border-l-4 border-purple-200 pl-6 space-y-4">
+                        <h3 class="text-lg font-bold text-foreground flex items-center gap-3">
+                            <i class="fas fa-robot text-purple-600"></i> Trợ Lý Ảo Sư Phạm
+                        </h3>
+                        <p class="text-muted-foreground text-sm leading-relaxed">
+                            Chatbot AI không chỉ trả lời câu hỏi mà còn hiểu ngữ cảnh. Giáo viên có thể yêu cầu: "Phân
+                            tích tình hình vi phạm lớp 11A1 trong tuần qua" hoặc "Soạn thư trả lời phụ huynh về việc học
+                            sinh sút giảm GPA".
+                        </p>
+                    </div>
+
+                    <div class="border-l-4 border-rose-200 pl-6 space-y-4">
+                        <h3 class="text-lg font-bold text-foreground flex items-center gap-3">
+                            <i class="fas fa-chart-line text-rose-600"></i> Phân Tích & Dự Báo Xu Hướng
+                        </h3>
+                        <p class="text-muted-foreground text-sm leading-relaxed">
+                            AI tự động kết nối giữa điểm số học tập và hành vi nề nếp để đưa ra các <strong>Cảnh báo
+                                đỏ</strong>. Nếu một học sinh vốn có GPA cao bỗng nhiên đi muộn liên tục, AI sẽ gợi ý
+                            giáo viên gặp riêng để hỗ trợ tâm lý kịp thời.
+                        </p>
+                    </div>
+
+                    <div class="border-l-4 border-emerald-200 pl-6 space-y-4">
+                        <h3 class="text-lg font-bold text-foreground flex items-center gap-3">
+                            <i class="fas fa-microphone-alt text-emerald-600"></i> Chuẩn Hóa Nhận Xét (Voice-to-Text)
+                        </h3>
+                        <p class="text-muted-foreground text-sm leading-relaxed">
+                            Thầy cô chỉ cần nói ý nghĩ thô qua microphone, AI sẽ sửa lỗi chính tả và chuyển hóa thành
+                            câu văn sư phạm lịch sự, tinh tế để đưa vào học bạ hoặc sổ liên lạc điện tử.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Discipline Management -->
+            <section id="management" class="glass-panel p-8 md:p-10 scroll-mt-6">
+                <h3 class="text-xl font-bold text-foreground mb-6 flex items-center gap-3">
+                    <i class="fas fa-shield-halved text-emerald-600"></i> 3. Quản lý Nề nếp & Thi đua
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm text-muted-foreground">
+                    <div class="space-y-3">
+                        <h4 class="font-bold text-foreground flex items-center gap-2">
+                            <i class="fas fa-check-double text-blue-500"></i> Theo dõi kỉ luật
+                        </h4>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>Xây dựng danh mục lỗi vi phạm tùy chỉnh theo quy định nhà trường.</li>
+                            <li>Hệ thống tự động trừ điểm rèn luyện dựa trên mức độ vi phạm.</li>
+                            <li>Ghi chú hình ảnh minh họa cho từng trường hợp vi phạm.</li>
+                        </ul>
+                    </div>
+                    <div class="space-y-3">
+                        <h4 class="font-bold text-foreground flex items-center gap-2">
+                            <i class="fas fa-trophy text-amber-500"></i> Điểm cộng & Khích lệ
+                        </h4>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>Ghi nhận đóng góp tích cực của học sinh trong các hoạt động phong trào.</li>
+                            <li>Hệ thống xếp hạng thi đua lớp (Class Ranking) hàng tuần.</li>
+                            <li>Biểu đồ cột so sánh nề nếp giữa các khối lớp.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. Academic -->
+            <section id="grades" class="glass-panel p-8 md:p-10 scroll-mt-6">
+                <h3 class="text-xl font-bold text-foreground mb-6">4. Quản lý Học tập & Điểm số</h3>
+                <div
+                    class="bg-indigo-50/50 rounded-xl p-6 border border-indigo-100 flex flex-col md:flex-row gap-8 items-center">
+                    <div class="w-full md:w-1/3 text-center">
+                        <div class="text-4xl font-black text-indigo-600 mb-1">9.5</div>
+                        <div class="text-xs font-bold text-indigo-900 uppercase">GPA Insights</div>
+                        <div class="mt-3 flex justify-center gap-1">
+                            <div class="w-1 h-8 bg-indigo-200 rounded-full"></div>
+                            <div class="w-1 h-12 bg-indigo-400 rounded-full"></div>
+                            <div class="w-1 h-16 bg-indigo-600 rounded-full"></div>
+                            <div class="w-1 h-10 bg-indigo-300 rounded-full"></div>
+                        </div>
+                    </div>
+                    <div class="flex-1 space-y-4">
+                        <p class="text-sm text-muted-foreground leading-relaxed">
+                            Hệ thống quản lý điểm số đa tầng hỗ trợ các loại điểm Thường xuyên (TX), Giữa kỳ (GK) và
+                            Cuối kỳ (HK). Thuật toán tự động tính điểm Trung bình môn, trung bình học kỳ và xếp loại học
+                            lực theo thông tư mới nhất.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="badge badge-secondary text-[10px]">Tự động xếp loại</span>
+                            <span class="badge badge-secondary text-[10px]">Thống kê tỉ lệ Giỏi/Khá</span>
+                            <span class="badge badge-secondary text-[10px]">Xuất Excel bảng điểm</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. Communication -->
+            <section id="communication" class="glass-panel p-8 md:p-10 scroll-mt-6">
+                <h3 class="text-xl font-bold text-foreground mb-6 flex items-center gap-3">
+                    <i class="fas fa-envelopes-bulk text-blue-600"></i> 5. Kết nối & Thông tin liên lạc
+                </h3>
+                <div class="space-y-6">
+                    <div class="flex gap-4 items-start">
+                        <div class="p-2 bg-blue-50 text-blue-600 rounded-lg"><i class="fas fa-comments"></i></div>
+                        <div>
+                            <h4 class="text-base font-bold text-foreground">Phòng chat & Tin nhắn</h4>
+                            <p class="text-sm text-muted-foreground">Kênh trao đổi trực tiếp giữa giáo viên và học sinh.
+                                Học sinh có thể nhắn tin riêng để xin tư vấn hoặc kiến nghị về điểm rèn luyện.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 items-start">
+                        <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><i class="fas fa-bullhorn"></i></div>
+                        <div>
+                            <h4 class="text-base font-bold text-foreground">Thông báo đa kênh</h4>
+                            <p class="text-sm text-muted-foreground">Gửi thông báo đến toàn trường, toàn khối hoặc chỉ
+                                định theo từng lớp. Thông báo hiển thị ngay lập tức khi học sinh đăng nhập vào hệ thống.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. Technology & Security -->
+            <section id="security" class="glass-panel p-8 md:p-10 scroll-mt-6 bg-slate-50 border-slate-200">
+                <h3 class="text-xl font-bold text-foreground mb-6">6. Nền tảng Công nghệ & Bảo mật</h3>
+                <div class="prose prose-sm prose-slate text-muted-foreground max-w-none">
+                    <p>
+                        Chúng tôi hiểu rằng dữ liệu học sinh là tài sản quý giá và nhạy cảm. Vì vậy, EduMind AI được xây
+                        dựng với nguyên tắc <strong>"Local First Security"</strong>:
+                    </p>
+                    <ul class="space-y-2">
+                        <li><strong>AI Local:</strong> Trí tuệ nhân tạo (Ollama) chạy trực tiếp trên máy chủ của trường,
+                            không gửi dữ liệu ra internet.</li>
+                        <li><strong>Cơ sở dữ liệu biệt lập:</strong> Dữ liệu được mã hóa và lưu trữ tại chỗ, quyền truy
+                            cập được phân tầng nghiêm ngặt giữa Admin, GVCN và Học sinh.</li>
+                        <li><strong>Tech stack:</strong> Backend Python/Flask tối ưu hóa hiệu năng, Frontend Tailwind
+                            CSS/Vanilla JS đảm bảo tốc độ tải trang cực nhanh.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- CTA Back to Home -->
+            <div class="pt-8 border-t border-[hsl(240,5.9%,90%)] flex justify-between items-center text-sm">
+                <p class="text-muted-foreground italic">Cảm ơn thầy cô đã tin dùng EduMind AI.</p>
+                <a href="{{ url_for('welcome') }}" class="btn-primary flex items-center gap-2 px-6 py-2.5">
+                    <i class="fas fa-home"></i> Về trang chủ
+                </a>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Simple Script for Smooth Scroll -->
+<script>
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+
+            // Update active class
+            document.querySelectorAll('aside a').forEach(a => a.classList.remove('bg-accent', 'text-foreground'));
+            this.classList.add('bg-accent', 'text-foreground');
+        });
+    });
+</script>
+{% endblock %}

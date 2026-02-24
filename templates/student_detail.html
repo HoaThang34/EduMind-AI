@@ -1,0 +1,672 @@
+{% extends "base.html" %}
+{% block title %}Chi Tiết Học Sinh - {{ student.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6">
+
+    <div
+        class="bg-white p-6 rounded-xl shadow-sm border border-[hsl(240,5.9%,90%)] flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <div class="flex items-center gap-3 mb-1">
+                <h1 class="text-2xl font-bold text-foreground">{{ student.name }}</h1>
+                <span
+                    class="px-2 py-0.5 rounded text-sm font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                    {{ student.student_code }}
+                </span>
+            </div>
+            <p class="text-muted-foreground text-sm"><i class="fas fa-school mr-1"></i> Lớp: <strong>{{
+                    student.student_class
+                    }}</strong></p>
+        </div>
+
+        <div class="flex items-center gap-3 bg-accent p-2 rounded-xl border border-[hsl(240,5.9%,90%)]">
+            <span class="text-sm font-bold text-muted-foreground pl-2">Xem dữ liệu:</span>
+            <form method="GET" action="" class="m-0">
+                <select name="week" onchange="this.form.submit()"
+                    class="bg-white border-slate-300 text-foreground text-sm rounded-lg input-shadcn block p-2 cursor-pointer font-bold shadow-sm min-w-[120px]">
+                    {% for w in weeks %}
+                    <option value="{{ w }}" {% if w==selected_week %}selected{% endif %}>Tuần {{ w }}</option>
+                    {% else %}
+                    <option value="{{ selected_week }}">Tuần {{ selected_week }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+    </div>
+
+    {% if warning %}
+    <div
+        class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-r-lg shadow-sm flex items-start gap-3 animate-fade-in-down">
+        <i class="fas fa-exclamation-triangle mt-1"></i>
+        <div>
+            <p class="font-bold">Cần Lưu Ý</p>
+            <p class="text-sm">{{ warning }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <div class="lg:col-span-1 space-y-6">
+            <div
+                class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl p-6 text-white shadow-card relative overflow-hidden">
+                <div class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl">
+                </div>
+
+                <h3 class="text-indigo-100 font-medium mb-1 text-sm uppercase tracking-wide">Điểm Rèn Luyện (Tuần {{
+                    selected_week }})</h3>
+                <div class="flex items-baseline gap-2 mt-2">
+                    <span class="text-6xl font-bold">{{ display_score }}</span>
+                    <span class="text-xl text-indigo-200">/ 100</span>Rèn Luyện
+                </div>
+
+                <div class="mt-6 flex gap-2">
+                    <div class="px-3 py-1 bg-white/10 rounded-lg backdrop-blur-sm border border-white/10 text-sm">
+                        Số lỗi: <span class="font-bold text-white">{{ violations|length }}</span>
+                    </div>
+                    <div class="px-3 py-1 bg-white/10 rounded-lg backdrop-blur-sm border border-white/10 text-sm">
+                        Xếp loại:
+                        {% if display_score >= 90 %}
+                        <span class="font-bold text-green-300">Tốt</span>
+                        {% elif display_score >= 70 %}
+                        <span class="font-bold text-yellow-300">Khá</span>
+                        {% else %}
+                        <span class="font-bold text-red-300">Yếu</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-[hsl(240,5.9%,90%)] overflow-hidden">
+                <div class="p-4 bg-accent border-b border-[hsl(240,5.9%,90%)] font-bold text-foreground">Công Cụ Quản Lý
+                </div>
+                <div class="p-2 space-y-1">
+                    <a href="{{ url_for('grades.student_grades', student_id=student.id) }}"
+                        class="flex items-center px-4 py-3 text-foreground hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition font-medium">
+                        <div
+                            class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mr-3 text-sm">
+                            <i class="fas fa-pencil-alt"></i>
+                        </div>
+                        Nhập Điểm Học Tập
+                    </a>
+                    <a href="{{ url_for('grades.student_transcript', student_id=student.id) }}"
+                        class="flex items-center px-4 py-3 text-foreground hover:bg-purple-50 hover:text-purple-700 rounded-lg transition font-medium">
+                        <div
+                            class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mr-3 text-sm">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        Xem Học Bạ
+                    </a>
+                    <a href="{{ url_for('violations_timeline', student_id=student.id) }}"
+                        class="flex items-center px-4 py-3 text-foreground hover:bg-orange-50 hover:text-orange-700 rounded-lg transition font-medium">
+                        <div
+                            class="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mr-3 text-sm">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        Timeline Vi Phạm
+                    </a>
+                    <a href="{{ url_for('grades.parent_report', student_id=student.id) }}"
+                        class="flex items-center px-4 py-3 text-foreground hover:bg-green-50 hover:text-green-700 rounded-lg transition font-medium">
+                        <div
+                            class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-3 text-sm">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        Báo Cáo Phụ Huynh
+                    </a>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 text-white shadow-card">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center animate-pulse">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold">Trợ Lý AI</h3>
+                        <p class="text-xs text-muted-foreground">Hỗ trợ nhận xét tuần {{ selected_week }}</p>
+                    </div>
+                </div>
+
+                <div id="report-display"
+                    class="bg-white/10 rounded-lg p-3 mb-4 text-sm text-slate-200 min-h-[80px] hidden">
+                    <p id="report-text" class="whitespace-pre-line"></p>
+                </div>
+
+                <div class="flex flex-col gap-2 relative">
+                    <button id="generate-report-btn" data-student-id="{{ student.id }}"
+                        class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold text-sm transition shadow-card flex items-center justify-center gap-2">
+                        <i class="fas fa-magic"></i> Tạo Nhận Xét Nhanh
+                    </button>
+
+                    <button id="predict-trend-btn" data-student-id="{{ student.id }}"
+                        class="w-full py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white rounded-lg font-bold text-sm transition shadow-card flex items-center justify-center gap-2 overflow-hidden relative group">
+                        <span class="absolute inset-0 w-full h-full -mt-1 rounded-lg opacity-30 gradient-pulse"></span>
+                        <i
+                            class="fas fa-chart-pie relative z-10 group-hover:rotate-12 transition-transform duration-300"></i>
+                        <span class="relative z-10">Phân Tích Xu Hướng (AI)</span>
+                        <div
+                            class="absolute inset-0 h-full w-full border-2 border-transparent group-hover:border-white/20 rounded-lg transition-all duration-300">
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL PHÂN TÍCH XU HƯỚNG -->
+        <div id="trend-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div
+                    class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl transform transition-all overflow-hidden border border-slate-200">
+                    <!-- Modal Header -->
+                    <div
+                        class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-4 flex justify-between items-center border-b border-indigo-500/30">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-400/30">
+                                <i class="fas fa-brain text-indigo-300"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-white font-bold text-lg">AI Phân Tích & Dự Báo</h3>
+                                <p class="text-indigo-200 text-xs">Học sinh: {{ student.name }}</p>
+                            </div>
+                        </div>
+                        <button id="close-modal-btn" class="text-slate-400 hover:text-white transition">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <!-- Modal Content -->
+                    <div class="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                        <!-- Loading State -->
+                        <div id="trend-loading" class="flex flex-col items-center justify-center py-12">
+                            <div
+                                class="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-4">
+                            </div>
+                            <p class="text-slate-600 font-medium">EduMind AI đang phân tích dữ liệu...</p>
+                            <p class="text-slate-400 text-sm mt-2">Đang liên kết điểm số và vi phạm</p>
+
+                            <!-- Skeleton loader -->
+                            <div class="w-full max-w-md mt-8 space-y-4">
+                                <div class="h-4 bg-slate-100 rounded animate-pulse w-3/4"></div>
+                                <div class="h-4 bg-slate-100 rounded animate-pulse w-full"></div>
+                                <div class="h-4 bg-slate-100 rounded animate-pulse w-5/6"></div>
+                            </div>
+                        </div>
+
+                        <!-- Error State -->
+                        <div id="trend-error" class="hidden text-center py-8">
+                            <i class="fas fa-exclamation-circle text-4xl text-red-400 mb-3"></i>
+                            <p class="text-red-600 font-medium" id="error-message">Có lỗi xảy ra khi phân tích.</p>
+                            <button id="retry-btn"
+                                class="mt-4 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition">Thử
+                                lại</button>
+                        </div>
+
+                        <!-- Result State -->
+                        <div id="trend-result" class="hidden space-y-6">
+
+                            <!-- Badges -->
+                            <div class="flex gap-3 items-center">
+                                <span
+                                    class="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1 rounded-full border border-blue-200">
+                                    <i class="fas fa-info-circle mr-1"></i> Dự báo AI
+                                </span>
+                                <span id="risk-badge"
+                                    class="bg-gray-100 text-gray-700 text-xs font-bold px-3 py-1 rounded-full border border-gray-200 transition-colors">
+                                    <i class="fas fa-shield-alt mr-1"></i> Rủi ro: Đang tính...
+                                </span>
+                            </div>
+
+                            <!-- Tổng quan -->
+                            <div>
+                                <h4
+                                    class="text-slate-800 font-bold mb-2 flex items-center gap-2 text-sm uppercase tracking-wide">
+                                    <i class="fas fa-poll text-indigo-500"></i> Nhận Định Chung
+                                </h4>
+                                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-slate-700 text-sm leading-relaxed"
+                                    id="trend-summary">
+                                    <!-- Dynamic content -->
+                                </div>
+                            </div>
+
+                            <!-- Hai cột: Cảnh báo & Dự đoán -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Nguy cơ -->
+                                <div class="bg-red-50/50 border border-red-100 rounded-xl p-4">
+                                    <h4 class="text-red-800 font-bold mb-3 flex items-center gap-2 text-sm">
+                                        <i class="fas fa-exclamation-triangle"></i> Dấu Hiệu Đáng Ngại
+                                    </h4>
+                                    <ul id="alerts-list" class="space-y-3">
+                                        <!-- Dynamic content -->
+                                    </ul>
+                                </div>
+
+                                <!-- Dự báo tương lai -->
+                                <div class="bg-amber-50/50 border border-amber-100 rounded-xl p-4">
+                                    <h4 class="text-amber-800 font-bold mb-3 flex items-center gap-2 text-sm">
+                                        <i class="fas fa-forward"></i> Dự Báo Tương Lai
+                                    </h4>
+                                    <ul id="predictions-list" class="space-y-3">
+                                        <!-- Dynamic content -->
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Đề xuất hành động -->
+                            <div class="bg-emerald-50/50 border border-emerald-100 rounded-xl p-4">
+                                <h4 class="text-emerald-800 font-bold mb-3 flex items-center gap-2 text-sm">
+                                    <i class="fas fa-check-circle"></i> Hành Động Đề Xuất Cho GV
+                                </h4>
+                                <div class="space-y-2" id="actions-list">
+                                    <!-- Dynamic content -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            /* Cuộn đẹp hơn cho modal */
+            .custom-scrollbar::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .custom-scrollbar::-webkit-scrollbar-track {
+                background: #f1f5f9;
+                border-radius: 4px;
+            }
+
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 4px;
+            }
+
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                background: #94a3b8;
+            }
+
+            /* Hiệu ứng pulse cho box gradient */
+            @keyframes softPulse {
+                0% {
+                    opacity: 0.2;
+                }
+
+                50% {
+                    opacity: 0.4;
+                }
+
+                100% {
+                    opacity: 0.2;
+                }
+            }
+
+            .gradient-pulse {
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+                animation: softPulse 2s ease-in-out infinite;
+            }
+        </style>
+
+        <div class="lg:col-span-2 space-y-6">
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-[hsl(240,5.9%,90%)]">
+                <h3 class="font-bold text-foreground mb-6 flex items-center gap-2">
+                    <i class="fas fa-chart-line text-indigo-500"></i>
+                    Diễn Biến Điểm Rèn Luyện (Tuần {{ selected_week }})
+                </h3>
+                <div class="h-80 w-full">
+                    <canvas id="lineChartStudent"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-[hsl(240,5.9%,90%)] overflow-hidden">
+                <div
+                    class="px-6 py-4 border-b border-[hsl(240,5.9%,90%)] bg-accent/50 flex justify-between items-center">
+                    <h3 class="font-bold text-foreground"><i class="fas fa-clipboard-list text-red-500 mr-2"></i>Chi
+                        Tiết
+                        Lỗi Vi Phạm</h3>
+                    <span class="text-xs font-bold bg-slate-200 text-muted-foreground px-2 py-1 rounded">Tuần {{
+                        selected_week
+                        }}</span>
+                </div>
+
+                <div class="divide-y divide-[hsl(240,5.9%,90%)]">
+                    {% for vio in violations %}
+                    <div class="p-4 hover:bg-accent transition flex items-start gap-4">
+                        <div class="flex-shrink-0 mt-1">
+                            <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-bold text-foreground">{{ vio.violation_type_name }}</p>
+                                    <p class="text-sm text-muted-foreground mt-0.5">
+                                        <i class="far fa-clock mr-1"></i> {{ vio.date_committed.strftime('%d/%m/%Y') }}
+                                    </p>
+                                </div>
+                                <span
+                                    class="px-2 py-1 bg-red-50 text-red-600 rounded text-xs font-bold border border-red-100">
+                                    -{{ vio.points_deducted }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="p-8 text-center text-muted-foreground">
+                        <i class="fas fa-check-circle text-4xl mb-3 text-emerald-100"></i>
+                        <p>Không có vi phạm nào trong tuần này.</p>
+                        <p class="text-sm text-emerald-600 font-bold mt-1">Rất đáng khen! 👏</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- BONUS RECORDS SECTION -->
+            <div class="bg-white rounded-xl shadow-sm border border-emerald-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-emerald-100 bg-emerald-50/50 flex justify-between items-center">
+                    <h3 class="font-bold text-emerald-800"><i class="fas fa-star text-yellow-400 mr-2"></i>Điểm Cộng &
+                        Thành Tích</h3>
+                    <span class="text-xs font-bold bg-emerald-200 text-emerald-700 px-2 py-1 rounded">Tuần {{
+                        selected_week }}</span>
+                </div>
+
+                <div class="divide-y divide-emerald-100">
+                    {% for bonus in bonuses %}
+                    <div class="p-4 hover:bg-emerald-50 transition flex items-start gap-4">
+                        <div class="flex-shrink-0 mt-1">
+                            <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-bold text-emerald-700">{{ bonus.bonus_type_name }}</p>
+                                    {% if bonus.reason %}
+                                    <p class="text-sm text-muted-foreground mt-0.5">{{ bonus.reason }}</p>
+                                    {% endif %}
+                                    <p class="text-sm text-muted-foreground mt-0.5">
+                                        <i class="far fa-clock mr-1"></i> {{ bonus.date_awarded.strftime('%d/%m/%Y') }}
+                                    </p>
+                                </div>
+                                <span
+                                    class="px-2 py-1 bg-emerald-100 text-emerald-600 rounded text-xs font-bold border border-emerald-200">
+                                    +{{ bonus.points_added }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="p-8 text-center text-muted-foreground">
+                        <i class="fas fa-gift text-4xl mb-3 text-slate-200"></i>
+                        <p>Chưa có điểm cộng trong tuần này.</p>
+                        <a href="{{ url_for('add_bonus') }}"
+                            class="text-sm text-emerald-600 font-bold mt-1 hover:underline">+ Thêm điểm cộng</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // 1. Cấu hình Biểu đồ Chart.js
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('lineChartStudent');
+
+        // Dữ liệu từ Flask
+        const labels = {{ chart_labels | safe
+    }};
+    const data = {{ chart_scores | safe }};
+
+    // Tạo gradient
+    const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(79, 70, 229, 0.2)'); // Indigo
+    gradient.addColorStop(1, 'rgba(79, 70, 229, 0.0)');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Điểm rèn luyện',
+                data: data,
+                borderColor: '#4f46e5',
+                backgroundColor: gradient,
+                borderWidth: 3,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#4f46e5',
+                pointBorderWidth: 2,
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                fill: true,
+                tension: 0.3 // Đường cong mềm mại
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    padding: 12,
+                    cornerRadius: 8,
+                    callbacks: {
+                        label: function (context) {
+                            return 'Điểm số: ' + context.raw;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    max: 100,
+                    grid: { borderDash: [4, 4], color: '#f1f5f9' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+    });
+
+    // 2. Xử lý nút AI Generate Report
+    const generateBtn = document.getElementById('generate-report-btn');
+    const reportDisplay = document.getElementById('report-display');
+    const reportText = document.getElementById('report-text');
+
+    // Lấy tuần hiện tại từ biến render của Flask (hoặc từ URL)
+    const currentWeek = {{ selected_week }};
+
+    generateBtn.addEventListener('click', async () => {
+        reportDisplay.classList.remove('hidden');
+        reportText.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> AI đang viết nhận xét...';
+        generateBtn.disabled = true;
+
+        try {
+            const studentId = generateBtn.dataset.studentId;
+
+            // Gửi request kèm thông tin tuần (week)
+            const response = await fetch(`/api/generate_report/${studentId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ week: currentWeek }) // Gửi tuần hiện tại lên server
+            });
+
+            const data = await response.json();
+
+            if (data.report) {
+                // Hiệu ứng gõ chữ
+                reportText.innerText = "";
+                let i = 0;
+                const txt = data.report;
+                function typeWriter() {
+                    if (i < txt.length) {
+                        reportText.innerHTML += txt.charAt(i);
+                        i++;
+                        setTimeout(typeWriter, 10); // Tốc độ gõ
+                    }
+                }
+                typeWriter();
+            } else {
+                reportText.innerText = data.error || 'Lỗi không xác định.';
+            }
+
+        } catch (error) {
+            reportText.innerText = 'Lỗi kết nối server.';
+        } finally {
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = '<i class="fas fa-redo mr-2"></i> Tạo Lại';
+        }
+    });
+
+    // 3. Xử lý nút Phân Tích Xu Hướng AI
+    const predictBtn = document.getElementById('predict-trend-btn');
+    const trendModal = document.getElementById('trend-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+
+    // Các UI states
+    const trendLoading = document.getElementById('trend-loading');
+    const trendError = document.getElementById('trend-error');
+    const trendResult = document.getElementById('trend-result');
+    const retryBtn = document.getElementById('retry-btn');
+
+    // Các thành phần dữ liệu
+    const riskBadge = document.getElementById('risk-badge');
+    const trendSummary = document.getElementById('trend-summary');
+    const alertsList = document.getElementById('alerts-list');
+    const predictionsList = document.getElementById('predictions-list');
+    const actionsList = document.getElementById('actions-list');
+
+    function openModal() {
+        trendModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Ngăn cuộn trang
+    }
+
+    function closeModal() {
+        trendModal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+
+    closeModalBtn.addEventListener('click', closeModal);
+
+    // Đóng khi click ra ngoài modal
+    trendModal.addEventListener('click', (e) => {
+        if (e.target === trendModal) closeModal();
+    });
+
+    async function fetchTrendData() {
+        // Reset states
+        trendLoading.classList.remove('hidden');
+        trendError.classList.add('hidden');
+        trendResult.classList.add('hidden');
+
+        try {
+            const studentId = predictBtn.dataset.studentId;
+            const response = await fetch(`/api/predict_trend/${studentId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await response.json();
+
+            if (response.ok && !data.error) {
+                renderTrendData(data);
+                trendLoading.classList.add('hidden');
+                trendResult.classList.remove('hidden');
+            } else {
+                throw new Error(data.error || 'Lỗi phân tích');
+            }
+
+        } catch (error) {
+            console.error('Trend Analysis Error:', error);
+            trendLoading.classList.add('hidden');
+            trendError.classList.remove('hidden');
+            document.getElementById('error-message').innerText = error.message || 'Lỗi kết nối server. Vui lòng thử lại sau.';
+        }
+    }
+
+    function renderTrendData(data) {
+        // 1. Phân loại mức rủi ro
+        riskBadge.className = 'text-xs font-bold px-3 py-1 rounded-full border transition-colors';
+        const shieldIcon = '<i class="fas fa-shield-alt mr-1"></i>';
+        if (data.risk_level === 'Rất cao' || data.risk_level === 'Cao') {
+            riskBadge.classList.add('bg-red-50', 'text-red-700', 'border-red-200');
+            riskBadge.innerHTML = shieldIcon + ` Rủi ro: ${data.risk_level}`;
+        } else if (data.risk_level === 'Trung bình') {
+            riskBadge.classList.add('bg-amber-50', 'text-amber-700', 'border-amber-200');
+            riskBadge.innerHTML = shieldIcon + ` Rủi ro: ${data.risk_level}`;
+        } else {
+            riskBadge.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+            riskBadge.innerHTML = shieldIcon + ` Rủi ro: ${data.risk_level}`;
+        }
+
+        // 2. Tổng quan chung
+        trendSummary.innerHTML = `<strong>Nhận định AI:</strong> ${data.trend_summary}`;
+
+        // 3. Cảnh báo (Alerts)
+        alertsList.innerHTML = '';
+        if (data.alerts && data.alerts.length > 0) {
+            data.alerts.forEach(alert => {
+                let badgeColor = alert.type === 'Tâm lý' ? 'bg-purple-100 text-purple-700' :
+                    alert.type === 'Học lực' ? 'bg-orange-100 text-orange-700' :
+                        'bg-rose-100 text-rose-700';
+
+                alertsList.innerHTML += `
+                    <li class="flex items-start gap-2 text-sm bg-white/50 p-2 rounded-lg border border-red-50">
+                        <span class="mt-0.5 text-xs font-bold px-2 py-0.5 rounded ${badgeColor}">${alert.type}</span>
+                        <span class="text-slate-700">${alert.description}</span>
+                    </li>
+                `;
+            });
+        } else {
+            alertsList.innerHTML = '<li class="text-sm text-slate-500 italic">Không có dấu hiệu bất thường.</li>';
+        }
+
+        // 4. Dự báo (Predictions)
+        predictionsList.innerHTML = '';
+        if (data.predictions && data.predictions.length > 0) {
+            data.predictions.forEach(pred => {
+                predictionsList.innerHTML += `
+                    <li class="flex items-start gap-2 text-sm text-slate-700">
+                        <i class="fas fa-angle-right text-amber-500 mt-1"></i>
+                        <span>${pred}</span>
+                    </li>
+                `;
+            });
+        } else {
+            predictionsList.innerHTML = '<li class="text-sm text-slate-500 italic">Chưa có dự báo cụ thể.</li>';
+        }
+
+        // 5. Đề xuất hành động (Actions)
+        actionsList.innerHTML = '';
+        if (data.recommended_actions && data.recommended_actions.length > 0) {
+            data.recommended_actions.forEach((action, index) => {
+                actionsList.innerHTML += `
+                    <div class="flex items-center gap-3 bg-white p-3 rounded-lg border border-emerald-100 shadow-sm">
+                        <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                            ${index + 1}
+                        </div>
+                        <span class="text-sm text-slate-700">${action}</span>
+                    </div>
+                `;
+            });
+        } else {
+            actionsList.innerHTML = '<p class="text-sm text-slate-500 italic">Tiếp tục theo dõi tình hình học sinh.</p>';
+        }
+    }
+
+    predictBtn.addEventListener('click', () => {
+        openModal();
+        fetchTrendData();
+    });
+
+    retryBtn.addEventListener('click', fetchTrendData);
+</script>
+{% endblock %}
