@@ -9,3 +9,4 @@ uploads/
 brain/
 *.log
 .vscode/
+data/

@@ -597,40 +597,41 @@
     </div>
 
     <!-- Mobile Overlay -->
+    {% if current_user.is_authenticated %}
     <div id="sidebar-overlay"
         class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity"
         onclick="toggleSidebar()"></div>
+    {% endif %}
 
     <!-- Layout Wrapper -->
     <div class="flex h-full">
 
         <!-- SIDEBAR -->
+        {% if current_user.is_authenticated %}
         <aside id="sidebar"
             class="glass-sidebar fixed lg:static inset-y-0 left-0 w-[260px] z-50 flex flex-col transform -translate-x-[120%] lg:translate-x-0 transition-transform duration-300 ease-out">
 
             <!-- Logo Area -->
             <div class="h-14 flex items-center px-6 border-b border-[hsl(240,5.9%,90%)]">
-                <div class="flex items-center gap-2.5">
+                <a href="{% if current_user.is_authenticated %}{{ url_for('dashboard') }}{% elif session.get('student_id') %}{{ url_for('student.student_dashboard') }}{% else %}{{ url_for('welcome') }}{% endif %}" class="flex items-center gap-2.5 group transition-opacity hover:opacity-80">
                     <div
-                        class="w-8 h-8 rounded-lg bg-[hsl(240,5.9%,10%)] flex items-center justify-center text-white text-sm">
+                        class="w-8 h-8 rounded-lg bg-[hsl(240,5.9%,10%)] flex items-center justify-center text-white text-sm shadow-sm group-hover:shadow-md transition-all">
                         <i class="fas fa-brain"></i>
                     </div>
                     <div>
-                        <h1 class="text-sm font-semibold text-foreground tracking-tight leading-none">EduMind</h1>
-                        <span class="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">AI
-                            System</span>
+                        <h1 class="text-sm font-semibold text-foreground tracking-tight leading-none">EduMind AI</h1>
+                        <span class="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">AI System</span>
                     </div>
-                </div>
+                </a>
                 <!-- Close Button Mobile -->
                 <button onclick="toggleSidebar()"
                     class="lg:hidden ml-auto p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-
+           
             <!-- Scrollable Nav -->
             <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-6 scroll-smooth">
-
                 <!-- Group: Tổng quan -->
                 <div>
                     <h3 class="px-3 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
@@ -798,11 +799,9 @@
                         </a>
                     </div>
                 </div>
-
             </nav>
 
             <!-- User Profile (Bottom) -->
-            {% if current_user.is_authenticated %}
             <div class="p-3 border-t border-[hsl(240,5.9%,90%)]">
                 <div class="flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-accent transition cursor-pointer">
                     <div
@@ -820,8 +819,8 @@
                     </a>
                 </div>
             </div>
-            {% endif %}
         </aside>
+        {% endif %}
 
         <!-- MAIN CONTENT WRAPPER -->
         <div class="flex-1 flex flex-col min-w-0 h-full relative">
@@ -831,13 +830,23 @@
                 class="h-14 border-b border-[hsl(240,5.9%,90%)] bg-white/80 backdrop-blur-sm flex items-center justify-between px-6 flex-shrink-0 z-30">
                 <!-- Left: Mobile Toggle & Page Title -->
                 <div class="flex items-center gap-3">
+                    {% if current_user.is_authenticated %}
                     <button onclick="toggleSidebar()"
                         class="lg:hidden p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <div class="hidden sm:block">
+                    {% else %}
+                    <div class="w-8 h-8 rounded-lg bg-[hsl(240,5.9%,10%)] flex items-center justify-center text-white text-sm">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    {% endif %}
+                    <div class="block">
                         <h2 class="text-sm font-semibold text-foreground">
-                            {% if self.title() %}{{ self.title() }}{% else %}EduMind AI{% endif %}
+                            {% if current_user.is_authenticated %}
+                                {% if self.title() %}{{ self.title() }}{% else %}EduMind AI{% endif %}
+                            {% else %}
+                                EduMind AI System
+                            {% endif %}
                         </h2>
                     </div>
                 </div>

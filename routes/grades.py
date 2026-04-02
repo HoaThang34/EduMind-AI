@@ -9,7 +9,7 @@ grades_bp = Blueprint('grades', __name__)
 @grades_bp.route("/manage_grades")
 @login_required
 def manage_grades():
-    from app import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa
+    from app_helpers import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa
     """Danh sách học sinh để chọn nhập điểm"""
     search = request.args.get('search', '').strip()
     selected_class = request.args.get('class_select', '').strip()
@@ -31,7 +31,7 @@ def manage_grades():
 @grades_bp.route("/student_grades/<int:student_id>", methods=["GET", "POST"])
 @login_required
 def student_grades(student_id):
-    from app import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa
+    from app_helpers import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa
     """Xem và nhập điểm cho học sinh"""
     # Kiểm tra quyền truy cập học sinh
     if not can_access_student(student_id):
@@ -167,7 +167,7 @@ def student_grades(student_id):
 @grades_bp.route("/delete_grade/<int:grade_id>", methods=["POST"])
 @login_required
 def delete_grade(grade_id):
-    from app import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa
+    from app_helpers import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa
     """Xóa một điểm"""
     grade = db.session.get(Grade, grade_id)
     if grade:
@@ -186,7 +186,7 @@ def delete_grade(grade_id):
 @grades_bp.route("/api/update_grade/<int:grade_id>", methods=["POST"])
 @login_required
 def update_grade_api(grade_id):
-    from app import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa
+    from app_helpers import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa
     """API endpoint để cập nhật điểm inline"""
     try:
         data = request.get_json()
@@ -218,7 +218,7 @@ def update_grade_api(grade_id):
 @grades_bp.route("/student/<int:student_id>/transcript")
 @login_required
 def student_transcript(student_id):
-    from app import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa
+    from app_helpers import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa
     """Xem bảng điểm tổng hợp (học bạ) của học sinh"""
     # Kiểm tra quyền truy cập học sinh
     if not can_access_student(student_id):
@@ -285,7 +285,7 @@ def student_transcript(student_id):
 @grades_bp.route("/student/<int:student_id>/parent_report")
 @login_required
 def parent_report(student_id):
-    from app import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa
+    from app_helpers import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa
     """Báo cáo tổng hợp cho phụ huynh"""
     # Kiểm tra quyền truy cập học sinh
     if not can_access_student(student_id):

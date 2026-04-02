@@ -4,11 +4,12 @@ import base64
 import json
 import ollama
 from functools import wraps
+import os
 
 
 student_bp = Blueprint('student', __name__)
 
-OLLAMA_MODEL = "gemini-3-flash-preview"
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemini-3-flash-preview")
 
 # We might need to copy `student_required`, `get_student_ai_advice`, `_student_chat_call_ollama` and `ALLOWED_CHAT_EXTENSIONS` here.
 # Let's extract them:
@@ -16,7 +17,7 @@ def student_required(f):
     """Decorator yêu cầu quyền học sinh để truy cập"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        from app import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa, call_ollama
+        from app_helpers import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa, call_ollama
         if 'student_id' not in session:
             return redirect(url_for('student.student_login'))
         return f(*args, **kwargs)
@@ -25,7 +26,7 @@ def student_required(f):
 
 
 def get_student_ai_advice(student):
-    from app import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa, call_ollama
+    from app_helpers import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa, call_ollama
     """
     Phân tích dữ liệu học sinh và đưa ra lời khuyên từ AI
     """
@@ -81,7 +82,7 @@ ALLOWED_CHAT_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'pdf'}
 
 
 def _student_chat_call_ollama(system_prompt, history, user_message, image_base64=None):
-    from app import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa
+    from app_helpers import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa
     """
     Gọi Ollama cho student chat. Nếu có image_base64 thì dùng message có images.
     history: list of dict {role, content}
@@ -109,7 +110,7 @@ def _student_chat_call_ollama(system_prompt, history, user_message, image_base64
 
 @student_bp.route("/student/login", methods=["GET", "POST"])
 def student_login():
-    from app import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa
+    from app_helpers import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa
     if request.method == "POST":
         code = request.form.get("student_code", "").strip()
         # Chuẩn hóa mã
@@ -129,7 +130,7 @@ def student_login():
 
 @student_bp.route("/student/logout")
 def student_logout():
-    from app import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa
+    from app_helpers import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa
     session.pop('student_id', None)
     session.pop('student_name', None)
     return redirect(url_for('student.student_login'))
@@ -139,7 +140,7 @@ def student_logout():
 @student_bp.route("/student/dashboard")
 @student_required
 def student_dashboard():
-    from app import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa
+    from app_helpers import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa
     student_id = session['student_id']
     student = Student.query.get(student_id)
     if not student:
@@ -206,7 +207,7 @@ def student_dashboard():
 @student_bp.route("/api/student/chat", methods=["POST"])
 @student_required
 def student_chat_api():
-    from app import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa
+    from app_helpers import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa
     """
     API Chatbot cho học sinh.
     Chấp nhận: application/json { "message", "mode" } hoặc multipart/form-data với message, mode, file (tùy chọn).

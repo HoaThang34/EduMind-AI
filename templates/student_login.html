@@ -1,68 +1,86 @@
 {% extends "base.html" %}
-{% block title %}Đăng Nhập Học Sinh{% endblock %}
+{% block title %}Đăng Nhập Học Sinh - EduMind AI{% endblock %}
 
 {% block login_content %}
-<div class="min-h-[85vh] flex items-center justify-center relative py-12 px-4">
+<!-- Decorative background elements -->
+<div class="absolute inset-0 z-[-1] overflow-hidden bg-[hsl(150,20%,98%)] rounded-xl">
+    <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-emerald-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float"></div>
+    <div class="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-teal-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float" style="animation-delay: 2s;"></div>
+    <div class="absolute bottom-1/4 left-1/3 w-[600px] h-[600px] bg-sky-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float" style="animation-delay: 4s;"></div>
+</div>
 
-    <div class="w-full max-w-sm animate-fade-in-up">
+<div class="min-h-[85vh] flex items-center justify-center relative py-12 px-4 sm:px-6 lg:px-8">
 
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <div
-                class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-600 text-white text-xl mb-4">
-                <i class="fas fa-user-graduate"></i>
-            </div>
-            <h1 class="text-2xl font-semibold text-foreground tracking-tight">Cổng Học Sinh</h1>
-            <p class="text-muted-foreground text-sm mt-1.5">Nhập mã số để xem kết quả rèn luyện</p>
-        </div>
+    <div class="w-full max-w-md animate-fade-in-up relative z-10">
+        
+        <!-- Glow behind card -->
+        <div class="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-[2rem] blur-2xl opacity-15 scale-[1.02]"></div>
 
         <!-- Card -->
-        <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl shadow-card p-6">
+        <div class="backdrop-blur-2xl bg-white/70 border border-white/60 rounded-[2rem] shadow-[0_8px_40px_0_rgba(31,38,135,0.05)] p-10 relative overflow-hidden">
+            
+            <!-- Reflections -->
+            <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
+            <div class="absolute bottom-0 inset-x-0 h-[300px] bg-gradient-to-t from-emerald-50/50 to-transparent z-[-1]"></div>
+
+            <!-- Header -->
+            <div class="text-center mb-10">
+                <div class="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-900 text-white text-2xl mb-6 shadow-xl shadow-emerald-900/20 transform transition-transform hover:scale-105">
+                    <i class="fas fa-user-graduate"></i>
+                    <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-sky-400 border-2 border-white rounded-full"></span>
+                </div>
+                <h1 class="text-[28px] leading-tight font-extrabold text-slate-800 tracking-tight">Cổng Học Sinh</h1>
+                <p class="text-slate-500 font-medium text-sm mt-2">Tra cứu kết quả học tập & rèn luyện</p>
+                <div class="mt-4 flex items-center justify-center">
+                    <span class="px-3 py-1.5 rounded-full bg-emerald-50/80 border border-emerald-100 text-emerald-700 text-xs font-bold tracking-widest shadow-inner">
+                        <i class="fas fa-graduation-cap mr-1.5 opacity-70"></i> EDUMIND AI
+                    </span>
+                </div>
+            </div>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
             {% for category, message in messages %}
             <div
-                class="mb-4 p-3 rounded-lg flex items-center gap-2.5 text-sm animate-fade-in-down bg-destructive/5 text-destructive border border-destructive/10">
-                <i class="fas fa-circle-exclamation text-xs"></i>
-                <span class="font-medium">{{ message }}</span>
+                class="mb-6 p-4 rounded-xl flex items-center gap-3 text-sm animate-fade-in-down shadow-sm bg-red-50 text-red-700 border border-red-200">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-red-100 text-red-600">
+                    <i class="fas fa-exclamation text-xs"></i>
+                </div>
+                <span class="font-semibold flex-1">{{ message }}</span>
             </div>
             {% endfor %}
             {% endif %}
             {% endwith %}
 
-            <form action="{{ url_for('student.student_login') }}" method="POST" class="space-y-4">
-                <div class="space-y-2">
-                    <label for="student_code" class="text-sm font-medium text-foreground">Mã Số Học Sinh</label>
-                    <div class="relative">
-                        <i
-                            class="fas fa-id-card absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs"></i>
-                        <input type="text" name="student_code" id="student_code" required
-                            class="input-shadcn pl-9 py-2.5" placeholder="Ví dụ: 34TIN-001">
+            <form action="{{ url_for('student.student_login') }}" method="POST" class="space-y-6">
+                <!-- Student Code -->
+                <div class="space-y-2 focus-within:text-emerald-600 transition-colors">
+                    <label for="student_code" class="text-[11px] font-bold text-slate-500 uppercase tracking-[0.2em] pl-1">Mã số học sinh</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none transition-colors group-focus-within:text-emerald-600 text-slate-400">
+                            <i class="fas fa-id-card text-sm"></i>
+                        </div>
+                        <input type="text" name="student_code" id="student_code" required 
+                            class="w-full bg-white/60 hover:bg-white/90 border border-slate-200 focus:bg-white text-slate-800 text-sm font-medium rounded-xl focus:ring-[3px] focus:ring-emerald-500/20 focus:border-emerald-500 block pl-11 p-3.5 transition-all outline-none shadow-sm"
+                            placeholder="Ví dụ: 34TIN-001">
                     </div>
                 </div>
 
-                <button type="submit" class="btn-primary w-full py-2.5 flex items-center justify-center gap-2 text-sm">
-                    Xem Kết Quả
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 12h14"></path>
-                        <path d="m12 5 7 7-7 7"></path>
-                    </svg>
+                <button type="submit" class="w-full bg-slate-900 hover:bg-emerald-600 text-white focus:ring-[4px] focus:outline-none focus:ring-emerald-300 font-bold rounded-xl text-sm px-5 py-4 text-center transition-all duration-300 shadow-xl shadow-slate-900/20 hover:shadow-emerald-600/30 transform hover:-translate-y-1 flex items-center justify-center gap-3 group mt-2">
+                    <span class="tracking-wide uppercase">Xác nhận tra cứu</span>
+                    <i class="fas fa-search text-sm group-hover:translate-x-1 group-hover:scale-110 transition-all"></i>
                 </button>
             </form>
         </div>
 
         <!-- Teacher Login Link -->
-        <div class="mt-6 text-center">
+        <div class="mt-8 text-center bg-white/40 backdrop-blur-md rounded-[1.5rem] p-5 border border-white/60 shadow-sm max-w-sm mx-auto transition-all hover:bg-white/60">
+            <p class="text-[10px] text-slate-500 font-bold mb-3 uppercase tracking-widest">Cổng dành cho cán bộ</p>
             <a href="{{ url_for('auth.login') }}"
-                class="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition group">
-                <i class="fas fa-chalkboard-teacher text-xs"></i>
-                <span>Giáo viên đăng nhập</span>
-                <svg class="w-3 h-3 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2">
-                    <path d="m9 18 6-6-6-6" />
-                </svg>
+                class="inline-flex w-full items-center justify-center gap-2 text-sm font-bold text-slate-700 bg-white hover:bg-emerald-50 border border-slate-200 rounded-xl py-3.5 transition-colors group shadow-sm hover:text-emerald-600 hover:border-emerald-200">
+                <i class="fas fa-chalkboard-teacher text-emerald-500 text-lg"></i>
+                <span>Đăng nhập Giáo viên</span>
+                <i class="fas fa-chevron-right text-[10px] text-slate-400 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all ml-1"></i>
             </a>
         </div>
 

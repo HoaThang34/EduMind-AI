@@ -2,85 +2,109 @@
 {% block title %}Đăng Nhập - EduMind AI{% endblock %}
 
 {% block login_content %}
+<!-- We inject a specific full-screen wrap to avoid the base layout padding if possible, 
+but since it's nested in `<main class="p-6">`, we'll just manipulate the inner container -->
+<div class="absolute inset-0 z-[-1] overflow-hidden bg-[hsl(220,20%,98%)] rounded-xl">
+    <!-- Extra login specific decorative blur -->
+    <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-indigo-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float"></div>
+    <div class="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-cyan-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float" style="animation-delay: 2s;"></div>
+    <div class="absolute bottom-1/4 left-1/3 w-[600px] h-[600px] bg-violet-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float" style="animation-delay: 4s;"></div>
+</div>
+
 <div class="min-h-[85vh] flex items-center justify-center relative py-12 px-4 sm:px-6 lg:px-8">
 
-    <div class="w-full max-w-sm animate-fade-in-up">
-
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <div
-                class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[hsl(240,5.9%,10%)] text-white text-xl mb-4">
-                <i class="fas fa-fingerprint"></i>
-            </div>
-            <h1 class="text-2xl font-semibold text-foreground tracking-tight">Chào mừng trở lại</h1>
-            <p class="text-muted-foreground text-sm mt-1.5">Đăng nhập vào hệ thống quản lý</p>
-        </div>
+    <div class="w-full max-w-md animate-fade-in-up relative z-10">
+        
+        <!-- Glow behind card -->
+        <div class="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-[2rem] blur-2xl opacity-15 scale-[1.02]"></div>
 
         <!-- Card -->
-        <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl shadow-card p-6">
+        <div class="backdrop-blur-2xl bg-white/70 border border-white/60 rounded-[2rem] shadow-[0_8px_40px_0_rgba(31,38,135,0.05)] p-10 relative overflow-hidden">
+            
+            <!-- Subtle gradient reflection inside card -->
+            <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
+            <div class="absolute bottom-0 inset-x-0 h-[300px] bg-gradient-to-t from-indigo-50/50 to-transparent z-[-1]"></div>
+
+            <!-- Header -->
+            <div class="text-center mb-10">
+                <div class="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-900 to-indigo-900 text-white text-2xl mb-6 shadow-xl shadow-indigo-900/20 transform transition-transform hover:scale-105">
+                    <i class="fas fa-fingerprint"></i>
+                    <!-- Little ping dot -->
+                    <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-400 border-2 border-white rounded-full"></span>
+                </div>
+                <h1 class="text-[28px] leading-tight font-extrabold text-slate-800 tracking-tight">Chào mừng trở lại</h1>
+                <p class="text-slate-500 font-medium text-sm mt-2">Hệ Thống Quản Lý Giáo Dục Thông Minh</p>
+                <div class="mt-4 flex items-center justify-center">
+                    <span class="px-3 py-1.5 rounded-full bg-indigo-50/80 border border-indigo-100 text-indigo-700 text-xs font-bold tracking-widest shadow-inner">
+                        <i class="fas fa-school mr-1.5 opacity-70"></i> EDUMIND AI
+                    </span>
+                </div>
+            </div>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
             {% for category, message in messages %}
             <div
-                class="mb-4 p-3 rounded-lg flex items-center gap-2.5 text-sm animate-fade-in-down {{ 'bg-destructive/5 text-destructive border border-destructive/10' if category == 'error' else 'bg-emerald-50 text-emerald-700 border border-emerald-100' }}">
-                <i class="fas {{ 'fa-circle-exclamation' if category == 'error' else 'fa-circle-check' }} text-xs"></i>
-                <span class="font-medium">{{ message }}</span>
+                class="mb-6 p-4 rounded-xl flex items-center gap-3 text-sm animate-fade-in-down shadow-sm {{ 'bg-red-50 text-red-700 border border-red-200' if category == 'error' else 'bg-emerald-50 text-emerald-700 border border-emerald-200' }}">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 {{ 'bg-red-100 text-red-600' if category == 'error' else 'bg-emerald-100 text-emerald-600' }}">
+                    <i class="fas {{ 'fa-exclamation' if category == 'error' else 'fa-check' }} text-xs"></i>
+                </div>
+                <span class="font-semibold flex-1">{{ message }}</span>
             </div>
             {% endfor %}
             {% endif %}
             {% endwith %}
 
-            <form action="{{ url_for('auth.login') }}" method="POST" class="space-y-4">
-                <div class="space-y-2">
-                    <label for="username" class="text-sm font-medium text-foreground">Tên đăng nhập</label>
-                    <div class="relative">
-                        <i
-                            class="fas fa-user absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs"></i>
-                        <input type="text" name="username" id="username" required class="input-shadcn pl-9 py-2.5"
-                            placeholder="admin">
+            <form action="{{ url_for('auth.login') }}" method="POST" class="space-y-6">
+                <!-- Username -->
+                <div class="space-y-2 focus-within:text-indigo-600 transition-colors">
+                    <label for="username" class="text-[11px] font-bold text-slate-500 uppercase tracking-[0.2em] pl-1">Tài khoản quản lý</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none transition-colors group-focus-within:text-indigo-600 text-slate-400">
+                            <i class="fas fa-user text-sm"></i>
+                        </div>
+                        <input type="text" name="username" id="username" required 
+                            class="w-full bg-white/60 hover:bg-white/90 border border-slate-200 focus:bg-white text-slate-800 text-sm font-medium rounded-xl focus:ring-[3px] focus:ring-indigo-500/20 focus:border-indigo-500 block pl-11 p-3.5 transition-all outline-none shadow-sm"
+                            placeholder="Nhập tên đăng nhập">
                     </div>
                 </div>
 
-                <div class="space-y-2">
-                    <label for="password" class="text-sm font-medium text-foreground">Mật khẩu</label>
-                    <div class="relative">
-                        <i
-                            class="fas fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs"></i>
-                        <input type="password" name="password" id="password" required class="input-shadcn pl-9 py-2.5"
+                <!-- Password -->
+                <div class="space-y-2 focus-within:text-indigo-600 transition-colors">
+                    <label for="password" class="text-[11px] font-bold text-slate-500 uppercase tracking-[0.2em] pl-1">Mật khẩu</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none transition-colors group-focus-within:text-indigo-600 text-slate-400">
+                            <i class="fas fa-lock text-sm"></i>
+                        </div>
+                        <input type="password" name="password" id="password" required 
+                            class="w-full bg-white/60 hover:bg-white/90 border border-slate-200 focus:bg-white text-slate-800 text-sm font-medium rounded-xl focus:ring-[3px] focus:ring-indigo-500/20 focus:border-indigo-500 block pl-11 p-3.5 transition-all outline-none shadow-sm"
                             placeholder="••••••••">
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
+                <div class="flex items-center justify-between pt-1">
+                    <div class="relative flex items-center gap-2">
                         <input id="remember-me" name="remember-me" type="checkbox"
-                            class="h-4 w-4 rounded border-[hsl(240,5.9%,90%)] text-foreground focus:ring-1 focus:ring-ring">
-                        <label for="remember-me" class="text-sm text-muted-foreground">Ghi nhớ</label>
+                            class="w-4 h-4 border-slate-300 rounded bg-white text-indigo-600 focus:ring-indigo-500 transition-all cursor-pointer">
+                        <label for="remember-me" class="text-sm font-medium text-slate-600 cursor-pointer hover:text-slate-900 transition select-none">Ghi nhớ đăng nhập</label>
                     </div>
                 </div>
 
-                <button type="submit" class="btn-primary w-full py-2.5 flex items-center justify-center gap-2 text-sm">
-                    Đăng Nhập
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 12h14"></path>
-                        <path d="m12 5 7 7-7 7"></path>
-                    </svg>
+                <button type="submit" class="w-full bg-slate-900 hover:bg-indigo-600 text-white focus:ring-[4px] focus:outline-none focus:ring-indigo-300 font-bold rounded-xl text-sm px-5 py-4 text-center transition-all duration-300 shadow-xl shadow-slate-900/20 hover:shadow-indigo-600/30 transform hover:-translate-y-1 flex items-center justify-center gap-3 group mt-2">
+                    <span class="tracking-wide">ĐĂNG NHẬP HỆ THỐNG</span>
+                    <i class="fas fa-arrow-right text-sm group-hover:translate-x-1 group-hover:scale-110 transition-all"></i>
                 </button>
             </form>
         </div>
 
         <!-- Student Login Link -->
-        <div class="mt-6 text-center">
+        <div class="mt-8 text-center bg-white/40 backdrop-blur-md rounded-[1.5rem] p-5 border border-white/60 shadow-sm max-w-sm mx-auto transition-all hover:bg-white/60">
+            <p class="text-[10px] text-slate-500 font-bold mb-3 uppercase tracking-widest">Cổng dành cho học sinh</p>
             <a href="{{ url_for('student.student_login') }}"
-                class="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition group">
-                <i class="fas fa-user-graduate text-xs"></i>
-                <span>Học sinh đăng nhập</span>
-                <svg class="w-3 h-3 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2">
-                    <path d="m9 18 6-6-6-6" />
-                </svg>
+                class="inline-flex w-full items-center justify-center gap-2 text-sm font-bold text-slate-700 bg-white hover:bg-indigo-50 border border-slate-200 rounded-xl py-3.5 transition-colors group shadow-sm hover:text-indigo-600 hover:border-indigo-200">
+                <i class="fas fa-user-graduate text-indigo-500 text-lg"></i>
+                <span>Tới cổng Học sinh</span>
+                <i class="fas fa-chevron-right text-[10px] text-slate-400 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all ml-1"></i>
             </a>
         </div>
 

@@ -1,51 +1,128 @@
 {% extends "base.html" %}
-{% block title %}EduMind AI - Hệ Thống Giáo Dục Tổng Hợp{% endblock %}
+{% block title %}Chào mừng đến với EduMind AI{% endblock %}
 
 {% block content %}
 <div class="space-y-16 pb-12 animate-fade-in-up">
 
-    <!-- Hero Section -->
-    <section class="relative text-center py-10 md:py-20 px-4">
-        <div
-            class="inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-md bg-accent border border-[hsl(240,5.9%,90%)] text-sm font-medium text-foreground">
-            <span class="relative flex h-1.5 w-1.5">
-                <span
-                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-            </span>
-            <span class="text-xs tracking-wider uppercase">Hệ Thống Giáo Dục Tổng Hợp</span>
+    <!-- Hero Section with Unified Login Form -->
+    <section class="relative py-10 md:py-20 px-4">
+        <!-- Background Decorations -->
+        <div class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80" aria-hidden="true">
+            <div class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]" style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"></div>
         </div>
 
-        <h1 class="text-4xl md:text-6xl font-bold text-foreground tracking-tight mb-5 leading-[1.1]">
-            Quản lý giáo dục <br>
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500">với
-                sức mạnh AI</span>
-        </h1>
+        <div class="grid lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
+            <!-- Left: Marketing Content -->
+            <div class="text-left">
+                <div
+                    class="inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-sm font-semibold text-indigo-700">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                    </span>
+                    <span class="text-xs tracking-wider uppercase">Hệ Thống Giáo Dục Thông Minh</span>
+                </div>
 
-        <p class="text-base md:text-lg text-muted-foreground max-w-xl mx-auto mb-8 leading-relaxed">
-            Tự động hóa nề nếp, điểm số và báo cáo. Trợ lý ảo AI chạy local giúp bảo mật dữ liệu tuyệt đối.
-        </p>
+                <h1 class="text-4xl md:text-6xl font-extrabold text-slate-900 tracking-tight mb-6 leading-[1.1]">
+                    Quản lý giáo dục <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500">Thông Minh & Hiệu Quả</span>
+                </h1>
 
-        <div class="flex flex-col sm:flex-row justify-center gap-3">
-            {% if current_user.is_authenticated %}
-            <a href="{{ url_for('dashboard') }}"
-                class="btn-primary px-6 py-3 text-sm flex items-center justify-center gap-2">
-                <i class="fas fa-chart-pie text-xs"></i> Vào Dashboard
-            </a>
-            <a href="{{ url_for('index') }}"
-                class="btn-outline px-6 py-3 text-sm flex items-center justify-center gap-2">
-                <i class="fas fa-list-ul text-xs"></i> Bảng Rèn Luyện
-            </a>
-            {% else %}
-            <a href="{{ url_for('student.student_login') }}"
-                class="btn-primary px-6 py-3 text-sm flex items-center justify-center gap-2">
-                <i class="fas fa-user-graduate text-xs"></i> Học Sinh Đăng Nhập
-            </a>
-            <a href="{{ url_for('auth.login') }}"
-                class="btn-outline px-6 py-3 text-sm flex items-center justify-center gap-2">
-                <i class="fas fa-chalkboard-teacher text-xs"></i> Giáo Viên Đăng Nhập
-            </a>
-            {% endif %}
+                <p class="text-lg text-slate-600 max-w-xl mb-8 leading-relaxed font-medium">
+                    Tự động hóa nề nếp, trích xuất điểm số bằng AI Vision và phân tích xu hướng học tập. Bảo mật 100% với AI chạy local giúp nhà trường tối ưu vận hành.
+                </p>
+
+                <div class="flex items-center gap-6">
+                    <div class="flex flex-col">
+                        <span class="text-2xl font-bold text-slate-900">100%</span>
+                        <span class="text-sm text-slate-500 font-medium">Bảo mật dữ liệu</span>
+                    </div>
+                    <div class="w-px h-10 bg-slate-200"></div>
+                    <div class="flex flex-col">
+                        <span class="text-2xl font-bold text-slate-900">24/7</span>
+                        <span class="text-sm text-slate-500 font-medium">Hỗ trợ AI 4.0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Unified Login Form -->
+            <div class="relative w-full max-w-md mx-auto lg:ml-auto">
+                <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-[2rem] blur opacity-25"></div>
+                <div class="relative bg-white/90 backdrop-blur-xl border border-white/60 rounded-[2rem] shadow-2xl p-8 transition-transform hover:scale-[1.01] duration-500">
+                    
+                    <!-- Tabs -->
+                    <div class="flex bg-slate-100 p-1 rounded-xl mb-8">
+                        <button onclick="switchTab('staff')" id="tab-staff" class="flex-1 py-2 text-sm font-bold rounded-lg transition-all bg-white shadow-sm text-indigo-600">
+                            Cán bộ / GV
+                        </button>
+                        <button onclick="switchTab('student')" id="tab-student" class="flex-1 py-2 text-sm font-bold rounded-lg transition-all text-slate-500 hover:text-slate-700">
+                            Học sinh
+                        </button>
+                    </div>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="mb-6 p-4 rounded-xl flex items-center gap-3 text-sm animate-fade-in-down {{ 'bg-red-50 text-red-700 border border-red-200' if category == 'error' else 'bg-emerald-50 text-emerald-700 border border-emerald-200' }}">
+                        <i class="fas {{ 'fa-exclamation-circle' if category == 'error' else 'fa-check-circle' }} shrink-0"></i>
+                        <span class="font-semibold">{{ message }}</span>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+
+                    <form action="{{ url_for('welcome') }}" method="POST" class="space-y-6">
+                        <input type="hidden" name="login_type" id="login_type" value="staff">
+                        
+
+                        <!-- Staff Fields -->
+                        <div id="staff-fields" class="space-y-6">
+                            <div class="space-y-2">
+                                <label for="username" class="text-[11px] font-bold text-slate-500 uppercase tracking-widest pl-1">Tài khoản quản lý</label>
+                                <div class="relative group">
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-indigo-600 transition-colors">
+                                        <i class="fas fa-user-shield text-sm"></i>
+                                    </div>
+                                    <input type="text" name="username" id="username" 
+                                        class="w-full bg-slate-50 border border-slate-200 focus:bg-white text-slate-900 text-sm font-medium rounded-xl focus:ring-[3px] focus:ring-indigo-500/20 focus:border-indigo-500 block pl-11 p-3.5 transition-all outline-none"
+                                        placeholder="admin">
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="password" class="text-[11px] font-bold text-slate-500 uppercase tracking-widest pl-1">Mật khẩu</label>
+                                <div class="relative group">
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-indigo-600 transition-colors">
+                                        <i class="fas fa-key text-sm"></i>
+                                    </div>
+                                    <input type="password" name="password" id="password" 
+                                        class="w-full bg-slate-50 border border-slate-200 focus:bg-white text-slate-900 text-sm font-medium rounded-xl focus:ring-[3px] focus:ring-indigo-500/20 focus:border-indigo-500 block pl-11 p-3.5 transition-all outline-none"
+                                        placeholder="••••••••">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Student Fields -->
+                        <div id="student-fields" class="space-y-6 hidden">
+                            <div class="space-y-2">
+                                <label for="student_code" class="text-[11px] font-bold text-slate-500 uppercase tracking-widest pl-1">Mã số học sinh</label>
+                                <div class="relative group">
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-indigo-600 transition-colors">
+                                        <i class="fas fa-id-card text-sm"></i>
+                                    </div>
+                                    <input type="text" name="student_code" id="student_code" 
+                                        class="w-full bg-slate-50 border border-slate-200 focus:bg-white text-slate-900 text-sm font-medium rounded-xl focus:ring-[3px] focus:ring-indigo-500/20 focus:border-indigo-500 block pl-11 p-3.5 transition-all outline-none"
+                                        placeholder="Ví dụ: 34TIN-001">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-sm px-5 py-4 transition-all transform hover:-translate-y-1 shadow-xl shadow-slate-900/20 flex items-center justify-center gap-3 group">
+                            <span id="btn-text">Đăng Nhập Cán Bộ</span>
+                            <i class="fas fa-arrow-right-to-bracket text-xs group-hover:translate-x-1 transition-transform"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -221,68 +298,25 @@
     <section class="overflow-hidden">
         <h2 class="text-xl font-semibold text-foreground tracking-tight mb-8 text-center">Người dùng nói gì?</h2>
 
-        <style>
-            @keyframes marquee-ltr {
-                0% {
-                    transform: translateX(-50%);
-                }
-
-                100% {
-                    transform: translateX(0);
-                }
-            }
-
-            .animate-marquee-ltr {
-                animation: marquee-ltr 15s linear infinite;
-            }
-
-            .animate-marquee-ltr:hover {
-                animation-play-state: paused;
-            }
-
-            .mask-fade-x {
-                -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-                mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-            }
-        </style>
-
         <div class="relative mask-fade-x py-8">
             <div class="flex gap-6 animate-marquee-ltr">
                 {% set testimonials = [
-                {"text": "Hệ thống giúp tôi tiết kiệm 50% thời gian tổng hợp báo cáo tuần. Giao diện mới rất đẹp và dễ
-                dùng.", "name": "Cô Nguyễn Thị Hương", "role": "GVCN 10A1", "initial": "H", "bg": "bg-indigo-100
-                text-indigo-700"},
-                {"text": "Chatbot tra cứu cực nhanh, tôi không cần phải lật sổ điểm để xem học sinh nào vi phạm nữa.",
-                "name": "Thầy Trần Văn Minh", "role": "GVCN 11B2", "initial": "M", "bg": "bg-emerald-100
-                text-emerald-700"},
-                {"text": "Em rất thích tính năng xem điểm rèn luyện và chat với giáo viên. Giao diện nhìn rất hiện
-                đại!", "name": "Em Hoàng Minh Tuấn", "role": "Học sinh 12C1", "initial": "T", "bg": "bg-amber-100
-                text-amber-700"},
-                {"text": "Tôi rất yên tâm khi nhận được thông báo ngay khi con có vi phạm. Sự minh bạch giúp gia đình
-                đồng hành tốt hơn.", "name": "Chị Lê Thị Lan", "role": "Phụ huynh 10A2", "initial": "L", "bg":
-                "bg-rose-100 text-rose-700"},
-                {"text": "EduMind AI là bước đột phá trong quản lý nề nếp. Số liệu trực quan giúp BGH đưa ra quyết định
-                chính xác.", "name": "Thầy Phạm Văn Dũng", "role": "Hiệu Trưởng", "initial": "D", "bg": "bg-purple-100
-                text-purple-700"},
-                {"text": "Giao diện web rất đẹp, giống như một ứng dụng hiện đại. Em thích nhất có thể tra cứu điểm số
-                mọi lúc.", "name": "Em Trần Ngọc Nhi", "role": "Học sinh 11A5", "initial": "N", "bg": "bg-sky-100
-                text-sky-700"}
+                {"text": "Hệ thống giúp tôi tiết kiệm 50% thời gian tổng hợp báo cáo tuần. Giao diện mới rất đẹp và dễ dàng.", "name": "Cô Nguyễn Thị Hương", "role": "GVCN 10A1", "initial": "H", "bg": "bg-indigo-100 text-indigo-700"},
+                {"text": "Chatbot tra cứu cực nhanh, tôi không cần phải lật sổ điểm để xem học sinh nào vi phạm nữa.", "name": "Thầy Trần Văn Minh", "role": "GVCN 11B2", "initial": "M", "bg": "bg-emerald-100 text-emerald-700"},
+                {"text": "Em rất thích tính năng xem điểm rèn luyện và chat với giáo viên. Giao diện nhìn rất hiện đại!", "name": "Em Hoàng Minh Tuấn", "role": "Học sinh 12C1", "initial": "T", "bg": "bg-amber-100 text-amber-700"},
+                {"text": "Tôi rất yên tâm khi nhận được thông báo ngay khi con có vi phạm. Sự minh bạch giúp gia đình đồng hành tốt hơn.", "name": "Chị Lê Thị Lan", "role": "Phụ huynh 10A2", "initial": "L", "bg": "bg-rose-100 text-rose-700"},
+                {"text": "EduMind AI là bước đột phá trong quản lý nề nếp. Số liệu trực quan giúp BGH đưa ra quyết định chính xác.", "name": "Thầy Phạm Văn Dũng", "role": "Hiệu Trưởng", "initial": "D", "bg": "bg-purple-100 text-purple-700"}
                 ] %}
 
-                {# Render twice for infinite loop #}
                 {% for i in range(2) %}
                 {% for t in testimonials %}
-                <div
-                    class="bg-white border border-[hsl(240,5.9%,90%)] p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow min-w-[300px] md:min-w-[350px] flex flex-col group">
+                <div class="bg-white border border-[hsl(240,5.9%,90%)] p-6 rounded-2xl shadow-sm min-w-[300px] flex flex-col group">
                     <div class="flex items-center gap-1 text-amber-400 mb-4 text-xs">
-                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                            class="fas fa-star"></i><i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                     </div>
                     <p class="text-[15px] text-muted-foreground leading-relaxed italic mb-6 flex-1">"{{ t.text }}"</p>
                     <div class="flex items-center gap-3 pt-4 border-t border-[hsl(240,5.9%,90%)]">
-                        <div
-                            class="w-10 h-10 rounded-xl {{ t.bg }} flex items-center justify-center font-bold text-sm shadow-sm group-hover:scale-110 transition-transform">
-                            {{ t.initial }}</div>
+                        <div class="w-10 h-10 rounded-xl {{ t.bg }} flex items-center justify-center font-bold text-sm transition-transform group-hover:scale-110">{{ t.initial }}</div>
                         <div>
                             <p class="text-sm font-bold text-foreground">{{ t.name }}</p>
                             <p class="text-xs text-muted-foreground font-medium">{{ t.role }}</p>
@@ -302,7 +336,63 @@
             <span class="text-muted-foreground/40">•</span>
             <a href="{{ url_for('privacy') }}" class="hover:text-foreground transition">Bảo mật</a>
         </div>
-        <p>Bản quyền © Agent_LLM — Trường THPT Chuyên Nguyễn Tất Thành</p>
+        <p>Bản quyền © Agent_LLM — Hệ Thống EduMind AI</p>
     </footer>
 </div>
+
+<script>
+    function switchTab(type) {
+        const staffBtn = document.getElementById('tab-staff');
+        const studentBtn = document.getElementById('tab-student');
+        const staffFields = document.getElementById('staff-fields');
+        const studentFields = document.getElementById('student-fields');
+        const loginType = document.getElementById('login_type');
+        const btnText = document.getElementById('btn-text');
+
+        if (type === 'staff') {
+            staffBtn.classList.add('bg-white', 'shadow-sm', 'text-indigo-600');
+            staffBtn.classList.remove('text-slate-500');
+            studentBtn.classList.remove('bg-white', 'shadow-sm', 'text-indigo-600');
+            studentBtn.classList.add('text-slate-500');
+            staffFields.classList.remove('hidden');
+            studentFields.classList.add('hidden');
+            loginType.value = 'staff';
+            btnText.innerText = 'Đăng Nhập Cán Bộ';
+            
+            document.getElementById('username').required = true;
+            document.getElementById('password').required = true;
+            document.getElementById('student_code').required = false;
+        } else {
+            studentBtn.classList.add('bg-white', 'shadow-sm', 'text-indigo-600');
+            studentBtn.classList.remove('text-slate-500');
+            staffBtn.classList.remove('bg-white', 'shadow-sm', 'text-indigo-600');
+            staffBtn.classList.add('text-slate-500');
+            staffFields.classList.add('hidden');
+            studentFields.classList.remove('hidden');
+            loginType.value = 'student';
+            btnText.innerText = 'Đăng Nhập Học Sinh';
+
+            document.getElementById('username').required = false;
+            document.getElementById('password').required = false;
+            document.getElementById('student_code').required = true;
+        }
+    }
+</script>
+
+<style>
+    @keyframes marquee-ltr {
+        0% { transform: translateX(-50%); }
+        100% { transform: translateX(0); }
+    }
+    .animate-marquee-ltr {
+        animation: marquee-ltr 25s linear infinite;
+    }
+    .animate-marquee-ltr:hover {
+        animation-play-state: paused;
+    }
+    .mask-fade-x {
+        -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    }
+</style>
 {% endblock %}

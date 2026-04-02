@@ -11,12 +11,12 @@ from datetime import datetime
 
 ai_engine_bp = Blueprint('ai_engine', __name__)
 
-OLLAMA_MODEL = "gemini-3-flash-preview"
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemini-3-flash-preview")
 
 @ai_engine_bp.route("/chatbot")
 @login_required
 def chatbot():
-    from app import call_ollama, get_or_create_chat_session, get_conversation_history, save_message, CHATBOT_SYSTEM_PROMPT, _call_gemini, log_change, create_notification, can_access_subject, can_access_student
+    from app_helpers import call_ollama, get_or_create_chat_session, get_conversation_history, save_message, CHATBOT_SYSTEM_PROMPT, _call_gemini, log_change, create_notification, can_access_subject, can_access_student
     return render_template("chatbot.html")
 
 
@@ -24,7 +24,7 @@ def chatbot():
 @ai_engine_bp.route("/api/chatbot", methods=["POST"])
 @login_required
 def api_chatbot():
-    from app import call_ollama, get_or_create_chat_session, get_conversation_history, save_message, CHATBOT_SYSTEM_PROMPT, _call_gemini, log_change, create_notification, can_access_subject, can_access_student
+    from app_helpers import call_ollama, get_or_create_chat_session, get_conversation_history, save_message, CHATBOT_SYSTEM_PROMPT, _call_gemini, log_change, create_notification, can_access_subject, can_access_student
     """Context-aware chatbot với conversation memory"""
     msg = (request.json.get("message") or "").strip()
     if not msg:
@@ -194,7 +194,7 @@ def api_chatbot():
 @ai_engine_bp.route("/api/chatbot/clear", methods=["POST"])
 @login_required
 def clear_chat_session():
-    from app import call_ollama, get_or_create_chat_session, get_conversation_history, save_message, CHATBOT_SYSTEM_PROMPT, _call_gemini, log_change, create_notification, can_access_subject, can_access_student
+    from app_helpers import call_ollama, get_or_create_chat_session, get_conversation_history, save_message, CHATBOT_SYSTEM_PROMPT, _call_gemini, log_change, create_notification, can_access_subject, can_access_student
     """Tạo session mới và xóa session cũ khỏi Flask session"""
     session.pop('chat_session_id', None)
     return jsonify({"status": "success", "message": "Chat đã được làm mới"})
@@ -205,7 +205,7 @@ def clear_chat_session():
 @ai_engine_bp.route("/assistant_chatbot")
 @login_required
 def assistant_chatbot():
-    from app import call_ollama, get_or_create_chat_session, get_conversation_history, save_message, CHATBOT_SYSTEM_PROMPT, _call_gemini, log_change, create_notification, can_access_subject, can_access_student
+    from app_helpers import call_ollama, get_or_create_chat_session, get_conversation_history, save_message, CHATBOT_SYSTEM_PROMPT, _call_gemini, log_change, create_notification, can_access_subject, can_access_student
     """Chatbot đa năng: nội quy, ứng xử, trợ giúp GV"""
     return render_template("assistant_chatbot.html")
 
@@ -214,7 +214,7 @@ def assistant_chatbot():
 @ai_engine_bp.route("/api/generate_report/<int:student_id>", methods=["POST"])
 @login_required
 def generate_report(student_id):
-    from app import call_ollama, get_or_create_chat_session, get_conversation_history, save_message, CHATBOT_SYSTEM_PROMPT, _call_gemini, log_change, create_notification, can_access_subject, can_access_student
+    from app_helpers import call_ollama, get_or_create_chat_session, get_conversation_history, save_message, CHATBOT_SYSTEM_PROMPT, _call_gemini, log_change, create_notification, can_access_subject, can_access_student
     try:
         data = request.get_json() or {}
         week = data.get('week') # Nhận tham số tuần từ Frontend
@@ -275,7 +275,7 @@ def generate_report(student_id):
 @ai_engine_bp.route("/api/generate_parent_report/<int:student_id>", methods=["POST"])
 @login_required
 def generate_parent_report(student_id):
-    from app import call_ollama, get_or_create_chat_session, get_conversation_history, save_message, CHATBOT_SYSTEM_PROMPT, _call_gemini, log_change, create_notification, can_access_subject, can_access_student
+    from app_helpers import call_ollama, get_or_create_chat_session, get_conversation_history, save_message, CHATBOT_SYSTEM_PROMPT, _call_gemini, log_change, create_notification, can_access_subject, can_access_student
     """Gọi AI tạo nhận xét tổng hợp cho phụ huynh"""
     student = db.session.get(Student, student_id)
     if not student:
@@ -339,7 +339,7 @@ Hãy viết nhận xét xúc tích, chân thành, khích lệ học sinh và đ�
 @ai_engine_bp.route("/api/assistant_chatbot", methods=["POST"])
 @login_required
 def api_assistant_chatbot():
-    from app import call_ollama
+    from app_helpers import call_ollama
     """API cho chatbot đa năng với intent detection"""
     msg = request.json.get("message", "").strip()
     
@@ -421,7 +421,7 @@ def ocr_grades():
 @login_required
 def api_ocr_grades():
     """Xử lý ảnh OCR sử dụng Gemini Vision"""
-    from app import _call_gemini
+    from app_helpers import _call_gemini
     from prompts import VISION_GRADE_OCR_PROMPT
     
     if 'image' not in request.files:
@@ -432,7 +432,7 @@ def api_ocr_grades():
         return jsonify({"error": "Tên file rỗng"}), 400
     
     # Save temporary file
-    from app import UPLOAD_FOLDER
+    from app_helpers import UPLOAD_FOLDER
     filename = f"ocr_{uuid.uuid4().hex}_{file.filename}"
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     file.save(filepath)
@@ -456,7 +456,7 @@ def api_ocr_grades():
 @login_required
 def api_confirm_ocr_grades():
     """Lưu kết quả điểm đã soát lại vào database"""
-    from app import call_ollama, get_or_create_chat_session, get_conversation_history, save_message, CHATBOT_SYSTEM_PROMPT, _call_gemini, log_change, create_notification, can_access_subject, can_access_student
+    from app_helpers import call_ollama, get_or_create_chat_session, get_conversation_history, save_message, CHATBOT_SYSTEM_PROMPT, _call_gemini, log_change, create_notification, can_access_subject, can_access_student
     data = request.get_json()
     if not data:
         return jsonify({"error": "Không có dữ liệu"}), 400
@@ -569,7 +569,7 @@ def api_confirm_ocr_grades():
 @login_required
 def predict_trend(student_id):
     try:
-        from app import _call_gemini
+        from app_helpers import _call_gemini
         from prompts import STUDENT_TREND_PREDICTION_PROMPT
         
         student = db.session.get(Student, student_id)
@@ -653,7 +653,7 @@ def voice_to_text():
 @login_required
 def api_normalize_comment():
     """API chuẩn hóa nhận xét bằng AI"""
-    from app import _call_gemini
+    from app_helpers import _call_gemini
     from prompts import VOICE_TO_PEDAGOGICAL_PROMPT
     
     data = request.get_json()

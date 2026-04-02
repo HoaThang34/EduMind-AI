@@ -5,6 +5,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
+from flask import g, has_request_context
+from sqlalchemy.orm import with_loader_criteria
+from sqlalchemy import event
+import sqlalchemy
+
+
+
 
 class ClassRoom(db.Model):
     id = db.Column(db.Integer, primary_key=True)
