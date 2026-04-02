@@ -1,4 +1,7 @@
-# 🎓 EduMind AI - Hệ Thống Quản Lý Giáo Dục Thông Minh Tích Hợp AI
+<div align="center">
+  <img src="logo/logo.png" alt="EduMind AI Logo" width="180">
+  <h1>🎓 EduMind AI - Hệ Thống Quản Lý Giáo Dục Thông Minh Tích Hợp AI</h1>
+</div>
 
 **EduMind AI** là một nền tảng quản lý giáo dục toàn diện, được thiết kế để hiện đại hóa và tối ưu hóa các quy trình quản trị trong nhà trường. Bằng cách tận dụng sức mạnh của **Trí tuệ Nhân tạo (AI)** và công nghệ **Thị giác máy tính (Computer Vision)**, EduMind AI giúp giáo viên và ban giám hiệu giảm bớt gánh nặng hành chính, tập trung tối đa vào việc nâng cao chất lượng dạy và học.
 
