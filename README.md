@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="logo/logo.png" alt="EduMind AI Logo" width="180">
+  <img src="logo/logo.png" alt="EduMind AI Logo" width="180" style="border-radius: 50%;">
   <h1>🎓 EduMind AI - Hệ Thống Quản Lý Giáo Dục Thông Minh Tích Hợp AI</h1>
 </div>
 
