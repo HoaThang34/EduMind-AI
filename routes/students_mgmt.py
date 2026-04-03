@@ -1,5 +1,6 @@
 """Routes: students_mgmt."""
 import json
+import math
 import os
 import uuid
 import datetime
@@ -23,6 +24,57 @@ from app_helpers import (
 )
 
 
+def _empty_to_none(s):
+    s = (s or "").strip()
+    return s if s else None
+
+
+def _excel_cell_str(v):
+    if pd.isna(v):
+        return None
+    if isinstance(v, float) and not math.isnan(v) and v == int(v):
+        return str(int(v))
+    s = str(v).strip()
+    return s if s else None
+
+
+def _student_name_column(df_columns):
+    """Cột họ tên học sinh — loại trừ cột phụ huynh."""
+    for c in df_columns:
+        cl = str(c).strip().lower()
+        if "phụ huynh" in cl or "phu huynh" in cl or "phhs" in cl:
+            continue
+        if "tên" in cl or "name" in cl:
+            return c
+    return None
+
+
+def _find_parent_import_columns(df_columns):
+    """Nhận diện cột Excel: Họ tên phụ huynh / SĐT phụ huynh (tùy chọn)."""
+    orig = list(df_columns)
+    name_col = None
+    phone_col = None
+    for o in orig:
+        cl = str(o).strip().lower()
+        is_ph = "phụ huynh" in cl or "phu huynh" in cl or "phhs" in cl
+        is_phone = any(
+            x in cl
+            for x in ("sđt", "sdt", "phone", "điện thoại", "dien thoai", "tel", "mobile")
+        )
+        if is_ph and is_phone:
+            phone_col = o
+        elif is_ph and not is_phone:
+            name_col = o
+    if not phone_col:
+        for o in orig:
+            cl = str(o).strip().lower()
+            if "sđt" in cl or "sdt" in cl:
+                if "ph" in cl or "phhs" in cl or "phụ" in cl or "phu" in cl:
+                    phone_col = o
+                    break
+    return name_col, phone_col
+
+
 def register(app):
     @app.route("/manage_students")
     @login_required
@@ -35,7 +87,15 @@ def register(app):
     @app.route("/add_student", methods=["POST"])
     @login_required
     def add_student():
-        db.session.add(Student(name=request.form["student_name"], student_code=request.form["student_code"], student_class=request.form["student_class"]))
+        db.session.add(
+            Student(
+                name=request.form["student_name"],
+                student_code=request.form["student_code"],
+                student_class=request.form["student_class"],
+                parent_name=_empty_to_none(request.form.get("parent_name")),
+                parent_phone=_empty_to_none(request.form.get("parent_phone")),
+            )
+        )
         db.session.commit()
         flash("Thêm học sinh thành công", "success")
         return redirect(url_for("manage_students"))
@@ -63,6 +123,8 @@ def register(app):
             s.name = request.form["student_name"]
             s.student_code = request.form["student_code"]
             s.student_class = request.form["student_class"]
+            s.parent_name = _empty_to_none(request.form.get("parent_name"))
+            s.parent_phone = _empty_to_none(request.form.get("parent_phone"))
             db.session.commit()
             flash("Cập nhật thành công", "success")
             return redirect(url_for("manage_students"))
@@ -159,14 +221,16 @@ def register(app):
                 preview_data = []
             
                 # Tìm các cột cần thiết
-                code_col = next((c for c in df.columns if "mã" in c or "code" in c), None)
-                name_col = next((c for c in df.columns if "tên" in c or "name" in c), None)
-                class_col = next((c for c in df.columns if "lớp" in c or "class" in c), None)
+                code_col = next((c for c in df.columns if "mã" in str(c).lower() or "code" in str(c).lower()), None)
+                name_col = _student_name_column(df.columns)
+                class_col = next((c for c in df.columns if "lớp" in str(c).lower() or "class" in str(c).lower()), None)
             
                 if not code_col or not name_col or not class_col:
                     if os.path.exists(filepath): os.remove(filepath)
                     flash("File Excel cần có 3 cột: 'Mã học sinh', 'Họ và tên', 'Lớp'", "error")
                     return redirect(request.url)
+
+                parent_name_col, parent_phone_col = _find_parent_import_columns(df.columns)
 
                 # Lặp qua từng dòng trong Excel
                 for index, row in df.iterrows():
@@ -180,14 +244,31 @@ def register(app):
                     if not student_code or student_code.lower() == 'nan':
                         continue
                 
-                    preview_data.append({
+                    entry = {
                         "name": name,
                         "class": s_class,
-                        "student_code": student_code
-                    })
+                        "student_code": student_code,
+                    }
+                    if parent_name_col:
+                        pn = _excel_cell_str(row.get(parent_name_col))
+                        if pn:
+                            entry["parent_name"] = pn
+                    if parent_phone_col:
+                        pp = _excel_cell_str(row.get(parent_phone_col))
+                        if pp:
+                            entry["parent_phone"] = pp
+                    preview_data.append(entry)
             
                 # Chuyển sang trang xác nhận
-                return render_template("confirm_import.html", students=preview_data, file_path=filepath)
+                has_parent_cols = any(
+                    e.get("parent_name") or e.get("parent_phone") for e in preview_data
+                )
+                return render_template(
+                    "confirm_import.html",
+                    students=preview_data,
+                    file_path=filepath,
+                    has_parent_cols=has_parent_cols,
+                )
 
             except Exception as e:
                 flash(f"Lỗi đọc file: {str(e)}", "error")
@@ -203,7 +284,9 @@ def register(app):
         sample_data = {
             'Mã học sinh': ['36 ANHA - 001001', '36 ANHA - 001002', '36 TINA - 001001'],
             'Họ và tên': ['Nguyễn Văn A', 'Trần Thị B', 'Lê Hoàng C'],
-            'Lớp': ['10 Anh A', '10 Anh A', '10 Tin A']
+            'Lớp': ['10 Anh A', '10 Anh A', '10 Tin A'],
+            'Họ tên phụ huynh': ['Nguyễn Văn Ph', 'Trần Thị X', 'Lê Văn Y'],
+            'SĐT phụ huynh': ['0912345678', '0987654321', '0901122334'],
         }
         df = pd.DataFrame(sample_data)
     
@@ -235,9 +318,10 @@ def register(app):
             df = pd.read_excel(filepath)
             df.columns = [str(c).strip().lower() for c in df.columns]
         
-            code_col = next((c for c in df.columns if "mã" in c or "code" in c), None)
-            name_col = next((c for c in df.columns if "tên" in c or "name" in c), None)
-            class_col = next((c for c in df.columns if "lớp" in c or "class" in c), None)
+            code_col = next((c for c in df.columns if "mã" in str(c).lower() or "code" in str(c).lower()), None)
+            name_col = _student_name_column(df.columns)
+            class_col = next((c for c in df.columns if "lớp" in str(c).lower() or "class" in str(c).lower()), None)
+            parent_name_col, parent_phone_col = _find_parent_import_columns(df.columns)
         
             count = 0
             skipped = 0
@@ -259,7 +343,15 @@ def register(app):
                     db.session.add(ClassRoom(name=s_class))
             
                 # 3. Thêm học sinh
-                new_student = Student(name=name, student_class=s_class, student_code=student_code)
+                pn = _excel_cell_str(row.get(parent_name_col)) if parent_name_col else None
+                pp = _excel_cell_str(row.get(parent_phone_col)) if parent_phone_col else None
+                new_student = Student(
+                    name=name,
+                    student_class=s_class,
+                    student_code=student_code,
+                    parent_name=pn,
+                    parent_phone=pp,
+                )
                 db.session.add(new_student)
             
                 count += 1

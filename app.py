@@ -4,6 +4,8 @@ from flask import Flask, send_from_directory
 from werkzeug.security import generate_password_hash
 from flask_login import LoginManager
 
+from sqlalchemy import inspect, text
+
 from models import db, Teacher, SystemConfig, ViolationType
 from app_helpers import register_template_extensions
 from routes import register_all_routes
@@ -51,8 +53,22 @@ app.register_blueprint(ai_engine_bp)
 register_all_routes(app)
 
 
+def ensure_student_parent_columns():
+    """Thêm cột phụ huynh cho DB SQLite cũ (ALTER TABLE)."""
+    insp = inspect(db.engine)
+    if not insp.has_table("student"):
+        return
+    cols = {c["name"] for c in insp.get_columns("student")}
+    if "parent_name" not in cols:
+        db.session.execute(text("ALTER TABLE student ADD COLUMN parent_name VARCHAR(150)"))
+    if "parent_phone" not in cols:
+        db.session.execute(text("ALTER TABLE student ADD COLUMN parent_phone VARCHAR(20)"))
+    db.session.commit()
+
+
 def create_database():
     db.create_all()
+    ensure_student_parent_columns()
     if not Teacher.query.first():
         hashed_pwd = generate_password_hash("admin")
         db.session.add(Teacher(username="admin", password=hashed_pwd, full_name="Admin", role="admin"))

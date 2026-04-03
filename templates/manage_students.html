@@ -51,6 +51,19 @@
                         {% endfor %}
                     </select>
                 </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-foreground">Họ và tên phụ huynh</label>
+                        <input type="text" name="parent_name" placeholder="Tùy chọn"
+                            class="input-shadcn py-2.5">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-foreground">SĐT liên hệ phụ huynh</label>
+                        <input type="text" name="parent_phone" placeholder="Tùy chọn" inputmode="tel"
+                            autocomplete="tel"
+                            class="input-shadcn py-2.5">
+                    </div>
+                </div>
                 <button type="submit" class="btn-primary w-full py-2.5 text-sm">Thêm Học Sinh</button>
             </form>
         </div>
@@ -117,6 +130,8 @@
                         <th>Mã Số</th>
                         <th>Tên</th>
                         <th>Lớp</th>
+                        <th>Phụ huynh</th>
+                        <th>SĐT PH</th>
                         <th>Điểm</th>
                         <th class="text-right">Hành Động</th>
                     </tr>
@@ -127,6 +142,8 @@
                         <td class="text-muted-foreground font-mono text-xs">{{ student.student_code }}</td>
                         <td class="font-medium">{{ student.name }}</td>
                         <td><span class="badge badge-secondary">{{ student.student_class }}</span></td>
+                        <td class="text-sm text-muted-foreground max-w-[140px] truncate" title="{{ student.parent_name or '' }}">{{ student.parent_name or '—' }}</td>
+                        <td class="text-sm text-muted-foreground font-mono">{{ student.parent_phone or '—' }}</td>
                         <td><span
                                 class="font-semibold {% if student.current_score >= 90 %}text-emerald-600{% elif student.current_score >= 70 %}text-amber-600{% else %}text-destructive{% endif %}">{{
                                 student.current_score }}</span></td>

@@ -68,6 +68,8 @@ class Student(db.Model):
     name = db.Column(db.String(100), nullable=False)
     student_class = db.Column(db.String(20), nullable=False)
     current_score = db.Column(db.Integer, default=100)
+    parent_name = db.Column(db.String(150), nullable=True)
+    parent_phone = db.Column(db.String(20), nullable=True)
 
 
 class ViolationType(db.Model):

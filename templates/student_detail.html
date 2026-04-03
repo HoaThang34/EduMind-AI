@@ -17,6 +17,13 @@
             <p class="text-muted-foreground text-sm"><i class="fas fa-school mr-1"></i> Lớp: <strong>{{
                     student.student_class
                     }}</strong></p>
+            <p class="text-muted-foreground text-sm mt-1">
+                <i class="fas fa-user-friends mr-1"></i> Phụ huynh:
+                <strong>{{ student.parent_name or '—' }}</strong>
+                <span class="mx-1.5 text-[hsl(240,5.9%,80%)]">|</span>
+                <i class="fas fa-phone mr-1"></i> SĐT:
+                <strong class="font-mono">{{ student.parent_phone or '—' }}</strong>
+            </p>
         </div>
 
         <div class="flex items-center gap-3 bg-accent p-2 rounded-xl border border-[hsl(240,5.9%,90%)]">
