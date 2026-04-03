@@ -134,20 +134,37 @@ def _student_chat_call_ollama(system_prompt, history, user_message, image_base64
 
 @student_bp.route("/student/login", methods=["GET", "POST"])
 def student_login():
-    from app_helpers import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa
+    from app_helpers import (
+        normalize_student_code,
+        parent_phone_login_match,
+        get_or_create_chat_session,
+        get_conversation_history,
+        save_message,
+        calculate_student_gpa,
+    )
     if request.method == "POST":
         code = request.form.get("student_code", "").strip()
-        # Chuẩn hóa mã
+        pwd = request.form.get("student_password", "").strip()
         norm_code = normalize_student_code(code)
-        
+
         student = Student.query.filter_by(student_code=norm_code).first()
-        if student:
-            session['student_id'] = student.id
-            session['student_name'] = student.name
-            return redirect(url_for('student.student_dashboard'))
-        else:
+        if not student:
             flash("Mã học sinh không tồn tại! Vui lòng kiểm tra lại.", "error")
-            
+        elif not (student.parent_phone or "").strip():
+            flash(
+                "Chưa có số điện thoại phụ huynh trong hệ thống. "
+                "Vui lòng liên hệ nhà trường để cập nhật trước khi đăng nhập.",
+                "error",
+            )
+        elif not pwd:
+            flash("Vui lòng nhập mật khẩu (số điện thoại phụ huynh).", "error")
+        elif not parent_phone_login_match(student.parent_phone, pwd):
+            flash("Sai mật khẩu. Mật khẩu là số điện thoại phụ huynh đã đăng ký.", "error")
+        else:
+            session["student_id"] = student.id
+            session["student_name"] = student.name
+            return redirect(url_for("student.student_dashboard"))
+
     return render_template("student_login.html")
 
 

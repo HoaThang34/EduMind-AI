@@ -1,6 +1,7 @@
 """Shared helpers and extensions (refactored from app.py)."""
 import os
 import json
+import hmac
 import datetime
 import base64
 import re
@@ -223,6 +224,32 @@ def normalize_student_code(code):
     code = code.strip()
     
     return code
+
+
+def normalize_parent_phone_for_login(s):
+    """
+    Chuẩn hóa số điện thoại (VN) để so khớp mật khẩu đăng nhập cổng học sinh.
+    Chỉ giữ chữ số; tiền tố +84 / 84 → 0; 9 số (không 0 đầu) → thêm 0.
+    """
+    if not s:
+        return ""
+    d = "".join(c for c in str(s).strip() if c.isdigit())
+    if not d:
+        return ""
+    if d.startswith("84") and len(d) >= 10:
+        d = "0" + d[2:]
+    if len(d) == 9 and not d.startswith("0"):
+        d = "0" + d
+    return d
+
+
+def parent_phone_login_match(stored_phone, entered_password):
+    """True nếu mật khẩu nhập khớp SĐT đã lưu (sau chuẩn hóa). So sánh constant-time."""
+    a = normalize_parent_phone_for_login(stored_phone)
+    b = normalize_parent_phone_for_login(entered_password)
+    if not a or not b or len(a) != len(b):
+        return False
+    return hmac.compare_digest(a, b)
 
 
 def get_current_iso_week():

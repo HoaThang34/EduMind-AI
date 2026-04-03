@@ -111,8 +111,20 @@
                                     </div>
                                     <input type="text" name="student_code" id="student_code" 
                                         class="w-full bg-slate-50 border border-slate-200 focus:bg-white text-slate-900 text-sm font-medium rounded-xl focus:ring-[3px] focus:ring-indigo-500/20 focus:border-indigo-500 block pl-11 p-3.5 transition-all outline-none"
-                                        placeholder="Ví dụ: 34TIN-001">
+                                        placeholder="Ví dụ: 34TIN-001" autocomplete="username">
                                 </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="student_password" class="text-[11px] font-bold text-slate-500 uppercase tracking-widest pl-1">Mật khẩu (SĐT phụ huynh)</label>
+                                <div class="relative group">
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-indigo-600 transition-colors">
+                                        <i class="fas fa-phone text-sm"></i>
+                                    </div>
+                                    <input type="password" name="student_password" id="student_password" inputmode="tel" autocomplete="current-password"
+                                        class="w-full bg-slate-50 border border-slate-200 focus:bg-white text-slate-900 text-sm font-medium rounded-xl focus:ring-[3px] focus:ring-indigo-500/20 focus:border-indigo-500 block pl-11 p-3.5 transition-all outline-none"
+                                        placeholder="Nhập SĐT phụ huynh đã đăng ký">
+                                </div>
+                                <p class="text-[11px] text-slate-500 pl-1">Mật khẩu trùng với số điện thoại liên hệ phụ huynh trong hồ sơ.</p>
                             </div>
                         </div>
 
@@ -360,6 +372,8 @@
             document.getElementById('username').required = true;
             document.getElementById('password').required = true;
             document.getElementById('student_code').required = false;
+            const sp = document.getElementById('student_password');
+            if (sp) sp.required = false;
         } else {
             studentBtn.classList.add('bg-white', 'shadow-sm', 'text-indigo-600');
             studentBtn.classList.remove('text-slate-500');
@@ -373,6 +387,8 @@
             document.getElementById('username').required = false;
             document.getElementById('password').required = false;
             document.getElementById('student_code').required = true;
+            const sp = document.getElementById('student_password');
+            if (sp) sp.required = true;
         }
     }
 </script>

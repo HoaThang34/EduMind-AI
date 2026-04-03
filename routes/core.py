@@ -17,6 +17,7 @@ from models import (
 )
 from app_helpers import (
     admin_required, get_accessible_students, can_access_student, normalize_student_code,
+    parent_phone_login_match,
     parse_excel_file, import_violations_to_db, calculate_week_from_date, _call_gemini,
     save_weekly_archive, get_current_iso_week, create_notification, log_change,
     UPLOAD_FOLDER, calculate_student_gpa, is_reset_needed,
@@ -48,14 +49,25 @@ def register(app):
             
             elif login_type == "student":
                 student_code = request.form.get("student_code", "").strip()
+                pwd = request.form.get("student_password", "").strip()
                 norm_code = normalize_student_code(student_code)
-                # Tìm học sinh (không lọc theo school_id nữa)
                 student = Student.query.filter_by(student_code=norm_code).first()
-                if student:
-                    session['student_id'] = student.id
-                    session['student_name'] = student.name
+                if not student:
+                    flash("Mã số học sinh không tồn tại trong hệ thống!", "error")
+                elif not (student.parent_phone or "").strip():
+                    flash(
+                        "Học sinh chưa có số điện thoại phụ huynh trong hệ thống. "
+                        "Vui lòng liên hệ nhà trường để cập nhật trước khi đăng nhập.",
+                        "error",
+                    )
+                elif not pwd:
+                    flash("Vui lòng nhập mật khẩu (số điện thoại phụ huynh).", "error")
+                elif not parent_phone_login_match(student.parent_phone, pwd):
+                    flash("Sai mật khẩu. Mật khẩu là số điện thoại phụ huynh đã đăng ký.", "error")
+                else:
+                    session["student_id"] = student.id
+                    session["student_name"] = student.name
                     return redirect(url_for("student.student_dashboard"))
-                flash("Mã số học sinh không tồn tại trong hệ thống!", "error")
             
         return render_template('welcome.html')
 
