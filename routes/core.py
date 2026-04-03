@@ -60,6 +60,12 @@ def register(app):
         return render_template('welcome.html')
 
 
+    @app.route("/home")
+    @login_required
+    def home():
+        return render_template("home.html")
+
+
     @app.route('/docs')
     def docs(): return render_template('docs.html')
 

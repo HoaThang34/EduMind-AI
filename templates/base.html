@@ -117,6 +117,13 @@
             letter-spacing: -0.025em;
         }
 
+        /* Tiếng Việt: gradient chữ (background-clip) dễ cắt dấu nếu line-height quá chật */
+        [class*="bg-clip-text"] {
+            padding-bottom: 0.1em;
+            -webkit-box-decoration-break: clone;
+            box-decoration-break: clone;
+        }
+
         /* === Shadcn Card & Panel System === */
         .glass-panel {
             background: hsl(0 0% 100%);
@@ -619,7 +626,7 @@
                         <i class="fas fa-brain"></i>
                     </div>
                     <div>
-                        <h1 class="text-sm font-semibold text-foreground tracking-tight leading-none">EduMind AI</h1>
+                        <h1 class="text-sm font-semibold text-foreground tracking-tight leading-snug">EduMind AI</h1>
                         <span class="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">AI System</span>
                     </div>
                 </a>
@@ -637,8 +644,8 @@
                     <h3 class="px-3 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
                         Tổng quan</h3>
                     <div class="space-y-1">
-                        <a href="{{ url_for('welcome') }}"
-                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'welcome' %}active{% endif %}">
+                        <a href="{{ url_for('home') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'home' %}active{% endif %}">
                             <i class="fas fa-home w-6 text-center text-lg mr-3 transition-colors"></i>
                             <span class="text-sm">Trang chủ</span>
                         </a>
@@ -845,7 +852,7 @@
                             {% if current_user.is_authenticated %}
                                 {% if self.title() %}{{ self.title() }}{% else %}EduMind AI{% endif %}
                             {% else %}
-                                EduMind AI System
+                                Hệ thống EduMind AI
                             {% endif %}
                         </h2>
                     </div>
