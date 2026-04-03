@@ -18,7 +18,7 @@
         <p class="text-muted-foreground mb-6">
             Tải lên file Excel chứa danh sách học sinh. <br>
             Bắt buộc 3 cột: <b>Mã học sinh</b>, <b>Họ và tên</b>, <b>Lớp</b>.
-            Có thể thêm cột tùy chọn: <b>Họ tên phụ huynh</b>, <b>SĐT phụ huynh</b>.
+            Có thể thêm cột tùy chọn: <b>Ngày sinh</b>, <b>Họ tên phụ huynh</b>, <b>SĐT phụ huynh</b>.
         </p>
         
         <form method="POST" enctype="multipart/form-data" class="space-y-6 text-left">
@@ -47,6 +47,7 @@
                 <li>Cột <b>Mã học sinh</b>: Mã số định danh (VD: 36 ANHA - 001001)</li>
                 <li>Cột <b>Họ và tên</b>: Tên đầy đủ học sinh</li>
                 <li>Cột <b>Lớp</b>: Tên lớp (VD: 10 Anh A)</li>
+                <li>Tùy chọn: <b>Ngày sinh</b> (tiêu đề có “ngày sinh”, “birth”, “dob”…)</li>
                 <li>Tùy chọn: <b>Họ tên phụ huynh</b>, <b>SĐT phụ huynh</b> (tiêu đề cột có chữ “phụ huynh” / “phhs”)</li>
             </ul>
             <p class="mt-2 text-indigo-600"><i class="fas fa-download mr-1"></i> <a href="{{ url_for('download_student_template') }}" class="underline hover:no-underline">Tải file mẫu</a></p>

@@ -76,10 +76,21 @@ def ensure_student_portrait_column():
     db.session.commit()
 
 
+def ensure_student_date_of_birth_column():
+    insp = inspect(db.engine)
+    if not insp.has_table("student"):
+        return
+    cols = {c["name"] for c in insp.get_columns("student")}
+    if "date_of_birth" not in cols:
+        db.session.execute(text("ALTER TABLE student ADD COLUMN date_of_birth VARCHAR(30)"))
+    db.session.commit()
+
+
 def create_database():
     db.create_all()
     ensure_student_parent_columns()
     ensure_student_portrait_column()
+    ensure_student_date_of_birth_column()
     if not Teacher.query.first():
         hashed_pwd = generate_password_hash("admin")
         db.session.add(Teacher(username="admin", password=hashed_pwd, full_name="Admin", role="admin"))

@@ -279,6 +279,12 @@
                         <label>Lớp</label>
                         <span>{{ student.student_class }}</span>
                     </div>
+                    {% if student.date_of_birth %}
+                    <div class="row">
+                        <label>Ngày sinh</label>
+                        <span>{{ student.date_of_birth }}</span>
+                    </div>
+                    {% endif %}
                     {% if student.parent_name %}
                     <div class="row">
                         <label>Phụ huynh</label>

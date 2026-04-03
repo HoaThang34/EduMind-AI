@@ -52,6 +52,11 @@
                     </select>
                 </div>
                 <div class="space-y-1.5">
+                    <label class="text-sm font-medium text-foreground">Ngày sinh</label>
+                    <input type="text" name="date_of_birth" placeholder="VD: 15/08/2008 (tùy chọn)"
+                        class="input-shadcn py-2.5" autocomplete="bday">
+                </div>
+                <div class="space-y-1.5">
                     <label class="text-sm font-medium text-foreground">Ảnh chân dung (tùy chọn)</label>
                     <input type="file" name="portrait" accept="image/jpeg,image/png,image/webp,image/gif"
                         class="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
@@ -137,6 +142,7 @@
                         <th>Mã Số</th>
                         <th>Tên</th>
                         <th>Lớp</th>
+                        <th>Ngày sinh</th>
                         <th>Phụ huynh</th>
                         <th>SĐT PH</th>
                         <th>Điểm</th>
@@ -160,6 +166,7 @@
                         <td class="text-muted-foreground font-mono text-xs">{{ student.student_code }}</td>
                         <td class="font-medium">{{ student.name }}</td>
                         <td><span class="badge badge-secondary">{{ student.student_class }}</span></td>
+                        <td class="text-sm text-muted-foreground whitespace-nowrap">{{ student.date_of_birth or '—' }}</td>
                         <td class="text-sm text-muted-foreground max-w-[140px] truncate" title="{{ student.parent_name or '' }}">{{ student.parent_name or '—' }}</td>
                         <td class="text-sm text-muted-foreground font-mono">{{ student.parent_phone or '—' }}</td>
                         <td><span

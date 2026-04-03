@@ -50,6 +50,40 @@ def _student_name_column(df_columns):
     return None
 
 
+def _find_dob_column(df_columns):
+    """Cột ngày sinh: tiêu đề có 'ngày sinh', 'birth', 'dob', 'năm sinh' (không lấy cột phụ huynh)."""
+    for c in df_columns:
+        cl = str(c).strip().lower()
+        if "phụ huynh" in cl or "phu huynh" in cl or "phhs" in cl:
+            continue
+        if (
+            "ngày sinh" in cl
+            or "ngay sinh" in cl
+            or "năm sinh" in cl
+            or "nam sinh" in cl
+            or "birth" in cl
+            or cl == "dob"
+        ):
+            return c
+    return None
+
+
+def _format_dob_from_excel_cell(v):
+    """Chuẩn hóa ô Excel (datetime hoặc chuỗi) thành chuỗi hiển thị."""
+    if v is None or (isinstance(v, float) and math.isnan(v)):
+        return None
+    if pd.isna(v):
+        return None
+    if isinstance(v, datetime.datetime):
+        return v.strftime("%d/%m/%Y")
+    if isinstance(v, datetime.date):
+        return v.strftime("%d/%m/%Y")
+    s = str(v).strip()
+    if not s or s.lower() == "nan":
+        return None
+    return s
+
+
 def _find_parent_import_columns(df_columns):
     """Nhận diện cột Excel: Họ tên phụ huynh / SĐT phụ huynh (tùy chọn)."""
     orig = list(df_columns)
@@ -163,6 +197,7 @@ def register(app):
             student_class=request.form["student_class"],
             parent_name=_empty_to_none(request.form.get("parent_name")),
             parent_phone=_empty_to_none(request.form.get("parent_phone")),
+            date_of_birth=_empty_to_none(request.form.get("date_of_birth")),
         )
         db.session.add(st)
         db.session.flush()
@@ -203,6 +238,7 @@ def register(app):
             s.student_class = request.form["student_class"]
             s.parent_name = _empty_to_none(request.form.get("parent_name"))
             s.parent_phone = _empty_to_none(request.form.get("parent_phone"))
+            s.date_of_birth = _empty_to_none(request.form.get("date_of_birth"))
             if request.form.get("remove_portrait"):
                 _delete_portrait_file(s.portrait_filename)
                 s.portrait_filename = None
@@ -321,6 +357,7 @@ def register(app):
                     return redirect(request.url)
 
                 parent_name_col, parent_phone_col = _find_parent_import_columns(df.columns)
+                dob_col = _find_dob_column(df.columns)
 
                 # Lặp qua từng dòng trong Excel
                 for index, row in df.iterrows():
@@ -347,17 +384,23 @@ def register(app):
                         pp = _excel_cell_str(row.get(parent_phone_col))
                         if pp:
                             entry["parent_phone"] = pp
+                    if dob_col:
+                        dob = _format_dob_from_excel_cell(row.get(dob_col))
+                        if dob:
+                            entry["date_of_birth"] = dob
                     preview_data.append(entry)
             
                 # Chuyển sang trang xác nhận
                 has_parent_cols = any(
                     e.get("parent_name") or e.get("parent_phone") for e in preview_data
                 )
+                has_dob_cols = bool(dob_col)
                 return render_template(
                     "confirm_import.html",
                     students=preview_data,
                     file_path=filepath,
                     has_parent_cols=has_parent_cols,
+                    has_dob_cols=has_dob_cols,
                 )
 
             except Exception as e:
@@ -375,6 +418,7 @@ def register(app):
             'Mã học sinh': ['36 ANHA - 001001', '36 ANHA - 001002', '36 TINA - 001001'],
             'Họ và tên': ['Nguyễn Văn A', 'Trần Thị B', 'Lê Hoàng C'],
             'Lớp': ['10 Anh A', '10 Anh A', '10 Tin A'],
+            'Ngày sinh': ['15/08/2008', '03/12/2008', '20/01/2008'],
             'Họ tên phụ huynh': ['Nguyễn Văn Ph', 'Trần Thị X', 'Lê Văn Y'],
             'SĐT phụ huynh': ['0912345678', '0987654321', '0901122334'],
         }
@@ -412,6 +456,7 @@ def register(app):
             name_col = _student_name_column(df.columns)
             class_col = next((c for c in df.columns if "lớp" in str(c).lower() or "class" in str(c).lower()), None)
             parent_name_col, parent_phone_col = _find_parent_import_columns(df.columns)
+            dob_col = _find_dob_column(df.columns)
         
             count = 0
             skipped = 0
@@ -435,12 +480,14 @@ def register(app):
                 # 3. Thêm học sinh
                 pn = _excel_cell_str(row.get(parent_name_col)) if parent_name_col else None
                 pp = _excel_cell_str(row.get(parent_phone_col)) if parent_phone_col else None
+                dob = _format_dob_from_excel_cell(row.get(dob_col)) if dob_col else None
                 new_student = Student(
                     name=name,
                     student_class=s_class,
                     student_code=student_code,
                     parent_name=pn,
                     parent_phone=pp,
+                    date_of_birth=dob,
                 )
                 db.session.add(new_student)
             

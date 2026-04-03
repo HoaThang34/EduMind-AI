@@ -111,6 +111,10 @@
             <dd>{{ student.student_code }}</dd>
             <dt>Lớp</dt>
             <dd>{{ student.student_class }}</dd>
+            {% if student.date_of_birth %}
+            <dt>Ngày sinh</dt>
+            <dd>{{ student.date_of_birth }}</dd>
+            {% endif %}
         </dl>
         <p style="margin-top:1rem;margin-bottom:0;font-size:0.8rem;">Thông tin khớp dữ liệu trong hệ thống tại thời điểm
             xác minh.</p>

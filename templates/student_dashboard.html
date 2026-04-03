@@ -166,6 +166,9 @@
                         <div>
                             <h5 class="mb-0">{{ student.name }}</h5>
                             <small class="opacity-75">{{ student.student_code }}</small>
+                            {% if student.date_of_birth %}
+                            <small class="opacity-75 d-block mt-1">Ngày sinh: {{ student.date_of_birth }}</small>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="d-flex justify-content-between mt-3">
