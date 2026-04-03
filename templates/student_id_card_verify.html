@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{% if valid %}Xác minh thẻ học sinh{% else %}Không hợp lệ{% endif %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.25rem;
+        }
+
+        .box {
+            max-width: 380px;
+            width: 100%;
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.75rem 1.5rem;
+            box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08);
+            text-align: center;
+        }
+
+        .icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+        }
+
+        .ok {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .bad {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        h1 {
+            font-size: 1.15rem;
+            margin: 0 0 0.5rem;
+            color: #0f172a;
+        }
+
+        p {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin: 0 0 1rem;
+            line-height: 1.5;
+        }
+
+        dl {
+            text-align: left;
+            margin: 0;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+
+        dt {
+            color: #64748b;
+            font-weight: 500;
+            margin-top: 0.65rem;
+        }
+
+        dt:first-child {
+            margin-top: 0;
+        }
+
+        dd {
+            margin: 0.15rem 0 0;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .school {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        {% if valid and student %}
+        <div class="icon ok" aria-hidden="true"><i class="fas fa-circle-check"></i></div>
+        <h1>Thẻ hợp lệ</h1>
+        <p class="school">{{ school_name }}</p>
+        <dl>
+            <dt>Họ và tên</dt>
+            <dd>{{ student.name }}</dd>
+            <dt>Mã học sinh</dt>
+            <dd>{{ student.student_code }}</dd>
+            <dt>Lớp</dt>
+            <dd>{{ student.student_class }}</dd>
+        </dl>
+        <p style="margin-top:1rem;margin-bottom:0;font-size:0.8rem;">Thông tin khớp dữ liệu trong hệ thống tại thời điểm
+            xác minh.</p>
+        {% else %}
+        <div class="icon bad" aria-hidden="true"><i class="fas fa-circle-xmark"></i></div>
+        <h1>Không xác minh được</h1>
+        {% if reason == 'expired' %}
+        <p>Liên kết xác minh đã hết hạn. Học sinh vui lòng mở lại mục thẻ học sinh trên tài khoản để tạo mã QR mới.</p>
+        {% else %}
+        <p>Liên kết không hợp lệ hoặc học sinh không còn trong hệ thống.</p>
+        {% endif %}
+        {% endif %}
+    </div>
+</body>
+
+</html>

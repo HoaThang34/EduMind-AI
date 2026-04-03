@@ -134,10 +134,13 @@
             <a class="navbar-brand fw-bold text-primary" href="#">
                 <i class="fas fa-graduation-cap me-2"></i>EDU Student
             </a>
-            <div class="d-flex">
-                <span class="navbar-text me-3 fw-bold text-dark">
+            <div class="d-flex align-items-center flex-wrap gap-2">
+                <span class="navbar-text fw-bold text-dark">
                     {{ student.name }}
                 </span>
+                <a href="{{ url_for('student.student_id_card') }}" class="btn btn-primary btn-sm rounded-pill">
+                    <i class="fas fa-id-card me-1"></i>Thẻ học sinh
+                </a>
                 <a href="{{ url_for('student.student_logout') }}" class="btn btn-outline-danger btn-sm rounded-pill">
                     <i class="fas fa-sign-out-alt me-1"></i>Thoát
                 </a>

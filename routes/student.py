@@ -5,11 +5,35 @@ import json
 import ollama
 from functools import wraps
 import os
+from urllib.parse import quote
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
 
 student_bp = Blueprint('student', __name__)
 
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemini-3-flash-preview")
+
+# Token xác minh thẻ học sinh (QR) — không lộ dữ liệu nếu không có chữ ký hợp lệ
+def _student_card_serializer():
+    from flask import current_app
+    return URLSafeTimedSerializer(
+        current_app.config["SECRET_KEY"],
+        salt="student-id-card-v1",
+    )
+
+
+def make_student_card_token(student_id):
+    return _student_card_serializer().dumps({"sid": student_id})
+
+
+def load_student_card_token(token, max_age=90 * 86400):
+    try:
+        data = _student_card_serializer().loads(token, max_age=max_age)
+        return data.get("sid"), None
+    except SignatureExpired:
+        return None, "expired"
+    except (BadSignature, TypeError, ValueError):
+        return None, "invalid"
 
 # We might need to copy `student_required`, `get_student_ai_advice`, `_student_chat_call_ollama` and `ALLOWED_CHAT_EXTENSIONS` here.
 # Let's extract them:
@@ -201,7 +225,66 @@ def student_dashboard():
                            current_week=current_week)
 
 
+@student_bp.route("/student/the-hoc-sinh")
+@student_required
+def student_id_card():
+    """Thẻ học sinh dạng toàn màn hình để xuất trình trực tuyến; có QR xác minh."""
+    student_id = session["student_id"]
+    student = db.session.get(Student, student_id)
+    if not student:
+        return redirect(url_for("student.student_logout"))
 
+    configs = {c.key: c.value for c in SystemConfig.query.all()}
+    school_name = configs.get("school_name", "Trường học")
+
+    token = make_student_card_token(student.id)
+    verify_url = url_for("student.verify_student_card", token=token, _external=True)
+    qr_src = (
+        "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="
+        + quote(verify_url, safe="")
+    )
+
+    return render_template(
+        "student_id_card.html",
+        student=student,
+        school_name=school_name,
+        verify_url=verify_url,
+        qr_src=qr_src,
+    )
+
+
+@student_bp.route("/student/the-hoc-sinh/xac-minh/<token>")
+def verify_student_card(token):
+    """Trang công khai: quét QR trên thẻ để xác minh (giáo viên / bảo vệ)."""
+    sid, token_err = load_student_card_token(token)
+    if not sid:
+        return render_template(
+            "student_id_card_verify.html",
+            valid=False,
+            reason=token_err or "invalid",
+            student=None,
+            school_name=None,
+        )
+
+    student = db.session.get(Student, sid)
+    if not student:
+        return render_template(
+            "student_id_card_verify.html",
+            valid=False,
+            reason="missing",
+            student=None,
+            school_name=None,
+        )
+
+    configs = {c.key: c.value for c in SystemConfig.query.all()}
+    school_name = configs.get("school_name", "Trường học")
+    return render_template(
+        "student_id_card_verify.html",
+        valid=True,
+        reason=None,
+        student=student,
+        school_name=school_name,
+    )
 
 
 @student_bp.route("/api/student/chat", methods=["POST"])
