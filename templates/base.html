@@ -20,6 +20,8 @@
     <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
 
     <title>{% block title %}EduMind AI - Hệ Thống Giáo Dục Tổng Hợp{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{{ url_for('logo_file', filename='logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('logo_file', filename='logo.png') }}">
 
     <script>
         tailwind.config = {
@@ -755,10 +757,9 @@
                 class="sidebar-header-row h-14 flex items-center px-6 lg:px-4 border-b border-[hsl(240,5.9%,90%)] shrink-0">
                 <a href="{{ url_for('dashboard') }}"
                     class="sidebar-brand-link flex items-center gap-2.5 group transition-opacity hover:opacity-80 min-w-0 flex-1">
-                    <div
-                        class="w-8 h-8 shrink-0 rounded-lg bg-[hsl(240,5.9%,10%)] flex items-center justify-center text-white text-sm shadow-sm group-hover:shadow-md transition-all">
-                        <i class="fas fa-brain" aria-hidden="true"></i>
-                    </div>
+                    <img src="{{ url_for('logo_file', filename='logo.png') }}" alt=""
+                        class="w-8 h-8 shrink-0 rounded-lg object-cover shadow-sm ring-1 ring-black/5 group-hover:shadow-md transition-all"
+                        width="32" height="32" decoding="async">
                     <div class="sidebar-brand-text min-w-0">
                         <h1 class="text-sm font-semibold text-foreground tracking-tight leading-snug truncate">EduMind AI</h1>
                         <span class="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">AI System</span>
@@ -994,9 +995,9 @@
                         <i class="fas fa-bars" aria-hidden="true"></i>
                     </button>
                     {% else %}
-                    <div class="w-8 h-8 rounded-lg bg-[hsl(240,5.9%,10%)] flex items-center justify-center text-white text-sm">
-                        <i class="fas fa-brain"></i>
-                    </div>
+                    <img src="{{ url_for('logo_file', filename='logo.png') }}" alt=""
+                        class="w-8 h-8 rounded-lg object-cover shadow-sm ring-1 ring-black/5"
+                        width="32" height="32" decoding="async">
                     {% endif %}
                     <div class="block">
                         <h2 class="text-sm font-semibold text-foreground">

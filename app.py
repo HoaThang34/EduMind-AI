@@ -1,6 +1,6 @@
 
 import os
-from flask import Flask
+from flask import Flask, send_from_directory
 from werkzeug.security import generate_password_hash
 from flask_login import LoginManager
 
@@ -12,6 +12,12 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 template_dir = os.path.join(basedir, "templates")
 
 app = Flask(__name__, template_folder=template_dir)
+
+
+@app.route("/logo/<path:filename>")
+def logo_file(filename):
+    return send_from_directory(os.path.join(basedir, "logo"), filename)
+
 
 app.config["SECRET_KEY"] = "chia-khoa-bi-mat-cua-ban-ne-123456"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(basedir, "database.db")
