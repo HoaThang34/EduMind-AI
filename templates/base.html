@@ -587,11 +587,139 @@
         .driver-overlay {
             background: rgba(0, 0, 0, 0.5) !important;
         }
+
+        /* Sidebar mobile: overlay và trạng thái mở */
+        #sidebar-overlay.sidebar-overlay--visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        @media (max-width: 1023px) {
+            body.sidebar-mobile-open main {
+                touch-action: none;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            #sidebar,
+            #sidebar-overlay {
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* === Desktop: sidebar thu gọn (rail icon) === */
+        @media (min-width: 1024px) {
+            #sidebar {
+                width: 260px;
+                transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            body.sidebar-desktop-collapsed #sidebar {
+                width: 4.5rem;
+            }
+
+            body.sidebar-desktop-collapsed #sidebar .sidebar-header-row {
+                flex-direction: column;
+                justify-content: center;
+                gap: 0.25rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                height: auto;
+                min-height: 3.5rem;
+                padding-top: 0.5rem;
+                padding-bottom: 0.5rem;
+            }
+
+            body.sidebar-desktop-collapsed #sidebar .sidebar-brand-link {
+                justify-content: center;
+                flex: none;
+                width: 100%;
+            }
+
+            body.sidebar-desktop-collapsed #sidebar .sidebar-brand-text {
+                display: none;
+            }
+
+            body.sidebar-desktop-collapsed #sidebar #sidebar-collapse-btn {
+                margin-left: 0;
+            }
+
+            body.sidebar-desktop-collapsed #sidebar .icon-collapse-open {
+                display: none !important;
+            }
+
+            body.sidebar-desktop-collapsed #sidebar .icon-collapse-shut {
+                display: block !important;
+            }
+
+            body.sidebar-desktop-collapsed #sidebar .sidebar-nav-inner {
+                padding-left: 0.375rem;
+                padding-right: 0.375rem;
+            }
+
+            body.sidebar-desktop-collapsed #sidebar .sidebar-group-title {
+                display: none;
+            }
+
+            body.sidebar-desktop-collapsed #sidebar a.nav-item {
+                justify-content: center;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+            }
+
+            body.sidebar-desktop-collapsed #sidebar a.nav-item>span {
+                display: none;
+            }
+
+            body.sidebar-desktop-collapsed #sidebar a.nav-item>i {
+                margin-right: 0 !important;
+            }
+
+            body.sidebar-desktop-collapsed #sidebar .sidebar-user-block {
+                padding: 0.5rem;
+            }
+
+            body.sidebar-desktop-collapsed #sidebar .sidebar-user-row {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.375rem;
+                padding-left: 0.25rem;
+                padding-right: 0.25rem;
+            }
+
+            body.sidebar-desktop-collapsed #sidebar .sidebar-user-text {
+                display: none;
+            }
+
+            body.sidebar-desktop-collapsed #sidebar .sidebar-user-actions {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        #sidebar .icon-collapse-shut {
+            display: none;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            @media (min-width: 1024px) {
+                #sidebar {
+                    transition-duration: 0.01ms !important;
+                }
+            }
+        }
     </style>
 </head>
 
 <body
     class="h-screen w-screen overflow-hidden bg-[hsl(0,0%,98%)] text-foreground selection:bg-indigo-500 selection:text-white">
+    <script>
+        try {
+            if (localStorage.getItem('edu_sidebar_desktop_collapsed') === '1')
+                document.body.classList.add('sidebar-desktop-collapsed');
+        } catch (e) { /* ignore */ }
+    </script>
 
     <!-- Ambient Background -->
     <div class="ambient-mesh">
@@ -606,7 +734,9 @@
     <!-- Mobile Overlay -->
     {% if current_user.is_authenticated %}
     <div id="sidebar-overlay"
-        class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity"
+        class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden opacity-0 pointer-events-none transition-opacity duration-300 ease-out motion-reduce:transition-none"
+        role="presentation"
+        aria-hidden="true"
         onclick="toggleSidebar()"></div>
     {% endif %}
 
@@ -616,32 +746,46 @@
         <!-- SIDEBAR -->
         {% if current_user.is_authenticated %}
         <aside id="sidebar"
-            class="glass-sidebar fixed lg:static inset-y-0 left-0 w-[260px] z-50 flex flex-col transform -translate-x-[120%] lg:translate-x-0 transition-transform duration-300 ease-out">
+            class="glass-sidebar fixed lg:static inset-y-0 left-0 w-[260px] max-w-[85vw] z-50 flex flex-col overflow-x-hidden transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none shadow-[4px_0_24px_-8px_rgba(0,0,0,0.12)] lg:shadow-none"
+            role="navigation"
+            aria-label="Menu chính EduMind AI">
 
             <!-- Logo Area -->
-            <div class="h-14 flex items-center px-6 border-b border-[hsl(240,5.9%,90%)]">
-                <a href="{% if current_user.is_authenticated %}{{ url_for('dashboard') }}{% elif session.get('student_id') %}{{ url_for('student.student_dashboard') }}{% else %}{{ url_for('welcome') }}{% endif %}" class="flex items-center gap-2.5 group transition-opacity hover:opacity-80">
+            <div
+                class="sidebar-header-row h-14 flex items-center px-6 lg:px-4 border-b border-[hsl(240,5.9%,90%)] shrink-0">
+                <a href="{{ url_for('dashboard') }}"
+                    class="sidebar-brand-link flex items-center gap-2.5 group transition-opacity hover:opacity-80 min-w-0 flex-1">
                     <div
-                        class="w-8 h-8 rounded-lg bg-[hsl(240,5.9%,10%)] flex items-center justify-center text-white text-sm shadow-sm group-hover:shadow-md transition-all">
-                        <i class="fas fa-brain"></i>
+                        class="w-8 h-8 shrink-0 rounded-lg bg-[hsl(240,5.9%,10%)] flex items-center justify-center text-white text-sm shadow-sm group-hover:shadow-md transition-all">
+                        <i class="fas fa-brain" aria-hidden="true"></i>
                     </div>
-                    <div>
-                        <h1 class="text-sm font-semibold text-foreground tracking-tight leading-snug">EduMind AI</h1>
+                    <div class="sidebar-brand-text min-w-0">
+                        <h1 class="text-sm font-semibold text-foreground tracking-tight leading-snug truncate">EduMind AI</h1>
                         <span class="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">AI System</span>
                     </div>
                 </a>
+                <button type="button" id="sidebar-collapse-btn" onclick="toggleDesktopSidebarCollapse()"
+                    class="hidden lg:flex items-center justify-center p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition shrink-0"
+                    aria-expanded="true"
+                    aria-controls="sidebar"
+                    title="Thu gọn sidebar"
+                    aria-label="Thu gọn sidebar">
+                    <i class="fas fa-angles-left text-sm icon-collapse-open" aria-hidden="true"></i>
+                    <i class="fas fa-angles-right text-sm icon-collapse-shut" aria-hidden="true"></i>
+                </button>
                 <!-- Close Button Mobile -->
-                <button onclick="toggleSidebar()"
-                    class="lg:hidden ml-auto p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition">
-                    <i class="fas fa-times"></i>
+                <button type="button" onclick="toggleSidebar()"
+                    class="lg:hidden ml-auto p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition"
+                    aria-label="Đóng menu">
+                    <i class="fas fa-times" aria-hidden="true"></i>
                 </button>
             </div>
-           
+
             <!-- Scrollable Nav -->
-            <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-6 scroll-smooth">
+            <nav class="sidebar-nav-inner flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 space-y-6 scroll-smooth">
                 <!-- Group: Tổng quan -->
                 <div>
-                    <h3 class="px-3 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
+                    <h3 class="sidebar-group-title px-3 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
                         Tổng quan</h3>
                     <div class="space-y-1">
                         <a href="{{ url_for('home') }}"
@@ -676,7 +820,7 @@
 
                 <!-- Group: Báo cáo -->
                 <div>
-                    <h3 class="px-3 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
+                    <h3 class="sidebar-group-title px-3 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
                         Báo cáo</h3>
                     <div class="space-y-1">
                         <a href="{{ url_for('weekly_report') }}"
@@ -701,7 +845,7 @@
 
                 <!-- Group: Quản lý -->
                 <div>
-                    <h3 class="px-3 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
+                    <h3 class="sidebar-group-title px-3 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
                         Quản lý</h3>
                     <div class="space-y-1">
                         <a href="{{ url_for('grades.manage_grades') }}"
@@ -769,7 +913,7 @@
 
                 <!-- Group: Tiện ích -->
                 <div>
-                    <h3 class="px-3 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
+                    <h3 class="sidebar-group-title px-3 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
                         Tiện ích</h3>
                     <div class="space-y-1">
                         <a href="{{ url_for('group_chat') }}"
@@ -809,28 +953,32 @@
             </nav>
 
             <!-- User Profile (Bottom) -->
-            <div class="p-3 border-t border-[hsl(240,5.9%,90%)]">
-                <div class="flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-accent transition cursor-pointer">
+            <div class="sidebar-user-block p-3 border-t border-[hsl(240,5.9%,90%)] shrink-0">
+                <div
+                    class="sidebar-user-row flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-accent transition cursor-pointer">
                     <div
-                        class="w-8 h-8 rounded-lg bg-[hsl(240,5.9%,10%)] flex items-center justify-center text-white text-xs font-medium">
+                        class="w-8 h-8 shrink-0 rounded-lg bg-[hsl(240,5.9%,10%)] flex items-center justify-center text-white text-xs font-medium"
+                        title="{{ current_user.full_name }}">
                         {{ current_user.full_name[0] | upper }}
                     </div>
-                    <div class="flex-1 min-w-0">
+                    <div class="sidebar-user-text flex-1 min-w-0">
                         <h4 class="text-sm font-medium text-foreground truncate">{{ current_user.full_name }}</h4>
                         <p class="text-[11px] text-muted-foreground truncate">{{ role_display }}</p>
                     </div>
-                    <a href="{{ url_for('auth.logout') }}"
-                        class="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition"
-                        title="Đăng xuất">
-                        <i class="fas fa-sign-out-alt text-sm"></i>
-                    </a>
+                    <div class="sidebar-user-actions flex shrink-0">
+                        <a href="{{ url_for('auth.logout') }}"
+                            class="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition"
+                            title="Đăng xuất">
+                            <i class="fas fa-sign-out-alt text-sm" aria-hidden="true"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </aside>
         {% endif %}
 
         <!-- MAIN CONTENT WRAPPER -->
-        <div class="flex-1 flex flex-col min-w-0 h-full relative">
+        <div id="main-column" class="flex-1 flex flex-col min-w-0 h-full relative">
 
             <!-- Header -->
             <header
@@ -838,9 +986,12 @@
                 <!-- Left: Mobile Toggle & Page Title -->
                 <div class="flex items-center gap-3">
                     {% if current_user.is_authenticated %}
-                    <button onclick="toggleSidebar()"
-                        class="lg:hidden p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition">
-                        <i class="fas fa-bars"></i>
+                    <button type="button" id="sidebar-toggle-btn" onclick="toggleSidebar()"
+                        class="lg:hidden p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition"
+                        aria-expanded="false"
+                        aria-controls="sidebar"
+                        aria-label="Mở menu điều hướng">
+                        <i class="fas fa-bars" aria-hidden="true"></i>
                     </button>
                     {% else %}
                     <div class="w-8 h-8 rounded-lg bg-[hsl(240,5.9%,10%)] flex items-center justify-center text-white text-sm">
@@ -939,20 +1090,145 @@
     {% block modals %}{% endblock %}
 
     <script>
-        // Sidebar Toggle Logic
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
+        (function () {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const toggleBtn = document.getElementById('sidebar-toggle-btn');
+            const collapseBtn = document.getElementById('sidebar-collapse-btn');
+            const mainCol = document.getElementById('main-column');
+            const LS_COLLAPSE = 'edu_sidebar_desktop_collapsed';
 
-        function toggleSidebar() {
-            const isClosed = sidebar.classList.contains('-translate-x-[120%]');
-            if (isClosed) {
-                sidebar.classList.remove('-translate-x-[120%]');
-                overlay.classList.remove('hidden');
-            } else {
-                sidebar.classList.add('-translate-x-[120%]');
-                overlay.classList.add('hidden');
+            const CLOSED_CLASS = '-translate-x-full';
+            const mqDesktop = () => window.matchMedia('(min-width: 1024px)').matches;
+
+            function isDesktopCollapsed() {
+                return document.body.classList.contains('sidebar-desktop-collapsed');
             }
-        }
+
+            function syncCollapseControl() {
+                if (!collapseBtn) return;
+                const collapsed = isDesktopCollapsed();
+                collapseBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+                collapseBtn.setAttribute('aria-label', collapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar');
+                collapseBtn.setAttribute('title', collapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar');
+            }
+
+            function ensureNavLinkTitles() {
+                if (!sidebar) return;
+                sidebar.querySelectorAll('a.nav-item').forEach(function (a) {
+                    var span = a.querySelector(':scope > span.text-sm');
+                    if (span) a.setAttribute('title', span.textContent.trim());
+                });
+            }
+
+            window.toggleDesktopSidebarCollapse = function () {
+                if (!sidebar || !mqDesktop()) return;
+                document.body.classList.toggle('sidebar-desktop-collapsed');
+                var on = isDesktopCollapsed();
+                try {
+                    localStorage.setItem(LS_COLLAPSE, on ? '1' : '0');
+                } catch (e) { /* ignore */ }
+                syncCollapseControl();
+            };
+
+            function isSidebarClosed() {
+                return !sidebar || sidebar.classList.contains(CLOSED_CLASS);
+            }
+
+            function syncDomOpen(open) {
+                if (!sidebar) return;
+                const desktop = mqDesktop();
+                if (!desktop) {
+                    if (open) {
+                        sidebar.classList.remove(CLOSED_CLASS);
+                        sidebar.removeAttribute('aria-hidden');
+                    } else {
+                        sidebar.classList.add(CLOSED_CLASS);
+                        sidebar.setAttribute('aria-hidden', 'true');
+                    }
+                } else {
+                    sidebar.removeAttribute('aria-hidden');
+                }
+                if (overlay) {
+                    const showOverlay = open && !desktop;
+                    overlay.classList.toggle('sidebar-overlay--visible', showOverlay);
+                    overlay.setAttribute('aria-hidden', showOverlay ? 'false' : 'true');
+                }
+                if (toggleBtn) {
+                    const expanded = open && !desktop;
+                    toggleBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+                    toggleBtn.setAttribute('aria-label', expanded ? 'Đóng menu điều hướng' : 'Mở menu điều hướng');
+                }
+                document.body.classList.toggle('sidebar-mobile-open', open && !desktop);
+                const main = document.querySelector('main');
+                if (main) {
+                    if (open && !desktop) main.classList.add('overflow-hidden');
+                    else main.classList.remove('overflow-hidden');
+                }
+                if (mainCol) {
+                    if (open && !desktop) mainCol.setAttribute('inert', '');
+                    else mainCol.removeAttribute('inert');
+                }
+            }
+
+            function normalizeAfterResize() {
+                if (!sidebar) return;
+                if (mqDesktop()) {
+                    syncDomOpen(false);
+                    sidebar.classList.add(CLOSED_CLASS);
+                    try {
+                        if (localStorage.getItem(LS_COLLAPSE) === '1')
+                            document.body.classList.add('sidebar-desktop-collapsed');
+                        else
+                            document.body.classList.remove('sidebar-desktop-collapsed');
+                    } catch (e) {
+                        /* keep current class */
+                    }
+                    syncCollapseControl();
+                }
+            }
+
+            window.setSidebarOpen = function (open) {
+                if (!sidebar) return;
+                if (mqDesktop()) {
+                    syncDomOpen(false);
+                    return;
+                }
+                syncDomOpen(!!open);
+                if (open) {
+                    requestAnimationFrame(() => {
+                        const closeBtn = sidebar.querySelector('button[aria-label="Đóng menu"]');
+                        if (closeBtn) closeBtn.focus({ preventScroll: true });
+                    });
+                } else if (toggleBtn) {
+                    toggleBtn.focus({ preventScroll: true });
+                }
+            };
+
+            window.toggleSidebar = function () {
+                if (!sidebar) return;
+                if (mqDesktop()) return;
+                window.setSidebarOpen(isSidebarClosed());
+            };
+
+            window.addEventListener('resize', () => {
+                normalizeAfterResize();
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key !== 'Escape' || !sidebar || mqDesktop()) return;
+                if (!isSidebarClosed()) {
+                    e.preventDefault();
+                    window.setSidebarOpen(false);
+                }
+            });
+
+            if (sidebar) {
+                ensureNavLinkTitles();
+                syncDomOpen(false);
+                syncCollapseControl();
+            }
+        })();
 
         // Auto-show toasts
         document.addEventListener('DOMContentLoaded', () => {

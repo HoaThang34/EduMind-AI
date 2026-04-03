@@ -258,7 +258,9 @@
         window.replayTour = () => {
             if (window.innerWidth < 1024) {
                 const sidebarEl = document.getElementById('sidebar');
-                if (sidebarEl && sidebarEl.classList.contains('-translate-x-[120%]')) { toggleSidebar(); }
+                if (sidebarEl && sidebarEl.classList.contains('-translate-x-full')) { toggleSidebar(); }
+            } else if (document.body.classList.contains('sidebar-desktop-collapsed') && typeof toggleDesktopSidebarCollapse === 'function') {
+                toggleDesktopSidebarCollapse();
             }
             driverObj.drive();
         };
