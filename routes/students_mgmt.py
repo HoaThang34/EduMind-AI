@@ -6,8 +6,9 @@ import uuid
 import datetime
 from io import BytesIO
 import pandas as pd
-from flask import render_template, request, jsonify, redirect, url_for, flash, session, send_file
+from flask import render_template, request, jsonify, redirect, url_for, flash, session, send_file, abort
 from flask_login import login_user, login_required, current_user
+from werkzeug.utils import secure_filename
 from sqlalchemy import func, desc, or_, and_
 from werkzeug.security import generate_password_hash
 
@@ -75,7 +76,76 @@ def _find_parent_import_columns(df_columns):
     return name_col, phone_col
 
 
+PORTRAIT_SUBDIR = "student_portraits"
+ALLOWED_PORTRAIT_EXT = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
+MAX_PORTRAIT_BYTES = 5 * 1024 * 1024
+
+
+def _portrait_dir():
+    d = os.path.join(UPLOAD_FOLDER, PORTRAIT_SUBDIR)
+    os.makedirs(d, exist_ok=True)
+    return d
+
+
+def _delete_portrait_file(filename):
+    if not filename:
+        return
+    safe = os.path.basename(filename)
+    path = os.path.join(_portrait_dir(), safe)
+    if os.path.isfile(path):
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+
+
+def _save_portrait_file(student_id, file_storage):
+    """Lưu ảnh chân dung; trả về tên file trong thư mục portrait hoặc None."""
+    if not file_storage or not file_storage.filename:
+        return None
+    orig = secure_filename(file_storage.filename)
+    if not orig:
+        return None
+    ext = os.path.splitext(orig)[1].lower()
+    if ext not in ALLOWED_PORTRAIT_EXT:
+        return None
+    name = f"student_{student_id}_{uuid.uuid4().hex[:12]}{ext}"
+    path = os.path.join(_portrait_dir(), name)
+    file_storage.save(path)
+    if os.path.getsize(path) > MAX_PORTRAIT_BYTES:
+        os.remove(path)
+        return None
+    return name
+
+
 def register(app):
+    @app.route("/student/<int:student_id>/portrait")
+    def student_portrait_view(student_id):
+        """Ảnh chân dung: học sinh (session) hoặc giáo viên có quyền."""
+        s = db.session.get(Student, student_id)
+        if not s or not s.portrait_filename:
+            abort(404)
+        allowed = False
+        if session.get("student_id") == student_id:
+            allowed = True
+        elif current_user.is_authenticated and can_access_student(student_id):
+            allowed = True
+        if not allowed:
+            if current_user.is_authenticated:
+                abort(403)
+            return redirect(url_for("auth.login"))
+        path = os.path.join(_portrait_dir(), os.path.basename(s.portrait_filename))
+        if not os.path.isfile(path):
+            abort(404)
+        ext = os.path.splitext(path)[1].lower()
+        mimetype = {
+            ".jpg": "image/jpeg",
+            ".jpeg": "image/jpeg",
+            ".png": "image/png",
+            ".webp": "image/webp",
+            ".gif": "image/gif",
+        }.get(ext, "application/octet-stream")
+        return send_file(path, mimetype=mimetype)
     @app.route("/manage_students")
     @login_required
     def manage_students():
@@ -87,15 +157,22 @@ def register(app):
     @app.route("/add_student", methods=["POST"])
     @login_required
     def add_student():
-        db.session.add(
-            Student(
-                name=request.form["student_name"],
-                student_code=request.form["student_code"],
-                student_class=request.form["student_class"],
-                parent_name=_empty_to_none(request.form.get("parent_name")),
-                parent_phone=_empty_to_none(request.form.get("parent_phone")),
-            )
+        st = Student(
+            name=request.form["student_name"],
+            student_code=request.form["student_code"],
+            student_class=request.form["student_class"],
+            parent_name=_empty_to_none(request.form.get("parent_name")),
+            parent_phone=_empty_to_none(request.form.get("parent_phone")),
         )
+        db.session.add(st)
+        db.session.flush()
+        pf = request.files.get("portrait")
+        if pf and pf.filename:
+            fn = _save_portrait_file(st.id, pf)
+            if fn:
+                st.portrait_filename = fn
+            else:
+                flash("Ảnh chân dung không hợp lệ (JPG, PNG, WebP, GIF, tối đa 5MB).", "warning")
         db.session.commit()
         flash("Thêm học sinh thành công", "success")
         return redirect(url_for("manage_students"))
@@ -105,6 +182,7 @@ def register(app):
     def delete_student(student_id):
         s = db.session.get(Student, student_id)
         if s:
+            _delete_portrait_file(s.portrait_filename)
             Violation.query.filter_by(student_id=student_id).delete()
             db.session.delete(s)
             db.session.commit()
@@ -125,6 +203,18 @@ def register(app):
             s.student_class = request.form["student_class"]
             s.parent_name = _empty_to_none(request.form.get("parent_name"))
             s.parent_phone = _empty_to_none(request.form.get("parent_phone"))
+            if request.form.get("remove_portrait"):
+                _delete_portrait_file(s.portrait_filename)
+                s.portrait_filename = None
+            pf = request.files.get("portrait")
+            if pf and pf.filename:
+                old = s.portrait_filename
+                fn = _save_portrait_file(s.id, pf)
+                if fn:
+                    _delete_portrait_file(old)
+                    s.portrait_filename = fn
+                else:
+                    flash("Ảnh chân dung không hợp lệ (JPG, PNG, WebP, GIF, tối đa 5MB).", "warning")
             db.session.commit()
             flash("Cập nhật thành công", "success")
             return redirect(url_for("manage_students"))

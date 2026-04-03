@@ -56,10 +56,15 @@
                     <tr>
                         <td>
                             <div class="flex items-center gap-3">
+                                {% if student.portrait_filename %}
+                                <img src="{{ url_for('student_portrait_view', student_id=student.id) }}" alt=""
+                                    class="w-8 h-8 rounded-lg object-cover border border-[hsl(240,5.9%,90%)] flex-shrink-0">
+                                {% else %}
                                 <div
                                     class="w-8 h-8 rounded-lg bg-[hsl(240,5.9%,10%)] flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
                                     {{ student.name.split()[-1][0] }}
                                 </div>
+                                {% endif %}
                                 <div>
                                     <a href="{{ url_for('student_detail', student_id=student.id) }}"
                                         class="text-sm font-medium text-foreground hover:underline">{{ student.name

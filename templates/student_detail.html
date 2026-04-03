@@ -6,7 +6,17 @@
 
     <div
         class="bg-white p-6 rounded-xl shadow-sm border border-[hsl(240,5.9%,90%)] flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
+        <div class="flex items-start gap-4">
+            {% if student.portrait_filename %}
+            <img src="{{ url_for('student_portrait_view', student_id=student.id) }}" alt=""
+                class="w-20 h-20 md:w-24 md:h-24 rounded-xl object-cover border border-[hsl(240,5.9%,90%)] shadow-sm flex-shrink-0">
+            {% else %}
+            <div
+                class="w-20 h-20 md:w-24 md:h-24 rounded-xl bg-[hsl(240,5.9%,10%)] flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
+                {{ student.name.split()[-1][0] if student.name else '?' }}
+            </div>
+            {% endif %}
+            <div>
             <div class="flex items-center gap-3 mb-1">
                 <h1 class="text-2xl font-bold text-foreground">{{ student.name }}</h1>
                 <span
@@ -24,6 +34,7 @@
                 <i class="fas fa-phone mr-1"></i> SĐT:
                 <strong class="font-mono">{{ student.parent_phone or '—' }}</strong>
             </p>
+            </div>
         </div>
 
         <div class="flex items-center gap-3 bg-accent p-2 rounded-xl border border-[hsl(240,5.9%,90%)]">

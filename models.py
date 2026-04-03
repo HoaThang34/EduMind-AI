@@ -70,6 +70,7 @@ class Student(db.Model):
     current_score = db.Column(db.Integer, default=100)
     parent_name = db.Column(db.String(150), nullable=True)
     parent_phone = db.Column(db.String(20), nullable=True)
+    portrait_filename = db.Column(db.String(255), nullable=True)
 
 
 class ViolationType(db.Model):

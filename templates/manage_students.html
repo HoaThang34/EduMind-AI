@@ -29,7 +29,7 @@
                     <i class="fas fa-file-excel text-xs"></i> Nhập từ Excel
                 </a>
             </div>
-            <form method="POST" action="{{ url_for('add_student') }}" class="space-y-4">
+            <form method="POST" action="{{ url_for('add_student') }}" enctype="multipart/form-data" class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-1.5">
                         <label class="text-sm font-medium text-foreground">Mã Số HS</label>
@@ -50,6 +50,12 @@
                         <option value="{{ class_name }}">{{ class_name }}</option>
                         {% endfor %}
                     </select>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-sm font-medium text-foreground">Ảnh chân dung (tùy chọn)</label>
+                    <input type="file" name="portrait" accept="image/jpeg,image/png,image/webp,image/gif"
+                        class="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                    <p class="text-xs text-muted-foreground">JPG, PNG, WebP hoặc GIF — tối đa 5MB.</p>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-1.5">
@@ -127,6 +133,7 @@
             <table class="table-shadcn">
                 <thead>
                     <tr>
+                        <th class="w-12"></th>
                         <th>Mã Số</th>
                         <th>Tên</th>
                         <th>Lớp</th>
@@ -139,6 +146,17 @@
                 <tbody>
                     {% for student in students %}
                     <tr>
+                        <td class="align-middle">
+                            {% if student.portrait_filename %}
+                            <img src="{{ url_for('student_portrait_view', student_id=student.id) }}" alt=""
+                                class="w-9 h-9 rounded-lg object-cover border border-[hsl(240,5.9%,90%)]">
+                            {% else %}
+                            <div
+                                class="w-9 h-9 rounded-lg bg-[hsl(240,5.9%,10%)] flex items-center justify-center text-white text-[10px] font-bold">
+                                {{ student.name.split()[-1][0] if student.name else '?' }}
+                            </div>
+                            {% endif %}
+                        </td>
                         <td class="text-muted-foreground font-mono text-xs">{{ student.student_code }}</td>
                         <td class="font-medium">{{ student.name }}</td>
                         <td><span class="badge badge-secondary">{{ student.student_class }}</span></td>
