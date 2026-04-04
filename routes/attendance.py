@@ -421,3 +421,30 @@ def register(app):
         class_name = request.args.get("class_name", "")
         ready = os.path.exists(_get_model_path(class_name)) if class_name else False
         return jsonify({"ready": ready})
+
+    @app.route("/api/attendance/delete/<int:record_id>", methods=["DELETE"])
+    @login_required
+    def api_attendance_delete(record_id):
+        """Xóa một bản ghi điểm danh."""
+        record = db.session.get(AttendanceRecord, record_id)
+        if not record:
+            return jsonify({"error": "Không tìm thấy dữ liệu điểm danh."}), 404
+        
+        # Chốt quyền: Admin hoặc chính người tạo bản ghi
+        if current_user.role != 'admin' and record.recorded_by_id != current_user.id:
+            return jsonify({"error": "Bạn không có quyền xóa dữ liệu này."}), 403
+            
+        try:
+            # Xóa ảnh vật lý để tiết kiệm bộ nhớ
+            if record.captured_photo:
+                photo_path = os.path.join(ATTENDANCE_PHOTO_DIR, record.captured_photo)
+                if os.path.exists(photo_path):
+                    try: os.remove(photo_path)
+                    except: pass
+            
+            db.session.delete(record)
+            db.session.commit()
+            return jsonify({"success": True, "message": "Đã xóa dữ liệu điểm danh."})
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": f"Lỗi hệ thống khi xóa: {str(e)}"}), 500
