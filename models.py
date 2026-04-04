@@ -216,3 +216,29 @@ class ChangeLog(db.Model):
 
     changed_by = db.relationship('Teacher', backref=db.backref('change_logs', lazy=True))
     student = db.relationship('Student', backref=db.backref('change_logs', lazy=True))
+
+
+class LessonBookEntry(db.Model):
+    """Sổ đầu bài điện tử — ghi nhận tiết dạy theo lớp/môn."""
+    __tablename__ = "lesson_book_entry"
+    id = db.Column(db.Integer, primary_key=True)
+    teacher_id = db.Column(db.Integer, db.ForeignKey("teacher.id"), nullable=False, index=True)
+    class_name = db.Column(db.String(50), nullable=False, index=True)
+    subject_id = db.Column(db.Integer, db.ForeignKey("subject.id"), nullable=True, index=True)
+    lesson_date = db.Column(db.Date, nullable=False, index=True)
+    period_number = db.Column(db.Integer, nullable=False, default=1)
+    topic = db.Column(db.Text, nullable=False)
+    objectives = db.Column(db.Text)
+    teaching_method = db.Column(db.Text)
+    evaluation = db.Column(db.Text)
+    homework = db.Column(db.Text)
+    notes = db.Column(db.Text)
+    attendance_present = db.Column(db.Integer)
+    attendance_absent = db.Column(db.Integer)
+    school_year = db.Column(db.String(20))
+    semester = db.Column(db.Integer, default=1)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    teacher = db.relationship("Teacher", backref=db.backref("lesson_book_entries", lazy=True))
+    subject = db.relationship("Subject", backref=db.backref("lesson_book_entries", lazy=True))

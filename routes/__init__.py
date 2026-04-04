@@ -9,6 +9,7 @@ def register_all_routes(app):
     from .rules_bonus import register as register_rules_bonus
     from .admin_mgmt import register as register_admin
     from .messaging import register as register_messaging
+    from .lesson_book import register as register_lesson_book
 
     register_core(app)
     register_violations(app)
@@ -17,3 +18,4 @@ def register_all_routes(app):
     register_rules_bonus(app)
     register_admin(app)
     register_messaging(app)
+    register_lesson_book(app)

@@ -829,6 +829,11 @@
                             <i class="fas fa-clipboard-check w-6 text-center text-lg mr-3"></i>
                             <span class="text-sm">Báo cáo tuần</span>
                         </a>
+                        <a href="{{ url_for('lesson_book') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'lesson_book' or request.endpoint == 'lesson_book_add' or request.endpoint == 'lesson_book_edit' %}active{% endif %}">
+                            <i class="fas fa-book-open w-6 text-center text-lg mr-3"></i>
+                            <span class="text-sm">Sổ đầu bài</span>
+                        </a>
                         <a href="{{ url_for('history') }}"
                             class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'history' %}active{% endif %}">
                             <i class="fas fa-history w-6 text-center text-lg mr-3"></i>

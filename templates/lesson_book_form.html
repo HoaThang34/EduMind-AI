@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}{{ form_title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+    <div>
+        <a href="{{ url_for('lesson_book') }}" class="text-indigo-600 hover:text-indigo-700 font-medium text-sm">
+            <i class="fas fa-arrow-left mr-2"></i> Sổ đầu bài
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-card p-6 md:p-8 border border-[hsl(240,5.9%,90%)]">
+        <h1 class="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
+            <span class="w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center">
+                <i class="fas fa-book-open"></i>
+            </span>
+            {{ form_title }}
+        </h1>
+
+        <form method="POST" action="{{ action_url }}" class="space-y-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-foreground mb-1.5">Ngày dạy *</label>
+                    <input type="date" name="lesson_date" required
+                        value="{% if entry %}{{ entry.lesson_date.strftime('%Y-%m-%d') }}{% else %}{{ today_str }}{% endif %}"
+                        class="w-full px-4 py-2 border border-slate-300 rounded-lg input-shadcn">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-foreground mb-1.5">Tiết *</label>
+                    <input type="number" name="period_number" min="1" max="15" required
+                        value="{{ entry.period_number if entry else 1 }}"
+                        class="w-full px-4 py-2 border border-slate-300 rounded-lg input-shadcn">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-foreground mb-1.5">Lớp *</label>
+                {% if current_user.role == 'homeroom_teacher' and current_user.assigned_class %}
+                <input type="hidden" name="class_name" value="{{ current_user.assigned_class }}">
+                <p class="px-4 py-2 bg-accent rounded-lg text-foreground font-medium">{{ current_user.assigned_class }}
+                    <span class="text-xs font-normal text-muted-foreground">(lớp chủ nhiệm)</span></p>
+                {% else %}
+                <select name="class_name" required class="w-full px-4 py-2 border border-slate-300 rounded-lg input-shadcn">
+                    <option value="">— Chọn lớp —</option>
+                    {% for c in classes %}
+                    <option value="{{ c }}"
+                        {% if entry and entry.class_name == c %}selected
+                        {% elif not entry and default_class == c %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-foreground mb-1.5">Môn học</label>
+                {% if current_user.role == 'subject_teacher' and current_user.assigned_subject_id %}
+                <input type="hidden" name="subject_id" value="{{ current_user.assigned_subject_id }}">
+                <p class="px-4 py-2 bg-accent rounded-lg text-foreground">
+                    {% for s in subjects %}
+                        {% if s.id == current_user.assigned_subject_id %}{{ s.name }}{% endif %}
+                    {% endfor %}
+                    <span class="text-xs text-muted-foreground ml-1">(môn phân công)</span>
+                </p>
+                {% else %}
+                <select name="subject_id" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-shadcn">
+                    <option value="">— Không chọn / tự ghi nhận —</option>
+                    {% for s in subjects %}
+                    <option value="{{ s.id }}"
+                        {% if entry and entry.subject_id == s.id %}selected
+                        {% elif not entry and default_subject_id == s.id %}selected{% endif %}>{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-foreground mb-1.5">Nội dung bài dạy *</label>
+                <textarea name="topic" rows="4" required placeholder="Kiến thức, kỹ năng trọng tâm tiết học…"
+                    class="w-full px-4 py-2 border border-slate-300 rounded-lg input-shadcn">{{ entry.topic if entry else '' }}</textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-foreground mb-1.5">Mục tiêu bài học</label>
+                    <textarea name="objectives" rows="3" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-shadcn"
+                        placeholder="Theo chương trình / điều chỉnh…">{{ entry.objectives or '' }}</textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-foreground mb-1.5">Phương pháp / Hình thức tổ chức</label>
+                    <textarea name="teaching_method" rows="3" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-shadcn"
+                        placeholder="Thảo luận nhóm, thực hành…">{{ entry.teaching_method or '' }}</textarea>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-foreground mb-1.5">Kiểm tra — đánh giá</label>
+                <textarea name="evaluation" rows="2" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-shadcn"
+                    placeholder="Câu hỏi, bài kiểm tra miệng…">{{ entry.evaluation or '' }}</textarea>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-foreground mb-1.5">Bài tập về nhà</label>
+                <textarea name="homework" rows="2" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-shadcn"
+                    placeholder="Bài số… trang…">{{ entry.homework or '' }}</textarea>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-foreground mb-1.5">Có mặt</label>
+                    <input type="number" name="attendance_present" min="0"
+                        value="{{ entry.attendance_present if entry and entry.attendance_present is not none else '' }}"
+                        class="w-full px-4 py-2 border border-slate-300 rounded-lg input-shadcn" placeholder="Sĩ số">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-foreground mb-1.5">Vắng</label>
+                    <input type="number" name="attendance_absent" min="0"
+                        value="{{ entry.attendance_absent if entry and entry.attendance_absent is not none else '' }}"
+                        class="w-full px-4 py-2 border border-slate-300 rounded-lg input-shadcn">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-foreground mb-1.5">Học kỳ</label>
+                    <select name="semester" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-shadcn">
+                        <option value="1" {% if (entry and entry.semester == 1) or (not entry and default_semester == 1) %}selected{% endif %}>Học kỳ 1</option>
+                        <option value="2" {% if (entry and entry.semester == 2) or (not entry and default_semester == 2) %}selected{% endif %}>Học kỳ 2</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-foreground mb-1.5">Năm học</label>
+                    <input type="text" name="school_year"
+                        value="{{ entry.school_year if entry and entry.school_year else default_year }}"
+                        class="w-full px-4 py-2 border border-slate-300 rounded-lg input-shadcn" placeholder="2025-2026">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-foreground mb-1.5">Ghi chú</label>
+                <textarea name="notes" rows="2" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-shadcn"
+                    placeholder="Nhận xét thêm…">{{ entry.notes or '' }}</textarea>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <a href="{{ url_for('lesson_book') }}"
+                    class="flex-1 px-5 py-3 bg-accent text-muted-foreground rounded-lg font-medium hover:bg-slate-200 transition text-center text-sm">
+                    Hủy
+                </a>
+                <button type="submit"
+                    class="flex-1 px-5 py-3 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 shadow-md transition text-sm">
+                    <i class="fas fa-save mr-2"></i> Lưu sổ đầu bài
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

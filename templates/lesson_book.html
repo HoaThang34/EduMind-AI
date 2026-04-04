@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Sổ đầu bài điện tử{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-semibold tracking-tight text-foreground">Sổ đầu bài điện tử</h1>
+            <p class="text-muted-foreground mt-1 text-sm">Ghi nhận nội dung tiết dạy, mục tiêu và điểm danh theo lớp/môn.</p>
+        </div>
+        <a href="{{ url_for('lesson_book_add') }}"
+            class="btn-primary inline-flex items-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium">
+            <i class="fas fa-plus text-xs"></i> Thêm tiết dạy
+        </a>
+    </div>
+
+    <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl p-4 shadow-card">
+        <form method="GET" action="{{ url_for('lesson_book') }}" class="flex flex-wrap gap-3 items-end">
+            <div>
+                <label class="block text-xs font-medium text-muted-foreground mb-1">Lớp</label>
+                <select name="class_name" class="input-shadcn py-2 text-sm min-w-[140px]">
+                    <option value="">— Tất cả —</option>
+                    {% for c in classes %}
+                    <option value="{{ c }}" {% if c == class_filter %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-muted-foreground mb-1">Môn</label>
+                <select name="subject_id" class="input-shadcn py-2 text-sm min-w-[160px]">
+                    <option value="">— Tất cả —</option>
+                    {% for s in subjects %}
+                    <option value="{{ s.id }}" {% if subject_filter == s.id %}selected{% endif %}>{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-muted-foreground mb-1">Từ ngày</label>
+                <input type="date" name="date_from" value="{{ date_from }}"
+                    class="input-shadcn py-2 text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-muted-foreground mb-1">Đến ngày</label>
+                <input type="date" name="date_to" value="{{ date_to }}"
+                    class="input-shadcn py-2 text-sm">
+            </div>
+            <button type="submit" class="btn-outline py-2 px-4 text-sm rounded-lg">Lọc</button>
+            <a href="{{ url_for('lesson_book') }}" class="text-sm text-indigo-600 hover:underline py-2">Xóa lọc</a>
+        </form>
+    </div>
+
+    <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl overflow-hidden shadow-card">
+        <div class="overflow-x-auto">
+            <table class="table-shadcn w-full text-sm">
+                <thead class="bg-accent/80">
+                    <tr>
+                        <th class="px-4 py-3 text-left font-semibold text-muted-foreground whitespace-nowrap">Ngày</th>
+                        <th class="px-4 py-3 text-left font-semibold text-muted-foreground">Tiết</th>
+                        <th class="px-4 py-3 text-left font-semibold text-muted-foreground">Lớp</th>
+                        <th class="px-4 py-3 text-left font-semibold text-muted-foreground">Môn</th>
+                        <th class="px-4 py-3 text-left font-semibold text-muted-foreground min-w-[200px]">Nội dung bài dạy</th>
+                        <th class="px-4 py-3 text-left font-semibold text-muted-foreground whitespace-nowrap">Điểm danh</th>
+                        <th class="px-4 py-3 text-left font-semibold text-muted-foreground whitespace-nowrap">Giáo viên</th>
+                        <th class="px-4 py-3 text-right font-semibold text-muted-foreground">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[hsl(240,5.9%,90%)]">
+                    {% for e in entries %}
+                    <tr class="hover:bg-accent/50 transition">
+                        <td class="px-4 py-3 whitespace-nowrap">{{ e.lesson_date.strftime('%d/%m/%Y') }}</td>
+                        <td class="px-4 py-3">{{ e.period_number }}</td>
+                        <td class="px-4 py-3 font-medium">{{ e.class_name }}</td>
+                        <td class="px-4 py-3">{{ e.subject.name if e.subject else '—' }}</td>
+                        <td class="px-4 py-3 text-muted-foreground">
+                            {% set t = e.topic %}
+                            {{ t[:120] }}{% if t|length > 120 %}…{% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                            {% if e.attendance_present is not none or e.attendance_absent is not none %}
+                            +{{ e.attendance_present or 0 }} / −{{ e.attendance_absent or 0 }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-xs">{{ e.teacher.full_name if e.teacher else '' }}</td>
+                        <td class="px-4 py-3 text-right whitespace-nowrap">
+                            {% if current_user.role == 'admin' or e.teacher_id == current_user.id %}
+                            <a href="{{ url_for('lesson_book_edit', entry_id=e.id) }}"
+                                class="text-indigo-600 hover:underline mr-2">Sửa</a>
+                            <form method="POST" action="{{ url_for('lesson_book_delete', entry_id=e.id) }}"
+                                class="inline"
+                                onsubmit="return confirm('Xóa bản ghi này?');">
+                                <button type="submit" class="text-red-600 hover:underline text-sm">Xóa</button>
+                            </form>
+                            {% else %}
+                            <span class="text-muted-foreground text-xs">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="px-4 py-12 text-center text-muted-foreground">
+                            Chưa có tiết dạy nào. <a href="{{ url_for('lesson_book_add') }}" class="text-indigo-600 font-medium hover:underline">Thêm tiết dạy đầu tiên</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
