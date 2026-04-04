@@ -1,0 +1,121 @@
+{
+  "name": "index",
+  "description": "Chỉ mục tất cả các prompt trong hệ thống EduMind AI",
+  "version": "1.0",
+  "last_updated": "2025-04-04",
+  "prompts": [
+    {
+      "file": "school_rules.json",
+      "name": "school_rules",
+      "description": "Trợ lý AI chuyên trách về Nề nếp & Kỷ luật Học đường",
+      "category": "discipline",
+      "keywords": ["nội quy", "vi phạm", "quy định", "điểm rèn luyện"]
+    },
+    {
+      "file": "behavior_guide.json",
+      "name": "behavior_guide",
+      "description": "Mentor Đồng Hành & Chuyên gia Kỹ năng sống",
+      "category": "life_skills",
+      "keywords": ["ứng xử", "kỹ năng", "giao tiếp", "tình huống"]
+    },
+    {
+      "file": "teacher_assistant.json",
+      "name": "teacher_assistant",
+      "description": "Trợ lý AI chuyên dụng hỗ trợ Giáo viên",
+      "category": "teacher_support",
+      "keywords": ["nhận xét", "phương pháp", "quản lý lớp", "giáo dục"]
+    },
+    {
+      "file": "default_assistant.json",
+      "name": "default_assistant",
+      "description": "Trợ lý Ảo thông minh tổng quát",
+      "category": "general",
+      "keywords": ["trợ lý", "hỗ trợ", "hướng dẫn"]
+    },
+    {
+      "file": "student_companion.json",
+      "name": "student_companion",
+      "description": "Người Bạn Đồng Hành Tin Cậy của học sinh",
+      "category": "student_support",
+      "keywords": ["học sinh", "tâm lý", "kỹ năng sống"]
+    },
+    {
+      "file": "student_tutor.json",
+      "name": "student_tutor",
+      "description": "Gia Sư AI Thông Thái hỗ trợ học tập",
+      "category": "learning_support",
+      "keywords": ["học tập", "gia sư", "toán", "lý", "hóa"]
+    },
+    {
+      "file": "student_analysis.json",
+      "name": "student_analysis",
+      "description": "Mentor tâm lý phân tích học sinh",
+      "category": "analytics",
+      "keywords": ["phân tích", "nhận xét", "đánh giá"]
+    },
+    {
+      "file": "vision_grade_ocr.json",
+      "name": "vision_grade_ocr",
+      "description": "Chuyên gia OCR điểm từ ảnh",
+      "category": "vision_ocr",
+      "keywords": ["ocr", "vision", "điểm số", "nhận diện"]
+    },
+    {
+      "file": "student_trend_prediction.json",
+      "name": "student_trend_prediction",
+      "description": "Chuyên gia Phân tích & Dự báo xu hướng học sinh",
+      "category": "predictive_analytics",
+      "keywords": ["dự báo", "xu hướng", "phân tích", "nguy cơ"]
+    },
+    {
+      "file": "voice_to_pedagogical.json",
+      "name": "voice_to_pedagogical",
+      "description": "Chuyên gia Chuẩn hóa nhận xét từ giọng nói",
+      "category": "voice_processing",
+      "keywords": ["voice", "giọng nói", "chuẩn hóa", "nhận xét"]
+    },
+    {
+      "file": "chatbot_system.json",
+      "name": "chatbot_system",
+      "description": "Context-Aware AI Assistant",
+      "category": "conversation_memory",
+      "keywords": ["chatbot", "ngữ cảnh", "ghi nhớ"]
+    },
+    {
+      "file": "parent_report_generation.json",
+      "name": "parent_report_generation",
+      "description": "Tạo nhận xét báo cáo gửi phụ huynh (Gemini)",
+      "category": "report_generation",
+      "keywords": ["báo cáo", "phụ huynh", "nhận xét"]
+    },
+    {
+      "file": "weekly_parent_report.json",
+      "name": "weekly_parent_report",
+      "description": "Tạo nhận xét tuần gửi phụ huynh (Ollama)",
+      "category": "report_generation",
+      "keywords": ["tuần", "nền nếp", "phụ huynh", "báo cáo"]
+    },
+    {
+      "file": "assistant_chatbot_wrapper.json",
+      "name": "assistant_chatbot_wrapper",
+      "description": "Wrapper cho chatbot đa năng với intent detection",
+      "category": "chatbot_wrapper",
+      "keywords": ["wrapper", "intent", "chatbot"]
+    }
+  ],
+  "categories": {
+    "discipline": "Nội quy & Kỷ luật",
+    "life_skills": "Kỹ năng sống & Ứng xử",
+    "teacher_support": "Hỗ trợ Giáo viên",
+    "general": "Tổng quát",
+    "student_support": "Hỗ trợ Học sinh",
+    "learning_support": "Hỗ trợ Học tập",
+    "analytics": "Phân tích & Đánh giá",
+    "vision_ocr": "Thị giác & OCR",
+    "predictive_analytics": "Phân tích Dự báo",
+    "voice_processing": "Xử lý Giọng nói",
+    "conversation_memory": "Ghi nhớ Hội thoại",
+    "report_generation": "Tạo Báo cáo",
+    "chatbot_wrapper": "Chatbot Wrapper"
+  }
+}

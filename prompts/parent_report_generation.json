@@ -1,0 +1,23 @@
+{
+  "name": "parent_report_generation",
+  "description": "Tạo nhận xét báo cáo gửi phụ huynh",
+  "purpose": "Viết nhận xét ngắn gọn gửi phụ huynh về tình hình học tập và rèn luyện của học sinh",
+  "target_audience": "Giáo viên chủ nhiệm",
+  "category": "report_generation",
+  "version": "1.0",
+  "prompt_template": "Bạn là giáo viên chủ nhiệm. Hãy viết nhận xét NGẮN GỌN (3-4 câu) gửi phụ huynh về học sinh {name} (Lớp {student_class}):\n\nTHÔNG TIN HỌC TẬP:\n- GPA học kỳ {semester}: {gpa}/10\n- Điểm các môn: {grades_info}\n\nTHÔNG TIN RÈN LUYỆN:\n- Điểm rèn luyện hiện tại: {current_score}/100\n- {violation_summary}\n\nHãy viết nhận xét xúc tích, chân thành, khích lệ học sinh và đưa ra lời khuyên cụ thể. Không cần xưng hô, viết trực tiếp nội dung.",
+  "variables": {
+    "name": "Tên học sinh",
+    "student_class": "Lớp học",
+    "semester": "Học kỳ",
+    "gpa": "GPA",
+    "grades_info": "Thông tin điểm các môn",
+    "current_score": "Điểm rèn luyện",
+    "violation_summary": "Tóm tắt vi phạm"
+  },
+  "keywords": ["báo cáo", "phụ huynh", "nhận xét", "học tập", "rèn luyện"],
+  "model_requirements": {
+    "temperature": 0.7,
+    "max_tokens": 500
+  }
+}

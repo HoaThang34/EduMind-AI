@@ -1,0 +1,35 @@
+{
+  "name": "assistant_chatbot_wrapper",
+  "description": "Wrapper prompt cho chatbot đa năng với intent detection",
+  "purpose": "Kết hợp system prompt động dựa trên intent detection với câu hỏi của người dùng",
+  "target_audience": "Người dùng chatbot đa năng",
+  "category": "chatbot_wrapper",
+  "version": "1.0",
+  "prompt_template": "{system_prompt}\n\n===== CÂU HỎI =====\n{user_message}\n\n===== YÊU CẦU =====\nTrả lời ngắn gọn, rõ ràng bằng tiếng Việt. Sử dụng markdown và emoji phù hợp.",
+  "intent_detection": {
+    "school_rules": {
+      "keywords": ["nội quy", "vi phạm", "quy định", "điểm rèn luyện", "bị trừ", "mức phạt", "xử lý kỷ luật"],
+      "prompt_ref": "school_rules"
+    },
+    "behavior_guide": {
+      "keywords": ["ứng xử", "cách xử lý", "tình huống", "kỹ năng", "giao tiếp", "cãi nhau", "đánh nhau", "bắt nạt"],
+      "prompt_ref": "behavior_guide"
+    },
+    "teacher_assistant": {
+      "keywords": ["nhận xét", "viết nhận xét", "đánh giá học sinh", "soạn", "phương pháp", "quản lý lớp", "giáo dục", "động viên"],
+      "prompt_ref": "teacher_assistant"
+    },
+    "default": {
+      "prompt_ref": "default_assistant"
+    }
+  },
+  "variables": {
+    "system_prompt": "System prompt được chọn dựa trên intent",
+    "user_message": "Câu hỏi của người dùng"
+  },
+  "keywords": ["wrapper", "intent", "chatbot", "đa năng"],
+  "model_requirements": {
+    "temperature": 0.7,
+    "max_tokens": 1500
+  }
+}

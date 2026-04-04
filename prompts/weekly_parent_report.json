@@ -1,0 +1,21 @@
+{
+  "name": "weekly_parent_report",
+  "description": "Tạo nhận xét tuần gửi phụ huynh qua Ollama",
+  "purpose": "Viết nhận xét ngắn gửi phụ huynh về tình hình nề nếp của học sinh trong tuần cụ thể",
+  "target_audience": "Giáo viên chủ nhiệm",
+  "category": "report_generation",
+  "version": "1.0",
+  "prompt_template": "Đóng vai Trợ lý Giáo viên Chủ nhiệm. Hãy viết một nhận xét ngắn (khoảng 3-4 câu) gửi cho phụ huynh về tình hình nề nếp của học sinh:\n- Tên: {name}\n- Thời gian: {time_context}\n- Điểm nền nếp: {final_score}/100\n- Các lỗi vi phạm:\n{violation_text}\n\nYêu cầu:\n1. Giọng văn lịch sự, xây dựng, quan tâm.\n2. Nếu điểm cao (>=90): Khen ngợi và động viên phát huy.\n3. Nếu điểm thấp (<70): Nhắc nhở khéo léo và đề nghị gia đình phối hợp.\n4. Trả lời bằng Tiếng Việt. Không cần chào hỏi rườm rà, vào thẳng nội dung nhận xét.",
+  "variables": {
+    "name": "Tên học sinh",
+    "time_context": "Thời gian (tuần hoặc từ trước đến nay)",
+    "final_score": "Điểm nền nếp cuối cùng",
+    "violation_text": "Danh sách vi phạm định dạng text"
+  },
+  "keywords": ["tuần", "nền nếp", "phụ huynh", "báo cáo", "nhận xét"],
+  "model_requirements": {
+    "temperature": 0.7,
+    "max_tokens": 400,
+    "model": "OLLAMA_TEXT_MODEL hoặc OLLAMA_MODEL"
+  }
+}
