@@ -835,7 +835,7 @@
                             <span class="text-sm">Sổ đầu bài</span>
                         </a>
                         <a href="{{ url_for('timetable_view') }}"
-                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'timetable_view' or request.endpoint == 'timetable_manage' or request.endpoint == 'timetable_import_xlsx' or request.endpoint == 'timetable_import_ai' %}active{% endif %}">
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'timetable_view' or request.endpoint == 'timetable_manage' or request.endpoint == 'timetable_import_xlsx' or request.endpoint == 'timetable_import_ai_preview' or request.endpoint == 'timetable_import_ai_confirm' or request.endpoint == 'timetable_import_ai_cancel' or request.endpoint == 'timetable_xlsx_template' %}active{% endif %}">
                             <i class="fas fa-calendar-alt w-6 text-center text-lg mr-3"></i>
                             <span class="text-sm">Thời khóa biểu</span>
                         </a>

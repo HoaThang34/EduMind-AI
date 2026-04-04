@@ -1,15 +1,22 @@
 {% extends "base.html" %}
 {% block title %}Quản trị thời khóa biểu{% endblock %}
 
+{% macro manage_return_hidden() %}
+<input type="hidden" name="return_class_name" value="{{ class_name or '' }}">
+<input type="hidden" name="return_school_year" value="{{ school_year }}">
+<input type="hidden" name="return_semester" value="{{ semester }}">
+{% endmacro %}
+
 {% block content %}
 <div class="max-w-6xl mx-auto space-y-8">
     <div class="flex flex-col md:flex-row justify-between gap-4">
         <div>
-            <a href="{{ url_for('timetable_view') }}" class="text-indigo-600 text-sm font-medium hover:underline">
+            <a href="{{ url_for('timetable_view', school_year=school_year, semester=semester, class_name=class_name or none) }}"
+                class="text-indigo-600 text-sm font-medium hover:underline">
                 <i class="fas fa-arrow-left mr-1"></i> Xem TKB
             </a>
             <h1 class="text-2xl font-semibold text-foreground mt-2">Quản trị thời khóa biểu</h1>
-            <p class="text-muted-foreground text-sm mt-1">Chỉnh sửa lưới theo lớp, nhập Excel hoặc dùng AI (Ollama) để chuẩn hóa dữ liệu.</p>
+            <p class="text-muted-foreground text-sm mt-1">Chỉnh sửa lưới theo lớp, nhập Excel hoặc dùng Ollama để chuẩn hóa dữ liệu từ text/ảnh.</p>
         </div>
     </div>
 
@@ -92,25 +99,104 @@
         <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl p-5 shadow-card">
             <h3 class="font-semibold text-foreground mb-2"><i class="fas fa-file-excel text-green-600 mr-2"></i>Nhập Excel</h3>
             <p class="text-xs text-muted-foreground mb-3">Cột: <strong>Lớp</strong>, <strong>Thứ</strong> (1–7 hoặc Thứ 2…), <strong>Tiết</strong>, <strong>Môn</strong>, tùy chọn <strong>Phòng</strong>.</p>
+            <p class="text-xs mb-3">
+                <a href="{{ url_for('timetable_xlsx_template') }}" class="text-green-700 hover:underline font-medium">
+                    <i class="fas fa-download mr-1"></i>Tải file mẫu Excel (.xlsx)
+                </a>
+            </p>
+            <p class="text-xs text-amber-800/90 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-2">
+                Excel/AI ghi cho <strong>{{ school_year }}</strong>, <strong>HK{{ semester }}</strong> (theo bộ lọc phía trên). Cột «Lớp» trong file phải <strong>trùng hệt</strong> tên lớp trong hệ thống (vd <code class="text-[11px]">11 TIN</code>).
+            </p>
             <form method="POST" action="{{ url_for('timetable_import_xlsx') }}" enctype="multipart/form-data" class="space-y-3">
-                <input type="hidden" name="school_year" value="{{ default_year }}">
-                <input type="hidden" name="semester" value="{{ default_sem }}">
+                <input type="hidden" name="school_year" value="{{ school_year }}">
+                <input type="hidden" name="semester" value="{{ semester }}">
+                {{ manage_return_hidden() }}
                 <input type="file" name="file" accept=".xlsx,.xls" required class="text-sm w-full">
                 <button type="submit" class="w-full btn-outline py-2 rounded-lg text-sm">Tải lên & nhập</button>
             </form>
         </div>
         <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl p-5 shadow-card">
             <h3 class="font-semibold text-foreground mb-2"><i class="fas fa-robot text-indigo-600 mr-2"></i>AI (Ollama) chuẩn hóa</h3>
-            <p class="text-xs text-muted-foreground mb-3">Dán nội dung lộn xộn, hoặc đính kèm <strong>txt / csv / ảnh</strong> (png, jpg). Model Ollama sẽ trả JSON để hệ thống nhập.</p>
-            <form method="POST" action="{{ url_for('timetable_import_ai') }}" enctype="multipart/form-data" class="space-y-3">
-                <input type="hidden" name="school_year" value="{{ default_year }}">
-                <input type="hidden" name="semester" value="{{ default_sem }}">
+            <p class="text-xs text-muted-foreground mb-3">Chọn <strong>nhiều file</strong> (Ctrl/Shift khi chọn), hoặc dán text. Hỗ trợ txt, csv, md, xlsx (đưa vào prompt dạng CSV), ảnh. Bước 1: AI chuẩn hóa và hiển thị bảng xem trước. Bước 2: bạn <strong>xác nhận</strong> mới ghi vào CSDL. Cần Ollama và <code class="text-[11px]">OLLAMA_MODEL</code> khớp <code class="text-[11px]">ollama list</code>; nhiều ảnh cần model vision (vd <code class="text-[11px]">llava</code>). Nhập Excel trực tiếp (không qua AI) dùng cột bên trái.</p>
+            <form method="POST" action="{{ url_for('timetable_import_ai_preview') }}" enctype="multipart/form-data" class="space-y-3">
+                <input type="hidden" name="school_year" value="{{ school_year }}">
+                <input type="hidden" name="semester" value="{{ semester }}">
+                {{ manage_return_hidden() }}
                 <textarea name="raw_text" rows="4" placeholder="Dán bảng TKB dạng text…"
                     class="w-full px-3 py-2 border rounded-lg text-sm input-shadcn"></textarea>
-                <input type="file" name="file" accept=".txt,.csv,.md,.png,.jpg,.jpeg,.webp,.gif,.xlsx,.xls" class="text-sm w-full">
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm font-medium">Gửi AI xử lý & nhập</button>
+                <div>
+                    <label class="block text-xs text-muted-foreground mb-1">File đính kèm (có thể nhiều file)</label>
+                    <input type="file" name="files" accept=".txt,.csv,.md,.png,.jpg,.jpeg,.webp,.gif,.xlsx,.xls" multiple class="text-sm w-full">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm font-medium">Chuẩn hóa bằng AI (xem trước)</button>
             </form>
         </div>
     </div>
+
+    {% if ai_preview and ai_preview_token %}
+    <div class="bg-indigo-50/80 border border-indigo-200 rounded-xl p-5 shadow-card">
+        <h3 class="font-semibold text-foreground mb-1"><i class="fas fa-eye text-indigo-600 mr-2"></i>Kết quả chuẩn hóa — xem trước</h3>
+        <p class="text-xs text-muted-foreground mb-3">
+            Năm học <strong>{{ ai_preview.school_year }}</strong>, học kỳ <strong>HK{{ ai_preview.semester }}</strong>.
+            {% if ai_preview.source_files and ai_preview.source_files|length > 0 %}
+            File: {{ ai_preview.source_files | join(', ') }}.
+            {% endif %}
+            Chỉ các dòng <span class="text-green-700 font-medium">hợp lệ</span> sẽ được ghi khi bạn bấm xác nhận.
+        </p>
+        <div class="max-h-[min(28rem,55vh)] overflow-auto rounded-lg border border-indigo-100 bg-white mb-4">
+            <table class="w-full text-xs border-collapse">
+                <thead class="sticky top-0 bg-indigo-100/90 z-10">
+                    <tr>
+                        <th class="px-2 py-2 text-left font-semibold">#</th>
+                        <th class="px-2 py-2 text-left font-semibold">Lớp</th>
+                        <th class="px-2 py-2 text-left font-semibold">Thứ</th>
+                        <th class="px-2 py-2 text-left font-semibold">Tiết</th>
+                        <th class="px-2 py-2 text-left font-semibold">Môn</th>
+                        <th class="px-2 py-2 text-left font-semibold">Phòng</th>
+                        <th class="px-2 py-2 text-left font-semibold">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in ai_preview.rows %}
+                    <tr class="border-t border-slate-100 {% if not row.ok %}bg-red-50/50{% endif %}">
+                        <td class="px-2 py-1.5 text-muted-foreground">{{ row.i }}</td>
+                        <td class="px-2 py-1.5">{{ row.class_name or '—' }}</td>
+                        <td class="px-2 py-1.5">
+                            {% if row.day_of_week and row.day_of_week >= 1 and row.day_of_week <= 7 %}
+                            {{ row.day_of_week }} ({{ day_labels[row.day_of_week - 1] }})
+                            {% else %}
+                            {{ row.day_of_week if row.day_of_week is not none else '—' }}
+                            {% endif %}
+                        </td>
+                        <td class="px-2 py-1.5">{{ row.period_number if row.period_number is not none else '—' }}</td>
+                        <td class="px-2 py-1.5">{{ row.subject_name or '—' }}</td>
+                        <td class="px-2 py-1.5 text-muted-foreground">{{ row.room or '—' }}</td>
+                        <td class="px-2 py-1.5">
+                            {% if row.ok %}
+                            <span class="text-green-700 font-medium">Hợp lệ</span>
+                            {% else %}
+                            <span class="text-red-700">{{ row.issues or 'Lỗi' }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <form method="POST" action="{{ url_for('timetable_import_ai_confirm') }}" class="inline">
+                <input type="hidden" name="preview_token" value="{{ ai_preview_token }}">
+                {{ manage_return_hidden() }}
+                <button type="submit" class="bg-green-700 hover:bg-green-800 text-white py-2 px-5 rounded-lg text-sm font-medium">
+                    <i class="fas fa-check mr-2"></i>Xác nhận nhập vào CSDL
+                </button>
+            </form>
+            <form method="POST" action="{{ url_for('timetable_import_ai_cancel') }}" class="inline">
+                {{ manage_return_hidden() }}
+                <button type="submit" class="btn-outline py-2 px-5 rounded-lg text-sm border-slate-300">Hủy xem trước</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

@@ -5,16 +5,12 @@ from models import (
 )
 import base64
 import json
-import ollama
 from functools import wraps
-import os
 from urllib.parse import quote
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
 
 student_bp = Blueprint('student', __name__)
-
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
 
 # Token xác minh thẻ học sinh (QR) — không lộ dữ liệu nếu không có chữ ký hợp lệ
 def _student_card_serializer():
@@ -109,12 +105,20 @@ ALLOWED_CHAT_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'pdf'}
 
 
 def _student_chat_call_ollama(system_prompt, history, user_message, image_base64=None):
-    from app_helpers import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa
+    from app_helpers import (
+        normalize_student_code,
+        get_or_create_chat_session,
+        get_conversation_history,
+        save_message,
+        calculate_student_gpa,
+        get_ollama_client,
+        get_ollama_model,
+    )
     """
     Gọi Ollama cho student chat. Nếu có image_base64 thì dùng message có images.
     history: list of dict {role, content}
     """
-    model = OLLAMA_MODEL
+    model = get_ollama_model()
     # Build messages cho Ollama (có hỗ trợ images trong user message)
     messages = []
     # System context: gộp system + history vào prompt của user đầu (hoặc message riêng tùy model)
@@ -127,7 +131,7 @@ def _student_chat_call_ollama(system_prompt, history, user_message, image_base64
     else:
         messages.append({"role": "user", "content": context})
     try:
-        response = ollama.chat(model=model, messages=messages)
+        response = get_ollama_client().chat(model=model, messages=messages)
         return (response.get("message") or {}).get("content", "").strip(), None
     except Exception as e:
         return None, str(e)

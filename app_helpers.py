@@ -1,6 +1,8 @@
 """Shared helpers and extensions (refactored from app.py)."""
 import os
 import json
+
+from dotenv import load_dotenv
 import hmac
 import datetime
 import base64
@@ -20,17 +22,98 @@ from models import (
     db, Student, Violation, ViolationType, Teacher, SystemConfig, ClassRoom,
     WeeklyArchive, Subject, Grade, ChatConversation, BonusType, BonusRecord,
     Notification, GroupChatMessage, PrivateMessage, ChangeLog, StudentNotification,
+    TimetableSlot,
 )
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+load_dotenv(os.path.join(basedir, ".env"))
+
 UPLOAD_FOLDER = os.path.join(basedir, "uploads")
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Tên model phải trùng với `ollama list` (vd: llama3.2, mistral, qwen2.5).
-# "gemini-*" là model Google API, không có sẵn trong Ollama mặc định.
-OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2")
-OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+
+def get_ollama_host():
+    """OLLAMA_HOST trong .env (mặc định localhost Ollama)."""
+    h = (os.environ.get("OLLAMA_HOST") or "").strip()
+    return h or "http://localhost:11434"
+
+
+def get_ollama_model():
+    """OLLAMA_MODEL trong .env — phải trùng `ollama list` (vd: llama3.2, llava)."""
+    m = (os.environ.get("OLLAMA_MODEL") or "").strip()
+    return m or "llama3.2"
+
+
+def get_ollama_fallback_model():
+    """OLLAMA_FALLBACK_MODEL trong .env; nếu trống thì dùng cùng model chính."""
+    m = (os.environ.get("OLLAMA_FALLBACK_MODEL") or "").strip()
+    return m if m else get_ollama_model()
+
+
+def get_ollama_client():
+    return ollama.Client(host=get_ollama_host())
+
+
+def _ollama_client():
+    return get_ollama_client()
+
+
+def _parse_llm_json_response(text):
+    """
+    Parse JSON array hoặc object chứa mảng từ phản hồi LLM (có thể kèm markdown / chữ thừa).
+    Trả về (list | None, error_str | None).
+    """
+    if not text or not str(text).strip():
+        return None, "Phản hồi rỗng"
+
+    raw = str(text).strip()
+    if "```json" in raw:
+        a = raw.find("```json") + 7
+        b = raw.find("```", a)
+        if b > a:
+            raw = raw[a:b].strip()
+    elif "```" in raw:
+        a = raw.find("```") + 3
+        b = raw.find("```", a)
+        if b > a:
+            raw = raw[a:b].strip()
+
+    def try_load(s):
+        try:
+            return json.loads(s)
+        except json.JSONDecodeError:
+            return None
+
+    data = try_load(raw)
+    if isinstance(data, list):
+        return data, None
+    if isinstance(data, dict):
+        for key in ("items", "slots", "timetable", "data", "rows"):
+            v = data.get(key)
+            if isinstance(v, list):
+                return v, None
+        for v in data.values():
+            if isinstance(v, list) and v and isinstance(v[0], dict):
+                return v, None
+
+    start = raw.find("[")
+    if start >= 0:
+        depth = 0
+        for i in range(start, len(raw)):
+            c = raw[i]
+            if c == "[":
+                depth += 1
+            elif c == "]":
+                depth -= 1
+                if depth == 0:
+                    chunk = raw[start : i + 1]
+                    data = try_load(chunk)
+                    if isinstance(data, list):
+                        return data, None
+                    break
+
+    return None, f"Lỗi parse JSON. Đoạn đầu phản hồi: {raw[:280]!r}"
 
 # === HELPER FUNCTIONS CHO PHÂN QUYỀN ===
 
@@ -93,20 +176,21 @@ def can_access_student(student_id):
 def call_ollama(prompt, model=None):
     """
     Gọi Ollama API để chat với AI model local.
-    Model mặc định: biến môi trường OLLAMA_MODEL hoặc llama3.2 (`ollama pull llama3.2`).
+    Model mặc định: OLLAMA_MODEL trong file .env (hoặc llama3.2); host: OLLAMA_HOST.
     Args:
         prompt: Câu hỏi/prompt gửi cho AI
-        model: Tên model Ollama (None = dùng OLLAMA_MODEL)
+        model: Tên model Ollama (None = đọc từ .env qua get_ollama_model())
     Returns:
         (response_text, error)
     """
-    model = model or OLLAMA_MODEL
+    model = model or get_ollama_model()
+    client = get_ollama_client()
     try:
-        response = ollama.chat(
+        response = client.chat(
             model=model,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
         )
-        return response['message']['content'], None
+        return response["message"]["content"], None
     except Exception as e:
         return None, f"Lỗi kết nối Ollama: {str(e)}"
 
@@ -194,6 +278,49 @@ def broadcast_timetable_update(title, message, created_by_id=None):
     except Exception as e:
         print(f"broadcast_timetable_update: {e}")
         db.session.rollback()
+
+
+def _timetable_class_compact_key(s):
+    """Khóa so khớp tên lớp: bỏ khoảng trắng, chữ thường (11 TIN ≡ 11TIN)."""
+    return "".join(str(s).lower().split())
+
+
+def resolve_class_name_for_timetable(raw):
+    """
+    Chuẩn hóa tên lớp về bản ghi trong ClassRoom (tránh lệch '11 TIN' / '11TIN').
+    Không khớp danh sách lớp thì trả về chuỗi đã strip để giữ nguyên nhập liệu tự do.
+    """
+    if raw is None:
+        return ""
+    t = str(raw).strip()
+    if not t or t.lower() == "nan":
+        return t
+    classes = [c.name for c in ClassRoom.query.order_by(ClassRoom.name).all()]
+    if t in classes:
+        return t
+    nt = _timetable_class_compact_key(t)
+    for name in classes:
+        if _timetable_class_compact_key(name) == nt:
+            return name
+    return t
+
+
+def timetable_class_variants_for_filter(selected_class_name):
+    """
+    Mọi giá trị class_name thực tế trong DB (và ClassRoom) cùng nhóm với lớp đang chọn,
+    để truy vấn TKB không bỏ sót do sai khác khoảng trắng / hoa thường.
+    """
+    if not (selected_class_name or "").strip():
+        return []
+    k = _timetable_class_compact_key(selected_class_name)
+    variants = set()
+    for c in ClassRoom.query.all():
+        if _timetable_class_compact_key(c.name) == k:
+            variants.add(c.name)
+    for (stored,) in db.session.query(TimetableSlot.class_name).distinct().all():
+        if _timetable_class_compact_key(stored) == k:
+            variants.add(stored)
+    return list(variants) if variants else [selected_class_name.strip()]
 
 
 def resolve_subject_for_timetable(text):
@@ -546,82 +673,88 @@ def import_violations_to_db(violations_data):
     
     return errors, success_count
 
-def _call_gemini(prompt, image_path=None, is_json=False):
+def _call_gemini(prompt, image_path=None, image_paths=None, is_json=False):
     """
-    Gọi Ollama local model để xử lý text hoặc vision tasks
-    
+    Gọi Ollama (host OLLAMA_HOST, model OLLAMA_MODEL) — tên hàm lịch sử; không gọi Google Gemini API.
+
     Args:
         prompt (str): Text prompt
-        image_path (str, optional): Đường dẫn đến file ảnh
-        is_json (bool): Yêu cầu response dạng JSON
-    
+        image_path (str, optional): Một file ảnh (tương thích ngược)
+        image_paths (list, optional): Nhiều ảnh (cần model vision, vd llava, qwen2.5-vl)
+        is_json (bool): Nếu True, parse thành list/object từ phản hồi
+
     Returns:
-        tuple: (response_text/dict, error_message)
+        tuple: (response_text/dict/list, error_message)
     """
-    try:
-        # Prepare messages
-        messages = []
-        
-        if image_path:
-            # Vision task - sử dụng ollama.chat với images
+    client = get_ollama_client()
+    messages = []
+
+    paths = []
+    if image_paths:
+        paths = [p for p in image_paths if p]
+    elif image_path:
+        paths = [image_path]
+
+    if paths:
+        image_blobs = []
+        for p in paths:
             try:
-                with open(image_path, "rb") as image_file:
-                    image_data = base64.b64encode(image_file.read()).decode("utf-8")
-                
-                messages.append({
-                    'role': 'user',
-                    'content': prompt,
-                    'images': [image_data]
-                })
+                with open(p, "rb") as image_file:
+                    image_blobs.append(base64.b64encode(image_file.read()).decode("utf-8"))
             except Exception as e:
                 return None, f"Lỗi đọc file ảnh: {str(e)}"
-        else:
-            # Text-only task
-            messages.append({
-                'role': 'user',
-                'content': prompt
-            })
-        
-        # Prepare options
-        options = {}
-        if is_json:
-            # Thêm instruction vào prompt để yêu cầu JSON format
-            messages[0]['content'] = f"{prompt}\n\nIMPORTANT: Response MUST be valid JSON only, no additional text."
-        
-        # Call Ollama
-        response = ollama.chat(
-            model=OLLAMA_MODEL,
-            messages=messages,
-            options=options
+        vision_prompt = prompt
+        if len(paths) > 1:
+            vision_prompt = (
+                f"{prompt}\n\n(Có {len(paths)} ảnh đính kèm — gộp toàn bộ thành một mảng JSON duy nhất.)"
+            )
+        messages.append(
+            {
+                "role": "user",
+                "content": vision_prompt,
+                "images": image_blobs,
+            }
         )
-        
-        # Extract response text
-        if response and 'message' in response and 'content' in response['message']:
-            text = response['message']['content'].strip()
-            
-            # Parse JSON if requested
-            if is_json:
-                try:
-                    # Try to extract JSON from markdown code blocks if present
-                    if '```json' in text:
-                        json_start = text.find('```json') + 7
-                        json_end = text.find('```', json_start)
-                        text = text[json_start:json_end].strip()
-                    elif '```' in text:
-                        json_start = text.find('```') + 3
-                        json_end = text.find('```', json_start)
-                        text = text[json_start:json_end].strip()
-                    
-                    return json.loads(text), None
-                except json.JSONDecodeError as e:
-                    return None, f"Lỗi parse JSON: {str(e)}\nResponse: {text[:200]}"
-            
+    else:
+        messages.append({"role": "user", "content": prompt})
+
+    if is_json:
+        messages[0]["content"] = (
+            f"{messages[0]['content']}\n\n"
+            "IMPORTANT: Response MUST be a single valid JSON array only, no markdown, no explanation."
+        )
+
+    models_to_try = []
+    for m in (get_ollama_model(), get_ollama_fallback_model()):
+        if m and m not in models_to_try:
+            models_to_try.append(m)
+
+    last_err = None
+    for model_name in models_to_try:
+        try:
+            response = client.chat(model=model_name, messages=messages)
+        except Exception as e:
+            last_err = f"Model «{model_name}»: {str(e)}"
+            continue
+
+        if not response or "message" not in response or "content" not in response["message"]:
+            last_err = f"Model «{model_name}»: không có nội dung phản hồi"
+            continue
+
+        text = response["message"]["content"].strip()
+        if not is_json:
             return text, None
-        else:
-            return None, "Không nhận được response từ Ollama"
-            
-    except Exception as e:
-        return None, f"Lỗi kết nối Ollama: {str(e)}"
+
+        data, parse_err = _parse_llm_json_response(text)
+        if data is not None:
+            return data, None
+        last_err = parse_err or f"Model «{model_name}»: parse JSON thất bại"
+
+    hint = (
+        " Kiểm tra Ollama đang chạy, chạy `ollama list`, và đặt OLLAMA_MODEL trùng tên model đã pull "
+        "(vd: llama3.2). Biến OLLAMA_FALLBACK_MODEL có thể đặt model dự phòng."
+    )
+    return None, (last_err or "Lỗi Ollama không xác định") + hint
 
 
 def calculate_student_gpa(student_id, semester, school_year):
