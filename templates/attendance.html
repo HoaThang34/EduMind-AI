@@ -309,7 +309,6 @@ async function captureAndRecognize(isAuto = false) {
                 <div class="text-center space-y-3 bg-emerald-50 p-4 rounded-xl border border-emerald-100 animate-scale-in">
                     <p class="font-bold text-lg text-emerald-800">${data.student_name}</p>
                     <p class="text-xs text-emerald-600">${data.student_code}</p>
-                    <div class="text-xs font-bold text-emerald-700 bg-white px-2 py-1 rounded-full border border-emerald-200 inline-block shadow-sm">Độ tin cậy: ${Math.round(data.confidence*100)}%</div>
                     <div class="pt-2">
                         <button id="btn-confirm-${data.student_id}" onclick="confirmCheckin(${data.student_id}, '${data.captured_photo}', ${data.confidence})" class="btn-primary w-full py-2.5 shadow-md hover:scale-[1.02] transition-transform">Xác nhận có mặt</button>
                     </div>
