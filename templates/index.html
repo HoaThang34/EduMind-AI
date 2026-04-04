@@ -8,22 +8,42 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h1 class="text-2xl font-semibold text-foreground tracking-tight">Bảng Điểm Rèn Luyện</h1>
 
-        <div class="flex items-center gap-2 bg-white border border-[hsl(240,5.9%,90%)] rounded-lg p-1 shadow-card">
-            <form method="GET" action="{{ url_for('index') }}" class="flex items-center gap-1">
-                <select name="class_select" onchange="this.form.submit()"
-                    class="bg-transparent border-none text-sm focus:ring-0 text-foreground font-medium cursor-pointer py-1.5 pl-3 pr-7">
-                    <option value="">Tất cả lớp</option>
-                    {% for class_name in all_classes %}
-                    <option value="{{ class_name }}" {% if class_name==selected_class %}selected{% endif %}>{{
-                        class_name }}</option>
-                    {% endfor %}
-                </select>
-                <div class="w-px h-6 bg-[hsl(240,5.9%,90%)]"></div>
-                <input type="text" name="search" value="{{ search_query }}" placeholder="Tìm tên, mã số..."
-                    class="flex-1 min-w-[180px] border-none focus:ring-0 text-sm px-3 bg-transparent placeholder-muted-foreground">
-                <button type="submit" class="btn-primary px-3 py-1.5 text-xs rounded-md">
-                    <i class="fas fa-search"></i>
-                </button>
+        <div class="flex flex-wrap items-center gap-3 bg-white border border-border rounded-xl p-2 shadow-card">
+            <form method="GET" action="{{ url_for('index') }}" class="flex flex-wrap items-center gap-2">
+                <div class="input-group-shadcn-mini">
+                    <select name="class_select" onchange="this.form.submit()" class="select-shadcn text-xs py-1.5 min-w-[120px]">
+                        <option value="">Tất cả lớp</option>
+                        {% for class_name in all_classes %}
+                        <option value="{{ class_name }}" {% if class_name==selected_class %}selected{% endif %}>{{ class_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="input-group-shadcn-mini">
+                    <select name="warning_level" onchange="this.form.submit()" class="select-shadcn text-xs py-1.5 min-w-[140px]">
+                        <option value="">Báo động H.Kiểm</option>
+                        <option value="Xanh" {% if selected_warning == 'Xanh' %}selected{% endif %}>🟢 Xanh</option>
+                        <option value="Vàng" {% if selected_warning == 'Vàng' %}selected{% endif %}>🟡 Vàng</option>
+                        <option value="Đỏ" {% if selected_warning == 'Đỏ' %}selected{% endif %}>🔴 Đỏ</option>
+                    </select>
+                </div>
+
+                <div class="input-group-shadcn-mini">
+                    <select name="academic_warning" onchange="this.form.submit()" class="select-shadcn text-xs py-1.5 min-w-[140px]">
+                        <option value="">Báo động H.Lực</option>
+                        <option value="Xanh" {% if selected_academic_warning == 'Xanh' %}selected{% endif %}>🟢 Xanh</option>
+                        <option value="Vàng" {% if selected_academic_warning == 'Vàng' %}selected{% endif %}>🟡 Vàng</option>
+                        <option value="Đỏ" {% if selected_academic_warning == 'Đỏ' %}selected{% endif %}>🔴 Đỏ</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center gap-2 bg-accent/50 p-1 rounded-lg border border-border">
+                    <input type="text" name="search" value="{{ search_query }}" placeholder="Tìm tên, mã số..."
+                        class="bg-transparent border-none text-xs w-48 focus:ring-0 p-1">
+                    <button type="submit" class="p-1 px-2 hover:bg-accent rounded-md transition text-muted-foreground">
+                        <i class="fas fa-search text-xs"></i>
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -83,27 +103,34 @@
                         </td>
                         <td><span class="badge badge-secondary">{{ student.student_class }}</span></td>
                         <td>
-                            {% if student.current_score >= 90 %}
-                            <span class="badge badge-success">{{ student.current_score }} Tốt</span>
-                            {% elif student.current_score >= 70 %}
-                            <span class="badge" style="background:hsl(45 93% 47%);color:white;">{{ student.current_score
-                                }} Khá</span>
+                            {% if student.warning_level == 'Đỏ' %}
+                            <span class="badge badge-destructive flex items-center gap-1">
+                                <i class="fas fa-exclamation-circle text-[10px]"></i>
+                                {{ student.current_score }} {{ student.conduct }}
+                            </span>
+                            {% elif student.warning_level == 'Vàng' %}
+                            <span class="badge flex items-center gap-1" style="background:hsl(45 93% 47%);color:white;">
+                                <i class="fas fa-exclamation-triangle text-[10px]"></i>
+                                {{ student.current_score }} {{ student.conduct }}
+                            </span>
                             {% else %}
-                            <span class="badge badge-destructive">{{ student.current_score }} Yếu</span>
+                            <span class="badge badge-success flex items-center gap-1">
+                                <i class="fas fa-check-circle text-[10px]"></i>
+                                {{ student.current_score }} {{ student.conduct }}
+                            </span>
                             {% endif %}
                         </td>
                         <td>
                             {% set gpa = student_gpas.get(student.id) %}
                             {% if gpa %}
-                            {% if gpa >= 8.5 %}
-                            <span class="badge" style="background:hsl(221 83% 53%);color:white;">{{ gpa }} Giỏi</span>
-                            {% elif gpa >= 7.0 %}
-                            <span class="badge badge-success">{{ gpa }} Khá</span>
-                            {% elif gpa >= 5.0 %}
-                            <span class="badge" style="background:hsl(45 93% 47%);color:white;">{{ gpa }} TB</span>
-                            {% else %}
-                            <span class="badge badge-destructive">{{ gpa }} Yếu</span>
-                            {% endif %}
+                            <div class="flex items-center gap-2">
+                                <span class="badge {% if student.academic_warning_level == 'Đỏ' %}badge-destructive{% elif student.academic_warning_level == 'Vàng' %}bg-amber-500 text-white border-none{% else %}badge-success{% endif %}">
+                                    {{ gpa }} {{ student.academic_rank }}
+                                </span>
+                                {% if student.academic_warning_level != 'Xanh' %}
+                                <i class="fas fa-exclamation-triangle text-[10px] {% if student.academic_warning_level == 'Đỏ' %}text-red-500{% else %}text-amber-500{% endif %} animate-pulse"></i>
+                                {% endif %}
+                            </div>
                             {% else %}
                             <span class="text-muted-foreground text-xs italic">Chưa có điểm</span>
                             {% endif %}

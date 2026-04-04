@@ -31,7 +31,7 @@ def manage_grades():
 @grades_bp.route("/student_grades/<int:student_id>", methods=["GET", "POST"])
 @login_required
 def student_grades(student_id):
-    from app_helpers import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa
+    from app_helpers import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa, update_student_academic_status
     """Xem và nhập điểm cho học sinh"""
     # Kiểm tra quyền truy cập học sinh
     if not can_access_student(student_id):
@@ -107,6 +107,9 @@ def student_grades(student_id):
         
         db.session.commit()
         
+        # Cập nhật học lực và cảnh báo học tập
+        update_student_academic_status(student_id)
+        
         # Thông báo cho GVCN lớp
         try:
             if student.student_class:
@@ -167,7 +170,7 @@ def student_grades(student_id):
 @grades_bp.route("/delete_grade/<int:grade_id>", methods=["POST"])
 @login_required
 def delete_grade(grade_id):
-    from app_helpers import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa
+    from app_helpers import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa, update_student_academic_status
     """Xóa một điểm"""
     grade = db.session.get(Grade, grade_id)
     if grade:
@@ -177,6 +180,7 @@ def delete_grade(grade_id):
         log_change('grade_delete', f'Xóa điểm {grade.grade_type} môn {subject.name if subject else "N/A"}: {grade.score}', student_id=student_id, student_name=student.name if student else None, student_class=student.student_class if student else None, old_value=grade.score)
         db.session.delete(grade)
         db.session.commit()
+        update_student_academic_status(student_id)
         flash("Đã xóa điểm!", "success")
         return redirect(url_for("grades.student_grades", student_id=student_id))
     return redirect(url_for("grades.manage_grades"))
@@ -186,7 +190,7 @@ def delete_grade(grade_id):
 @grades_bp.route("/api/update_grade/<int:grade_id>", methods=["POST"])
 @login_required
 def update_grade_api(grade_id):
-    from app_helpers import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa
+    from app_helpers import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa, update_student_academic_status
     """API endpoint để cập nhật điểm inline"""
     try:
         data = request.get_json()
@@ -205,6 +209,7 @@ def update_grade_api(grade_id):
         subject = db.session.get(Subject, grade.subject_id)
         log_change('grade_update', f'Cập nhật điểm inline {grade.grade_type} môn {subject.name if subject else "N/A"}: {old_score_val} → {new_score}', student_id=grade.student_id, student_name=student.name if student else None, student_class=student.student_class if student else None, old_value=old_score_val, new_value=new_score)
         db.session.commit()
+        update_student_academic_status(grade.student_id)
         
         return jsonify({"success": True, "score": new_score})
     except ValueError:

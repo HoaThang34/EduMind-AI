@@ -21,7 +21,7 @@ from app_helpers import (
     admin_required, get_accessible_students, can_access_student, normalize_student_code,
     parse_excel_file, import_violations_to_db, calculate_week_from_date, _call_gemini,
     save_weekly_archive, get_current_iso_week, create_notification, log_change,
-    UPLOAD_FOLDER, calculate_student_gpa, is_reset_needed,
+    UPLOAD_FOLDER, calculate_student_gpa, is_reset_needed, update_student_conduct,
 )
 
 
@@ -90,6 +90,8 @@ def register(app):
                             ))
                             log_change('violation', f'Vi phạm: {rule.name} (-{rule.points_deducted} điểm)', student_id=student.id, student_name=student.name, student_class=student.student_class, old_value=old_score, new_value=student.current_score)
                             count += 1
+                            # Cập nhật hạnh kiểm
+                            update_student_conduct(student.id)
             
                 # B. Xử lý danh sách từ OCR (Áp dụng normalize)
                 elif ocr_json:
@@ -125,6 +127,8 @@ def register(app):
                                 ))
                                 log_change('violation', f'Vi phạm (OCR): {rule.name} (-{rule.points_deducted} điểm)', student_id=s.id, student_name=s.name, student_class=s.student_class, old_value=old_score, new_value=s.current_score)
                                 count += 1
+                                # Cập nhật hạnh kiểm
+                                update_student_conduct(s.id)
                     except Exception as e:
                         print(f"OCR Error: {e}")
 
@@ -451,6 +455,10 @@ def register(app):
             db.session.delete(violation)
             db.session.commit()
         
+            # 4. CẬP NHẬT HẠNH KIỂM
+            if student:
+                update_student_conduct(student.id)
+                
             flash(f"Đã xóa vi phạm và khôi phục {violation.points_deducted} điểm cho học sinh.", "success")
         
         except Exception as e:

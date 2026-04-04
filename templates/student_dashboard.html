@@ -168,30 +168,49 @@
                             class="rounded-circle me-3 border border-white border-2 shadow-sm"
                             style="width:56px;height:56px;object-fit:cover">
                         {% else %}
-                        <div class="bg-white rounded-circle p-2 text-primary me-3">
+                        <div class="bg-white rounded-circle p-2 text-primary me-3 text-center" style="width:56px;height:56px;">
                             <i class="fas fa-user-astronaut fa-2x"></i>
                         </div>
                         {% endif %}
-                        <div>
-                            <h5 class="mb-0">{{ student.name }}</h5>
+                        <div class="flex-grow-1">
+                            <h5 class="mb-0 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                {{ student.name }}
+                                <div class="d-flex gap-1">
+                                    <span class="badge border border-white rounded-pill pulse-slow" 
+                                        style="font-size: 0.6rem; background: 
+                                        {% if student.warning_level == 'Đỏ' %} #ff4757
+                                        {% elif student.warning_level == 'Vàng' %} #ffa502
+                                        {% else %} #2ed573 {% endif %}; 
+                                        color: white;">
+                                        <i class="fas {% if student.warning_level == 'Đỏ' %}fa-exclamation-circle{% elif student.warning_level == 'Vàng' %}fa-exclamation-triangle{% else %}fa-check-circle{% endif %} me-1"></i>
+                                        HK: {{ student.warning_level }}
+                                    </span>
+                                    <span class="badge border border-white rounded-pill pulse-slow" 
+                                        style="font-size: 0.6rem; background: 
+                                        {% if student.academic_warning_level == 'Đỏ' %} #ff4757
+                                        {% elif student.academic_warning_level == 'Vàng' %} #ffa502
+                                        {% else %} #2ed573 {% endif %}; 
+                                        color: white;">
+                                        <i class="fas {% if student.academic_warning_level == 'Đỏ' %}fa-user-slash{% elif student.academic_warning_level == 'Vàng' %}fa-user-clock{% else %}fa-user-graduate{% endif %} me-1"></i>
+                                        HL: {{ student.academic_rank }}
+                                    </span>
+                                </div>
+                            </h5>
                             <small class="opacity-75">{{ student.student_code }}</small>
-                            {% if student.date_of_birth %}
-                            <small class="opacity-75 d-block mt-1">Ngày sinh: {{ student.date_of_birth }}</small>
-                            {% endif %}
                         </div>
                     </div>
-                    <div class="d-flex justify-content-between mt-3">
-                        <div class="text-center">
+                    <div class="d-flex justify-content-between mt-3 text-center">
+                        <div class="flex-fill">
                             <h3 class="mb-0 fw-bold">{{ student.current_score }}</h3>
-                            <small class="opacity-75">Điểm Thi Đua</small>
+                            <small class="opacity-75">Điểm</small>
                         </div>
-                        <div class="text-center border-start border-end px-3">
+                        <div class="flex-fill border-start border-end px-2">
+                            <h3 class="mb-0 fw-bold" style="font-size: 1.1rem; line-height: 1.8;">{{ student.conduct }}</h3>
+                            <small class="opacity-75">Hạnh kiểm</small>
+                        </div>
+                        <div class="flex-fill">
                             <h3 class="mb-0 fw-bold">{{ student.student_class }}</h3>
                             <small class="opacity-75">Lớp</small>
-                        </div>
-                        <div class="text-center">
-                            <h3 class="mb-0 fw-bold">{{ current_week }}</h3>
-                            <small class="opacity-75">Tuần</small>
                         </div>
                     </div>
                 </div>

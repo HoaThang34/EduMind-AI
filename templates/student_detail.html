@@ -24,6 +24,16 @@
                     {{ student.position }}
                 </span>
                 {% endif %}
+                
+                <!-- Conduct Badge -->
+                <div class="flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-bold shadow-sm 
+                    {% if student.warning_level == 'Đỏ' %} bg-red-600 text-white
+                    {% elif student.warning_level == 'Vàng' %} bg-yellow-500 text-white
+                    {% else %} bg-emerald-600 text-white {% endif %} uppercase tracking-wider">
+                    <i class="fas {% if student.warning_level == 'Đỏ' %}fa-exclamation-circle{% elif student.warning_level == 'Vàng' %}fa-exclamation-triangle{% else %}fa-check-circle{% endif %}"></i>
+                    Hạnh kiểm: {{ student.conduct }}
+                </div>
+
                 <span
                     class="px-2 py-0.5 rounded text-sm font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
                     {{ student.student_code }}
@@ -90,13 +100,13 @@
                         Số lỗi: <span class="font-bold text-white">{{ violations|length }}</span>
                     </div>
                     <div class="px-3 py-1 bg-white/10 rounded-lg backdrop-blur-sm border border-white/10 text-sm">
-                        Xếp loại:
+                        Loại tuần này:
                         {% if display_score >= 90 %}
                         <span class="font-bold text-green-300">Tốt</span>
                         {% elif display_score >= 70 %}
                         <span class="font-bold text-yellow-300">Khá</span>
                         {% else %}
-                        <span class="font-bold text-red-300">Yếu</span>
+                        <span class="font-bold text-red-300">Yếu/TB</span>
                         {% endif %}
                     </div>
                 </div>

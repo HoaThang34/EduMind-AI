@@ -22,7 +22,7 @@ from models import (
     db, Student, Violation, ViolationType, Teacher, SystemConfig, ClassRoom,
     WeeklyArchive, Subject, Grade, ChatConversation, BonusType, BonusRecord,
     Notification, GroupChatMessage, PrivateMessage, ChangeLog, StudentNotification,
-    TimetableSlot,
+    TimetableSlot, ConductSetting,
 )
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -661,6 +661,9 @@ def import_violations_to_db(violations_data):
             
             success_count += 1
             
+            # 4. CẬP NHẬT HẠNH KIỂM & CẢNH BÁO
+            update_student_conduct(student.id)
+            
         except Exception as e:
             errors.append(f"Dòng {idx+1}: {str(e)}")
             db.session.rollback()
@@ -793,6 +796,174 @@ def calculate_student_gpa(student_id, semester, school_year):
         return None
 
     return round(sum(subject_averages) / len(subject_averages), 2)
+
+
+    return round(sum(subject_averages) / len(subject_averages), 2)
+
+
+def update_student_conduct(student_id):
+    """
+    Tự động cập nhật hạnh kiểm và mức cảnh báo cho học sinh dựa trên điểm số hiện tại.
+    Gửi thông báo nếu có sự thay đổi hoặc mức cảnh báo cao.
+    """
+    try:
+        student = db.session.get(Student, student_id)
+        if not student:
+            return
+            
+        settings = ConductSetting.query.first()
+        if not settings:
+            settings = ConductSetting()
+            db.session.add(settings)
+            db.session.commit()
+            
+        old_conduct = student.conduct
+        old_warning = student.warning_level
+        score = student.current_score if student.current_score is not None else 100
+        
+        # 1. Xác định hạnh kiểm
+        if score >= settings.good_threshold:
+            new_conduct = "Tốt"
+        elif score >= settings.fair_threshold:
+            new_conduct = "Khá"
+        elif score >= settings.average_threshold:
+            new_conduct = "Trung bình"
+        else:
+            new_conduct = "Yếu"
+            
+        # 2. Xác định mức cảnh báo (Ánh xạ từ hạnh kiểm theo yêu cầu)
+        if new_conduct == "Tốt":
+            new_warning = "Xanh"
+        elif new_conduct == "Khá":
+            new_warning = "Vàng"
+        else: # Trung bình hoặc Yếu
+            new_warning = "Đỏ"
+            
+        # 3. Cập nhật nếu có thay đổi
+        if new_conduct != old_conduct or new_warning != old_warning:
+            student.conduct = new_conduct
+            student.warning_level = new_warning
+            db.session.commit()
+            
+            # 4. Gửi thông báo nếu mức cảnh báo là Vàng hoặc Đỏ
+            if new_warning in ["Vàng", "Đỏ"]:
+                title = f"CẢNH BÁO HẠNH KIỂM: Học sinh {student.name}"
+                level_text = "BÁO ĐỘNG" if new_warning == "Đỏ" else "CẢNH BÁO"
+                msg = (f"Học sinh {student.name} ({student.student_class}) có mức hạnh kiểm {new_conduct} "
+                       f"với số điểm {score}. Mức cảnh báo: {new_warning}. "
+                       f"Vui lòng kiểm tra và có biện pháp nhắc nhở.")
+                
+                # Thông báo cho BGH (Admins)
+                admins = Teacher.query.filter_by(role='admin').all()
+                for admin in admins:
+                    create_notification(title, msg, 'violation', specific_recipient_id=admin.id)
+                    
+                # Thông báo cho GVCN
+                gvcn = Teacher.query.filter_by(role='homeroom_teacher', assigned_class=student.student_class).first()
+                if gvcn:
+                    create_notification(title, msg, 'violation', specific_recipient_id=gvcn.id)
+                    
+                # Thông báo cho Học sinh
+                student_msg = (f"Chào {student.name}, hệ thống ghi nhận hạnh kiểm của em đang ở mức {new_conduct} "
+                               f"({score} điểm). Mức cảnh báo: {new_warning}. "
+                               f"Em hãy chú ý rèn luyện tốt hơn nhé!")
+                db.session.add(StudentNotification(
+                    student_id=student.id,
+                    title="Thông báo Hạnh kiểm",
+                    message=student_msg,
+                    notification_type="violation"
+                ))
+                db.session.commit()
+                
+    except Exception as e:
+        print(f"Update Conduct Error: {e}")
+        db.session.rollback()
+
+
+def update_student_academic_status(student_id):
+    """
+    Tự động cập nhật học lực và mức cảnh báo học tập cho học sinh dựa trên điểm số hiện tại.
+    Gửi thông báo nếu có sự thay đổi hoặc mức cảnh báo cao.
+    """
+    try:
+        student = db.session.get(Student, student_id)
+        if not student:
+            return
+            
+        settings = ConductSetting.query.first()
+        if not settings:
+            settings = ConductSetting()
+            db.session.add(settings)
+            db.session.commit()
+            
+        old_rank = student.academic_rank
+        old_warning = student.academic_warning_level
+        
+        # Lấy kỳ học hiện tại
+        configs = {c.key: c.value for c in SystemConfig.query.all()}
+        semester = int(configs.get("current_semester", "1"))
+        school_year = configs.get("school_year", "2025-2026")
+        
+        gpa = calculate_student_gpa(student.id, semester, school_year)
+        if gpa is None:
+            return # Chưa có điểm môn nào đầy đủ để tính GPA
+        
+        # 1. Xác định học lực (Academic Rank)
+        if gpa >= 8.0:
+            new_rank = "Giỏi"
+        elif gpa >= 6.5:
+            new_rank = "Khá"
+        elif gpa >= 5.0:
+            new_rank = "Trung bình"
+        else:
+            new_rank = "Yếu"
+            
+        # 2. Xác định mức cảnh báo (Dựa vào ngưỡng BGH cài đặt)
+        if gpa < settings.academic_red_threshold:
+            new_warning = "Đỏ"
+        elif gpa < settings.academic_yellow_threshold:
+            new_warning = "Vàng"
+        else:
+            new_warning = "Xanh"
+            
+        # 3. Cập nhật nếu có thay đổi
+        if new_rank != old_rank or new_warning != old_warning:
+            student.academic_rank = new_rank
+            student.academic_warning_level = new_warning
+            db.session.commit()
+            
+            # 4. Gửi thông báo nếu mức cảnh báo là Vàng hoặc Đỏ
+            if new_warning in ["Vàng", "Đỏ"]:
+                title = f"CẢNH BÁO HỌC TẬP: Học sinh {student.name}"
+                msg = (f"Học sinh {student.name} ({student.student_class}) có học lực hiện tại là {new_rank} "
+                       f"với điểm trung bình (GPA) là {gpa}. Mức cảnh báo học tập: {new_warning}. "
+                       f"Vui lòng kiểm tra và có biện pháp hỗ trợ học tập cho học sinh.")
+                
+                # Thông báo cho BGH (Admins)
+                admins = Teacher.query.filter_by(role='admin').all()
+                for admin in admins:
+                    create_notification(title, msg, 'grade', specific_recipient_id=admin.id)
+                    
+                # Thông báo cho GVCN
+                gvcn = Teacher.query.filter_by(role='homeroom_teacher', assigned_class=student.student_class).first()
+                if gvcn:
+                    create_notification(title, msg, 'grade', specific_recipient_id=gvcn.id)
+                    
+                # Thông báo cho Học sinh
+                student_msg = (f"Chào {student.name}, hệ thống ghi nhận học lực của em hiện đang là {new_rank} "
+                               f"(GPA: {gpa}). Mức cảnh báo học tập: {new_warning}. "
+                               f"Em hãy cố gắng học tập tốt hơn nhé!")
+                db.session.add(StudentNotification(
+                    student_id=student.id,
+                    title="Thông báo Học lực",
+                    message=student_msg,
+                    notification_type="grade"
+                ))
+                db.session.commit()
+                
+    except Exception as e:
+        print(f"Update Academic Error: {e}")
+        db.session.rollback()
 
 
 def register_template_extensions(app):

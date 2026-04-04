@@ -10,7 +10,7 @@ from flask_login import LoginManager
 
 from sqlalchemy import inspect, text
 
-from models import db, Teacher, SystemConfig, ViolationType
+from models import db, Teacher, SystemConfig, ViolationType, ConductSetting
 from app_helpers import register_template_extensions
 from routes import register_all_routes
 
@@ -156,6 +156,31 @@ def ensure_student_notification_sender_column():
     db.session.commit()
 
 
+def ensure_student_conduct_columns():
+    insp = inspect(db.engine)
+    if not insp.has_table("student"):
+        return
+    cols = {c["name"] for c in insp.get_columns("student")}
+    if "conduct" not in cols:
+        db.session.execute(text("ALTER TABLE student ADD COLUMN conduct VARCHAR(20) DEFAULT 'Tốt'"))
+    if "warning_level" not in cols:
+        db.session.execute(text("ALTER TABLE student ADD COLUMN warning_level VARCHAR(20) DEFAULT 'Xanh'"))
+    if "academic_rank" not in cols:
+        db.session.execute(text("ALTER TABLE student ADD COLUMN academic_rank VARCHAR(20) DEFAULT 'Khá'"))
+    if "academic_warning_level" not in cols:
+        db.session.execute(text("ALTER TABLE student ADD COLUMN academic_warning_level VARCHAR(20) DEFAULT 'Xanh'"))
+    
+    # Check ConductSetting table
+    if insp.has_table("conduct_setting"):
+        c_cols = {c["name"] for c in insp.get_columns("conduct_setting")}
+        if "academic_yellow_threshold" not in c_cols:
+            db.session.execute(text("ALTER TABLE conduct_setting ADD COLUMN academic_yellow_threshold FLOAT DEFAULT 6.5"))
+        if "academic_red_threshold" not in c_cols:
+            db.session.execute(text("ALTER TABLE conduct_setting ADD COLUMN academic_red_threshold FLOAT DEFAULT 5.0"))
+            
+    db.session.commit()
+
+
 def create_database():
     db.create_all()
     ensure_student_parent_columns()
@@ -166,6 +191,7 @@ def create_database():
     ensure_violation_lesson_book_column()
     ensure_timetable_slot_week_number_column()
     ensure_student_notification_sender_column()
+    ensure_student_conduct_columns()
     if not Teacher.query.first():
         hashed_pwd = generate_password_hash("admin")
         db.session.add(Teacher(username="admin", password=hashed_pwd, full_name="Admin", role="admin"))
@@ -173,6 +199,8 @@ def create_database():
         db.session.add(SystemConfig(key="current_week", value="1"))
     if not ViolationType.query.first():
         db.session.add(ViolationType(name="Đi muộn", points_deducted=2))
+    if not ConductSetting.query.first():
+        db.session.add(ConductSetting())
     db.session.commit()
 
 

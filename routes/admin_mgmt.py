@@ -9,17 +9,17 @@ from flask import render_template, request, jsonify, redirect, url_for, flash, s
 from flask_login import login_user, login_required, current_user
 from sqlalchemy import func, desc, or_, and_
 from werkzeug.security import generate_password_hash
-
 from models import (
     db, Student, Violation, ViolationType, Teacher, SystemConfig, ClassRoom,
     WeeklyArchive, Subject, Grade, BonusType, BonusRecord, Notification,
-    GroupChatMessage, PrivateMessage, ChangeLog,
+    GroupChatMessage, PrivateMessage, ChangeLog, ConductSetting,
 )
 from app_helpers import (
     admin_required, get_accessible_students, can_access_student, normalize_student_code,
     parse_excel_file, import_violations_to_db, calculate_week_from_date, _call_gemini,
     save_weekly_archive, get_current_iso_week, create_notification, log_change,
-    UPLOAD_FOLDER, calculate_student_gpa, is_reset_needed,
+    UPLOAD_FOLDER, calculate_student_gpa, is_reset_needed, update_student_conduct,
+    update_student_academic_status,
 )
 
 
@@ -38,7 +38,31 @@ def register(app):
                         db.session.add(config)
                     else:
                         config.value = val
+            
+            # --- Cập nhật ConductSetting (BGH) ---
+            conduct_settings = ConductSetting.query.first()
+            if not conduct_settings:
+                conduct_settings = ConductSetting()
+                db.session.add(conduct_settings)
+            
+            try:
+                conduct_settings.good_threshold = int(request.form.get("good_threshold", 80))
+                conduct_settings.fair_threshold = int(request.form.get("fair_threshold", 65))
+                conduct_settings.average_threshold = int(request.form.get("average_threshold", 50))
+                conduct_settings.warning_yellow_threshold = int(request.form.get("warning_yellow_threshold", 70))
+                conduct_settings.warning_red_threshold = int(request.form.get("warning_red_threshold", 55))
+                # Học lực (academic)
+                conduct_settings.academic_yellow_threshold = float(request.form.get("academic_yellow_threshold", 6.5))
+                conduct_settings.academic_red_threshold = float(request.form.get("academic_red_threshold", 5.0))
+            except (ValueError, TypeError):
+                pass
+            
             db.session.commit()
+            
+            # Cập nhật lại toàn bộ học sinh khi đổi cấu hình
+            for s in Student.query.all():
+                update_student_conduct(s.id)
+                update_student_academic_status(s.id)
             flash("Cập nhật cài đặt hệ thống thành công!", "success")
             return redirect(url_for("manage_settings"))
     
@@ -51,7 +75,14 @@ def register(app):
         if "school_year" not in configs: configs["school_year"] = "2025-2026"
         if "current_semester" not in configs: configs["current_semester"] = "1"
     
-        return render_template("manage_settings.html", configs=configs)
+        # Lấy conduct settings
+        conduct_settings = ConductSetting.query.first()
+        if not conduct_settings:
+            conduct_settings = ConductSetting()
+            db.session.add(conduct_settings)
+            db.session.commit()
+            
+        return render_template("manage_settings.html", configs=configs, conduct_settings=conduct_settings)
 
 
     @app.route("/admin/reset_week", methods=["POST"])
@@ -81,6 +112,12 @@ def register(app):
                 last_reset_cfg.value = current_iso
             
             db.session.commit()
+            
+            # 6. Cập nhật hạnh kiểm & học lực cho toàn bộ học sinh sau khi reset điểm
+            for s in Student.query.all():
+                update_student_conduct(s.id)
+                update_student_academic_status(s.id)
+                
             flash(f"Đã kết thúc Tuần {current_week_num}. Hệ thống chuyển sang Tuần {current_week_num + 1}.", "success")
         
         except Exception as e:

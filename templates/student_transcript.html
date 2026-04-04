@@ -48,33 +48,68 @@
     </div>
 
     {% if gpa %}
-    <div class="bg-white rounded-xl shadow-card p-6 mb-6 border border-[hsl(240,5.9%,90%)]">
-        <div class="flex items-center justify-between">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- GPA Card -->
+        <div class="bg-white rounded-xl shadow-card p-6 border border-border flex items-center justify-between">
             <div>
-                <p class="text-sm font-medium text-muted-foreground mb-1">Điểm Trung Bình Chung (GPA)</p>
-                <p class="text-4xl font-bold text-indigo-600">{{ gpa }}</p>
-            </div>
-            <div
-                class="w-24 h-24 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center">
-                <div class="text-center">
-                    <p class="text-2xl font-semibold tracking-tight text-white">{{ gpa }}</p>
-                    <p class="text-xs text-white/80">GPA</p>
+                <p class="text-sm font-medium text-muted-foreground mb-1 font-mono uppercase tracking-wider">Điểm Trung Bình Chung (GPA)</p>
+                <div class="flex items-baseline gap-2">
+                    <p class="text-5xl font-extrabold text-primary tracking-tighter">{{ gpa }}</p>
+                    <span class="text-sm text-muted-foreground font-medium">/ 10.0</span>
+                </div>
+                <div class="mt-3 flex items-center gap-2">
+                    <span class="text-xs font-semibold px-2 py-1 bg-primary/10 text-primary rounded-md">Học kỳ {{ semester }}</span>
+                    <span class="text-xs font-medium text-muted-foreground">{{ school_year }}</span>
                 </div>
             </div>
+            <div class="relative w-24 h-24 flex items-center justify-center">
+                <svg class="w-full h-full transform -rotate-90">
+                    <circle cx="48" cy="48" r="40" stroke="currentColor" stroke-width="8" fill="transparent" class="text-muted/20" />
+                    <circle cx="48" cy="48" r="40" stroke="currentColor" stroke-width="8" fill="transparent" 
+                        class="text-primary transition-all duration-1000 ease-out" 
+                        stroke-dasharray="251.2" 
+                        stroke-dashoffset="{{ 251.2 * (1 - gpa / 10) }}" />
+                </svg>
+                <i class="fas fa-chart-line absolute text-primary/40 text-xl"></i>
+            </div>
         </div>
-        <div class="mt-4 pt-4 border-t border-[hsl(240,5.9%,90%)]">
-            <div class="flex gap-2 items-center">
-                <span class="text-sm text-muted-foreground">Xếp loại:</span>
-                {% if gpa >= 8.5 %}
-                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">Giỏi</span>
-                {% elif gpa >= 7.0 %}
-                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">Khá</span>
-                {% elif gpa >= 5.0 %}
-                <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold">Trung
-                    Bình</span>
-                {% else %}
-                <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-semibold">Yếu</span>
-                {% endif %}
+
+        <!-- Status Card -->
+        <div class="bg-white rounded-xl shadow-card p-6 border border-border">
+            <p class="text-sm font-medium text-muted-foreground mb-4 font-mono uppercase tracking-wider text-right">Trạng thái học tập</p>
+            <div class="flex items-center justify-between">
+                <div class="flex flex-col gap-1">
+                    <span class="text-xs text-muted-foreground font-medium">Xếp loại hiện tại</span>
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl font-bold tracking-tight 
+                            {% if student.academic_warning_level == 'Đỏ' %}text-red-600
+                            {% elif student.academic_warning_level == 'Vàng' %}text-amber-600
+                            {% else %}text-emerald-600{% endif %}">
+                            {{ student.academic_rank }}
+                        </span>
+                        {% if student.academic_warning_level != 'Xanh' %}
+                        <div class="flex items-center gap-1.5 px-2 py-1 rounded-full animate-pulse
+                            {% if student.academic_warning_level == 'Đỏ' %}bg-red-100 text-red-700
+                            {% else %}bg-amber-100 text-amber-700{% endif %}">
+                            <i class="fas fa-exclamation-triangle text-[10px]"></i>
+                            <span class="text-[10px] font-bold uppercase tracking-tight">Cảnh báo {{ student.academic_warning_level }}</span>
+                        </div>
+                        {% else %}
+                        <div class="flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 font-bold text-[10px] uppercase">
+                            <i class="fas fa-check-circle"></i> Ổn định
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="p-4 rounded-2xl 
+                    {% if student.academic_warning_level == 'Đỏ' %}bg-red-50 text-red-500
+                    {% elif student.academic_warning_level == 'Vàng' %}bg-amber-50 text-amber-500
+                    {% else %}bg-emerald-50 text-emerald-500{% endif %}">
+                    <i class="fas {% if student.academic_warning_level == 'Đỏ' %}fa-radiation-alt{% elif student.academic_warning_level == 'Vàng' %}fa-bell{% else %}fa-medal{% endif %} text-3xl"></i>
+                </div>
+            </div>
+            <div class="mt-4 text-[11px] text-muted-foreground italic leading-tight">
+                * Mức cảnh báo được hệ thống EduMind AI tự động tính toán dựa trên GPA và cấu hình của BGH.
             </div>
         </div>
     </div>

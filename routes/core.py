@@ -95,8 +95,13 @@ def register(app):
     def index():
         search = request.args.get('search', '').strip()
         selected_class = request.args.get('class_select', '').strip()
+        selected_warning = request.args.get('warning_level', '').strip()
+        selected_academic_warning = request.args.get('academic_warning', '').strip()
+        
         q = get_accessible_students()  # Filter by role
         if selected_class: q = q.filter_by(student_class=selected_class)
+        if selected_warning: q = q.filter_by(warning_level=selected_warning)
+        if selected_academic_warning: q = q.filter_by(academic_warning_level=selected_academic_warning)
         if search: q = q.filter(or_(Student.name.ilike(f"%{search}%"), Student.student_code.ilike(f"%{search}%")))
         students = q.order_by(Student.student_code.asc()).all()
     
@@ -110,7 +115,7 @@ def register(app):
             gpa = calculate_student_gpa(student.id, semester, school_year)
             student_gpas[student.id] = gpa
     
-        return render_template('index.html', students=students, student_gpas=student_gpas, search_query=search, selected_class=selected_class)
+        return render_template('index.html', students=students, student_gpas=student_gpas, search_query=search, selected_class=selected_class, selected_warning=selected_warning, selected_academic_warning=selected_academic_warning)
     @app.route("/dashboard")
     @login_required
     def dashboard():

@@ -62,6 +62,20 @@ class Teacher(UserMixin, db.Model):
     assigned_subject = db.relationship('Subject', backref='teachers', foreign_keys=[assigned_subject_id])
 
 
+class ConductSetting(db.Model):
+    """Cấu hình điểm sàn hạnh kiểm (BGH thiết lập)"""
+    id = db.Column(db.Integer, primary_key=True)
+    good_threshold = db.Column(db.Integer, default=80)    # Tốt >= 80
+    fair_threshold = db.Column(db.Integer, default=65)    # Khá >= 65
+    average_threshold = db.Column(db.Integer, default=50) # Trung bình >= 50
+    # Ngưỡng báo động (mức điểm để kích hoạt cảnh báo)
+    warning_yellow_threshold = db.Column(db.Integer, default=70) # Vàng
+    warning_red_threshold = db.Column(db.Integer, default=55)    # Đỏ
+    # Cấu hình học lực (BGH thiết lập)
+    academic_yellow_threshold = db.Column(db.Float, default=6.5) # Vàng: GPA < 6.5
+    academic_red_threshold = db.Column(db.Float, default=5.0)    # Đỏ: GPA < 5.0
+
+
 class Student(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_code = db.Column(db.String(50), unique=True, nullable=False)
@@ -73,6 +87,10 @@ class Student(db.Model):
     portrait_filename = db.Column(db.String(255), nullable=True)
     date_of_birth = db.Column(db.String(30), nullable=True)  # VD: 15/08/2008
     position = db.Column(db.String(50), nullable=True)  # Chức vụ: Lớp trưởng, Bí thư, ...
+    conduct = db.Column(db.String(20), default="Tốt")
+    warning_level = db.Column(db.String(20), default="Xanh") # Xanh, Vàng, Đỏ
+    academic_rank = db.Column(db.String(20), default="Khá")
+    academic_warning_level = db.Column(db.String(20), default="Xanh") # Xanh, Vàng, Đỏ
 
 
 class ViolationType(db.Model):

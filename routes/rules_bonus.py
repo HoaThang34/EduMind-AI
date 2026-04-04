@@ -19,7 +19,7 @@ from app_helpers import (
     admin_required, get_accessible_students, can_access_student, normalize_student_code,
     parse_excel_file, import_violations_to_db, calculate_week_from_date, _call_gemini,
     save_weekly_archive, get_current_iso_week, create_notification, log_change,
-    UPLOAD_FOLDER, calculate_student_gpa, is_reset_needed,
+    UPLOAD_FOLDER, calculate_student_gpa, is_reset_needed, update_student_conduct,
 )
 
 
@@ -193,6 +193,8 @@ def register(app):
                         ))
                         log_change('bonus', f'Điểm cộng: {bonus_type.name} (+{bonus_type.points_added} điểm){" - " + reason if reason else ""}', student_id=student.id, student_name=student.name, student_class=student.student_class, old_value=old_score, new_value=student.current_score)
                         count += 1
+                        # Cập nhật hạnh kiểm
+                        update_student_conduct(student.id)
         
             if count > 0:
                 db.session.commit()
