@@ -11,7 +11,7 @@ from datetime import datetime
 
 ai_engine_bp = Blueprint('ai_engine', __name__)
 
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemini-3-flash-preview")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
 
 @ai_engine_bp.route("/chatbot")
 @login_required
@@ -256,7 +256,7 @@ def generate_report(student_id):
         4. Trả lời bằng Tiếng Việt. Không cần chào hỏi rườm rà, vào thẳng nội dung nhận xét.
         """
 
-        # Gọi Ollama (Chạy model Text: ollama run gemini-3-flash-preview)
+        # Gọi Ollama (model: OLLAMA_MODEL / ollama list)
         model_name = os.environ.get("OLLAMA_TEXT_MODEL", OLLAMA_MODEL) 
         
         response = ollama.chat(model=model_name, messages=[
@@ -394,7 +394,7 @@ Trả lời ngắn gọn, rõ ràng bằng tiếng Việt. Sử dụng markdown 
     answer, err = call_ollama(full_prompt)
     
     if err:
-        response_text = f"⚠️ {err}\n\nVui lòng kiểm tra:\n• Ollama đã được cài đặt và chạy chưa?\n• Model đã được pull chưa? (`ollama pull gemini-3-flash-preview`)"
+        response_text = f"⚠️ {err}\n\nVui lòng kiểm tra:\n• Ollama đã được cài đặt và chạy chưa?\n• Model đã được pull chưa? (`ollama pull {OLLAMA_MODEL}` — tên phải khớp OLLAMA_MODEL trong .env và `ollama list`)"
     else:
         response_text = answer or "Xin lỗi, tôi không thể trả lời câu hỏi này."
     

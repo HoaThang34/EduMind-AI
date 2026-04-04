@@ -1,5 +1,9 @@
-
 import os
+from dotenv import load_dotenv
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+load_dotenv(os.path.join(basedir, ".env"))
+
 from flask import Flask, send_from_directory
 from werkzeug.security import generate_password_hash
 from flask_login import LoginManager
@@ -10,7 +14,6 @@ from models import db, Teacher, SystemConfig, ViolationType
 from app_helpers import register_template_extensions
 from routes import register_all_routes
 
-basedir = os.path.abspath(os.path.dirname(__file__))
 template_dir = os.path.join(basedir, "templates")
 
 app = Flask(__name__, template_folder=template_dir)

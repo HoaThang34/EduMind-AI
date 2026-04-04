@@ -14,7 +14,7 @@ from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
 student_bp = Blueprint('student', __name__)
 
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemini-3-flash-preview")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
 
 # Token xác minh thẻ học sinh (QR) — không lộ dữ liệu nếu không có chữ ký hợp lệ
 def _student_card_serializer():

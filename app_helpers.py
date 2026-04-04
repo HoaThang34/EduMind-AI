@@ -27,7 +27,9 @@ UPLOAD_FOLDER = os.path.join(basedir, "uploads")
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-OLLAMA_MODEL = "gemini-3-flash-preview"
+# Tên model phải trùng với `ollama list` (vd: llama3.2, mistral, qwen2.5).
+# "gemini-*" là model Google API, không có sẵn trong Ollama mặc định.
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2")
 OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 
 # === HELPER FUNCTIONS CHO PHÂN QUYỀN ===
@@ -91,7 +93,7 @@ def can_access_student(student_id):
 def call_ollama(prompt, model=None):
     """
     Gọi Ollama API để chat với AI model local.
-    Model mặc định: gemini-3-flash-preview (chạy bằng: ollama run gemini-3-flash-preview)
+    Model mặc định: biến môi trường OLLAMA_MODEL hoặc llama3.2 (`ollama pull llama3.2`).
     Args:
         prompt: Câu hỏi/prompt gửi cho AI
         model: Tên model Ollama (None = dùng OLLAMA_MODEL)
