@@ -65,10 +65,11 @@
                             <button onclick="stopCamera('camera-video', 'camera-placeholder', 'scan-overlay', 'start-cam-btn', 'stop-cam-btn')" id="stop-cam-btn" class="btn-destructive text-xs px-3 py-1.5 hidden flex items-center gap-1.5">Tắt camera</button>
                         </div>
                     </div>
-                    <div class="relative bg-gray-950 aspect-video flex items-center justify-center">
-                        <video id="camera-video" autoplay playsinline class="w-full h-full object-cover hidden"></video>
-                        <canvas id="camera-canvas" class="hidden"></canvas>
-                        <div id="camera-placeholder" class="flex flex-col items-center justify-center gap-4 text-gray-400 py-16">
+                        <div class="relative bg-gray-950 aspect-video flex items-center justify-center overflow-hidden">
+                            <video id="camera-video" autoplay playsinline class="w-full h-full object-cover hidden"></video>
+                            <canvas id="face-overlay" class="absolute inset-0 w-full h-full object-cover pointer-events-none z-10"></canvas>
+                            <canvas id="camera-canvas" class="hidden"></canvas>
+                            <div id="camera-placeholder" class="flex flex-col items-center justify-center gap-4 text-gray-400 py-16">
                             <svg class="w-20 h-20 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                             <p class="text-sm">Nhấn "Bật camera" để bắt đầu điểm danh</p>
                         </div>
@@ -230,6 +231,16 @@ async function startCamera(vidId, placeholderId, overlayId, startBtnId, stopBtnI
         const video = document.getElementById(vidId);
         video.srcObject = camStream;
         video.classList.remove('hidden');
+        
+        // Tự động khớp kích thước overlay với video
+        video.onloadedmetadata = () => {
+            const overlay = document.getElementById('face-overlay');
+            if (overlay) {
+                overlay.width = video.videoWidth;
+                overlay.height = video.videoHeight;
+            }
+        };
+
         if (placeholderId) document.getElementById(placeholderId).classList.add('hidden');
         if (overlayId) document.getElementById(overlayId).classList.remove('hidden');
         if (startBtnId) document.getElementById(startBtnId).classList.add('hidden');
@@ -258,6 +269,14 @@ function stopCamera(vidId, placeholderId, overlayId, startBtnId, stopBtnId) {
     if (stopBtnId) document.getElementById(stopBtnId).classList.add('hidden');
     if (vidId === 'camera-video') {
         document.getElementById('recognize-btn').disabled = true;
+        
+        // Xóa khung nhận diện khi tắt cam
+        const overlay = document.getElementById('face-overlay');
+        if (overlay) {
+            const ctx = overlay.getContext('2d');
+            ctx.clearRect(0, 0, overlay.width, overlay.height);
+        }
+
         if (autoScanInterval) {
             clearInterval(autoScanInterval);
             autoScanInterval = null;
@@ -303,6 +322,36 @@ async function captureAndRecognize(isAuto = false) {
         });
         const data = await resp.json();
         
+        // Vẽ khung nhận diện
+        const overlay = document.getElementById('face-overlay');
+        const ctx = overlay.getContext('2d');
+        ctx.clearRect(0, 0, overlay.width, overlay.height);
+
+        if (data.box) {
+            const [rx, ry, rw, rh] = data.box.map(v => v / scale);
+            const color = data.matched ? '#10b981' : '#6366f1'; // Emerald or Indigo
+            
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(rx, ry, rw, rh);
+            
+            // Vẽ 4 góc định vị (Artistic corners)
+            ctx.lineWidth = 5;
+            const len = 20;
+            // Top-left
+            ctx.beginPath(); ctx.moveTo(rx, ry + len); ctx.lineTo(rx, ry); ctx.lineTo(rx + len, ry); ctx.stroke();
+            // Top-right
+            ctx.beginPath(); ctx.moveTo(rx + rw - len, ry); ctx.lineTo(rx + rw, ry); ctx.lineTo(rx + rw, ry + len); ctx.stroke();
+            // Bottom-left
+            ctx.beginPath(); ctx.moveTo(rx, ry + rh - len); ctx.lineTo(rx, ry + rh); ctx.lineTo(rx + len, ry + rh); ctx.stroke();
+            // Bottom-right
+            ctx.beginPath(); ctx.moveTo(rx + rw - len, ry + rh); ctx.lineTo(rx + rw, ry + rh); ctx.lineTo(rx + rw, ry + rh - len); ctx.stroke();
+            
+            // Hiệu ứng scan line trong khung
+            ctx.fillStyle = color + '22';
+            ctx.fillRect(rx, ry, rw, rh);
+        }
+
         if (data.matched) {
             // Hiển thị kết quả nhận diện
             resDiv.innerHTML = `

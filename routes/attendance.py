@@ -83,21 +83,21 @@ def _get_portrait_path(student):
 
 
 def _extract_face(img, size=(200, 200)):
-    """Phát hiện và cắt khuôn mặt lớn nhất."""
+    """Phát hiện và cắt khuôn mặt lớn nhất. Trả về (face_gray, face_color, box)."""
     if img is None:
-        return None, None
+        return None, None, None
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     gray = cv2.equalizeHist(gray)
     faces = face_cascade.detectMultiScale(
         gray, scaleFactor=1.1, minNeighbors=5, minSize=(60, 60)
     )
     if len(faces) == 0:
-        return None, None
+        return None, None, None
     faces = sorted(faces, key=lambda f: f[2] * f[3], reverse=True)
     x, y, w, h = faces[0]
     face_gray = gray[y:y+h, x:x+w]
     face_gray = cv2.resize(face_gray, size)
-    return face_gray, img[y:y+h, x:x+w]
+    return face_gray, img[y:y+h, x:x+w], (int(x), int(y), int(w), int(h))
 
 
 def _get_model_path(class_name):
@@ -150,7 +150,7 @@ def _train_model_for_class(class_name):
             
             # Nếu là file từ enrollment thì nó đã là mặt xám resize rồi, 
             # nhưng ta vẫn chạy detect cho chắc ăn nếu là ảnh portrait
-            face_gray, _ = _extract_face(img)
+            face_gray, _, _ = _extract_face(img)
             if face_gray is None:
                 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                 face_gray = cv2.resize(gray, (200, 200))
@@ -283,7 +283,7 @@ def register(app):
         if not student_id or not image_base64:
             return jsonify({"error": "Thiếu thông tin."}), 400
         img = _base64_to_cv2(image_base64)
-        face_gray, _ = _extract_face(img)
+        face_gray, _, _ = _extract_face(img)
         if face_gray is None:
             return jsonify({"error": "Không phát hiện khuôn mặt sắc nét. Hãy thử lại."}), 400
         e_dir = _get_enrollment_path(student_id)
@@ -309,16 +309,17 @@ def register(app):
         if recognizer is None:
             return jsonify({"matched": False, "error": "Chưa huấn luyện model cho lớp này."})
         camera_img = _base64_to_cv2(image_base64)
-        face_gray, _ = _extract_face(camera_img)
+        face_gray, _, box = _extract_face(camera_img)
         if face_gray is None:
             return jsonify({"matched": False, "error": "Không phát hiện khuôn mặt."})
+        
         label, confidence_raw = recognizer.predict(face_gray)
         THRESHOLD = 100.0
         if confidence_raw < THRESHOLD and label in label_map:
             student_id = label_map[label]
             student = db.session.get(Student, student_id)
             if not student:
-                return jsonify({"matched": False, "error": "Lỗi dữ liệu."})
+                return jsonify({"matched": False, "error": "Lỗi dữ liệu.", "box": box})
             confidence = max(0, min(1, 1 - (confidence_raw / 150)))
             captured_filename = _save_captured_photo(image_base64)
             return jsonify({
@@ -328,8 +329,9 @@ def register(app):
                 "student_code": student.student_code,
                 "confidence": round(confidence, 2),
                 "captured_photo": captured_filename,
+                "box": box
             })
-        return jsonify({"matched": False, "error": "Không nhận diện được học sinh."})
+        return jsonify({"matched": False, "error": "Không nhận diện được học sinh.", "box": box})
 
     @app.route("/api/attendance/checkin", methods=["POST"])
     @login_required
