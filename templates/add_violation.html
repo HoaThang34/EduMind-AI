@@ -175,6 +175,17 @@
                     </p>
                 </div>
 
+                <div>
+                    <label class="block text-sm font-medium text-foreground mb-1">Liên kết sổ đầu bài (tuỳ chọn)</label>
+                    <select name="lesson_book_entry_id" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-shadcn text-sm">
+                        <option value="">— Không —</option>
+                        {% for e in lesson_entries %}
+                        <option value="{{ e.id }}">{{ e.lesson_date.strftime('%d/%m/%Y') }} · Tiết {{ e.period_number }} · {{ e.class_name }} — {{ (e.topic or '')[:50] }}{% if (e.topic or '')|length > 50 %}…{% endif %}</option>
+                        {% endfor %}
+                    </select>
+                    <p class="text-xs text-muted-foreground mt-1">Áp dụng khi chọn học sinh <strong>cùng một lớp</strong> với tiết trong sổ đầu bài.</p>
+                </div>
+
                 <div class="pt-2">
                     <button type="submit"
                         class="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-bold shadow-md transition-all flex justify-center items-center gap-2">

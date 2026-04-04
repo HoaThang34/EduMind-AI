@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Thời khóa biểu{% endblock %}
+
+{% block content %}
+<div class="max-w-[1100px] mx-auto space-y-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-semibold tracking-tight text-foreground">Thời khóa biểu</h1>
+            <p class="text-muted-foreground text-sm mt-1">Theo lớp — năm học và học kỳ hiện hành.</p>
+        </div>
+        {% if is_admin %}
+        <a href="{{ url_for('timetable_manage') }}" class="btn-primary py-2 px-4 rounded-xl text-sm inline-flex items-center gap-2">
+            <i class="fas fa-cog text-xs"></i> Quản trị & nhập liệu
+        </a>
+        {% endif %}
+    </div>
+
+    <form method="GET" class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl p-4 shadow-card flex flex-wrap gap-3 items-end">
+        <div>
+            <label class="block text-xs font-medium text-muted-foreground mb-1">Lớp</label>
+            <select name="class_name" class="input-shadcn py-2 text-sm min-w-[160px]">
+                <option value="">— Chọn lớp —</option>
+                {% for c in classes %}
+                <option value="{{ c }}" {% if c == class_name %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-muted-foreground mb-1">Năm học</label>
+            <input type="text" name="school_year" value="{{ school_year }}" class="input-shadcn py-2 text-sm w-32">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-muted-foreground mb-1">Học kỳ</label>
+            <select name="semester" class="input-shadcn py-2 text-sm">
+                <option value="1" {% if semester == 1 %}selected{% endif %}>HK1</option>
+                <option value="2" {% if semester == 2 %}selected{% endif %}>HK2</option>
+            </select>
+        </div>
+        <button type="submit" class="btn-outline py-2 px-4 text-sm rounded-lg">Xem</button>
+    </form>
+
+    {% if class_name %}
+    <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl overflow-hidden shadow-card">
+        <div class="overflow-x-auto">
+            <table class="table-shadcn w-full text-sm text-center">
+                <thead>
+                    <tr class="bg-accent/80">
+                        <th class="px-2 py-2 text-xs font-semibold text-muted-foreground w-14">Tiết</th>
+                        {% for d in range(1, 8) %}
+                        <th class="px-2 py-2 text-xs font-semibold text-foreground min-w-[100px]">{{ day_labels[d - 1] }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[hsl(240,5.9%,90%)]">
+                    {% for p in range(1, max_periods + 1) %}
+                    <tr>
+                        <td class="px-2 py-3 font-bold text-muted-foreground bg-accent/30">{{ p }}</td>
+                        {% for d in range(1, 8) %}
+                        {% set slot = grid.get((d, p)) %}
+                        <td class="px-2 py-2 align-top text-left">
+                            {% if slot %}
+                            <div class="font-medium text-foreground text-xs leading-snug">
+                                {{ slot.subject.name if slot.subject else (slot.subject_name_override or '—') }}
+                            </div>
+                            {% if slot.room %}
+                            <div class="text-[11px] text-muted-foreground mt-0.5">Phòng {{ slot.room }}</div>
+                            {% endif %}
+                            {% else %}
+                            <span class="text-muted-foreground/50">—</span>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <p class="text-muted-foreground text-sm">Chọn lớp để xem thời khóa biểu.</p>
+    {% endif %}
+</div>
+{% endblock %}

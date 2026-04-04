@@ -8,12 +8,14 @@ import pandas as pd
 from flask import render_template, request, jsonify, redirect, url_for, flash, session, send_file
 from flask_login import login_user, login_required, current_user
 from sqlalchemy import func, desc, or_, and_
+
+from routes.lesson_book import lesson_book_visible_query
 from werkzeug.security import generate_password_hash
 
 from models import (
     db, Student, Violation, ViolationType, Teacher, SystemConfig, ClassRoom,
     WeeklyArchive, Subject, Grade, BonusType, BonusRecord, Notification,
-    GroupChatMessage, PrivateMessage, ChangeLog,
+    GroupChatMessage, PrivateMessage, ChangeLog, LessonBookEntry,
 )
 from app_helpers import (
     admin_required, get_accessible_students, can_access_student, normalize_student_code,
@@ -36,6 +38,10 @@ def register(app):
         
             # 2. Lấy danh sách từ OCR (Dạng JSON nếu có)
             ocr_json = request.form.get("students_list")
+
+            lb_raw = request.form.get("lesson_book_entry_id", "").strip()
+            lesson_book_entry_id = int(lb_raw) if lb_raw.isdigit() else None
+            linked_lesson = db.session.get(LessonBookEntry, lesson_book_entry_id) if lesson_book_entry_id else None
         
             if not selected_rule_ids:
                 flash("Vui lòng chọn ít nhất một lỗi vi phạm!", "error")
@@ -44,6 +50,19 @@ def register(app):
             w_cfg = SystemConfig.query.filter_by(key="current_week").first()
             current_week = int(w_cfg.value) if w_cfg else 1
             count = 0
+
+            if linked_lesson and selected_student_ids:
+                st_classes = set()
+                for s_id in selected_student_ids:
+                    st = db.session.get(Student, int(s_id))
+                    if st:
+                        st_classes.add(st.student_class)
+                if len(st_classes) != 1 or list(st_classes)[0] != linked_lesson.class_name:
+                    lesson_book_entry_id = None
+                    linked_lesson = None
+            elif linked_lesson and ocr_json:
+                lesson_book_entry_id = None
+                linked_lesson = None
 
             # Process each violation type
             for rule_id in selected_rule_ids:
@@ -62,7 +81,13 @@ def register(app):
                         if student:
                             old_score = student.current_score or 100
                             student.current_score = old_score - rule.points_deducted
-                            db.session.add(Violation(student_id=student.id, violation_type_name=rule.name, points_deducted=rule.points_deducted, week_number=current_week))
+                            db.session.add(Violation(
+                                student_id=student.id,
+                                violation_type_name=rule.name,
+                                points_deducted=rule.points_deducted,
+                                week_number=current_week,
+                                lesson_book_entry_id=lesson_book_entry_id,
+                            ))
                             log_change('violation', f'Vi phạm: {rule.name} (-{rule.points_deducted} điểm)', student_id=student.id, student_name=student.name, student_class=student.student_class, old_value=old_score, new_value=student.current_score)
                             count += 1
             
@@ -91,7 +116,13 @@ def register(app):
                             if s:
                                 old_score = s.current_score or 100
                                 s.current_score = old_score - rule.points_deducted
-                                db.session.add(Violation(student_id=s.id, violation_type_name=rule.name, points_deducted=rule.points_deducted, week_number=current_week))
+                                db.session.add(Violation(
+                                    student_id=s.id,
+                                    violation_type_name=rule.name,
+                                    points_deducted=rule.points_deducted,
+                                    week_number=current_week,
+                                    lesson_book_entry_id=None,
+                                ))
                                 log_change('violation', f'Vi phạm (OCR): {rule.name} (-{rule.points_deducted} điểm)', student_id=s.id, student_name=s.name, student_class=s.student_class, old_value=old_score, new_value=s.current_score)
                                 count += 1
                     except Exception as e:
@@ -127,7 +158,18 @@ def register(app):
 
         # GET: Truyền thêm danh sách học sinh để hiển thị trong Dropdown (filtered by role)
         students = get_accessible_students().order_by(Student.student_class, Student.name).all()
-        return render_template("add_violation.html", rules=ViolationType.query.all(), students=students)
+        lesson_entries = (
+            lesson_book_visible_query()
+            .order_by(desc(LessonBookEntry.lesson_date), desc(LessonBookEntry.id))
+            .limit(120)
+            .all()
+        )
+        return render_template(
+            "add_violation.html",
+            rules=ViolationType.query.all(),
+            students=students,
+            lesson_entries=lesson_entries,
+        )
 
 
 

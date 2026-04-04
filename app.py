@@ -86,11 +86,33 @@ def ensure_student_date_of_birth_column():
     db.session.commit()
 
 
+def ensure_lesson_book_timetable_column():
+    insp = inspect(db.engine)
+    if not insp.has_table("lesson_book_entry"):
+        return
+    cols = {c["name"] for c in insp.get_columns("lesson_book_entry")}
+    if "timetable_slot_id" not in cols:
+        db.session.execute(text("ALTER TABLE lesson_book_entry ADD COLUMN timetable_slot_id INTEGER"))
+    db.session.commit()
+
+
+def ensure_violation_lesson_book_column():
+    insp = inspect(db.engine)
+    if not insp.has_table("violation"):
+        return
+    cols = {c["name"] for c in insp.get_columns("violation")}
+    if "lesson_book_entry_id" not in cols:
+        db.session.execute(text("ALTER TABLE violation ADD COLUMN lesson_book_entry_id INTEGER"))
+    db.session.commit()
+
+
 def create_database():
     db.create_all()
     ensure_student_parent_columns()
     ensure_student_portrait_column()
     ensure_student_date_of_birth_column()
+    ensure_lesson_book_timetable_column()
+    ensure_violation_lesson_book_column()
     if not Teacher.query.first():
         hashed_pwd = generate_password_hash("admin")
         db.session.add(Teacher(username="admin", password=hashed_pwd, full_name="Admin", role="admin"))

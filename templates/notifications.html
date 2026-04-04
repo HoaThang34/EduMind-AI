@@ -25,6 +25,8 @@
                         {% elif notif.notification_type == 'bonus' %}
                         <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">⭐ Điểm
                             cộng</span>
+                        {% elif notif.notification_type == 'timetable' %}
+                        <span class="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-semibold">📅 Thời khóa biểu</span>
                         {% else %}
                         <span class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold">📢
                             Thông báo</span>

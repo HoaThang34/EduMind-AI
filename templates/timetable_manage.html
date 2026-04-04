@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Quản trị thời khóa biểu{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-8">
+    <div class="flex flex-col md:flex-row justify-between gap-4">
+        <div>
+            <a href="{{ url_for('timetable_view') }}" class="text-indigo-600 text-sm font-medium hover:underline">
+                <i class="fas fa-arrow-left mr-1"></i> Xem TKB
+            </a>
+            <h1 class="text-2xl font-semibold text-foreground mt-2">Quản trị thời khóa biểu</h1>
+            <p class="text-muted-foreground text-sm mt-1">Chỉnh sửa lưới theo lớp, nhập Excel hoặc dùng AI (Ollama) để chuẩn hóa dữ liệu.</p>
+        </div>
+    </div>
+
+    <form method="GET" class="flex flex-wrap gap-3 items-end bg-white border border-[hsl(240,5.9%,90%)] rounded-xl p-4 shadow-card">
+        <div>
+            <label class="block text-xs text-muted-foreground mb-1">Lớp</label>
+            <select name="class_name" class="input-shadcn py-2 text-sm min-w-[160px]" required>
+                <option value="">— Chọn —</option>
+                {% for c in classes %}
+                <option value="{{ c }}" {% if c == class_name %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs text-muted-foreground mb-1">Năm học</label>
+            <input type="text" name="school_year" value="{{ school_year }}" class="input-shadcn py-2 text-sm w-32">
+        </div>
+        <div>
+            <label class="block text-xs text-muted-foreground mb-1">Học kỳ</label>
+            <select name="semester" class="input-shadcn py-2 text-sm">
+                <option value="1" {% if semester == 1 %}selected{% endif %}>HK1</option>
+                <option value="2" {% if semester == 2 %}selected{% endif %}>HK2</option>
+            </select>
+        </div>
+        <button type="submit" class="btn-primary py-2 px-4 text-sm rounded-lg">Mở lưới</button>
+    </form>
+
+    {% if class_name %}
+    <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl p-4 shadow-card overflow-x-auto">
+        <h2 class="text-sm font-semibold text-foreground mb-3">Sửa lưới — {{ class_name }}</h2>
+        <form method="POST">
+            <input type="hidden" name="action" value="save_grid">
+            <input type="hidden" name="class_name" value="{{ class_name }}">
+            <input type="hidden" name="school_year" value="{{ school_year }}">
+            <input type="hidden" name="semester" value="{{ semester }}">
+            <table class="table-shadcn w-full text-xs border-collapse min-w-[720px]">
+                <thead>
+                    <tr class="bg-accent/80">
+                        <th class="px-1 py-2">Tiết</th>
+                        {% for d in range(1, 8) %}
+                        <th class="px-1 py-2">{{ day_labels[d - 1] }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in range(1, max_periods + 1) %}
+                    <tr>
+                        <td class="font-bold text-center bg-accent/20">{{ p }}</td>
+                        {% for d in range(1, 8) %}
+                        {% set slot = grid.get((d, p)) %}
+                        <td class="px-1 py-1 align-top border border-[hsl(240,5.9%,90%)]">
+                            <input type="text" name="subj_{{ d }}_{{ p }}" placeholder="Môn / mã"
+                                value="{% if slot %}{% if slot.subject %}{{ slot.subject.name }}{% else %}{{ slot.subject_name_override or '' }}{% endif %}{% endif %}"
+                                class="w-full px-1 py-1 border border-slate-200 rounded text-[11px] mb-1">
+                            <input type="text" name="room_{{ d }}_{{ p }}" placeholder="Phòng"
+                                value="{{ slot.room or '' }}"
+                                class="w-full px-1 py-0.5 border border-slate-100 rounded text-[10px] text-muted-foreground">
+                            <select name="tid_{{ d }}_{{ p }}" class="w-full mt-1 text-[10px] border rounded px-0 py-0.5">
+                                <option value="">GV</option>
+                                {% for t in teachers %}
+                                <option value="{{ t.id }}" {% if slot and slot.teacher_id == t.id %}selected{% endif %}>{{ t.full_name[:24] }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="mt-4 flex justify-end">
+                <button type="submit" class="btn-primary py-2.5 px-6 text-sm rounded-xl">
+                    <i class="fas fa-save mr-2"></i>Lưu & thông báo toàn trường
+                </button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl p-5 shadow-card">
+            <h3 class="font-semibold text-foreground mb-2"><i class="fas fa-file-excel text-green-600 mr-2"></i>Nhập Excel</h3>
+            <p class="text-xs text-muted-foreground mb-3">Cột: <strong>Lớp</strong>, <strong>Thứ</strong> (1–7 hoặc Thứ 2…), <strong>Tiết</strong>, <strong>Môn</strong>, tùy chọn <strong>Phòng</strong>.</p>
+            <form method="POST" action="{{ url_for('timetable_import_xlsx') }}" enctype="multipart/form-data" class="space-y-3">
+                <input type="hidden" name="school_year" value="{{ default_year }}">
+                <input type="hidden" name="semester" value="{{ default_sem }}">
+                <input type="file" name="file" accept=".xlsx,.xls" required class="text-sm w-full">
+                <button type="submit" class="w-full btn-outline py-2 rounded-lg text-sm">Tải lên & nhập</button>
+            </form>
+        </div>
+        <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl p-5 shadow-card">
+            <h3 class="font-semibold text-foreground mb-2"><i class="fas fa-robot text-indigo-600 mr-2"></i>AI (Ollama) chuẩn hóa</h3>
+            <p class="text-xs text-muted-foreground mb-3">Dán nội dung lộn xộn, hoặc đính kèm <strong>txt / csv / ảnh</strong> (png, jpg). Model Ollama sẽ trả JSON để hệ thống nhập.</p>
+            <form method="POST" action="{{ url_for('timetable_import_ai') }}" enctype="multipart/form-data" class="space-y-3">
+                <input type="hidden" name="school_year" value="{{ default_year }}">
+                <input type="hidden" name="semester" value="{{ default_sem }}">
+                <textarea name="raw_text" rows="4" placeholder="Dán bảng TKB dạng text…"
+                    class="w-full px-3 py-2 border rounded-lg text-sm input-shadcn"></textarea>
+                <input type="file" name="file" accept=".txt,.csv,.md,.png,.jpg,.jpeg,.webp,.gif,.xlsx,.xls" class="text-sm w-full">
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm font-medium">Gửi AI xử lý & nhập</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

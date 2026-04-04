@@ -58,6 +58,7 @@
                         <th class="px-4 py-3 text-left font-semibold text-muted-foreground">Tiết</th>
                         <th class="px-4 py-3 text-left font-semibold text-muted-foreground">Lớp</th>
                         <th class="px-4 py-3 text-left font-semibold text-muted-foreground">Môn</th>
+                        <th class="px-4 py-3 text-left font-semibold text-muted-foreground whitespace-nowrap">TKB</th>
                         <th class="px-4 py-3 text-left font-semibold text-muted-foreground min-w-[200px]">Nội dung bài dạy</th>
                         <th class="px-4 py-3 text-left font-semibold text-muted-foreground whitespace-nowrap">Điểm danh</th>
                         <th class="px-4 py-3 text-left font-semibold text-muted-foreground whitespace-nowrap">Giáo viên</th>
@@ -71,6 +72,11 @@
                         <td class="px-4 py-3">{{ e.period_number }}</td>
                         <td class="px-4 py-3 font-medium">{{ e.class_name }}</td>
                         <td class="px-4 py-3">{{ e.subject.name if e.subject else '—' }}</td>
+                        <td class="px-4 py-3 text-xs text-muted-foreground">
+                            {% if e.timetable_slot %}
+                            <span class="text-teal-700 font-medium">Đã gắn</span>
+                            {% else %}—{% endif %}
+                        </td>
                         <td class="px-4 py-3 text-muted-foreground">
                             {% set t = e.topic %}
                             {{ t[:120] }}{% if t|length > 120 %}…{% endif %}
@@ -97,7 +103,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="8" class="px-4 py-12 text-center text-muted-foreground">
+                        <td colspan="9" class="px-4 py-12 text-center text-muted-foreground">
                             Chưa có tiết dạy nào. <a href="{{ url_for('lesson_book_add') }}" class="text-indigo-600 font-medium hover:underline">Thêm tiết dạy đầu tiên</a>
                         </td>
                     </tr>

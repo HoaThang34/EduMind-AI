@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thời khóa biểu — {{ student.student_class }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm mb-4">
+        <div class="container">
+            <span class="navbar-brand fw-bold text-primary"><i class="fas fa-calendar-alt me-2"></i>Thời khóa biểu</span>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('student.student_dashboard') }}" class="btn btn-outline-primary btn-sm">Dashboard</a>
+                <a href="{{ url_for('student.student_logout') }}" class="btn btn-outline-danger btn-sm">Thoát</a>
+            </div>
+        </div>
+    </nav>
+    <div class="container pb-5">
+        <p class="text-muted small mb-3">Lớp <strong>{{ student.student_class }}</strong> — {{ school_year }} · HK{{ semester }}</p>
+        <div class="table-responsive bg-white rounded-3 shadow-sm">
+            <table class="table table-bordered table-sm text-center mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-muted" style="width:3rem">Tiết</th>
+                        {% for label in day_labels %}
+                        <th class="small">{{ label }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in range(1, max_periods + 1) %}
+                    <tr>
+                        <td class="fw-bold bg-light">{{ p }}</td>
+                        {% for d in range(1, 8) %}
+                        {% set slot = grid.get((d, p)) %}
+                        <td class="text-start small p-2">
+                            {% if slot %}
+                            <div class="fw-semibold">{{ slot.subject.name if slot.subject else (slot.subject_name_override or '—') }}</div>
+                            {% if slot.room %}<div class="text-muted" style="font-size:0.75rem">Phòng {{ slot.room }}</div>{% endif %}
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,5 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
-from models import Student, Violation, BonusRecord, Grade, Subject, SystemConfig, db
+from models import (
+    Student, Violation, BonusRecord, Grade, Subject, SystemConfig, db,
+    TimetableSlot, StudentNotification,
+)
 import base64
 import json
 import ollama
@@ -232,6 +235,10 @@ def student_dashboard():
             
     # 4. Lấy lời khuyên AI (Optional - có thể load async)
     ai_advice = get_student_ai_advice(student)
+
+    unread_notifications = StudentNotification.query.filter_by(
+        student_id=student_id, is_read=False
+    ).count()
     
     return render_template("student_dashboard.html", 
                            student=student, 
@@ -239,7 +246,72 @@ def student_dashboard():
                            bonuses=current_bonuses,
                            transcript=transcript,
                            ai_advice=ai_advice,
-                           current_week=current_week)
+                           current_week=current_week,
+                           unread_notifications=unread_notifications)
+
+
+STUDENT_DAY_LABELS = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "CN"]
+STUDENT_MAX_PERIODS = 10
+
+
+@student_bp.route("/student/thoi-khoa-bieu")
+@student_required
+def student_timetable():
+    student_id = session["student_id"]
+    student = db.session.get(Student, student_id)
+    if not student:
+        return redirect(url_for("student.student_logout"))
+    configs = {c.key: c.value for c in SystemConfig.query.all()}
+    school_year = configs.get("school_year", "2025-2026")
+    semester = int(configs.get("current_semester", "1"))
+    slots = TimetableSlot.query.filter_by(
+        class_name=student.student_class,
+        school_year=school_year,
+        semester=semester,
+    ).all()
+    grid = {}
+    for s in slots:
+        grid[(s.day_of_week, s.period_number)] = s
+    return render_template(
+        "student_timetable.html",
+        student=student,
+        grid=grid,
+        school_year=school_year,
+        semester=semester,
+        day_labels=STUDENT_DAY_LABELS,
+        max_periods=STUDENT_MAX_PERIODS,
+    )
+
+
+@student_bp.route("/student/thong-bao")
+@student_required
+def student_notifications_list():
+    student_id = session["student_id"]
+    student = db.session.get(Student, student_id)
+    if not student:
+        return redirect(url_for("student.student_logout"))
+    notifications = (
+        StudentNotification.query.filter_by(student_id=student_id)
+        .order_by(StudentNotification.created_at.desc())
+        .limit(100)
+        .all()
+    )
+    return render_template(
+        "student_notifications.html",
+        student=student,
+        notifications=notifications,
+    )
+
+
+@student_bp.route("/student/thong-bao/<int:nid>/doc", methods=["POST"])
+@student_required
+def student_notification_read(nid):
+    student_id = session["student_id"]
+    n = StudentNotification.query.filter_by(id=nid, student_id=student_id).first()
+    if n:
+        n.is_read = True
+        db.session.commit()
+    return redirect(url_for("student.student_notifications_list"))
 
 
 @student_bp.route("/student/the-hoc-sinh")

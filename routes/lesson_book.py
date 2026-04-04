@@ -4,7 +4,7 @@ from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from sqlalchemy import or_, desc
 
-from models import db, LessonBookEntry, Subject, ClassRoom, SystemConfig
+from models import db, LessonBookEntry, Subject, ClassRoom, SystemConfig, TimetableSlot
 
 
 def _system_configs():
@@ -54,6 +54,24 @@ def can_set_subject_for_lesson(subject_id):
     if current_user.role == "subject_teacher":
         return current_user.assigned_subject_id == subject_id
     return False
+
+
+def _validate_timetable_slot_link(
+    timetable_slot_id, class_name, lesson_date, period_number, school_year, semester
+):
+    if not timetable_slot_id:
+        return None
+    slot = db.session.get(TimetableSlot, timetable_slot_id)
+    if not slot:
+        return None
+    if slot.class_name != class_name:
+        return None
+    dow = lesson_date.weekday() + 1
+    if slot.day_of_week != dow or slot.period_number != period_number:
+        return None
+    if slot.school_year != school_year or int(slot.semester) != int(semester):
+        return None
+    return timetable_slot_id
 
 
 def register(app):
@@ -151,9 +169,16 @@ def register(app):
                 flash("Bạn không có quyền chọn môn này.", "error")
                 return redirect(url_for("lesson_book_add"))
 
+            ts_raw = request.form.get("timetable_slot_id", "").strip()
+            ts_id = int(ts_raw) if ts_raw.isdigit() else None
+            ts_id = _validate_timetable_slot_link(
+                ts_id, class_name, lesson_date, period_number, school_year, semester
+            )
+
             entry = LessonBookEntry(
                 teacher_id=current_user.id,
                 class_name=class_name,
+                timetable_slot_id=ts_id,
                 subject_id=subject_id,
                 lesson_date=lesson_date,
                 period_number=period_number,
@@ -193,6 +218,8 @@ def register(app):
             default_year=default_year,
             default_semester=default_semester,
             today_str=today_str,
+            cfg_school_year=default_year,
+            cfg_semester=default_semester,
         )
 
     @app.route("/lesson_book/<int:entry_id>/edit", methods=["GET", "POST"])
@@ -259,7 +286,14 @@ def register(app):
                 flash("Bạn không có quyền chọn môn này.", "error")
                 return redirect(url_for("lesson_book_edit", entry_id=entry_id))
 
+            ts_raw = request.form.get("timetable_slot_id", "").strip()
+            ts_id = int(ts_raw) if ts_raw.isdigit() else None
+            ts_id = _validate_timetable_slot_link(
+                ts_id, class_name, lesson_date, period_number, school_year, semester
+            )
+
             entry.class_name = class_name
+            entry.timetable_slot_id = ts_id
             entry.subject_id = subject_id
             entry.lesson_date = lesson_date
             entry.period_number = period_number
@@ -291,6 +325,8 @@ def register(app):
             default_year=default_year,
             default_semester=entry.semester or int(configs.get("current_semester", "1")),
             today_str=today_str,
+            cfg_school_year=entry.school_year or default_year,
+            cfg_semester=entry.semester or int(configs.get("current_semester", "1")),
         )
 
     @app.route("/lesson_book/<int:entry_id>/delete", methods=["POST"])

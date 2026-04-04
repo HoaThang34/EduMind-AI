@@ -73,6 +73,22 @@
                 {% endif %}
             </div>
 
+            <div class="rounded-lg border border-dashed border-teal-200 bg-teal-50/40 p-4 space-y-2">
+                <label class="block text-sm font-medium text-foreground">Liên kết ô thời khóa biểu (tuỳ chọn)</label>
+                <p class="text-xs text-muted-foreground">Chọn đúng ngày, tiết và lớp — hệ thống khớp với TKB đã nhập.</p>
+                <select name="timetable_slot_id" id="timetable_slot_select"
+                    class="w-full px-4 py-2 border border-slate-300 rounded-lg input-shadcn text-sm">
+                    <option value="">— Không gắn —</option>
+                    {% if entry and entry.timetable_slot_id %}
+                    <option value="{{ entry.timetable_slot_id }}" selected>Ô TKB #{{ entry.timetable_slot_id }}</option>
+                    {% endif %}
+                </select>
+                <button type="button" onclick="window.__loadTkbSlots && __loadTkbSlots()"
+                    class="text-xs text-teal-700 font-medium hover:underline">
+                    <i class="fas fa-sync-alt mr-1"></i>Tải lại gợi ý từ TKB
+                </button>
+            </div>
+
             <div>
                 <label class="block text-sm font-medium text-foreground mb-1.5">Nội dung bài dạy *</label>
                 <textarea name="topic" rows="4" required placeholder="Kiến thức, kỹ năng trọng tâm tiết học…"
@@ -151,4 +167,55 @@
         </form>
     </div>
 </div>
+<script>
+(function () {
+    const preselected = {{ (entry.timetable_slot_id if entry and entry.timetable_slot_id else None) | tojson }};
+    window.__loadTkbSlots = async function () {
+        const classEl = document.querySelector('select[name="class_name"], input[name="class_name"]');
+        const cn = classEl ? classEl.value.trim() : '';
+        const ld = (document.querySelector('input[name="lesson_date"]') || {}).value || '';
+        const p = (document.querySelector('input[name="period_number"]') || {}).value || '';
+        const sy = (document.querySelector('input[name="school_year"]') || {}).value || '{{ cfg_school_year }}';
+        const sem = (document.querySelector('select[name="semester"]') || {}).value || '{{ cfg_semester }}';
+        const sel = document.getElementById('timetable_slot_select');
+        if (!sel || !cn || !ld || !p) return;
+        const url = '{{ url_for("api_timetable_match_slots") }}'
+            + '?class_name=' + encodeURIComponent(cn)
+            + '&lesson_date=' + encodeURIComponent(ld)
+            + '&period=' + encodeURIComponent(p)
+            + '&school_year=' + encodeURIComponent(sy)
+            + '&semester=' + encodeURIComponent(sem);
+        try {
+            const r = await fetch(url);
+            const j = await r.json();
+            sel.innerHTML = '<option value=\"\">— Không gắn —</option>';
+            (j.slots || []).forEach(function (s) {
+                const o = document.createElement('option');
+                o.value = s.id;
+                o.textContent = s.label;
+                if (preselected && String(s.id) === String(preselected)) o.selected = true;
+                sel.appendChild(o);
+            });
+            if (preselected && !Array.from(sel.options).some(function (o) { return o.value == preselected; })) {
+                const o = document.createElement('option');
+                o.value = preselected;
+                o.textContent = 'Ô TKB #' + preselected;
+                o.selected = true;
+                sel.appendChild(o);
+            }
+        } catch (e) { console.warn(e); }
+    };
+    document.addEventListener('DOMContentLoaded', function () {
+        ['lesson_date', 'period_number', 'school_year'].forEach(function (n) {
+            const el = document.querySelector('[name="' + n + '"]');
+            if (el) el.addEventListener('change', __loadTkbSlots);
+        });
+        const sem = document.querySelector('select[name="semester"]');
+        if (sem) sem.addEventListener('change', __loadTkbSlots);
+        const cs = document.querySelector('select[name="class_name"]');
+        if (cs) cs.addEventListener('change', __loadTkbSlots);
+        __loadTkbSlots();
+    });
+})();
+</script>
 {% endblock %}

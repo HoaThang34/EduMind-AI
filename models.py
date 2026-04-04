@@ -87,7 +87,9 @@ class Violation(db.Model):
     points_deducted = db.Column(db.Integer, nullable=False)
     date_committed = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     week_number = db.Column(db.Integer, default=1)
+    lesson_book_entry_id = db.Column(db.Integer, db.ForeignKey('lesson_book_entry.id'), nullable=True)
     student = db.relationship('Student', backref=db.backref('violations', lazy=True))
+    linked_lesson = db.relationship('LessonBookEntry', backref=db.backref('violations', lazy=True))
 
 
 class WeeklyArchive(db.Model):
@@ -100,6 +102,32 @@ class WeeklyArchive(db.Model):
     final_score = db.Column(db.Integer)
     total_deductions = db.Column(db.Integer)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+
+class TimetableSlot(db.Model):
+    """Một ô thời khóa biểu: lớp + thứ + tiết (trong năm/học kỳ)."""
+    __tablename__ = "timetable_slot"
+    __table_args__ = (
+        db.UniqueConstraint(
+            "class_name", "day_of_week", "period_number", "school_year", "semester",
+            name="uq_timetable_cell",
+        ),
+    )
+    id = db.Column(db.Integer, primary_key=True)
+    class_name = db.Column(db.String(50), nullable=False, index=True)
+    day_of_week = db.Column(db.Integer, nullable=False)  # 1=Thứ Hai … 7=Chủ nhật
+    period_number = db.Column(db.Integer, nullable=False)
+    subject_id = db.Column(db.Integer, db.ForeignKey("subject.id"), nullable=True)
+    subject_name_override = db.Column(db.String(120))
+    teacher_id = db.Column(db.Integer, db.ForeignKey("teacher.id"), nullable=True)
+    room = db.Column(db.String(50))
+    school_year = db.Column(db.String(20), nullable=False, index=True)
+    semester = db.Column(db.Integer, nullable=False, default=1)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    subject = db.relationship("Subject", backref=db.backref("timetable_slots", lazy=True))
+    teacher = db.relationship("Teacher", backref=db.backref("timetable_slots", lazy=True))
 
 
 class Subject(db.Model):
@@ -224,6 +252,7 @@ class LessonBookEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     teacher_id = db.Column(db.Integer, db.ForeignKey("teacher.id"), nullable=False, index=True)
     class_name = db.Column(db.String(50), nullable=False, index=True)
+    timetable_slot_id = db.Column(db.Integer, db.ForeignKey("timetable_slot.id"), nullable=True, index=True)
     subject_id = db.Column(db.Integer, db.ForeignKey("subject.id"), nullable=True, index=True)
     lesson_date = db.Column(db.Date, nullable=False, index=True)
     period_number = db.Column(db.Integer, nullable=False, default=1)
@@ -242,3 +271,17 @@ class LessonBookEntry(db.Model):
 
     teacher = db.relationship("Teacher", backref=db.backref("lesson_book_entries", lazy=True))
     subject = db.relationship("Subject", backref=db.backref("lesson_book_entries", lazy=True))
+    timetable_slot = db.relationship("TimetableSlot", backref=db.backref("lesson_book_entries", lazy=True))
+
+
+class StudentNotification(db.Model):
+    """Thông báo cho học sinh (TKB, v.v.) — tách bảng notification giáo viên."""
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey("student.id"), nullable=False, index=True)
+    title = db.Column(db.String(200), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    notification_type = db.Column(db.String(50))
+    is_read = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+    student = db.relationship("Student", backref=db.backref("student_notifications", lazy=True))

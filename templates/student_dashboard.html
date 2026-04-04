@@ -138,6 +138,15 @@
                 <span class="navbar-text fw-bold text-dark">
                     {{ student.name }}
                 </span>
+                <a href="{{ url_for('student.student_timetable') }}" class="btn btn-outline-primary btn-sm rounded-pill">
+                    <i class="fas fa-calendar-alt me-1"></i>Thời khóa biểu
+                </a>
+                <a href="{{ url_for('student.student_notifications_list') }}" class="btn btn-outline-secondary btn-sm rounded-pill position-relative">
+                    <i class="fas fa-bell me-1"></i>Thông báo
+                    {% if unread_notifications %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ unread_notifications }}</span>
+                    {% endif %}
+                </a>
                 <a href="{{ url_for('student.student_id_card') }}" class="btn btn-primary btn-sm rounded-pill">
                     <i class="fas fa-id-card me-1"></i>Thẻ học sinh
                 </a>

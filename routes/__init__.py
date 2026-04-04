@@ -10,6 +10,7 @@ def register_all_routes(app):
     from .admin_mgmt import register as register_admin
     from .messaging import register as register_messaging
     from .lesson_book import register as register_lesson_book
+    from .timetable import register as register_timetable
 
     register_core(app)
     register_violations(app)
@@ -19,3 +20,4 @@ def register_all_routes(app):
     register_admin(app)
     register_messaging(app)
     register_lesson_book(app)
+    register_timetable(app)

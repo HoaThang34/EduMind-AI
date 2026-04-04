@@ -19,7 +19,7 @@ from sqlalchemy import func, desc, or_, and_
 from models import (
     db, Student, Violation, ViolationType, Teacher, SystemConfig, ClassRoom,
     WeeklyArchive, Subject, Grade, ChatConversation, BonusType, BonusRecord,
-    Notification, GroupChatMessage, PrivateMessage, ChangeLog,
+    Notification, GroupChatMessage, PrivateMessage, ChangeLog, StudentNotification,
 )
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -162,6 +162,54 @@ def create_notification(title, message, notification_type, target_role='all', sp
                 db.session.add(notif)
     
     db.session.commit()
+
+
+def broadcast_timetable_update(title, message, created_by_id=None):
+    """Gửi thông báo cập nhật thời khóa biểu tới toàn bộ giáo viên và học sinh."""
+    try:
+        for t in Teacher.query.all():
+            db.session.add(
+                Notification(
+                    title=title,
+                    message=message,
+                    notification_type="timetable",
+                    created_by=created_by_id,
+                    recipient_id=t.id,
+                    target_role="all",
+                )
+            )
+        for s in Student.query.all():
+            db.session.add(
+                StudentNotification(
+                    student_id=s.id,
+                    title=title,
+                    message=message,
+                    notification_type="timetable",
+                    is_read=False,
+                )
+            )
+        db.session.commit()
+    except Exception as e:
+        print(f"broadcast_timetable_update: {e}")
+        db.session.rollback()
+
+
+def resolve_subject_for_timetable(text):
+    """
+    Khớp môn trong CSDL theo tên hoặc mã.
+    Trả về (subject_id hoặc None, subject_name_override hoặc None).
+    """
+    if text is None:
+        return None, None
+    t = str(text).strip()
+    if not t:
+        return None, None
+    s = Subject.query.filter(
+        or_(Subject.name.ilike(t), Subject.code.ilike(t))
+    ).first()
+    if s:
+        return s.id, None
+    return None, t[:120]
 
 
 def log_change(change_type, description, student_id=None, student_name=None, student_class=None, old_value=None, new_value=None):
