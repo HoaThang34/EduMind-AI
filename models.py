@@ -285,3 +285,38 @@ class StudentNotification(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
     student = db.relationship("Student", backref=db.backref("student_notifications", lazy=True))
+
+
+class ClassFundCollection(db.Model):
+    """Thu tiền từ phụ huynh (quỹ lớp, các khoản theo lớp)."""
+    __tablename__ = "class_fund_collection"
+    id = db.Column(db.Integer, primary_key=True)
+    class_name = db.Column(db.String(50), nullable=False, index=True)
+    school_year = db.Column(db.String(20), nullable=False, index=True)
+    amount_vnd = db.Column(db.Integer, nullable=False)
+    purpose = db.Column(db.String(200), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey("student.id"), nullable=True, index=True)
+    payer_name = db.Column(db.String(150))
+    collection_date = db.Column(db.Date, nullable=False)
+    notes = db.Column(db.Text)
+    created_by_id = db.Column(db.Integer, db.ForeignKey("teacher.id"), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+    student = db.relationship("Student", backref=db.backref("class_fund_collections", lazy=True))
+    created_by = db.relationship("Teacher", backref=db.backref("class_fund_collections_created", lazy=True))
+
+
+class ClassFundExpense(db.Model):
+    """Chi tiêu quỹ lớp."""
+    __tablename__ = "class_fund_expense"
+    id = db.Column(db.Integer, primary_key=True)
+    class_name = db.Column(db.String(50), nullable=False, index=True)
+    school_year = db.Column(db.String(20), nullable=False, index=True)
+    amount_vnd = db.Column(db.Integer, nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    expense_date = db.Column(db.Date, nullable=False)
+    notes = db.Column(db.Text)
+    created_by_id = db.Column(db.Integer, db.ForeignKey("teacher.id"), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+    created_by = db.relationship("Teacher", backref=db.backref("class_fund_expenses_created", lazy=True))

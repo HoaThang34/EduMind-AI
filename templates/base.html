@@ -839,6 +839,13 @@
                             <i class="fas fa-calendar-alt w-6 text-center text-lg mr-3"></i>
                             <span class="text-sm">Thời khóa biểu</span>
                         </a>
+                        {% if current_user.role in ['admin', 'homeroom_teacher'] %}
+                        <a href="{{ url_for('class_fund') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'class_fund' %}active{% endif %}">
+                            <i class="fas fa-piggy-bank w-6 text-center text-lg mr-3 text-amber-600"></i>
+                            <span class="text-sm">Quỹ lớp</span>
+                        </a>
+                        {% endif %}
                         <a href="{{ url_for('history') }}"
                             class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'history' %}active{% endif %}">
                             <i class="fas fa-history w-6 text-center text-lg mr-3"></i>

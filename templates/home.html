@@ -93,6 +93,10 @@
                 'Tìm nhanh học sinh và lịch sử nề nếp', 'tra cứu tìm kiếm học sinh vi phạm') }}
             {{ home_row(url_for('weekly_report'), 'fa-clipboard-check', 'bg-amber-50 text-amber-700', 'Báo cáo tuần',
                 'Tổng hợp nề nếp theo tuần', 'báo cáo tuần lớp') }}
+            {% if current_user.role in ['admin', 'homeroom_teacher'] %}
+            {{ home_row(url_for('class_fund'), 'fa-piggy-bank', 'bg-teal-50 text-teal-800', 'Quỹ lớp &amp; thu PH',
+                'Thu phụ huynh, chi tiêu, số dư quỹ', 'quỹ lớp chi tiêu phụ huynh thu tiền') }}
+            {% endif %}
             {{ home_row(url_for('history'), 'fa-history', 'bg-slate-50 text-slate-700', 'Lịch sử các tuần',
                 'Xem lại dữ liệu tuần trước', 'lịch sử tuần cũ') }}
             {% if current_user.role in ['admin', 'homeroom_teacher'] %}

@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% block title %}Quỹ lớp &amp; thu phụ huynh{% endblock %}
+
+{% macro fmt_vnd(n) -%}
+{{ "{:,}".format(n|int).replace(",", ".") }} đ
+{%- endmacro %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6">
+    <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+        <div>
+            <h1 class="text-2xl font-semibold tracking-tight text-foreground">Quỹ lớp</h1>
+            <p class="text-muted-foreground mt-1 text-sm max-w-2xl leading-relaxed">
+                Theo dõi các khoản thu từ phụ huynh, chi tiêu quỹ và số dư theo năm học.
+            </p>
+        </div>
+    </div>
+
+    <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl p-4 shadow-card">
+        <form method="GET" action="{{ url_for('class_fund') }}" class="flex flex-wrap gap-3 items-end">
+            {% if current_user.role == 'admin' %}
+            <div>
+                <label class="block text-xs font-medium text-muted-foreground mb-1">Lớp</label>
+                <select name="class_name" class="input-shadcn py-2 text-sm min-w-[160px]">
+                    {% for c in classes %}
+                    <option value="{{ c }}" {% if c == class_name %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            <div>
+                <label class="block text-xs font-medium text-muted-foreground mb-1">Năm học</label>
+                <input type="text" name="school_year" value="{{ school_year }}"
+                    placeholder="VD: 2025-2026"
+                    class="input-shadcn py-2 text-sm w-[140px]">
+            </div>
+            <button type="submit" class="btn-outline py-2 px-4 text-sm rounded-lg">Áp dụng</button>
+        </form>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="rounded-xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/90 to-white p-5 shadow-sm">
+            <p class="text-xs font-medium text-emerald-800/80 uppercase tracking-wide">Tổng thu (PH)</p>
+            <p class="mt-2 text-2xl font-bold text-emerald-900 tabular-nums">{{ fmt_vnd(total_in) }}</p>
+        </div>
+        <div class="rounded-xl border border-rose-200/80 bg-gradient-to-br from-rose-50/90 to-white p-5 shadow-sm">
+            <p class="text-xs font-medium text-rose-800/80 uppercase tracking-wide">Tổng chi</p>
+            <p class="mt-2 text-2xl font-bold text-rose-900 tabular-nums">{{ fmt_vnd(total_out) }}</p>
+        </div>
+        <div class="rounded-xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50/90 to-white p-5 shadow-sm">
+            <p class="text-xs font-medium text-indigo-800/80 uppercase tracking-wide">Số dư quỹ</p>
+            <p class="mt-2 text-2xl font-bold text-indigo-900 tabular-nums">{{ fmt_vnd(balance) }}</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Thu PH -->
+        <div class="space-y-4">
+            <h2 class="text-lg font-semibold text-foreground flex items-center gap-2">
+                <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700"><i class="fas fa-hand-holding-usd"></i></span>
+                Ghi nhận thu từ phụ huynh
+            </h2>
+            <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl p-4 shadow-card">
+                <form method="POST" action="{{ url_for('class_fund_add_collection') }}" class="space-y-3">
+                    <input type="hidden" name="class_name" value="{{ class_name }}">
+                    <input type="hidden" name="school_year" value="{{ school_year }}">
+                    <div>
+                        <label class="block text-xs font-medium text-muted-foreground mb-1">Số tiền (VNĐ)</label>
+                        <input type="text" name="amount_vnd" required inputmode="numeric" placeholder="VD: 500000"
+                            class="input-shadcn py-2 text-sm w-full">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-muted-foreground mb-1">Tên khoản thu</label>
+                        <input type="text" name="purpose" required maxlength="200" placeholder="Quỹ lớp, tiền ảnh kỷ yếu…"
+                            class="input-shadcn py-2 text-sm w-full">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-muted-foreground mb-1">Ngày thu</label>
+                        <input type="date" name="collection_date" value="{{ today }}"
+                            class="input-shadcn py-2 text-sm w-full">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-muted-foreground mb-1">Học sinh (tùy chọn)</label>
+                        <select name="student_id" class="input-shadcn py-2 text-sm w-full">
+                            <option value="">— Chung / không gắn HS —</option>
+                            {% for s in students %}
+                            <option value="{{ s.id }}">{{ s.name }} ({{ s.student_code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-muted-foreground mb-1">Người nộp / phụ huynh</label>
+                        <input type="text" name="payer_name" maxlength="150" placeholder="Họ tên người nộp"
+                            class="input-shadcn py-2 text-sm w-full">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-muted-foreground mb-1">Ghi chú</label>
+                        <textarea name="notes" rows="2" class="input-shadcn py-2 text-sm w-full resize-y" placeholder="Tùy chọn"></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary w-full sm:w-auto py-2.5 px-4 rounded-xl text-sm font-medium">
+                        <i class="fas fa-plus text-xs mr-2"></i> Thêm khoản thu
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl overflow-hidden shadow-card">
+                <div class="px-4 py-3 border-b border-[hsl(240,5.9%,90%)] bg-accent/50">
+                    <h3 class="text-sm font-semibold text-foreground">Lịch sử thu từ phụ huynh</h3>
+                </div>
+                <div class="overflow-x-auto max-h-[420px] overflow-y-auto">
+                    <table class="table-shadcn w-full text-sm">
+                        <thead class="bg-accent/80 sticky top-0 z-10">
+                            <tr>
+                                <th class="px-3 py-2.5 text-left font-semibold text-muted-foreground whitespace-nowrap">Ngày</th>
+                                <th class="px-3 py-2.5 text-left font-semibold text-muted-foreground">Khoản</th>
+                                <th class="px-3 py-2.5 text-right font-semibold text-muted-foreground">Số tiền</th>
+                                <th class="px-3 py-2.5 text-left font-semibold text-muted-foreground">HS / Người nộp</th>
+                                <th class="px-3 py-2.5 text-right font-semibold text-muted-foreground w-16"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[hsl(240,5.9%,90%)]">
+                            {% for c in collections %}
+                            <tr class="hover:bg-accent/40">
+                                <td class="px-3 py-2.5 whitespace-nowrap">{{ c.collection_date.strftime('%d/%m/%Y') }}</td>
+                                <td class="px-3 py-2.5">
+                                    <span class="font-medium text-foreground">{{ c.purpose }}</span>
+                                    {% if c.notes %}
+                                    <p class="text-xs text-muted-foreground mt-0.5">{{ c.notes }}</p>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 py-2.5 text-right font-medium tabular-nums text-emerald-700">{{ fmt_vnd(c.amount_vnd) }}</td>
+                                <td class="px-3 py-2.5 text-xs text-muted-foreground">
+                                    {% if c.student %}
+                                    <span class="text-foreground font-medium">{{ c.student.name }}</span>
+                                    {% if c.payer_name %}<br>{{ c.payer_name }}{% endif %}
+                                    {% elif c.payer_name %}{{ c.payer_name }}{% else %}—{% endif %}
+                                </td>
+                                <td class="px-3 py-2.5 text-right">
+                                    <form method="POST" action="{{ url_for('class_fund_delete_collection', cid=c.id) }}" class="inline"
+                                        onsubmit="return confirm('Xóa khoản thu này?');">
+                                        <button type="submit" class="text-rose-600 hover:text-rose-800 text-xs font-medium" title="Xóa">Xóa</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="px-4 py-8 text-center text-muted-foreground">Chưa có khoản thu nào trong năm học này.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chi -->
+        <div class="space-y-4">
+            <h2 class="text-lg font-semibold text-foreground flex items-center gap-2">
+                <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-100 text-rose-700"><i class="fas fa-receipt"></i></span>
+                Chi tiêu quỹ lớp
+            </h2>
+            <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl p-4 shadow-card">
+                <form method="POST" action="{{ url_for('class_fund_add_expense') }}" class="space-y-3">
+                    <input type="hidden" name="class_name" value="{{ class_name }}">
+                    <input type="hidden" name="school_year" value="{{ school_year }}">
+                    <div>
+                        <label class="block text-xs font-medium text-muted-foreground mb-1">Số tiền (VNĐ)</label>
+                        <input type="text" name="amount_vnd" required inputmode="numeric" placeholder="VD: 200000"
+                            class="input-shadcn py-2 text-sm w-full">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-muted-foreground mb-1">Nội dung chi</label>
+                        <input type="text" name="title" required maxlength="200" placeholder="Mua dụng cụ, hoa quả sinh nhật…"
+                            class="input-shadcn py-2 text-sm w-full">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-muted-foreground mb-1">Ngày chi</label>
+                        <input type="date" name="expense_date" value="{{ today }}"
+                            class="input-shadcn py-2 text-sm w-full">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-muted-foreground mb-1">Ghi chú</label>
+                        <textarea name="notes" rows="2" class="input-shadcn py-2 text-sm w-full resize-y" placeholder="Tùy chọn"></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary w-full sm:w-auto py-2.5 px-4 rounded-xl text-sm font-medium">
+                        <i class="fas fa-minus text-xs mr-2"></i> Thêm khoản chi
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl overflow-hidden shadow-card">
+                <div class="px-4 py-3 border-b border-[hsl(240,5.9%,90%)] bg-accent/50">
+                    <h3 class="text-sm font-semibold text-foreground">Lịch sử chi tiêu</h3>
+                </div>
+                <div class="overflow-x-auto max-h-[420px] overflow-y-auto">
+                    <table class="table-shadcn w-full text-sm">
+                        <thead class="bg-accent/80 sticky top-0 z-10">
+                            <tr>
+                                <th class="px-3 py-2.5 text-left font-semibold text-muted-foreground whitespace-nowrap">Ngày</th>
+                                <th class="px-3 py-2.5 text-left font-semibold text-muted-foreground">Nội dung</th>
+                                <th class="px-3 py-2.5 text-right font-semibold text-muted-foreground">Số tiền</th>
+                                <th class="px-3 py-2.5 text-right font-semibold text-muted-foreground w-16"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[hsl(240,5.9%,90%)]">
+                            {% for e in expenses %}
+                            <tr class="hover:bg-accent/40">
+                                <td class="px-3 py-2.5 whitespace-nowrap">{{ e.expense_date.strftime('%d/%m/%Y') }}</td>
+                                <td class="px-3 py-2.5">
+                                    <span class="font-medium text-foreground">{{ e.title }}</span>
+                                    {% if e.notes %}
+                                    <p class="text-xs text-muted-foreground mt-0.5">{{ e.notes }}</p>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 py-2.5 text-right font-medium tabular-nums text-rose-700">{{ fmt_vnd(e.amount_vnd) }}</td>
+                                <td class="px-3 py-2.5 text-right">
+                                    <form method="POST" action="{{ url_for('class_fund_delete_expense', eid=e.id) }}" class="inline"
+                                        onsubmit="return confirm('Xóa khoản chi này?');">
+                                        <button type="submit" class="text-rose-600 hover:text-rose-800 text-xs font-medium" title="Xóa">Xóa</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="px-4 py-8 text-center text-muted-foreground">Chưa có khoản chi nào trong năm học này.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
