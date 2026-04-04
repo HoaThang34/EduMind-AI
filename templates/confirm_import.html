@@ -28,6 +28,9 @@
                             {% if has_dob_cols|default(false) %}
                             <th class="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase">Ngày sinh</th>
                             {% endif %}
+                            {% if has_position_cols|default(false) %}
+                            <th class="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase">Chức vụ</th>
+                            {% endif %}
                             {% if has_parent_cols %}
                             <th class="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase">Phụ huynh</th>
                             <th class="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase">SĐT PH</th>
@@ -52,6 +55,9 @@
                             </td>
                             {% if has_dob_cols|default(false) %}
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{{ s.date_of_birth or '—' }}</td>
+                            {% endif %}
+                            {% if has_position_cols|default(false) %}
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-indigo-600 font-semibold">{{ s.position or '—' }}</td>
                             {% endif %}
                             {% if has_parent_cols %}
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{{ s.parent_name or '—' }}</td>

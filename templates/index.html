@@ -66,11 +66,18 @@
                                 </div>
                                 {% endif %}
                                 <div>
-                                    <a href="{{ url_for('student_detail', student_id=student.id) }}"
-                                        class="text-sm font-medium text-foreground hover:underline">{{ student.name
-                                        }}</a>
-                                    <div class="text-xs text-muted-foreground font-mono">{{ student.student_code }}
+                                    <div class="flex items-center gap-1.5">
+                                        <a href="{{ url_for('student_detail', student_id=student.id) }}"
+                                            class="text-sm font-medium text-foreground hover:underline">
+                                            {{ student.name }}
+                                        </a>
+                                        {% if student.position %}
+                                        <span class="px-1.5 py-0.5 rounded-md bg-indigo-50 text-[10px] text-indigo-700 font-bold uppercase tracking-tight border border-indigo-100/50">
+                                            {{ student.position }}
+                                        </span>
+                                        {% endif %}
                                     </div>
+                                    <div class="text-xs text-muted-foreground font-mono">{{ student.student_code }}</div>
                                 </div>
                             </div>
                         </td>

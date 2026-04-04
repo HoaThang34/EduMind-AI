@@ -89,6 +89,16 @@ def ensure_student_date_of_birth_column():
     db.session.commit()
 
 
+def ensure_student_position_column():
+    insp = inspect(db.engine)
+    if not insp.has_table("student"):
+        return
+    cols = {c["name"] for c in insp.get_columns("student")}
+    if "position" not in cols:
+        db.session.execute(text("ALTER TABLE student ADD COLUMN position VARCHAR(50)"))
+    db.session.commit()
+
+
 def ensure_lesson_book_timetable_column():
     insp = inspect(db.engine)
     if not insp.has_table("lesson_book_entry"):
@@ -151,6 +161,7 @@ def create_database():
     ensure_student_parent_columns()
     ensure_student_portrait_column()
     ensure_student_date_of_birth_column()
+    ensure_student_position_column()
     ensure_lesson_book_timetable_column()
     ensure_violation_lesson_book_column()
     ensure_timetable_slot_week_number_column()

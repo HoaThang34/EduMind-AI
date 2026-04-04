@@ -17,8 +17,13 @@
             </div>
             {% endif %}
             <div>
-            <div class="flex items-center gap-3 mb-1">
+            <div class="flex flex-wrap items-center gap-3 mb-1">
                 <h1 class="text-2xl font-bold text-foreground">{{ student.name }}</h1>
+                {% if student.position %}
+                <span class="px-2 py-0.5 rounded text-xs font-bold bg-indigo-600 text-white uppercase tracking-wider shadow-sm">
+                    {{ student.position }}
+                </span>
+                {% endif %}
                 <span
                     class="px-2 py-0.5 rounded text-sm font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
                     {{ student.student_code }}

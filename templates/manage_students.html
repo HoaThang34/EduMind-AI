@@ -42,14 +42,29 @@
                             class="input-shadcn py-2.5">
                     </div>
                 </div>
-                <div class="space-y-1.5">
-                    <label class="text-sm font-medium text-foreground">Lớp</label>
-                    <select name="student_class" required class="input-shadcn py-2.5 cursor-pointer">
-                        <option value="">-- Chọn lớp --</option>
-                        {% for class_name in all_classes %}
-                        <option value="{{ class_name }}">{{ class_name }}</option>
-                        {% endfor %}
-                    </select>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-foreground">Lớp</label>
+                        <select name="student_class" required class="input-shadcn py-2.5 cursor-pointer">
+                            <option value="">-- Chọn lớp --</option>
+                            {% for cls in class_list %}
+                            <option value="{{ cls.name }}">{{ cls.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-foreground">Chức vụ</label>
+                        <select name="position" class="input-shadcn py-2.5 cursor-pointer">
+                            <option value="">-- Thành viên --</option>
+                            <option value="Lớp trưởng">Lớp trưởng</option>
+                            <option value="Lớp phó">Lớp phó</option>
+                            <option value="Bí thư">Bí thư</option>
+                            <option value="Phó Bí thư">Phó Bí thư</option>
+                            <option value="Ủy viên">Ủy viên</option>
+                            <option value="Tổ trưởng">Tổ trưởng</option>
+                            <option value="Tổ phó">Tổ phó</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="space-y-1.5">
                     <label class="text-sm font-medium text-foreground">Ngày sinh</label>
@@ -141,6 +156,7 @@
                         <th class="w-12"></th>
                         <th>Mã Số</th>
                         <th>Tên</th>
+                        <th>Chức vụ</th>
                         <th>Lớp</th>
                         <th>Ngày sinh</th>
                         <th>Phụ huynh</th>
@@ -164,7 +180,21 @@
                             {% endif %}
                         </td>
                         <td class="text-muted-foreground font-mono text-xs">{{ student.student_code }}</td>
-                        <td class="font-medium">{{ student.name }}</td>
+                        <td class="font-medium">
+                            <div class="flex flex-col">
+                                <span>{{ student.name }}</span>
+                                {% if student.position %}
+                                <span class="text-[10px] text-indigo-600 font-semibold uppercase tracking-wider">{{ student.position }}</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            {% if student.position %}
+                            <span class="badge badge-primary py-0 px-1.5 text-[10px]">{{ student.position }}</span>
+                            {% else %}
+                            <span class="text-muted-foreground text-[10px]">Thành viên</span>
+                            {% endif %}
+                        </td>
                         <td><span class="badge badge-secondary">{{ student.student_class }}</span></td>
                         <td class="text-sm text-muted-foreground whitespace-nowrap">{{ student.date_of_birth or '—' }}</td>
                         <td class="text-sm text-muted-foreground max-w-[140px] truncate" title="{{ student.parent_name or '' }}">{{ student.parent_name or '—' }}</td>

@@ -72,6 +72,7 @@ class Student(db.Model):
     parent_phone = db.Column(db.String(20), nullable=True)
     portrait_filename = db.Column(db.String(255), nullable=True)
     date_of_birth = db.Column(db.String(30), nullable=True)  # VD: 15/08/2008
+    position = db.Column(db.String(50), nullable=True)  # Chức vụ: Lớp trưởng, Bí thư, ...
 
 
 class ViolationType(db.Model):

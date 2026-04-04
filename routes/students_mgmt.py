@@ -68,6 +68,15 @@ def _find_dob_column(df_columns):
     return None
 
 
+def _find_position_column(df_columns):
+    """Cột chức vụ: 'chức vụ', 'chuc vu', 'position'."""
+    for c in df_columns:
+        cl = str(c).strip().lower()
+        if "chức vụ" in cl or "chuc vu" in cl or "position" in cl:
+            return c
+    return None
+
+
 def _format_dob_from_excel_cell(v):
     """Chuẩn hóa ô Excel (datetime hoặc chuỗi) thành chuỗi hiển thị."""
     if v is None or (isinstance(v, float) and math.isnan(v)):
@@ -198,6 +207,7 @@ def register(app):
             parent_name=_empty_to_none(request.form.get("parent_name")),
             parent_phone=_empty_to_none(request.form.get("parent_phone")),
             date_of_birth=_empty_to_none(request.form.get("date_of_birth")),
+            position=_empty_to_none(request.form.get("position")),
         )
         db.session.add(st)
         db.session.flush()
@@ -239,6 +249,7 @@ def register(app):
             s.parent_name = _empty_to_none(request.form.get("parent_name"))
             s.parent_phone = _empty_to_none(request.form.get("parent_phone"))
             s.date_of_birth = _empty_to_none(request.form.get("date_of_birth"))
+            s.position = _empty_to_none(request.form.get("position"))
             if request.form.get("remove_portrait"):
                 _delete_portrait_file(s.portrait_filename)
                 s.portrait_filename = None
@@ -255,7 +266,8 @@ def register(app):
             flash("Cập nhật thành công", "success")
             return redirect(url_for("manage_students"))
         
-        return render_template("edit_student.html", student=s)
+        class_list = ClassRoom.query.order_by(ClassRoom.name).all()
+        return render_template("edit_student.html", student=s, class_list=class_list)
 
     @app.route("/add_class", methods=["POST"])
     @login_required
@@ -358,6 +370,7 @@ def register(app):
 
                 parent_name_col, parent_phone_col = _find_parent_import_columns(df.columns)
                 dob_col = _find_dob_column(df.columns)
+                pos_col = _find_position_column(df.columns)
 
                 # Lặp qua từng dòng trong Excel
                 for index, row in df.iterrows():
@@ -388,6 +401,10 @@ def register(app):
                         dob = _format_dob_from_excel_cell(row.get(dob_col))
                         if dob:
                             entry["date_of_birth"] = dob
+                    if pos_col:
+                        pos = _excel_cell_str(row.get(pos_col))
+                        if pos:
+                            entry["position"] = pos
                     preview_data.append(entry)
             
                 # Chuyển sang trang xác nhận
@@ -395,12 +412,14 @@ def register(app):
                     e.get("parent_name") or e.get("parent_phone") for e in preview_data
                 )
                 has_dob_cols = bool(dob_col)
+                has_position_cols = bool(pos_col)
                 return render_template(
                     "confirm_import.html",
                     students=preview_data,
                     file_path=filepath,
                     has_parent_cols=has_parent_cols,
                     has_dob_cols=has_dob_cols,
+                    has_position_cols=has_position_cols,
                 )
 
             except Exception as e:
@@ -419,6 +438,7 @@ def register(app):
             'Họ và tên': ['Nguyễn Văn A', 'Trần Thị B', 'Lê Hoàng C'],
             'Lớp': ['10 Anh A', '10 Anh A', '10 Tin A'],
             'Ngày sinh': ['15/08/2008', '03/12/2008', '20/01/2008'],
+            'Chức vụ': ['Lớp trưởng', 'Bí thư', ''],
             'Họ tên phụ huynh': ['Nguyễn Văn Ph', 'Trần Thị X', 'Lê Văn Y'],
             'SĐT phụ huynh': ['0912345678', '0987654321', '0901122334'],
         }
@@ -457,6 +477,7 @@ def register(app):
             class_col = next((c for c in df.columns if "lớp" in str(c).lower() or "class" in str(c).lower()), None)
             parent_name_col, parent_phone_col = _find_parent_import_columns(df.columns)
             dob_col = _find_dob_column(df.columns)
+            pos_col = _find_position_column(df.columns)
         
             count = 0
             skipped = 0
@@ -481,6 +502,7 @@ def register(app):
                 pn = _excel_cell_str(row.get(parent_name_col)) if parent_name_col else None
                 pp = _excel_cell_str(row.get(parent_phone_col)) if parent_phone_col else None
                 dob = _format_dob_from_excel_cell(row.get(dob_col)) if dob_col else None
+                pos = _excel_cell_str(row.get(pos_col)) if pos_col else None
                 new_student = Student(
                     name=name,
                     student_class=s_class,
@@ -488,6 +510,7 @@ def register(app):
                     parent_name=pn,
                     parent_phone=pp,
                     date_of_birth=dob,
+                    position=pos,
                 )
                 db.session.add(new_student)
             
