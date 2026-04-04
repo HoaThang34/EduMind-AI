@@ -105,11 +105,11 @@ class WeeklyArchive(db.Model):
 
 
 class TimetableSlot(db.Model):
-    """Một ô thời khóa biểu: lớp + thứ + tiết (trong năm/học kỳ)."""
+    """Một ô thời khóa biểu: lớp + thứ + tiết (theo năm học và số tuần ISO 1–53)."""
     __tablename__ = "timetable_slot"
     __table_args__ = (
         db.UniqueConstraint(
-            "class_name", "day_of_week", "period_number", "school_year", "semester",
+            "class_name", "day_of_week", "period_number", "school_year", "week_number",
             name="uq_timetable_cell",
         ),
     )
@@ -122,7 +122,7 @@ class TimetableSlot(db.Model):
     teacher_id = db.Column(db.Integer, db.ForeignKey("teacher.id"), nullable=True)
     room = db.Column(db.String(50))
     school_year = db.Column(db.String(20), nullable=False, index=True)
-    semester = db.Column(db.Integer, nullable=False, default=1)
+    week_number = db.Column(db.Integer, nullable=False, default=1)  # tuần ISO, cùng logic calculate_week_from_date
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 

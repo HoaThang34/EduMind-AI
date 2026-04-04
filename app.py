@@ -109,6 +109,32 @@ def ensure_violation_lesson_book_column():
     db.session.commit()
 
 
+def ensure_timetable_slot_week_number_column():
+    """SQLite cũ: đổi cột semester -> week_number (thời khóa biểu theo tuần ISO)."""
+    insp = inspect(db.engine)
+    if not insp.has_table("timetable_slot"):
+        return
+    cols = {c["name"] for c in insp.get_columns("timetable_slot")}
+    if "week_number" in cols:
+        return
+    if "semester" in cols:
+        try:
+            db.session.execute(text("ALTER TABLE timetable_slot RENAME COLUMN semester TO week_number"))
+            db.session.commit()
+            return
+        except Exception:
+            db.session.rollback()
+        db.session.execute(
+            text("ALTER TABLE timetable_slot ADD COLUMN week_number INTEGER NOT NULL DEFAULT 1")
+        )
+        db.session.execute(text("UPDATE timetable_slot SET week_number = semester"))
+    else:
+        db.session.execute(
+            text("ALTER TABLE timetable_slot ADD COLUMN week_number INTEGER NOT NULL DEFAULT 1")
+        )
+    db.session.commit()
+
+
 def create_database():
     db.create_all()
     ensure_student_parent_columns()
@@ -116,6 +142,7 @@ def create_database():
     ensure_student_date_of_birth_column()
     ensure_lesson_book_timetable_column()
     ensure_violation_lesson_book_column()
+    ensure_timetable_slot_week_number_column()
     if not Teacher.query.first():
         hashed_pwd = generate_password_hash("admin")
         db.session.add(Teacher(username="admin", password=hashed_pwd, full_name="Admin", role="admin"))

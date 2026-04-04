@@ -4,19 +4,19 @@
 {% macro manage_return_hidden() %}
 <input type="hidden" name="return_class_name" value="{{ class_name or '' }}">
 <input type="hidden" name="return_school_year" value="{{ school_year }}">
-<input type="hidden" name="return_semester" value="{{ semester }}">
+<input type="hidden" name="return_week_number" value="{{ week_number }}">
 {% endmacro %}
 
 {% block content %}
 <div class="max-w-6xl mx-auto space-y-8">
     <div class="flex flex-col md:flex-row justify-between gap-4">
         <div>
-            <a href="{{ url_for('timetable_view', school_year=school_year, semester=semester, class_name=class_name or none) }}"
+            <a href="{{ url_for('timetable_view', school_year=school_year, week_number=week_number, class_name=class_name or none) }}"
                 class="text-indigo-600 text-sm font-medium hover:underline">
                 <i class="fas fa-arrow-left mr-1"></i> Xem TKB
             </a>
             <h1 class="text-2xl font-semibold text-foreground mt-2">Quản trị thời khóa biểu</h1>
-            <p class="text-muted-foreground text-sm mt-1">Chỉnh sửa lưới theo lớp, nhập Excel hoặc dùng Ollama để chuẩn hóa dữ liệu từ text/ảnh.</p>
+            <p class="text-muted-foreground text-sm mt-1">Chỉnh sửa lưới theo <strong>tuần ISO</strong> (không theo học kỳ), nhập Excel hoặc Ollama.</p>
         </div>
     </div>
 
@@ -35,10 +35,11 @@
             <input type="text" name="school_year" value="{{ school_year }}" class="input-shadcn py-2 text-sm w-32">
         </div>
         <div>
-            <label class="block text-xs text-muted-foreground mb-1">Học kỳ</label>
-            <select name="semester" class="input-shadcn py-2 text-sm">
-                <option value="1" {% if semester == 1 %}selected{% endif %}>HK1</option>
-                <option value="2" {% if semester == 2 %}selected{% endif %}>HK2</option>
+            <label class="block text-xs text-muted-foreground mb-1">Tuần (ISO)</label>
+            <select name="week_number" class="input-shadcn py-2 text-sm min-w-[5.5rem]">
+                {% for w in range(1, max_iso_week + 1) %}
+                <option value="{{ w }}" {% if week_number == w %}selected{% endif %}>Tuần {{ w }}</option>
+                {% endfor %}
             </select>
         </div>
         <button type="submit" class="btn-primary py-2 px-4 text-sm rounded-lg">Mở lưới</button>
@@ -51,7 +52,7 @@
             <input type="hidden" name="action" value="save_grid">
             <input type="hidden" name="class_name" value="{{ class_name }}">
             <input type="hidden" name="school_year" value="{{ school_year }}">
-            <input type="hidden" name="semester" value="{{ semester }}">
+            <input type="hidden" name="week_number" value="{{ week_number }}">
             <table class="table-shadcn w-full text-xs border-collapse min-w-[720px]">
                 <thead>
                     <tr class="bg-accent/80">
@@ -98,18 +99,18 @@
     <div class="grid md:grid-cols-2 gap-6">
         <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl p-5 shadow-card">
             <h3 class="font-semibold text-foreground mb-2"><i class="fas fa-file-excel text-green-600 mr-2"></i>Nhập Excel</h3>
-            <p class="text-xs text-muted-foreground mb-3">Cột: <strong>Lớp</strong>, <strong>Thứ</strong> (1–7 hoặc Thứ 2…), <strong>Tiết</strong>, <strong>Môn</strong>, tùy chọn <strong>Phòng</strong>.</p>
+            <p class="text-xs text-muted-foreground mb-3">Cột: <strong>Lớp</strong>, <strong>Thứ</strong>, <strong>Tiết</strong>, <strong>Môn</strong>; tùy chọn <strong>Phòng</strong>, <strong>Tuần</strong> (ISO, 1–{{ max_iso_week }} — nếu không có thì dùng tuần đã chọn ở bộ lọc).</p>
             <p class="text-xs mb-3">
                 <a href="{{ url_for('timetable_xlsx_template') }}" class="text-green-700 hover:underline font-medium">
                     <i class="fas fa-download mr-1"></i>Tải file mẫu Excel (.xlsx)
                 </a>
             </p>
             <p class="text-xs text-amber-800/90 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-2">
-                Excel/AI ghi cho <strong>{{ school_year }}</strong>, <strong>HK{{ semester }}</strong> (theo bộ lọc phía trên). Cột «Lớp» trong file phải <strong>trùng hệt</strong> tên lớp trong hệ thống (vd <code class="text-[11px]">11 TIN</code>).
+                Excel/AI ghi cho <strong>{{ school_year }}</strong>, <strong>tuần ISO {{ week_number }}</strong> (theo bộ lọc). Cột «Lớp» phải <strong>trùng hệt</strong> tên lớp (vd <code class="text-[11px]">11 TIN</code>).
             </p>
             <form method="POST" action="{{ url_for('timetable_import_xlsx') }}" enctype="multipart/form-data" class="space-y-3">
                 <input type="hidden" name="school_year" value="{{ school_year }}">
-                <input type="hidden" name="semester" value="{{ semester }}">
+                <input type="hidden" name="week_number" value="{{ week_number }}">
                 {{ manage_return_hidden() }}
                 <input type="file" name="file" accept=".xlsx,.xls" required class="text-sm w-full">
                 <button type="submit" class="w-full btn-outline py-2 rounded-lg text-sm">Tải lên & nhập</button>
@@ -120,7 +121,7 @@
             <p class="text-xs text-muted-foreground mb-3">Chọn <strong>nhiều file</strong> (Ctrl/Shift khi chọn), hoặc dán text. Hỗ trợ txt, csv, md, xlsx (đưa vào prompt dạng CSV), ảnh. Bước 1: AI chuẩn hóa và hiển thị bảng xem trước. Bước 2: bạn <strong>xác nhận</strong> mới ghi vào CSDL. Cần Ollama và <code class="text-[11px]">OLLAMA_MODEL</code> khớp <code class="text-[11px]">ollama list</code>; nhiều ảnh cần model vision (vd <code class="text-[11px]">llava</code>). Nhập Excel trực tiếp (không qua AI) dùng cột bên trái.</p>
             <form method="POST" action="{{ url_for('timetable_import_ai_preview') }}" enctype="multipart/form-data" class="space-y-3">
                 <input type="hidden" name="school_year" value="{{ school_year }}">
-                <input type="hidden" name="semester" value="{{ semester }}">
+                <input type="hidden" name="week_number" value="{{ week_number }}">
                 {{ manage_return_hidden() }}
                 <textarea name="raw_text" rows="4" placeholder="Dán bảng TKB dạng text…"
                     class="w-full px-3 py-2 border rounded-lg text-sm input-shadcn"></textarea>
@@ -137,7 +138,7 @@
     <div class="bg-indigo-50/80 border border-indigo-200 rounded-xl p-5 shadow-card">
         <h3 class="font-semibold text-foreground mb-1"><i class="fas fa-eye text-indigo-600 mr-2"></i>Kết quả chuẩn hóa — xem trước</h3>
         <p class="text-xs text-muted-foreground mb-3">
-            Năm học <strong>{{ ai_preview.school_year }}</strong>, học kỳ <strong>HK{{ ai_preview.semester }}</strong>.
+            Năm học <strong>{{ ai_preview.school_year }}</strong>, tuần ISO <strong>{{ ai_preview.week_number if ai_preview.week_number is defined else ai_preview.semester }}</strong>.
             {% if ai_preview.source_files and ai_preview.source_files|length > 0 %}
             File: {{ ai_preview.source_files | join(', ') }}.
             {% endif %}

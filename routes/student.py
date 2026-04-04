@@ -256,22 +256,39 @@ def student_dashboard():
 
 STUDENT_DAY_LABELS = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "CN"]
 STUDENT_MAX_PERIODS = 10
+STUDENT_MAX_ISO_WEEK = 53
 
 
 @student_bp.route("/student/thoi-khoa-bieu")
 @student_required
 def student_timetable():
+    from app_helpers import timetable_class_variants_for_filter
+
     student_id = session["student_id"]
     student = db.session.get(Student, student_id)
     if not student:
         return redirect(url_for("student.student_logout"))
     configs = {c.key: c.value for c in SystemConfig.query.all()}
     school_year = configs.get("school_year", "2025-2026")
-    semester = int(configs.get("current_semester", "1"))
-    slots = TimetableSlot.query.filter_by(
-        class_name=student.student_class,
-        school_year=school_year,
-        semester=semester,
+    try:
+        school_current_week = int(configs.get("current_week", "1"))
+    except (TypeError, ValueError):
+        school_current_week = 1
+    school_current_week = max(1, min(STUDENT_MAX_ISO_WEEK, school_current_week))
+    raw_w = request.args.get("week_number", type=int)
+    if raw_w is not None and 1 <= raw_w <= STUDENT_MAX_ISO_WEEK:
+        week_number = raw_w
+    else:
+        week_number = school_current_week
+
+    prev_week = max(1, week_number - 1)
+    next_week = min(STUDENT_MAX_ISO_WEEK, week_number + 1)
+
+    variants = timetable_class_variants_for_filter(student.student_class)
+    slots = TimetableSlot.query.filter(
+        TimetableSlot.class_name.in_(variants),
+        TimetableSlot.school_year == school_year,
+        TimetableSlot.week_number == week_number,
     ).all()
     grid = {}
     for s in slots:
@@ -281,7 +298,11 @@ def student_timetable():
         student=student,
         grid=grid,
         school_year=school_year,
-        semester=semester,
+        week_number=week_number,
+        school_current_week=school_current_week,
+        prev_week=prev_week,
+        next_week=next_week,
+        max_iso_week=STUDENT_MAX_ISO_WEEK,
         day_labels=STUDENT_DAY_LABELS,
         max_periods=STUDENT_MAX_PERIODS,
     )

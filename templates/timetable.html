@@ -6,10 +6,10 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
             <h1 class="text-2xl font-semibold tracking-tight text-foreground">Thời khóa biểu</h1>
-            <p class="text-muted-foreground text-sm mt-1">Theo lớp — năm học và học kỳ hiện hành.</p>
+            <p class="text-muted-foreground text-sm mt-1">Theo lớp — năm học và <strong>tuần ISO</strong> (1–{{ max_iso_week }}). Mỗi tuần có thể có lưới riêng.</p>
         </div>
         {% if is_admin %}
-        <a href="{{ url_for('timetable_manage') }}" class="btn-primary py-2 px-4 rounded-xl text-sm inline-flex items-center gap-2">
+        <a href="{{ url_for('timetable_manage', school_year=school_year, week_number=week_number, class_name=class_name or none) }}" class="btn-primary py-2 px-4 rounded-xl text-sm inline-flex items-center gap-2">
             <i class="fas fa-cog text-xs"></i> Quản trị & nhập liệu
         </a>
         {% endif %}
@@ -30,10 +30,11 @@
             <input type="text" name="school_year" value="{{ school_year }}" class="input-shadcn py-2 text-sm w-32">
         </div>
         <div>
-            <label class="block text-xs font-medium text-muted-foreground mb-1">Học kỳ</label>
-            <select name="semester" class="input-shadcn py-2 text-sm">
-                <option value="1" {% if semester == 1 %}selected{% endif %}>HK1</option>
-                <option value="2" {% if semester == 2 %}selected{% endif %}>HK2</option>
+            <label class="block text-xs font-medium text-muted-foreground mb-1">Tuần (ISO)</label>
+            <select name="week_number" class="input-shadcn py-2 text-sm min-w-[5.5rem]">
+                {% for w in range(1, max_iso_week + 1) %}
+                <option value="{{ w }}" {% if week_number == w %}selected{% endif %}>Tuần {{ w }}</option>
+                {% endfor %}
             </select>
         </div>
         <button type="submit" class="btn-outline py-2 px-4 text-sm rounded-lg">Xem</button>

@@ -5,6 +5,7 @@ from flask_login import login_required, current_user
 from sqlalchemy import or_, desc
 
 from models import db, LessonBookEntry, Subject, ClassRoom, SystemConfig, TimetableSlot
+from app_helpers import calculate_week_from_date, timetable_class_variants_for_filter
 
 
 def _system_configs():
@@ -57,19 +58,21 @@ def can_set_subject_for_lesson(subject_id):
 
 
 def _validate_timetable_slot_link(
-    timetable_slot_id, class_name, lesson_date, period_number, school_year, semester
+    timetable_slot_id, class_name, lesson_date, period_number, school_year
 ):
     if not timetable_slot_id:
         return None
     slot = db.session.get(TimetableSlot, timetable_slot_id)
     if not slot:
         return None
-    if slot.class_name != class_name:
+    variants = timetable_class_variants_for_filter(class_name)
+    if slot.class_name not in variants:
         return None
     dow = lesson_date.weekday() + 1
     if slot.day_of_week != dow or slot.period_number != period_number:
         return None
-    if slot.school_year != school_year or int(slot.semester) != int(semester):
+    wn = calculate_week_from_date(lesson_date)
+    if slot.school_year != school_year or int(slot.week_number) != int(wn):
         return None
     return timetable_slot_id
 
@@ -172,7 +175,7 @@ def register(app):
             ts_raw = request.form.get("timetable_slot_id", "").strip()
             ts_id = int(ts_raw) if ts_raw.isdigit() else None
             ts_id = _validate_timetable_slot_link(
-                ts_id, class_name, lesson_date, period_number, school_year, semester
+                ts_id, class_name, lesson_date, period_number, school_year
             )
 
             entry = LessonBookEntry(
@@ -289,7 +292,7 @@ def register(app):
             ts_raw = request.form.get("timetable_slot_id", "").strip()
             ts_id = int(ts_raw) if ts_raw.isdigit() else None
             ts_id = _validate_timetable_slot_link(
-                ts_id, class_name, lesson_date, period_number, school_year, semester
+                ts_id, class_name, lesson_date, period_number, school_year
             )
 
             entry.class_name = class_name

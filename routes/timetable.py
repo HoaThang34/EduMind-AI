@@ -1,4 +1,5 @@
 """Thời khóa biểu — xem, quản trị (admin), nhập Excel / AI (Ollama)."""
+import datetime as dt
 import json
 import os
 import re
@@ -15,6 +16,7 @@ from app_helpers import (
     UPLOAD_FOLDER,
     admin_required,
     broadcast_timetable_update,
+    calculate_week_from_date,
     resolve_class_name_for_timetable,
     resolve_subject_for_timetable,
     timetable_class_variants_for_filter,
@@ -23,6 +25,27 @@ from app_helpers import (
 
 DAY_LABELS = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "CN"]
 MAX_PERIODS = 10
+MAX_ISO_WEEK = 53
+
+
+def _parse_week_number_arg(val, default):
+    if val is None:
+        return default
+    try:
+        w = int(float(val))
+        if 1 <= w <= MAX_ISO_WEEK:
+            return w
+    except (TypeError, ValueError):
+        pass
+    return default
+
+
+def _default_week_number():
+    """Tuần đang áp dụng theo cấu hình nhà trường (SystemConfig.current_week)."""
+    w_cfg = SystemConfig.query.filter_by(key="current_week").first()
+    return int(w_cfg.value) if w_cfg else 1
+
+
 AI_PREVIEW_SUBDIR = "timetable_ai_preview"
 SESSION_AI_PREVIEW = "timetable_ai_preview_id"
 AI_PROMPT_TEXT_MAX = 28000
@@ -124,7 +147,7 @@ def _configs():
 
 
 def _timetable_manage_redirect_kwargs():
-    """Sau POST nhập TKB: giữ lớp / năm / học kỳ từ hidden return_* (khớp bộ lọc trang quản trị)."""
+    """Sau POST nhập TKB: giữ lớp / năm / tuần từ hidden return_* (khớp bộ lọc trang quản trị)."""
     kw = {}
     cn = (request.form.get("return_class_name") or "").strip()
     if cn:
@@ -132,9 +155,11 @@ def _timetable_manage_redirect_kwargs():
     sy = (request.form.get("return_school_year") or "").strip()
     if sy:
         kw["school_year"] = sy
-    rs = request.form.get("return_semester")
-    if rs is not None and str(rs).strip().isdigit():
-        kw["semester"] = int(rs)
+    rw = request.form.get("return_week_number")
+    if rw is not None and str(rw).strip().isdigit():
+        w = int(rw)
+        if 1 <= w <= MAX_ISO_WEEK:
+            kw["week_number"] = w
     return kw
 
 
@@ -179,7 +204,7 @@ def upsert_slot(
     day_of_week,
     period_number,
     school_year,
-    semester,
+    week_number,
     subject_id=None,
     subject_name_override=None,
     room=None,
@@ -190,7 +215,7 @@ def upsert_slot(
         day_of_week=day_of_week,
         period_number=period_number,
         school_year=school_year,
-        semester=semester,
+        week_number=week_number,
     ).first()
     if not slot:
         slot = TimetableSlot(
@@ -198,7 +223,7 @@ def upsert_slot(
             day_of_week=day_of_week,
             period_number=period_number,
             school_year=school_year,
-            semester=semester,
+            week_number=week_number,
         )
         db.session.add(slot)
     slot.subject_id = subject_id
@@ -224,11 +249,12 @@ def _df_column_map(df):
         "period": pick("tiết", "tiet", "period"),
         "subject": pick("môn", "mon", "subject"),
         "room": pick("phòng", "phong", "room"),
+        "week": pick("tuần", "tuan", "week"),
     }
 
 
-def import_slots_from_dataframe(df, school_year, semester, notify=True):
-    """Trả về (số ô đã ghi, danh sách lỗi)."""
+def import_slots_from_dataframe(df, school_year, default_week_number, notify=True):
+    """Trả về (số ô đã ghi, danh sách lỗi). Cột «Tuần» (tuần ISO) tùy chọn — mỗi dòng có thể khác tuần."""
     cmap = _df_column_map(df)
     errors = []
     if not cmap["class_name"] or not cmap["day"] or not cmap["period"] or not cmap["subject"]:
@@ -241,6 +267,18 @@ def import_slots_from_dataframe(df, school_year, semester, notify=True):
             if not cn or cn.lower() == "nan":
                 continue
             cn = resolve_class_name_for_timetable(cn)
+            wn = default_week_number
+            if cmap["week"]:
+                wcell = row[cmap["week"]]
+                if wcell is not None and not (isinstance(wcell, float) and pd.isna(wcell)):
+                    try:
+                        wn = int(float(wcell))
+                        if wn < 1 or wn > MAX_ISO_WEEK:
+                            errors.append(f"Dòng {idx + 2}: Tuần phải từ 1 đến {MAX_ISO_WEEK}.")
+                            continue
+                    except (TypeError, ValueError):
+                        errors.append(f"Dòng {idx + 2}: Tuần không hợp lệ.")
+                        continue
             day = parse_day_cell(row[cmap["day"]])
             per = parse_period_cell(row[cmap["period"]])
             subj_raw = row[cmap["subject"]]
@@ -258,7 +296,7 @@ def import_slots_from_dataframe(df, school_year, semester, notify=True):
                 if r is not None and not (isinstance(r, float) and pd.isna(r)):
                     room = str(r).strip()
             sid, override = resolve_subject_for_timetable(subj_raw)
-            upsert_slot(cn, day, per, school_year, semester, subject_id=sid, subject_name_override=override, room=room)
+            upsert_slot(cn, day, per, school_year, wn, subject_id=sid, subject_name_override=override, room=room)
             count += 1
         except Exception as e:
             errors.append(f"Dòng {idx + 2}: {e}")
@@ -266,7 +304,7 @@ def import_slots_from_dataframe(df, school_year, semester, notify=True):
     if notify and count > 0:
         broadcast_timetable_update(
             "Thời khóa biểu đã cập nhật",
-            f"Đã nhập/cập nhật {count} ô TKB (năm học {school_year}, HK{semester}).",
+            f"Đã nhập/cập nhật {count} ô TKB (năm học {school_year}, tuần ISO).",
             created_by_id=current_user.id if current_user.is_authenticated else None,
         )
     return count, errors
@@ -278,16 +316,16 @@ def register(app):
     def timetable_view():
         cfg = _configs()
         default_year = cfg.get("school_year", "2025-2026")
-        default_sem = int(cfg.get("current_semester", "1"))
+        dw = _default_week_number()
         school_year = request.args.get("school_year", default_year).strip()
-        semester = int(request.args.get("semester", default_sem))
+        week_number = _parse_week_number_arg(request.args.get("week_number"), dw)
         class_name = request.args.get("class_name", "").strip()
 
         if current_user.role == "homeroom_teacher" and current_user.assigned_class and not class_name:
             class_name = current_user.assigned_class
 
         classes = [c.name for c in ClassRoom.query.order_by(ClassRoom.name).all()]
-        slots = TimetableSlot.query.filter_by(school_year=school_year, semester=semester)
+        slots = TimetableSlot.query.filter_by(school_year=school_year, week_number=week_number)
         if class_name:
             variants = timetable_class_variants_for_filter(class_name)
             slots = slots.filter(TimetableSlot.class_name.in_(variants))
@@ -303,7 +341,9 @@ def register(app):
             classes=classes,
             class_name=class_name,
             school_year=school_year,
-            semester=semester,
+            week_number=week_number,
+            default_week_number=dw,
+            max_iso_week=MAX_ISO_WEEK,
             day_labels=DAY_LABELS,
             max_periods=MAX_PERIODS,
             is_admin=current_user.role == "admin",
@@ -315,9 +355,9 @@ def register(app):
     def timetable_manage():
         cfg = _configs()
         default_year = cfg.get("school_year", "2025-2026")
-        default_sem = int(cfg.get("current_semester", "1"))
+        dw = _default_week_number()
         school_year = request.args.get("school_year", default_year).strip() or default_year
-        semester = int(request.args.get("semester", default_sem))
+        week_number = _parse_week_number_arg(request.args.get("week_number"), dw)
         class_name = request.args.get("class_name", "").strip()
         classes = [c.name for c in ClassRoom.query.order_by(ClassRoom.name).all()]
         subjects = Subject.query.order_by(Subject.name).all()
@@ -326,10 +366,10 @@ def register(app):
         if request.method == "POST" and request.form.get("action") == "save_grid":
             class_name = request.form.get("class_name", "").strip()
             school_year = request.form.get("school_year", default_year).strip()
-            semester = int(request.form.get("semester", default_sem))
+            week_number = _parse_week_number_arg(request.form.get("week_number"), _default_week_number())
             if not class_name:
                 flash("Chọn lớp.", "error")
-                return redirect(url_for("timetable_manage", school_year=school_year, semester=semester))
+                return redirect(url_for("timetable_manage", school_year=school_year, week_number=week_number))
 
             variants = timetable_class_variants_for_filter(class_name)
             canonical = resolve_class_name_for_timetable(class_name)
@@ -346,7 +386,7 @@ def register(app):
                         TimetableSlot.day_of_week == d,
                         TimetableSlot.period_number == p,
                         TimetableSlot.school_year == school_year,
-                        TimetableSlot.semester == semester,
+                        TimetableSlot.week_number == week_number,
                     )
                     if not subj:
                         for slot in cell_q.all():
@@ -361,7 +401,7 @@ def register(app):
                         d,
                         p,
                         school_year,
-                        semester,
+                        week_number,
                         subject_id=sid,
                         subject_name_override=override,
                         room=room or None,
@@ -371,7 +411,7 @@ def register(app):
             db.session.commit()
             broadcast_timetable_update(
                 "Thời khóa biểu đã cập nhật",
-                f"Lớp {canonical}: đã lưu lưới TKB ({school_year}, HK{semester}).",
+                f"Lớp {canonical}: đã lưu lưới TKB ({school_year}, tuần ISO {week_number}).",
                 created_by_id=current_user.id,
             )
             flash(f"Đã lưu thời khóa biểu ({n_saved} ô có môn).", "success")
@@ -380,7 +420,7 @@ def register(app):
                     "timetable_manage",
                     class_name=canonical,
                     school_year=school_year,
-                    semester=semester,
+                    week_number=week_number,
                 )
             )
 
@@ -390,7 +430,7 @@ def register(app):
             for s in TimetableSlot.query.filter(
                 TimetableSlot.class_name.in_(variants),
                 TimetableSlot.school_year == school_year,
-                TimetableSlot.semester == semester,
+                TimetableSlot.week_number == week_number,
             ).all():
                 grid[(s.day_of_week, s.period_number)] = s
 
@@ -402,14 +442,15 @@ def register(app):
             classes=classes,
             class_name=class_name,
             school_year=school_year,
-            semester=semester,
+            week_number=week_number,
+            default_week_number=dw,
+            max_iso_week=MAX_ISO_WEEK,
             day_labels=DAY_LABELS,
             max_periods=MAX_PERIODS,
             grid=grid,
             subjects=subjects,
             teachers=teachers,
             default_year=default_year,
-            default_sem=default_sem,
             ai_preview=ai_preview,
             ai_preview_token=ai_preview_token,
         )
@@ -425,7 +466,7 @@ def register(app):
 
         cfg = _configs()
         school_year = request.form.get("school_year", cfg.get("school_year", "2025-2026")).strip()
-        semester = int(request.form.get("semester", cfg.get("current_semester", "1")))
+        wn = _parse_week_number_arg(request.form.get("week_number"), _default_week_number())
 
         try:
             df = pd.read_excel(f)
@@ -433,7 +474,7 @@ def register(app):
             flash(f"Không đọc được file: {e}", "error")
             return redirect(url_for("timetable_manage", **_timetable_manage_redirect_kwargs()))
 
-        count, errors = import_slots_from_dataframe(df, school_year, semester, notify=True)
+        count, errors = import_slots_from_dataframe(df, school_year, wn, notify=True)
         if errors and count == 0:
             flash("; ".join(errors[:5]), "error")
         else:
@@ -453,6 +494,7 @@ def register(app):
                     "Tiết": 1,
                     "Môn": "Toán",
                     "Phòng": "A101",
+                    "Tuần": 14,
                 },
                 {
                     "Lớp": "11 TIN",
@@ -460,6 +502,7 @@ def register(app):
                     "Tiết": 2,
                     "Môn": "Văn",
                     "Phòng": "",
+                    "Tuần": 14,
                 },
             ]
         )
@@ -491,7 +534,7 @@ def register(app):
     def timetable_import_ai_preview():
         cfg = _configs()
         school_year = request.form.get("school_year", cfg.get("school_year", "2025-2026")).strip()
-        semester = int(request.form.get("semester", cfg.get("current_semester", "1")))
+        week_number = _parse_week_number_arg(request.form.get("week_number"), _default_week_number())
         raw_text = (request.form.get("raw_text") or "").strip()
 
         text_parts = []
@@ -571,7 +614,7 @@ def register(app):
         _save_ai_preview_payload(
             {
                 "school_year": school_year,
-                "semester": semester,
+                "week_number": week_number,
                 "rows": rows,
                 "source_files": source_files,
             }
@@ -606,7 +649,8 @@ def register(app):
             return _redirect_manage_from_form()
 
         school_year = str(payload.get("school_year", "")).strip()
-        semester = int(payload.get("semester", 1))
+        wn_raw = payload.get("week_number", payload.get("semester"))
+        week_number = _parse_week_number_arg(wn_raw, _default_week_number())
         rows = payload.get("rows") or []
         if not school_year:
             flash("Thiếu năm học trong bản xem trước.", "error")
@@ -634,7 +678,7 @@ def register(app):
                 room = chk.get("room")
                 r = str(room).strip() if room else None
                 sid, override = resolve_subject_for_timetable(subj)
-                upsert_slot(cn, day, per, school_year, semester, subject_id=sid, subject_name_override=override, room=r)
+                upsert_slot(cn, day, per, school_year, week_number, subject_id=sid, subject_name_override=override, room=r)
                 count += 1
             except (TypeError, ValueError, KeyError):
                 continue
@@ -649,7 +693,7 @@ def register(app):
         if count > 0:
             broadcast_timetable_update(
                 "Thời khóa biểu đã cập nhật (AI)",
-                f"Đã nhập {count} ô TKB ({school_year}, HK{semester}) sau khi xác nhận.",
+                f"Đã nhập {count} ô TKB ({school_year}, tuần ISO {week_number}) sau khi xác nhận.",
                 created_by_id=current_user.id,
             )
             flash(f"Đã nhập {count} ô vào CSDL.", "success")
@@ -673,17 +717,18 @@ def register(app):
         period = request.args.get("period", type=int)
         cfg = _configs()
         school_year = request.args.get("school_year", cfg.get("school_year", "2025-2026")).strip()
-        semester = int(request.args.get("semester", cfg.get("current_semester", "1")))
 
         if not class_name or not lesson_date or not period:
             return jsonify({"slots": []})
 
         try:
-            import datetime as dt
-
             d = dt.datetime.strptime(lesson_date, "%Y-%m-%d").date()
         except ValueError:
             return jsonify({"slots": []})
+
+        week_number = request.args.get("week_number", type=int)
+        if week_number is None or not (1 <= week_number <= MAX_ISO_WEEK):
+            week_number = calculate_week_from_date(d)
 
         dow = d.weekday() + 1
         variants = timetable_class_variants_for_filter(class_name)
@@ -692,7 +737,7 @@ def register(app):
             TimetableSlot.day_of_week == dow,
             TimetableSlot.period_number == period,
             TimetableSlot.school_year == school_year,
-            TimetableSlot.semester == semester,
+            TimetableSlot.week_number == week_number,
         ).all()
         out = []
         for s in q:

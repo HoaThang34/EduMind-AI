@@ -176,15 +176,13 @@
         const ld = (document.querySelector('input[name="lesson_date"]') || {}).value || '';
         const p = (document.querySelector('input[name="period_number"]') || {}).value || '';
         const sy = (document.querySelector('input[name="school_year"]') || {}).value || '{{ cfg_school_year }}';
-        const sem = (document.querySelector('select[name="semester"]') || {}).value || '{{ cfg_semester }}';
         const sel = document.getElementById('timetable_slot_select');
         if (!sel || !cn || !ld || !p) return;
         const url = '{{ url_for("api_timetable_match_slots") }}'
             + '?class_name=' + encodeURIComponent(cn)
             + '&lesson_date=' + encodeURIComponent(ld)
             + '&period=' + encodeURIComponent(p)
-            + '&school_year=' + encodeURIComponent(sy)
-            + '&semester=' + encodeURIComponent(sem);
+            + '&school_year=' + encodeURIComponent(sy);
         try {
             const r = await fetch(url);
             const j = await r.json();
@@ -210,8 +208,6 @@
             const el = document.querySelector('[name="' + n + '"]');
             if (el) el.addEventListener('change', __loadTkbSlots);
         });
-        const sem = document.querySelector('select[name="semester"]');
-        if (sem) sem.addEventListener('change', __loadTkbSlots);
         const cs = document.querySelector('select[name="class_name"]');
         if (cs) cs.addEventListener('change', __loadTkbSlots);
         __loadTkbSlots();

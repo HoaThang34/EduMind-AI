@@ -18,7 +18,31 @@
         </div>
     </nav>
     <div class="container pb-5">
-        <p class="text-muted small mb-3">Lớp <strong>{{ student.student_class }}</strong> — {{ school_year }} · HK{{ semester }}</p>
+        <p class="text-muted small mb-2">
+            Lớp <strong>{{ student.student_class }}</strong> — {{ school_year }}
+            {% if week_number == school_current_week %}
+            <span class="badge text-bg-primary ms-1" title="Theo cấu hình nhà trường (BGH)">Tuần hiện tại</span>
+            {% else %}
+            <span class="badge text-bg-secondary ms-1">Đang xem tuần khác</span>
+            {% endif %}
+        </p>
+        <form method="get" class="d-flex flex-wrap align-items-center gap-2 mb-3">
+            <a href="{{ url_for('student.student_timetable', week_number=prev_week) }}" class="btn btn-sm btn-outline-secondary" title="Tuần trước">
+                <i class="fas fa-chevron-left"></i> Tuần trước
+            </a>
+            <label class="small text-muted mb-0">Tuần ISO</label>
+            <select name="week_number" class="form-select form-select-sm" style="width:auto; min-width:7rem" onchange="this.form.submit()" aria-label="Chọn tuần">
+                {% for w in range(1, max_iso_week + 1) %}
+                <option value="{{ w }}" {% if w == week_number %}selected{% endif %}>Tuần {{ w }}</option>
+                {% endfor %}
+            </select>
+            <a href="{{ url_for('student.student_timetable', week_number=next_week) }}" class="btn btn-sm btn-outline-secondary" title="Tuần sau">
+                Tuần sau <i class="fas fa-chevron-right"></i>
+            </a>
+            {% if week_number != school_current_week %}
+            <a href="{{ url_for('student.student_timetable') }}" class="btn btn-sm btn-outline-primary" title="Về tuần đang áp dụng theo nhà trường">Về tuần này</a>
+            {% endif %}
+        </form>
         <div class="table-responsive bg-white rounded-3 shadow-sm">
             <table class="table table-bordered table-sm text-center mb-0 align-middle">
                 <thead class="table-light">
