@@ -234,7 +234,13 @@ async function startCamera(vidId, placeholderId, overlayId, startBtnId, stopBtnI
         if (overlayId) document.getElementById(overlayId).classList.remove('hidden');
         if (startBtnId) document.getElementById(startBtnId).classList.add('hidden');
         if (stopBtnId) document.getElementById(stopBtnId).classList.remove('hidden');
-        if (vidId === 'camera-video') document.getElementById('recognize-btn').disabled = false;
+        if (vidId === 'camera-video') {
+            document.getElementById('recognize-btn').disabled = false;
+            // Tự động kích hoạt vòng lặp nếu checkbox đã được tích sẵn
+            if (document.getElementById('auto-recognize').checked && !autoScanInterval) {
+                autoScanInterval = setInterval(() => captureAndRecognize(true), 100);
+            }
+        }
     } catch(e) { alert('Lỗi camera: ' + e.message); }
 }
 
@@ -250,59 +256,140 @@ function stopCamera(vidId, placeholderId, overlayId, startBtnId, stopBtnId) {
     if (overlayId) document.getElementById(overlayId).classList.add('hidden');
     if (startBtnId) document.getElementById(startBtnId).classList.remove('hidden');
     if (stopBtnId) document.getElementById(stopBtnId).classList.add('hidden');
-    if (vidId === 'camera-video') document.getElementById('recognize-btn').disabled = true;
+    if (vidId === 'camera-video') {
+        document.getElementById('recognize-btn').disabled = true;
+        if (autoScanInterval) {
+            clearInterval(autoScanInterval);
+            autoScanInterval = null;
+        }
+    }
 }
 
 // ===================== RECOGNITION =====================
-async function captureAndRecognize() {
+let autoScanInterval = null;
+
+async function captureAndRecognize(isAuto = false) {
     if (isProcessingRecognize || !camStream) return;
+    
+    // Nếu đang ở chế độ tự động và checkbox không được chọn, dừng quét
+    const isAutoCheckbox = document.getElementById('auto-recognize').checked;
+    if (isAuto && !isAutoCheckbox) return;
+
     isProcessingRecognize = true;
     
     const video = document.getElementById('camera-video');
     const canvas = document.getElementById('camera-canvas');
-    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
-    const base64 = canvas.toDataURL('image/jpeg', 0.85);
+    
+    // Tối ưu: Giảm kích thước ảnh gửi lên server để tăng tốc độ xử lý (0.1s cần nhanh)
+    const scale = 0.5; 
+    canvas.width = video.videoWidth * scale; 
+    canvas.height = video.videoHeight * scale;
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    const base64 = canvas.toDataURL('image/jpeg', 0.7); // Giảm chất lượng 1 chút để giảm latency
 
     const cls = document.getElementById('class-select').value;
     const resDiv = document.getElementById('recognize-result');
-    resDiv.innerHTML = '<div class="flex flex-col items-center py-4"><div class="w-8 h-8 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin"></div><p class="text-xs mt-2">Đang nhận diện...</p></div>';
+    
+    // Chỉ hiện loading nếu không phải quét tự động để tránh nhấp nháy UI
+    if (!isAuto) {
+        resDiv.innerHTML = '<div class="flex flex-col items-center py-4"><div class="w-8 h-8 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin"></div><p class="text-xs mt-2 font-medium">Đang nhận diện...</p></div>';
+    }
 
     try {
         const resp = await fetch('/api/attendance/recognize', {
-            method: 'POST', headers: {'Content-Type': 'application/json'},
+            method: 'POST', 
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ class_name: cls, image_base64: base64 })
         });
         const data = await resp.json();
+        
         if (data.matched) {
+            // Hiển thị kết quả nhận diện
             resDiv.innerHTML = `
-                <div class="text-center space-y-3 bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                <div class="text-center space-y-3 bg-emerald-50 p-4 rounded-xl border border-emerald-100 animate-scale-in">
                     <p class="font-bold text-lg text-emerald-800">${data.student_name}</p>
                     <p class="text-xs text-emerald-600">${data.student_code}</p>
-                    <div class="text-xs font-bold text-emerald-700 bg-white px-2 py-1 rounded-full border border-emerald-200 inline-block">Độ tin cậy: ${Math.round(data.confidence*100)}%</div>
+                    <div class="text-xs font-bold text-emerald-700 bg-white px-2 py-1 rounded-full border border-emerald-200 inline-block shadow-sm">Độ tin cậy: ${Math.round(data.confidence*100)}%</div>
                     <div class="pt-2">
-                        <button onclick="confirmCheckin(${data.student_id}, '${data.captured_photo}', ${data.confidence})" class="btn-primary w-full py-2 shadow-sm">Xác nhận có mặt</button>
+                        <button id="btn-confirm-${data.student_id}" onclick="confirmCheckin(${data.student_id}, '${data.captured_photo}', ${data.confidence})" class="btn-primary w-full py-2.5 shadow-md hover:scale-[1.02] transition-transform">Xác nhận có mặt</button>
                     </div>
                 </div>
             `;
+            
+            // Tự động confirm nếu độ tin cậy cực cao (> 85%) và đang ở chế độ tự động
+            if (isAutoCheckbox && data.confidence > 0.85) {
+                const btn = document.getElementById(`btn-confirm-${data.student_id}`);
+                if (btn) {
+                    btn.innerHTML = '<div class="flex items-center justify-center gap-2"><div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Đang tự động ghi nhận...</div>';
+                    setTimeout(() => confirmCheckin(data.student_id, data.captured_photo, data.confidence), 300);
+                }
+            }
         } else {
-            resDiv.innerHTML = `<div class="text-center p-4 bg-red-50 text-red-700 text-sm rounded-xl border border-red-100">${data.error}</div>`;
+            // Nếu không khớp và không phải tự động, hiện lỗi. Nếu tự động thì giữ nguyên màn hình chờ.
+            if (!isAuto) {
+                resDiv.innerHTML = `<div class="text-center p-4 bg-red-50 text-red-700 text-sm rounded-xl border border-red-100">${data.error}</div>`;
+            } else if (!resDiv.querySelector('.bg-emerald-50')) {
+                // Chỉ reset về "Chờ..." nếu hiện tại không đang hiển thị 1 kết quả thành công
+                resDiv.innerHTML = '<div class="text-center py-6 text-muted-foreground text-sm flex flex-col items-center gap-3"><div class="w-2 h-2 bg-indigo-400 rounded-full animate-ping"></div> Đang quét khuôn mặt...</div>';
+            }
         }
-    } catch(e) { resDiv.innerHTML = `<p class="text-red-500 text-center text-xs">Lỗi server: ${e.message}</p>`; }
-    isProcessingRecognize = false;
+    } catch(e) { 
+        if (!isAuto) resDiv.innerHTML = `<p class="text-red-500 text-center text-xs">Lỗi kết nối: ${e.message}</p>`; 
+    } finally {
+        isProcessingRecognize = false;
+    }
 }
 
+// Khởi chạy vòng lặp 0.1s khi checkbox được tích
+document.getElementById('auto-recognize').addEventListener('change', function(e) {
+    if (e.target.checked) {
+        if (!autoScanInterval) {
+            autoScanInterval = setInterval(() => {
+                captureAndRecognize(true);
+            }, 100); // 0.1 giây
+            showToast('Đã bật nhận diện tự động (0.1s)', 'success');
+        }
+    } else {
+        if (autoScanInterval) {
+            clearInterval(autoScanInterval);
+            autoScanInterval = null;
+            showToast('Đã tắt nhận diện tự động', 'info');
+        }
+    }
+});
+
 async function confirmCheckin(sid, photo, conf) {
-    const resp = await fetch('/api/attendance/checkin', {
-        method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ student_id: sid, captured_photo: photo, confidence: conf, status: 'Có mặt' })
-    });
-    const data = await resp.json();
-    if (data.success) {
-        showToast(data.message, 'success');
-        document.getElementById('recognize-result').innerHTML = '<div class="text-center py-6 text-muted-foreground text-sm">Chờ nhận diện tiếp theo...</div>';
-        loadStats(); loadTodayCheckins();
-    } else alert(data.error);
+    // Ngưng quét tự động tạm thời để tránh ghi nhận trùng lặp trong khi đang gửi request checkin
+    const wasAuto = document.getElementById('auto-recognize').checked;
+    if (wasAuto) {
+         // Tạm dừng 1 chút để UI phản hồi
+    }
+
+    try {
+        const resp = await fetch('/api/attendance/checkin', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ student_id: sid, captured_photo: photo, confidence: conf, status: 'Có mặt' })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            showToast(data.message, 'success');
+            document.getElementById('recognize-result').innerHTML = '<div class="text-center py-6 text-emerald-600 font-bold bg-emerald-50 rounded-xl animate-fade-in">✓ Đã ghi nhận thành công!</div>';
+            loadStats(); 
+            loadTodayCheckins();
+            
+            // Chờ 2 giây sau khi thành công mới cho phép quét tiếp (tránh lặp lại cùng 1 người quá nhanh)
+            if (wasAuto) {
+                isProcessingRecognize = true;
+                setTimeout(() => { isProcessingRecognize = false; }, 2000);
+            }
+        } else {
+            if (!data.error.includes('đã điểm danh')) alert(data.error);
+            // Nếu đã điểm danh rồi thì cũng cho qua để quét người tiếp theo
+            isProcessingRecognize = false;
+        }
+    } catch(e) {
+        console.error(e);
+    }
 }
 
 // ===================== TRAINING & ENROLLMENT =====================
@@ -405,7 +492,11 @@ function toggleSelectAll(el) {
 }
 function showToast(m, t='success') {
     const div = document.createElement('div');
-    div.className = `fixed bottom-6 right-6 px-6 py-3 rounded-xl shadow-2xl text-white ${t==='success'?'bg-indigo-600':'bg-red-600'} animate-fade-in-up z-[100] font-bold`;
+    let bg = 'bg-indigo-600';
+    if (t === 'error') bg = 'bg-red-600';
+    if (t === 'info') bg = 'bg-blue-600';
+    
+    div.className = `fixed bottom-6 right-6 px-6 py-3 rounded-xl shadow-2xl text-white ${bg} animate-fade-in-up z-[100] font-bold`;
     div.textContent = m; document.body.appendChild(div);
     setTimeout(() => div.remove(), 3000);
 }
