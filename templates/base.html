@@ -182,6 +182,26 @@
             }
         }
 
+        @keyframes fade-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
         .animate-float {
             animation: float 6s ease-in-out infinite;
         }
@@ -944,6 +964,14 @@
                             <i class="fas fa-envelope w-6 text-center text-lg mr-3 text-indigo-400"></i>
                             <span class="text-sm">Tin nhắn riêng</span>
                         </a>
+
+                        {% if current_user.role in ['admin', 'homeroom_teacher'] %}
+                        <a href="{{ url_for('send_student_notification') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'send_student_notification' or request.endpoint == 'student_notifications_history' %}active{% endif %}">
+                            <i class="fas fa-bullhorn w-6 text-center text-lg mr-3 text-amber-500"></i>
+                            <span class="text-sm">Thông báo học sinh</span>
+                        </a>
+                        {% endif %}
 
                         {% if current_user.role == 'admin' %}
                         <a href="{{ url_for('send_notification') }}"

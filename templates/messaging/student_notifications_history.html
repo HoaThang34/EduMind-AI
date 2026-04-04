@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Lịch sử thông báo đã gửi - EduMind AI{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-foreground tracking-tight">Lịch sử thông báo đã gửi</h1>
+            <p class="text-muted-foreground">Xem lại các thông báo bạn đã gửi tới học sinh.</p>
+        </div>
+        <a href="{{ url_for('send_student_notification') }}" class="btn-primary flex items-center gap-2">
+            <i class="fas fa-plus"></i>
+            Gửi thông báo mới
+        </a>
+    </div>
+
+    <!-- Stats Panel -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="glass-panel p-4 flex flex-col items-center justify-center text-center">
+            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mb-2">
+                <i class="fas fa-paper-plane"></i>
+            </div>
+            <p class="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Tổng số đã gửi</p>
+            <h3 class="text-2xl font-bold text-foreground">{{ notifications | length }}</h3>
+        </div>
+        <div class="glass-panel p-4 flex flex-col items-center justify-center text-center">
+            <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mb-2">
+                <i class="fas fa-eye text-lg"></i>
+            </div>
+            <p class="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Tỷ lệ đã đọc</p>
+            <h3 class="text-2xl font-bold text-foreground">
+                {% if notifications %}
+                {{ (notifications | selectattr('is_read', 'equalto', True) | list | length / notifications | length * 100) | round }}%
+                {% else %}
+                0%
+                {% endif %}
+            </h3>
+        </div>
+        <div class="glass-panel p-4 flex flex-col items-center justify-center text-center">
+            <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 mb-2" title="Chưa đọc">
+                <i class="fas fa-envelope-open-text"></i>
+            </div>
+            <p class="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Chưa được xem</p>
+            <h3 class="text-2xl font-bold text-foreground">{{ notifications | selectattr('is_read', 'equalto', False) | list | length }}</h3>
+        </div>
+    </div>
+
+    <div class="glass-panel p-6 shadow-sm overflow-x-auto">
+        {% if notifications %}
+        <table class="table-shadcn w-full min-w-[800px]">
+            <thead>
+                <tr class="stagger-item">
+                    <th class="w-1/4">📝 Tiêu đề & Loại</th>
+                    <th class="w-1/4">👥 Người nhận</th>
+                    <th class="w-1/4">💬 Nội dung xem trước</th>
+                    <th class="w-[120px] text-center">🕒 Thời gian</th>
+                    <th class="w-[100px] text-center">🔍 Trạng thái</th>
+                    <th class="w-[80px] text-center">⚙️ Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for n in notifications %}
+                <tr class="stagger-item group">
+                    <td>
+                        <div class="flex flex-col">
+                            <span class="font-bold text-foreground">{{ n.title }}</span>
+                            <span class="text-[10px] text-muted-foreground/80 mt-1 uppercase tracking-wider font-semibold">
+                                {% if n.notification_type == 'announcement' %}📢 Thông báo chung
+                                {% elif n.notification_type == 'reminder' %}⏰ Nhắc nhở học tập
+                                {% elif n.notification_type == 'violation' %}⚠️ Nhắc nhở kỷ luật
+                                {% elif n.notification_type == 'bonus' %}🌟 Khen thưởng
+                                {% elif n.notification_type == 'timetable' %}📅 Lịch học
+                                {% else %}🔔 Khác
+                                {% endif %}
+                            </span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="flex flex-col">
+                            <span class="font-medium text-foreground text-sm">{{ n.student.name }}</span>
+                            <span class="text-[10px] text-muted-foreground px-1.5 py-0.5 rounded-full bg-slate-100 w-fit mt-1">Lớp {{ n.student.student_class }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="text-sm text-muted-foreground line-clamp-1 italic max-w-xs group-hover:line-clamp-none transition-all">
+                            "{{ n.message }}"
+                        </div>
+                    </td>
+                    <td class="text-center">
+                        <span class="text-xs text-muted-foreground" title="{{ n.created_at.strftime('%H:%M:%S %d/%m/%Y') }}">
+                            {{ n.created_at.strftime('%H:%M %d/%m') }}
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        {% if n.is_read %}
+                        <span class="badge badge-success flex items-center justify-center gap-1">
+                            <i class="fas fa-check-circle text-[8px]"></i> Đã xem
+                        </span>
+                        {% else %}
+                        <span class="badge badge-secondary flex items-center justify-center gap-1 opacity-60">
+                            <i class="fas fa-clock text-[8px]"></i> Đang chờ
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <form action="{{ url_for('student_notification_recall', nid=n.id) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn thu hồi thông báo này không? Thao tác này sẽ xoá thông báo khỏi cổng học sinh.')">
+                            <button type="submit" class="p-2 text-muted-foreground hover:text-destructive transition-colors" title="Thu hồi thông báo">
+                                <i class="fas fa-undo"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="p-20 flex flex-col items-center justify-center text-center space-y-4">
+            <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                <i class="fas fa-history text-3xl"></i>
+            </div>
+            <div>
+                <h4 class="text-lg font-bold text-foreground">Chưa có lịch sử thông báo</h4>
+                <p class="text-sm text-muted-foreground">Bắt đầu bằng việc gửi thông báo đầu tiên cho học sinh của bạn nhé!</p>
+            </div>
+            <a href="{{ url_for('send_student_notification') }}" class="btn-primary">Gửi ngay</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

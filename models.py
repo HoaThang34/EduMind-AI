@@ -283,8 +283,10 @@ class StudentNotification(db.Model):
     notification_type = db.Column(db.String(50))
     is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    sender_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=True)
 
     student = db.relationship("Student", backref=db.backref("student_notifications", lazy=True))
+    sender = db.relationship("Teacher", backref=db.backref("sent_student_notifications", lazy=True))
 
 
 class ClassFundCollection(db.Model):

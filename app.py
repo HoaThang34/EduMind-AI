@@ -135,6 +135,17 @@ def ensure_timetable_slot_week_number_column():
     db.session.commit()
 
 
+def ensure_student_notification_sender_column():
+    """Thêm cột sender_id cho bảng student_notification (SQLite cũ)."""
+    insp = inspect(db.engine)
+    if not insp.has_table("student_notification"):
+        return
+    cols = {c["name"] for c in insp.get_columns("student_notification")}
+    if "sender_id" not in cols:
+        db.session.execute(text("ALTER TABLE student_notification ADD COLUMN sender_id INTEGER"))
+    db.session.commit()
+
+
 def create_database():
     db.create_all()
     ensure_student_parent_columns()
@@ -143,6 +154,7 @@ def create_database():
     ensure_lesson_book_timetable_column()
     ensure_violation_lesson_book_column()
     ensure_timetable_slot_week_number_column()
+    ensure_student_notification_sender_column()
     if not Teacher.query.first():
         hashed_pwd = generate_password_hash("admin")
         db.session.add(Teacher(username="admin", password=hashed_pwd, full_name="Admin", role="admin"))

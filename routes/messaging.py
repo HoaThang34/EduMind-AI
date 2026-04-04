@@ -13,7 +13,7 @@ from werkzeug.security import generate_password_hash
 from models import (
     db, Student, Violation, ViolationType, Teacher, SystemConfig, ClassRoom,
     WeeklyArchive, Subject, Grade, BonusType, BonusRecord, Notification,
-    GroupChatMessage, PrivateMessage, ChangeLog,
+    GroupChatMessage, PrivateMessage, ChangeLog, StudentNotification,
 )
 from app_helpers import (
     admin_required, get_accessible_students, can_access_student, normalize_student_code,
@@ -223,3 +223,123 @@ def register(app):
                 for m in messages
             ]
         })
+
+    # === STUDENT NOTIFICATION ROUTES ===
+
+    @app.route("/student_notifications/send", methods=["GET", "POST"])
+    @login_required
+    def send_student_notification():
+        """Soạn và gửi thông báo tới học sinh"""
+        # Giới hạn chỉ Admin và GVCN có thể gửi (hoặc theo yêu cầu: GVCN + BGH)
+        if current_user.role not in ['admin', 'homeroom_teacher']:
+            flash("Bạn không có quyền thực hiện chức năng này!", "error")
+            return redirect(url_for('dashboard'))
+
+        if request.method == "POST":
+            target = request.form.get("target")  # all, class, individual
+            title = request.form.get("title")
+            message = request.form.get("message")
+            notif_type = request.form.get("notification_type", "announcement")
+            
+            if not title or not message:
+                flash("Vui lòng nhập đầy đủ tiêu đề và nội dung!", "error")
+            else:
+                target_students = []
+                if target == "all":
+                    if current_user.role != 'admin':
+                        flash("Chỉ Admin mới có thể gửi thông báo toàn trường!", "error")
+                        return redirect(url_for('send_student_notification'))
+                    target_students = Student.query.all()
+                elif target == "class":
+                    class_name = request.form.get("class_name")
+                    if not class_name:
+                        flash("Vui lòng chọn lớp!", "error")
+                    else:
+                        # GVCN chỉ được gửi cho lớp mình (nếu không phải admin)
+                        if current_user.role == 'homeroom_teacher' and class_name != current_user.assigned_class:
+                            flash("Bạn chỉ có thể gửi thông báo cho lớp mình chủ nhiệm!", "error")
+                        else:
+                            target_students = Student.query.filter_by(student_class=class_name).all()
+                elif target == "individual":
+                    student_id = request.form.get("student_id")
+                    if not student_id:
+                        flash("Vui lòng chọn học sinh!", "error")
+                    else:
+                        student = Student.query.get(student_id)
+                        if student:
+                            # GVCN chỉ được gửi cho HS lớp mình
+                            if current_user.role == 'homeroom_teacher' and student.student_class != current_user.assigned_class:
+                                flash("Bạn chỉ có thể gửi thông báo cho học sinh lớp mình chủ nhiệm!", "error")
+                            else:
+                                target_students = [student]
+
+                if target_students:
+                    for student in target_students:
+                        notif = StudentNotification(
+                            student_id=student.id,
+                            title=title,
+                            message=message,
+                            notification_type=notif_type,
+                            sender_id=current_user.id
+                        )
+                        db.session.add(notif)
+                    db.session.commit()
+                    log_change(
+                        change_type="student_notification",
+                        description=f"Gửi thông báo: {title} tới {len(target_students)} học sinh ({target})"
+                    )
+                    flash(f"Đã gửi thông báo tới {len(target_students)} học sinh thành công!", "success")
+                    return redirect(url_for('student_notifications_history'))
+
+        # Lấy dữ liệu cho form
+        classes = db.session.query(Student.student_class).distinct().all()
+        classes = [c[0] for c in classes]
+        
+        # Nếu là GVCN, chỉ lấy HS lớp mình (nếu target individual)
+        if current_user.role == 'homeroom_teacher':
+            students = Student.query.filter_by(student_class=current_user.assigned_class).order_by(Student.name).all()
+        else:
+            students = Student.query.order_by(Student.student_class, Student.name).all()
+
+        return render_template("messaging/send_student_notification.html", 
+                             classes=classes, 
+                             students=students)
+
+    @app.route("/student_notifications/history")
+    @login_required
+    def student_notifications_history():
+        """Lịch sử thông báo đã gửi cho học sinh"""
+        if current_user.role not in ['admin', 'homeroom_teacher']:
+            flash("Bạn không có quyền thực hiện chức năng này!", "error")
+            return redirect(url_for('dashboard'))
+
+        # Lấy các thông báo do user này gửi
+        sent_notifs = StudentNotification.query.filter_by(sender_id=current_user.id)\
+            .order_by(StudentNotification.created_at.desc()).all()
+            
+        return render_template("messaging/student_notifications_history.html", notifications=sent_notifs)
+
+    @app.route("/student_notifications/<int:nid>/recall", methods=["POST"])
+    @login_required
+    def student_notification_recall(nid):
+        """Thu hồi (xoá) thông báo đã gửi tới học sinh"""
+        notif = StudentNotification.query.get_or_404(nid)
+        
+        # Chỉ người gửi hoặc admin mới có quyền thu hồi
+        if notif.sender_id != current_user.id and current_user.role != 'admin':
+            flash("Bạn không có quyền thu hồi thông báo này!", "error")
+            return redirect(url_for('student_notifications_history'))
+            
+        title = notif.title
+        student_name = notif.student.name
+        
+        db.session.delete(notif)
+        db.session.commit()
+        
+        log_change(
+            change_type="student_notification_recall",
+            description=f"Thu hồi thông báo: {title} đã gửi tới {student_name}"
+        )
+        
+        flash("Đã thu hồi thông báo thành công!", "success")
+        return redirect(url_for('student_notifications_history'))

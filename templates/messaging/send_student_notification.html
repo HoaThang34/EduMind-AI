@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Gửi thông báo tới học sinh - EduMind AI{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-foreground tracking-tight">Gửi thông báo tới học sinh</h1>
+            <p class="text-muted-foreground">Soạn và gửi thông báo tới cá nhân, lớp hoặc toàn trường.</p>
+        </div>
+        <a href="{{ url_for('student_notifications_history') }}" class="btn-outline flex items-center gap-2">
+            <i class="fas fa-history"></i>
+            Lịch sử đã gửi
+        </a>
+    </div>
+
+    <div class="glass-panel p-6 shadow-sm">
+        <form action="{{ url_for('send_student_notification') }}" method="POST" class="space-y-6">
+            <!-- Targeting -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b border-border">
+                <div class="space-y-2">
+                    <label class="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <i class="fas fa-bullseye text-indigo-500"></i>
+                        Đối tượng nhận tin
+                    </label>
+                    <select name="target" id="target-select" class="input-shadcn bg-white" onchange="toggleTargetFields()">
+                        {% if current_user.role == 'admin' %}
+                        <option value="all">Toàn bộ học sinh</option>
+                        {% endif %}
+                        <option value="class">Theo lớp học</option>
+                        <option value="individual">Cá nhân học sinh</option>
+                    </select>
+                </div>
+
+                <div id="class-target-div" class="space-y-2" style="display: none;">
+                    <label class="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <i class="fas fa-users text-blue-500"></i>
+                        Chọn lớp
+                    </label>
+                    <select name="class_name" class="input-shadcn bg-white">
+                        <option value="">-- Chọn lớp --</option>
+                        {% for c in classes %}
+                        <option value="{{ c }}">{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div id="individual-target-div" class="space-y-2" style="display: none;">
+                    <label class="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <i class="fas fa-user text-emerald-500"></i>
+                        Chọn học sinh
+                    </label>
+                    <select name="student_id" class="input-shadcn bg-white search-select">
+                        <option value="">-- Tìm học sinh --</option>
+                        {% for s in students %}
+                        <option value="{{ s.id }}">{{ s.name }} ({{ s.student_class }}) - {{ s.student_code }}</option>
+                        {% endfor %}
+                    </select>
+                    <p class="text-[10px] text-muted-foreground italic">Gợi ý: Nhập tên hoặc mã HS để tìm nhanh.</p>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="space-y-4 pt-2">
+                <div class="space-y-2">
+                    <label class="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <i class="fas fa-heading text-slate-500"></i>
+                        Tiêu đề thông báo
+                    </label>
+                    <input type="text" name="title" required placeholder="VD: Nhắc nhở nộp bài tập về nhà" class="input-shadcn">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold text-foreground flex items-center gap-2">
+                            <i class="fas fa-tag text-slate-500"></i>
+                            Loại thông báo
+                        </label>
+                        <select name="notification_type" class="input-shadcn bg-white">
+                            <option value="announcement">📢 Thông báo chung</option>
+                            <option value="reminder">⏰ Nhắc nhở học tập</option>
+                            <option value="violation">⚠️ Nhắc nhở kỷ luật</option>
+                            <option value="bonus">🌟 Khen thưởng / Điểm cộng</option>
+                            <option value="timetable">📅 Thay đổi lịch học</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <i class="fas fa-align-left text-slate-500"></i>
+                        Nội dung chi tiết
+                    </label>
+                    <textarea name="message" rows="6" required placeholder="Nhập nội dung thông báo tại đây..." class="input-shadcn resize-none"></textarea>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-4">
+                <button type="reset" class="btn-ghost">Hủy bỏ</button>
+                <button type="submit" class="btn-primary flex items-center gap-2 px-8">
+                    <i class="fas fa-paper-plane"></i>
+                    Gửi thông báo ngay
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tips Section -->
+    <div class="bg-indigo-50/50 border border-indigo-100 rounded-xl p-4 flex gap-4">
+        <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
+            <i class="fas fa-lightbulb"></i>
+        </div>
+        <div>
+            <h4 class="text-sm font-semibold text-indigo-900">Mẹo nhỏ</h4>
+            <p class="text-xs text-indigo-700 leading-relaxed">
+                Học sinh sẽ nhận được thông báo ngay khi đăng nhập vào hệ thống. Đối với các thông báo cá nhân, bạn có thể gửi trực tiếp từ trang hồ sơ của học sinh đó.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleTargetFields() {
+    const target = document.getElementById('target-select').value;
+    const classDiv = document.getElementById('class-target-div');
+    const individualDiv = document.getElementById('individual-target-div');
+
+    classDiv.style.display = (target === 'class') ? 'block' : 'none';
+    individualDiv.style.display = (target === 'individual') ? 'block' : 'none';
+}
+
+// Khởi tạo trạng thái ban đầu
+document.addEventListener('DOMContentLoaded', toggleTargetFields);
+</script>
+{% endblock %}
