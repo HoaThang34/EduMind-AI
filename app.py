@@ -10,7 +10,7 @@ from flask_login import LoginManager
 
 from sqlalchemy import inspect, text
 
-from models import db, Teacher, SystemConfig, ViolationType, ConductSetting
+from models import db, Teacher, SystemConfig, ViolationType, ConductSetting, AttendanceRecord
 from app_helpers import register_template_extensions
 from routes import register_all_routes
 
@@ -192,6 +192,7 @@ def create_database():
     ensure_timetable_slot_week_number_column()
     ensure_student_notification_sender_column()
     ensure_student_conduct_columns()
+    # AttendanceRecord table is auto-created by db.create_all()
     if not Teacher.query.first():
         hashed_pwd = generate_password_hash("admin")
         db.session.add(Teacher(username="admin", password=hashed_pwd, full_name="Admin", role="admin"))

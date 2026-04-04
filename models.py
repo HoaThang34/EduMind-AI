@@ -341,3 +341,21 @@ class ClassFundExpense(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
     created_by = db.relationship("Teacher", backref=db.backref("class_fund_expenses_created", lazy=True))
+
+
+class AttendanceRecord(db.Model):
+    """Lịch sử điểm danh bằng nhận diện khuôn mặt."""
+    __tablename__ = "attendance_record"
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey("student.id"), nullable=False, index=True)
+    class_name = db.Column(db.String(50), nullable=False, index=True)
+    check_in_time = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
+    captured_photo = db.Column(db.String(255), nullable=True)  # Đường dẫn ảnh chụp từ camera
+    confidence = db.Column(db.Float, default=0.0)  # Độ tin cậy nhận diện (0-1)
+    status = db.Column(db.String(20), default="Có mặt")  # Có mặt, Trễ, Vắng
+    notes = db.Column(db.Text, nullable=True)
+    recorded_by_id = db.Column(db.Integer, db.ForeignKey("teacher.id"), nullable=True)
+    attendance_date = db.Column(db.Date, nullable=False, index=True)
+
+    student = db.relationship("Student", backref=db.backref("attendance_records", lazy=True))
+    recorded_by = db.relationship("Teacher", backref=db.backref("attendance_records_created", lazy=True))

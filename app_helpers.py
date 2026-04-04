@@ -22,7 +22,7 @@ from models import (
     db, Student, Violation, ViolationType, Teacher, SystemConfig, ClassRoom,
     WeeklyArchive, Subject, Grade, ChatConversation, BonusType, BonusRecord,
     Notification, GroupChatMessage, PrivateMessage, ChangeLog, StudentNotification,
-    TimetableSlot, ConductSetting,
+    TimetableSlot, ConductSetting, AttendanceRecord,
 )
 
 basedir = os.path.abspath(os.path.dirname(__file__))

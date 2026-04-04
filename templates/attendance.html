@@ -1,0 +1,439 @@
+{% extends "base.html" %}
+{% block title %}Điểm danh khuôn mặt - EduMind AI{% endblock %}
+
+{% block content %}
+<div class="page-enter space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-foreground">
+                <svg class="inline-block w-7 h-7 mr-2 -mt-1 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+                Điểm danh Khuôn mặt
+            </h1>
+            <p class="text-sm text-muted-foreground mt-1">Nâng cao: Huấn luyện đa mẫu từ ảnh thẻ và trực tiếp qua camera</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <select id="class-select" onchange="onClassChange()" class="input-shadcn w-48">
+                {% for cls in classes %}
+                <option value="{{ cls }}" {% if cls == selected_class %}selected{% endif %}>{{ cls }}</option>
+                {% endfor %}
+            </select>
+            <button onclick="trainModel()" id="train-btn" class="btn-primary flex items-center gap-2 text-sm whitespace-nowrap">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                Huấn luyện dữ liệu lớp
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="stats-section">
+        <!-- Stats cards here (same as before) -->
+        <div class="glass-panel p-4 hover-card"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center"><svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><div><p class="text-xs text-muted-foreground font-medium">Sĩ số</p><p class="text-xl font-bold text-foreground" id="stat-total">0</p></div></div></div>
+        <div class="glass-panel p-4 hover-card"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center"><svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div><p class="text-xs text-muted-foreground font-medium">Có mặt</p><p class="text-xl font-bold text-emerald-600" id="stat-present">0</p></div></div></div>
+        <div class="glass-panel p-4 hover-card"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center"><svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div><p class="text-xs text-muted-foreground font-medium">Đi trễ</p><p class="text-xl font-bold text-amber-600" id="stat-late">0</p></div></div></div>
+        <div class="glass-panel p-4 hover-card"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center"><svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div><p class="text-xs text-muted-foreground font-medium">Vắng</p><p class="text-xl font-bold text-red-600" id="stat-absent">0</p></div></div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex border-b border-border gap-1">
+        <button onclick="switchTab('camera')" id="tab-camera" class="tab-btn px-4 py-2.5 text-sm font-medium text-muted-foreground border-b-2 border-transparent transition-colors hover:text-foreground active-tab">
+            <svg class="inline w-4 h-4 mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+            Điểm danh Camera
+        </button>
+        <button onclick="switchTab('list')" id="tab-list" class="tab-btn px-4 py-2.5 text-sm font-medium text-muted-foreground border-b-2 border-transparent transition-colors hover:text-foreground">
+            <svg class="inline w-4 h-4 mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            Quản lý dữ liệu khuôn mặt
+        </button>
+        <button onclick="switchTab('history')" id="tab-history" class="tab-btn px-4 py-2.5 text-sm font-medium text-muted-foreground border-b-2 border-transparent transition-colors hover:text-foreground">
+            <svg class="inline w-4 h-4 mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Lịch sử
+        </button>
+    </div>
+
+    <!-- TAB: Camera Scan -->
+    <div id="panel-camera" class="tab-panel">
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <div class="lg:col-span-3">
+                <div class="glass-panel overflow-hidden">
+                    <div class="p-4 border-b border-border flex items-center justify-between">
+                        <h3 class="text-sm font-semibold text-foreground flex items-center gap-2">Camera trực tiếp</h3>
+                        <div class="flex gap-2">
+                            <button onclick="startCamera('camera-video', 'camera-placeholder', 'scan-overlay', 'start-cam-btn', 'stop-cam-btn')" id="start-cam-btn" class="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5">Bật camera</button>
+                            <button onclick="stopCamera('camera-video', 'camera-placeholder', 'scan-overlay', 'start-cam-btn', 'stop-cam-btn')" id="stop-cam-btn" class="btn-destructive text-xs px-3 py-1.5 hidden flex items-center gap-1.5">Tắt camera</button>
+                        </div>
+                    </div>
+                    <div class="relative bg-gray-950 aspect-video flex items-center justify-center">
+                        <video id="camera-video" autoplay playsinline class="w-full h-full object-cover hidden"></video>
+                        <canvas id="camera-canvas" class="hidden"></canvas>
+                        <div id="camera-placeholder" class="flex flex-col items-center justify-center gap-4 text-gray-400 py-16">
+                            <svg class="w-20 h-20 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <p class="text-sm">Nhấn "Bật camera" để bắt đầu điểm danh</p>
+                        </div>
+                        <div id="scan-overlay" class="absolute inset-0 hidden">
+                            <div class="absolute inset-0 bg-black/20"></div>
+                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 sm:w-64 sm:h-64 border-2 border-indigo-400 border-dashed rounded-2xl">
+                                <div id="scan-line" class="absolute left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-indigo-400 to-transparent opacity-80 animate-scan-line"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 border-t border-border flex items-center gap-3">
+                        <button onclick="captureAndRecognize()" id="recognize-btn" class="btn-primary flex items-center gap-2 flex-1 justify-center py-2.5 disabled:opacity-50" disabled>Chụp & Nhận diện</button>
+                        <label class="flex items-center gap-2 text-sm text-muted-foreground whitespace-nowrap">
+                            <input type="checkbox" id="auto-recognize" class="w-4 h-4 rounded border-gray-300 text-indigo-600"> Tự động
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="lg:col-span-2 space-y-4">
+                <div class="glass-panel" id="result-panel">
+                    <div class="p-4 border-b border-border"><h3 class="text-sm font-semibold">Kết quả nhận diện</h3></div>
+                    <div class="p-6" id="recognize-result">
+                        <div class="text-center py-6 text-muted-foreground text-sm">Chưa có kết quả</div>
+                    </div>
+                </div>
+                <div class="glass-panel">
+                    <div class="p-4 border-b border-border"><h3 class="text-sm font-semibold">Đã điểm danh hôm nay</h3></div>
+                    <div class="max-h-64 overflow-y-auto" id="today-checkins"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: Student Management -->
+    <div id="panel-list" class="tab-panel hidden">
+        <div class="glass-panel overflow-hidden">
+            <div class="p-4 border-b border-border flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <h3 class="text-sm font-semibold text-foreground">Dữ liệu mẫu khuôn mặt</h3>
+                    <button onclick="trainSelected()" id="train-selected-btn" class="btn-outline text-xs px-3 py-1.5 flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Huấn luyện lớp (Cập nhật mẫu mới)
+                    </button>
+                </div>
+                <span class="badge badge-secondary text-xs" id="student-count-badge">0 học sinh</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="table-shadcn">
+                    <thead>
+                        <tr>
+                            <th class="w-10"><input type="checkbox" id="select-all-students" onchange="toggleSelectAll(this)"></th>
+                            <th>Học sinh</th>
+                            <th class="text-center">Ảnh thẻ</th>
+                            <th class="text-center">Mẫu camera</th>
+                            <th class="text-center">Trạng thái mô hình</th>
+                            <th class="text-center">Thao tác dữ liệu</th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-list-body">
+                        <tr><td colspan="6" class="text-center py-8 text-muted-foreground">Đang tải...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: History (Not modified, remains same) -->
+    <div id="panel-history" class="tab-panel hidden">
+        <div class="glass-panel overflow-hidden">
+            <div class="p-4 border-b border-border flex flex-wrap items-center gap-3">
+                <h3 class="text-sm font-semibold text-foreground mr-auto">Lịch sử điểm danh</h3>
+                <input type="date" id="history-date-from" class="input-shadcn w-36 text-sm" onchange="loadHistory()">
+                <input type="date" id="history-date-to" class="input-shadcn w-36 text-sm" onchange="loadHistory()">
+            </div>
+            <div class="overflow-x-auto">
+                <table class="table-shadcn" id="history-table">
+                    <thead>
+                        <tr><th>#</th><th>Học sinh</th><th>Lớp</th><th>Ngày</th><th>Giờ</th><th class="text-center">Trạng thái</th><th class="text-center">Ảnh chụp</th></tr>
+                    </thead>
+                    <tbody id="history-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Enroll Face via Camera -->
+<div id="enroll-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl animate-scale-in">
+        <div class="p-6 border-b border-border flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-bold text-foreground">Chụp mẫu khuôn mặt trực tiếp</h3>
+                <p class="text-sm text-muted-foreground mt-0.5" id="enroll-student-name">Học sinh: ...</p>
+            </div>
+            <button onclick="closeEnrollModal()" class="text-gray-400 hover:text-gray-600 font-bold text-2xl">&times;</button>
+        </div>
+        <div class="p-6 space-y-6">
+            <div class="relative bg-gray-950 aspect-square rounded-xl overflow-hidden max-w-xs mx-auto border-4 border-white shadow-lg">
+                <video id="enroll-video" autoplay playsinline class="w-full h-full object-cover"></video>
+                <div class="absolute inset-0 border-4 border-indigo-400/50 rounded-xl pointer-events-none"></div>
+                <!-- Frame hints -->
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="w-48 h-48 border-2 border-white/30 border-dashed rounded-full"></div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div class="text-center p-4 rounded-xl bg-gray-50 border border-border">
+                    <p class="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-1">Mẫu đã chụp</p>
+                    <p class="text-2xl font-black text-indigo-600" id="enroll-count">0</p>
+                </div>
+                <div class="flex flex-col justify-center">
+                    <p class="text-xs text-muted-foreground leading-relaxed italic">Gợi ý: Chụp 5-10 mẫu với các góc độ nghiêng nhẹ để nhận diện tốt hơn.</p>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="captureEnrollmentSample()" id="enroll-capture-btn" class="btn-primary flex-1 py-3 font-bold flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg>
+                    Chụp mẫu
+                </button>
+                <button onclick="trainModel()" class="btn-outline px-6 py-3 font-bold text-indigo-600">Hoàn tất & Huấn luyện</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Other Modals (History photo, etc) -->
+<div id="photo-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="this.classList.add('hidden')">
+    <img id="photo-modal-img" class="max-w-full max-h-full rounded-xl" src="">
+</div>
+
+<style>
+    .active-tab { color: #4f46e5; border-bottom-color: #4f46e5; font-weight: 700; }
+    @keyframes scan-line { 0% { top: 0%; } 100% { top: 100%; } }
+    .animate-scan-line { animation: scan-line 2s linear infinite; }
+</style>
+
+<script>
+// ===================== STATE =====================
+let camStream = null;
+let currentEnrollStudentId = null;
+let isProcessingRecognize = false;
+
+// ===================== TABS =====================
+function switchTab(tab) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
+    document.getElementById('panel-' + tab).classList.remove('hidden');
+    document.getElementById('tab-' + tab).classList.add('active-tab');
+    if (tab === 'list') loadStudentList();
+    if (tab === 'history') loadHistory();
+}
+
+// ===================== CAMERA HELPERS =====================
+async function startCamera(vidId, placeholderId, overlayId, startBtnId, stopBtnId) {
+    try {
+        camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+        const video = document.getElementById(vidId);
+        video.srcObject = camStream;
+        video.classList.remove('hidden');
+        if (placeholderId) document.getElementById(placeholderId).classList.add('hidden');
+        if (overlayId) document.getElementById(overlayId).classList.remove('hidden');
+        if (startBtnId) document.getElementById(startBtnId).classList.add('hidden');
+        if (stopBtnId) document.getElementById(stopBtnId).classList.remove('hidden');
+        if (vidId === 'camera-video') document.getElementById('recognize-btn').disabled = false;
+    } catch(e) { alert('Lỗi camera: ' + e.message); }
+}
+
+function stopCamera(vidId, placeholderId, overlayId, startBtnId, stopBtnId) {
+    if (camStream) {
+        camStream.getTracks().forEach(t => t.stop());
+        camStream = null;
+    }
+    const video = document.getElementById(vidId);
+    video.srcObject = null;
+    video.classList.add('hidden');
+    if (placeholderId) document.getElementById(placeholderId).classList.remove('hidden');
+    if (overlayId) document.getElementById(overlayId).classList.add('hidden');
+    if (startBtnId) document.getElementById(startBtnId).classList.remove('hidden');
+    if (stopBtnId) document.getElementById(stopBtnId).classList.add('hidden');
+    if (vidId === 'camera-video') document.getElementById('recognize-btn').disabled = true;
+}
+
+// ===================== RECOGNITION =====================
+async function captureAndRecognize() {
+    if (isProcessingRecognize || !camStream) return;
+    isProcessingRecognize = true;
+    
+    const video = document.getElementById('camera-video');
+    const canvas = document.getElementById('camera-canvas');
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    const base64 = canvas.toDataURL('image/jpeg', 0.85);
+
+    const cls = document.getElementById('class-select').value;
+    const resDiv = document.getElementById('recognize-result');
+    resDiv.innerHTML = '<div class="flex flex-col items-center py-4"><div class="w-8 h-8 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin"></div><p class="text-xs mt-2">Đang nhận diện...</p></div>';
+
+    try {
+        const resp = await fetch('/api/attendance/recognize', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ class_name: cls, image_base64: base64 })
+        });
+        const data = await resp.json();
+        if (data.matched) {
+            resDiv.innerHTML = `
+                <div class="text-center space-y-3 bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                    <p class="font-bold text-lg text-emerald-800">${data.student_name}</p>
+                    <p class="text-xs text-emerald-600">${data.student_code}</p>
+                    <div class="text-xs font-bold text-emerald-700 bg-white px-2 py-1 rounded-full border border-emerald-200 inline-block">Độ tin cậy: ${Math.round(data.confidence*100)}%</div>
+                    <div class="pt-2">
+                        <button onclick="confirmCheckin(${data.student_id}, '${data.captured_photo}', ${data.confidence})" class="btn-primary w-full py-2 shadow-sm">Xác nhận có mặt</button>
+                    </div>
+                </div>
+            `;
+        } else {
+            resDiv.innerHTML = `<div class="text-center p-4 bg-red-50 text-red-700 text-sm rounded-xl border border-red-100">${data.error}</div>`;
+        }
+    } catch(e) { resDiv.innerHTML = `<p class="text-red-500 text-center text-xs">Lỗi server: ${e.message}</p>`; }
+    isProcessingRecognize = false;
+}
+
+async function confirmCheckin(sid, photo, conf) {
+    const resp = await fetch('/api/attendance/checkin', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ student_id: sid, captured_photo: photo, confidence: conf, status: 'Có mặt' })
+    });
+    const data = await resp.json();
+    if (data.success) {
+        showToast(data.message, 'success');
+        document.getElementById('recognize-result').innerHTML = '<div class="text-center py-6 text-muted-foreground text-sm">Chờ nhận diện tiếp theo...</div>';
+        loadStats(); loadTodayCheckins();
+    } else alert(data.error);
+}
+
+// ===================== TRAINING & ENROLLMENT =====================
+async function loadStudentList() {
+    const cls = document.getElementById('class-select').value;
+    const resp = await fetch(`/api/attendance/students?class_name=${encodeURIComponent(cls)}`);
+    const data = await resp.json();
+    const tbody = document.getElementById('student-list-body');
+    document.getElementById('student-count-badge').textContent = data.students.length + ' HS';
+    
+    tbody.innerHTML = data.students.map(s => `
+        <tr class="hover:bg-gray-50 transition-colors">
+            <td><input type="checkbox" class="student-checkbox" value="${s.id}"></td>
+            <td>
+                <div class="flex flex-col">
+                    <span class="font-bold text-foreground text-sm">${s.name}</span>
+                    <span class="text-[10px] text-muted-foreground font-mono">${s.student_code}</span>
+                </div>
+            </td>
+            <td class="text-center">${s.has_portrait ? '<span class="text-emerald-500 font-bold">✓</span>' : '<span class="text-red-400 text-xs">Phí ảnh</span>'}</td>
+            <td class="text-center">
+                <span class="badge ${s.enrollment_count > 0 ? 'bg-indigo-50 text-indigo-700' : 'bg-gray-100 text-muted-foreground'} text-[10px]">${s.enrollment_count} mẫu</span>
+            </td>
+            <td class="text-center">
+                ${s.is_trained 
+                    ? '<span class="badge bg-emerald-100 text-emerald-700 text-[10px] font-bold">Đã huấn luyện</span>' 
+                    : '<span class="badge bg-amber-50 text-amber-600 text-[10px] border border-amber-100">Chưa sẵn sàng</span>'}
+            </td>
+            <td class="text-center">
+                <div class="flex justify-center gap-2">
+                    <button onclick="openEnrollModal(${s.id}, '${s.name.replace(/'/g, "\\'")}', ${s.enrollment_count})" class="btn-ghost text-xs text-indigo-600 hover:bg-indigo-50 p-1 rounded">Chụp mẫu</button>
+                    ${!s.already_checked ? `<button onclick="openManualCheckin(${s.id}, '${s.name}')" class="btn-ghost text-xs text-emerald-600 hover:bg-emerald-50 p-1 rounded">Có mặt</button>` : '✓'}
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+async function trainModel() {
+    const btn = document.getElementById('train-btn');
+    btn.disabled = true;
+    const cls = document.getElementById('class-select').value;
+    try {
+        const resp = await fetch('/api/attendance/train', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ class_name: cls })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            showToast(data.message, 'success');
+            loadStudentList();
+            if (currentEnrollStudentId) closeEnrollModal();
+        } else alert(data.error);
+    } catch(e) { alert('Lỗi kết nối'); }
+    btn.disabled = false;
+}
+
+// ===================== ENROLLMENT CAMERA =====================
+function openEnrollModal(sid, name, count) {
+    currentEnrollStudentId = sid;
+    document.getElementById('enroll-student-name').textContent = `Học sinh: ${name}`;
+    document.getElementById('enroll-count').textContent = count;
+    document.getElementById('enroll-modal').classList.remove('hidden');
+    startCamera('enroll-video', null, null, null, null);
+}
+
+function closeEnrollModal() {
+    stopCamera('enroll-video', null, null, null, null);
+    document.getElementById('enroll-modal').classList.add('hidden');
+    currentEnrollStudentId = null;
+}
+
+async function captureEnrollmentSample() {
+    const video = document.getElementById('enroll-video');
+    const canvas = document.createElement('canvas');
+    canvas.width = 400; canvas.height = 400; // Smaller and squared for enrollment
+    canvas.getContext('2d').drawImage(video, 0, 0, 400, 400);
+    const base64 = canvas.toDataURL('image/jpeg', 0.9);
+
+    const btn = document.getElementById('enroll-capture-btn');
+    btn.disabled = true;
+    
+    try {
+        const resp = await fetch('/api/attendance/enroll_camera', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ student_id: currentEnrollStudentId, image_base64: base64 })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            document.getElementById('enroll-count').textContent = data.enrollment_count;
+            showToast(data.message);
+        } else alert(data.error);
+    } catch(e) { alert('Lỗi: ' + e.message); }
+    btn.disabled = false;
+}
+
+// ===================== HELPERS =====================
+function toggleSelectAll(el) {
+    document.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = el.checked);
+}
+function showToast(m, t='success') {
+    const div = document.createElement('div');
+    div.className = `fixed bottom-6 right-6 px-6 py-3 rounded-xl shadow-2xl text-white ${t==='success'?'bg-indigo-600':'bg-red-600'} animate-fade-in-up z-[100] font-bold`;
+    div.textContent = m; document.body.appendChild(div);
+    setTimeout(() => div.remove(), 3000);
+}
+
+// Load stats, history etc same as before but keeping it clean
+async function loadStats() {
+    const cls = document.getElementById('class-select').value;
+    const r = await fetch(`/api/attendance/stats?class_name=${encodeURIComponent(cls)}`);
+    const d = await r.json();
+    document.getElementById('stat-total').textContent = d.total;
+    document.getElementById('stat-present').textContent = d.present;
+    document.getElementById('stat-late').textContent = d.late;
+    document.getElementById('stat-absent').textContent = d.absent;
+}
+
+async function loadTodayCheckins() {
+    const cls = document.getElementById('class-select').value;
+    const r = await fetch(`/api/attendance/history?class_name=${encodeURIComponent(cls)}&date_from=${new Date().toISOString().split('T')[0]}`);
+    const d = await r.json();
+    document.getElementById('today-checkins').innerHTML = d.records.map(r => `
+        <div class="p-3 border-b border-border flex justify-between items-center text-sm">
+            <span class="font-medium">${r.student_name}</span>
+            <span class="text-muted-foreground text-xs">${r.check_in_time}</span>
+        </div>
+    `).join('') || '<div class="p-6 text-center text-xs text-muted-foreground">Chưa có ai</div>';
+}
+
+function onClassChange() { loadStats(); loadStudentList(); loadTodayCheckins(); }
+document.addEventListener('DOMContentLoaded', onClassChange);
+</script>
+{% endblock %}

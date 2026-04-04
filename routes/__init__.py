@@ -12,6 +12,7 @@ def register_all_routes(app):
     from .lesson_book import register as register_lesson_book
     from .timetable import register as register_timetable
     from .class_fund import register as register_class_fund
+    from .attendance import register as register_attendance
 
     register_core(app)
     register_violations(app)
@@ -23,3 +24,4 @@ def register_all_routes(app):
     register_lesson_book(app)
     register_timetable(app)
     register_class_fund(app)
+    register_attendance(app)
