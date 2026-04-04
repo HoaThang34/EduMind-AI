@@ -524,7 +524,65 @@ async function loadTodayCheckins() {
     `).join('') || '<div class="p-6 text-center text-xs text-muted-foreground">Chưa có ai</div>';
 }
 
-function onClassChange() { loadStats(); loadStudentList(); loadTodayCheckins(); }
+async function loadHistory() {
+    const cls = document.getElementById('class-select').value;
+    const from = document.getElementById('history-date-from').value;
+    const to = document.getElementById('history-date-to').value;
+    
+    let url = `/api/attendance/history?class_name=${encodeURIComponent(cls)}`;
+    if (from) url += `&date_from=${from}`;
+    if (to) url += `&date_to=${to}`;
+
+    const body = document.getElementById('history-body');
+    body.innerHTML = '<tr><td colspan="7" class="text-center py-8"><div class="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div></td></tr>';
+
+    try {
+        const resp = await fetch(url);
+        const data = await resp.json();
+        body.innerHTML = data.records.map((r, i) => `
+            <tr class="hover:bg-gray-50 transition-colors">
+                <td class="font-mono text-xs text-muted-foreground">${i+1}</td>
+                <td>
+                    <div class="font-bold text-sm text-foreground">${r.student_name}</div>
+                    <div class="text-[10px] text-muted-foreground font-mono">${r.student_code}</div>
+                </td>
+                <td class="text-sm">${r.class_name}</td>
+                <td class="text-sm font-medium text-gray-600">${r.attendance_date}</td>
+                <td class="text-sm text-gray-500">${r.check_in_time}</td>
+                <td class="text-center">
+                    <span class="badge ${r.status === 'Có mặt' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'} text-[10px] font-bold">
+                        ${r.status}
+                    </span>
+                </td>
+                <td class="text-center">
+                    ${r.captured_photo ? `
+                        <button onclick="showPhoto('/uploads/attendance_photos/${r.captured_photo}')" class="text-indigo-600 hover:text-indigo-800 transition-colors">
+                            <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </button>
+                    ` : '<span class="text-gray-300 text-[10px]">N/A</span>'}
+                </td>
+            </tr>
+        `).join('') || '<tr><td colspan="7" class="text-center py-12 text-muted-foreground">Không có dữ liệu lịch sử</td></tr>';
+    } catch(e) {
+        body.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-red-500 text-sm">Lỗi tải dữ liệu: ${e.message}</td></tr>`;
+    }
+}
+
+function showPhoto(url) {
+    const modal = document.getElementById('photo-modal');
+    const img = document.getElementById('photo-modal-img');
+    img.src = url;
+    modal.classList.remove('hidden');
+}
+
+function onClassChange() { 
+    loadStats(); 
+    loadStudentList(); 
+    loadTodayCheckins(); 
+    if (document.getElementById('tab-history').classList.contains('active-tab')) {
+        loadHistory();
+    }
+}
 document.addEventListener('DOMContentLoaded', onClassChange);
 </script>
 {% endblock %}
