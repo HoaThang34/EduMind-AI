@@ -16,14 +16,11 @@
             <p class="text-sm text-muted-foreground mt-1">Nâng cao: Huấn luyện đa mẫu từ ảnh thẻ và trực tiếp qua camera</p>
         </div>
         <div class="flex items-center gap-3">
-            <select id="class-select" onchange="onClassChange()" class="input-shadcn w-48">
-                {% for cls in classes %}
-                <option value="{{ cls }}" {% if cls == selected_class %}selected{% endif %}>{{ cls }}</option>
-                {% endfor %}
-            </select>
-            <button onclick="trainModel()" id="train-btn" class="btn-primary flex items-center gap-2 text-sm whitespace-nowrap">
+            <span class="badge border-indigo-200 bg-indigo-50 text-indigo-700 font-bold px-4 py-2">PHẠM VI: TOÀN TRƯỜNG</span>
+            <input type="hidden" id="class-select" value="">
+            <button onclick="trainModel()" id="train-btn" class="btn-primary flex items-center gap-2 text-sm whitespace-nowrap shadow-indigo-100">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                Huấn luyện dữ liệu lớp
+                Huấn luyện dữ liệu TOÀN TRƯỜNG
             </button>
         </div>
     </div>
@@ -109,9 +106,9 @@
             <div class="p-4 border-b border-border flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <h3 class="text-sm font-semibold text-foreground">Dữ liệu mẫu khuôn mặt</h3>
-                    <button onclick="trainSelected()" id="train-selected-btn" class="btn-outline text-xs px-3 py-1.5 flex items-center gap-1.5">
+                    <button onclick="trainModel()" id="train-selected-btn" class="btn-outline text-xs px-3 py-1.5 flex items-center gap-1.5">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        Huấn luyện lớp (Cập nhật mẫu mới)
+                        Huấn luyện Toàn trường (Cập nhật mẫu mới)
                     </button>
                 </div>
                 <span class="badge badge-secondary text-xs" id="student-count-badge">0 học sinh</span>
@@ -120,8 +117,8 @@
                 <table class="table-shadcn">
                     <thead>
                         <tr>
-                            <th class="w-10"><input type="checkbox" id="select-all-students" onchange="toggleSelectAll(this)"></th>
                             <th>Học sinh</th>
+                            <th class="text-center text-indigo-600">Lớp</th>
                             <th class="text-center">Ảnh thẻ</th>
                             <th class="text-center">Mẫu camera</th>
                             <th class="text-center">Trạng thái mô hình</th>
@@ -186,12 +183,26 @@
                 </div>
             </div>
 
-            <div class="flex gap-3">
-                <button onclick="captureEnrollmentSample()" id="enroll-capture-btn" class="btn-primary flex-1 py-3 font-bold flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg>
-                    Chụp mẫu
+            <div class="space-y-4">
+                <button onclick="startAutoEnrollment()" id="enroll-auto-btn" class="btn-primary w-full py-4 font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-100 transition-all hover:scale-[1.02]">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg>
+                    BẮT ĐẦU CHỤP TỰ ĐỘNG (30 ẢNH)
                 </button>
-                <button onclick="trainModel()" class="btn-outline px-6 py-3 font-bold text-indigo-600">Hoàn tất & Huấn luyện</button>
+                
+                <div id="enroll-progress-container" class="hidden space-y-2">
+                    <div class="flex justify-between text-[10px] font-bold text-indigo-600 uppercase">
+                        <span id="enroll-status-text">Đang chuẩn bị...</span>
+                        <span id="enroll-pct-text">0%</span>
+                    </div>
+                    <div class="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden border border-gray-50">
+                        <div id="enroll-progress-bar" class="h-full bg-indigo-600 w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button onclick="trainModel()" class="btn-outline flex-1 py-2 text-xs font-bold text-gray-600 border-gray-200">Chỉ huấn luyện lại</button>
+                    <button onclick="closeEnrollModal()" class="btn-ghost flex-1 py-2 text-xs font-bold text-red-500">Đóng</button>
+                </div>
             </div>
         </div>
     </div>
@@ -441,58 +452,97 @@ async function confirmCheckin(sid, photo, conf) {
 }
 
 // ===================== TRAINING & ENROLLMENT =====================
+async function loadStats() {
+    try {
+        const resp = await fetch(`/api/attendance/stats`);
+        const data = await resp.json();
+        document.getElementById('stat-total').textContent = data.total || 0;
+        document.getElementById('stat-present').textContent = data.present || 0;
+        document.getElementById('stat-late').textContent = data.late || 0;
+        document.getElementById('stat-absent').textContent = data.absent || 0;
+    } catch(e) { console.error(e); }
+}
+
 async function loadStudentList() {
-    const cls = document.getElementById('class-select').value;
-    const resp = await fetch(`/api/attendance/students?class_name=${encodeURIComponent(cls)}`);
-    const data = await resp.json();
-    const tbody = document.getElementById('student-list-body');
-    document.getElementById('student-count-badge').textContent = data.students.length + ' HS';
-    
-    tbody.innerHTML = data.students.map(s => `
-        <tr class="hover:bg-gray-50 transition-colors">
-            <td><input type="checkbox" class="student-checkbox" value="${s.id}"></td>
-            <td>
-                <div class="flex flex-col">
-                    <span class="font-bold text-foreground text-sm">${s.name}</span>
-                    <span class="text-[10px] text-muted-foreground font-mono">${s.student_code}</span>
-                </div>
-            </td>
-            <td class="text-center">${s.has_portrait ? '<span class="text-emerald-500 font-bold">✓</span>' : '<span class="text-red-400 text-xs">Phí ảnh</span>'}</td>
-            <td class="text-center">
-                <span class="badge ${s.enrollment_count > 0 ? 'bg-indigo-50 text-indigo-700' : 'bg-gray-100 text-muted-foreground'} text-[10px]">${s.enrollment_count} mẫu</span>
-            </td>
-            <td class="text-center">
-                ${s.is_trained 
-                    ? '<span class="badge bg-emerald-100 text-emerald-700 text-[10px] font-bold">Đã huấn luyện</span>' 
-                    : '<span class="badge bg-amber-50 text-amber-600 text-[10px] border border-amber-100">Chưa sẵn sàng</span>'}
-            </td>
-            <td class="text-center">
-                <div class="flex justify-center gap-2">
-                    <button onclick="openEnrollModal(${s.id}, '${s.name.replace(/'/g, "\\'")}', ${s.enrollment_count})" class="btn-ghost text-xs text-indigo-600 hover:bg-indigo-50 p-1 rounded">Chụp mẫu</button>
-                    ${!s.already_checked ? `<button onclick="openManualCheckin(${s.id}, '${s.name}')" class="btn-ghost text-xs text-emerald-600 hover:bg-emerald-50 p-1 rounded">Có mặt</button>` : '✓'}
-                </div>
-            </td>
-        </tr>
-    `).join('');
+    const body = document.getElementById('student-list-body');
+    try {
+        const resp = await fetch(`/api/attendance/students`);
+        const data = await resp.json();
+        document.getElementById('student-count-badge').textContent = `${data.students.length} học sinh`;
+        body.innerHTML = data.students.map(s => `
+            <tr class="hover:bg-gray-50 transition-colors">
+                <td>
+                    <div class="font-bold text-sm text-foreground">${s.name}</div>
+                    <div class="text-[10px] text-muted-foreground font-mono">${s.student_code}</div>
+                </td>
+                <td class="text-xs font-medium text-indigo-600">${s.student_class || 'N/A'}</td>
+                <td class="text-xs">
+                    ${s.has_portrait ? '<span class="text-emerald-500 flex items-center gap-1 font-medium"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg> Sẵn sàng</span>' : '<span class="text-gray-400">Thiếu</span>'}
+                </td>
+                <td class="text-center">
+                    <span class="badge ${s.enrollment_count > 0 ? 'bg-indigo-50 text-indigo-700' : 'bg-gray-100 text-muted-foreground'} text-[10px]">${s.enrollment_count} mẫu</span>
+                </td>
+                <td class="text-center">
+                    ${s.is_trained 
+                        ? '<span class="badge bg-emerald-100 text-emerald-700 text-[10px] font-bold">Đã huấn luyện</span>' 
+                        : '<span class="badge bg-amber-50 text-amber-600 text-[10px] border border-amber-100">Chưa sẵn sàng</span>'}
+                </td>
+                <td class="text-center">
+                    <div class="flex items-center justify-center gap-1">
+                        <button onclick="openEnrollModal(${s.id}, '${s.name.replace(/'/g, "\\'")}', ${s.enrollment_count})" class="text-indigo-600 hover:bg-indigo-100 px-2 py-1 rounded text-[10px] font-bold transition-colors">Chụp mẫu</button>
+                        ${s.enrollment_count > 0 ? `
+                            <button onclick="resetEnrollment(${s.id}, '${s.name.replace(/'/g, "\\'")}')" class="text-red-500 hover:bg-red-50 px-2 py-1 rounded text-[10px] transition-colors" title="Xóa mẫu để chụp lại">Xóa mẫu</button>
+                        ` : ''}
+                        ${s.enrollment_count > 0 ? `
+                            <button onclick="trainModel()" class="text-emerald-600 hover:bg-emerald-50 px-2 py-1 rounded text-[10px] font-bold transition-colors" title="Cập nhật mô hình toàn trường">Huấn luyện lại</button>
+                        ` : ''}
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    } catch(e) { console.error(e); }
+}
+
+async function resetEnrollment(sid, name) {
+    if (!confirm(`Bạn có chắc chắn muốn xóa toàn bộ mẫu camera của học sinh ${name}?`)) return;
+    try {
+        const resp = await fetch('/api/attendance/reset_enrollment', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ student_id: sid })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            showToast(data.message, 'success');
+            loadStudentList();
+            trainModel(); // Tự động huấn luyện lại để cập nhật mô hình (xóa dữ liệu cũ của HS này)
+        } else alert(data.error);
+    } catch(e) { alert('Lỗi: ' + e.message); }
 }
 
 async function trainModel() {
     const btn = document.getElementById('train-btn');
-    btn.disabled = true;
-    const cls = document.getElementById('class-select').value;
+    if (btn) btn.disabled = true;
+    
     try {
         const resp = await fetch('/api/attendance/train', {
-            method: 'POST', headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ class_name: cls })
+            method: 'POST', 
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ class_name: '_GLOBAL_' }) // Luôn huấn luyện toàn trường
         });
         const data = await resp.json();
         if (data.success) {
             showToast(data.message, 'success');
             loadStudentList();
             if (currentEnrollStudentId) closeEnrollModal();
-        } else alert(data.error);
-    } catch(e) { alert('Lỗi kết nối'); }
-    btn.disabled = false;
+        } else {
+            alert(data.error);
+        }
+    } catch(e) { 
+        alert('Lỗi kết nối server khi huấn luyện'); 
+    } finally {
+        if (btn) btn.disabled = false;
+    }
 }
 
 // ===================== ENROLLMENT CAMERA =====================
@@ -510,34 +560,94 @@ function closeEnrollModal() {
     currentEnrollStudentId = null;
 }
 
-async function captureEnrollmentSample() {
-    const video = document.getElementById('enroll-video');
-    const canvas = document.createElement('canvas');
-    canvas.width = 400; canvas.height = 400; // Smaller and squared for enrollment
-    canvas.getContext('2d').drawImage(video, 0, 0, 400, 400);
-    const base64 = canvas.toDataURL('image/jpeg', 0.9);
+let isAutoEnrolling = false;
 
-    const btn = document.getElementById('enroll-capture-btn');
+async function startAutoEnrollment() {
+    if (isAutoEnrolling) return;
+    isAutoEnrolling = true;
+    
+    const btn = document.getElementById('enroll-auto-btn');
+    const progCont = document.getElementById('enroll-progress-container');
+    const bar = document.getElementById('enroll-progress-bar');
+    const statusText = document.getElementById('enroll-status-text');
+    const pctText = document.getElementById('enroll-pct-text');
+    
     btn.disabled = true;
+    btn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> ĐANG CHỤP...';
+    progCont.classList.remove('hidden');
+    
+    const TOTAL_SAMPLES = 30;
+    let captured = 0;
+    
+    // Gợi ý cho người dùng
+    statusText.innerText = "Hãy quay nhẹ đầu...";
+
+    for (let i = 0; i < TOTAL_SAMPLES; i++) {
+        const success = await captureEnrollmentSample(true);
+        if (success) {
+            captured++;
+            const pct = Math.round((captured / TOTAL_SAMPLES) * 100);
+            bar.style.width = `${pct}%`;
+            pctText.innerText = `${pct}%`;
+            statusText.innerText = `Đã thu thập: ${captured}/${TOTAL_SAMPLES}`;
+        }
+        // Delay nhỏ để tránh nghẽn server và đảm bảo 30 ảnh trong ~1-2 giây
+        await new Promise(r => setTimeout(r, 40)); 
+    }
+    
+    isAutoEnrolling = false;
+    btn.disabled = false;
+    btn.innerHTML = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg> BẮT ĐẦU CHỤP TỰ ĐỘNG (30 ẢNH)';
+    
+    statusText.innerText = "Đang cập nhật mô hình...";
+    await trainModel(); // Tự động huấn luyện luôn sau khi chụp xong
+    
+    progCont.classList.add('hidden');
+    bar.style.width = '0%';
+    showToast(`Đã thu thập xong ${captured} mẫu và cập nhật mô hình!`, 'success');
+}
+
+async function captureEnrollmentSample(isSilent = false) {
+    const video = document.getElementById('enroll-video');
+    if (!video || !currentEnrollStudentId) return false;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 400; canvas.height = 400;
+    canvas.getContext('2d').drawImage(video, 200, 0, 400, 400, 0, 0, 400, 400); // Lấy vùng trung tâm
+    const base64 = canvas.toDataURL('image/jpeg', 0.85);
+
+    if (!isSilent) {
+        const btn = document.getElementById('enroll-auto-btn');
+        if (btn) btn.disabled = true;
+    }
     
     try {
         const resp = await fetch('/api/attendance/enroll_camera', {
-            method: 'POST', headers: {'Content-Type': 'application/json'},
+            method: 'POST', 
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ student_id: currentEnrollStudentId, image_base64: base64 })
         });
         const data = await resp.json();
         if (data.success) {
             document.getElementById('enroll-count').textContent = data.enrollment_count;
-            showToast(data.message);
-        } else alert(data.error);
-    } catch(e) { alert('Lỗi: ' + e.message); }
-    btn.disabled = false;
+            if (!isSilent) showToast(data.message);
+            return true;
+        } else {
+            if (!isSilent) alert(data.error);
+            return false;
+        }
+    } catch(e) { 
+        if (!isSilent) console.error(e); 
+        return false;
+    } finally {
+        if (!isSilent) {
+            const btn = document.getElementById('enroll-auto-btn');
+            if (btn) btn.disabled = false;
+        }
+    }
 }
 
 // ===================== HELPERS =====================
-function toggleSelectAll(el) {
-    document.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = el.checked);
-}
 function showToast(m, t='success') {
     const div = document.createElement('div');
     let bg = 'bg-indigo-600';
@@ -549,43 +659,37 @@ function showToast(m, t='success') {
     setTimeout(() => div.remove(), 3000);
 }
 
-// Load stats, history etc same as before but keeping it clean
-async function loadStats() {
-    const cls = document.getElementById('class-select').value;
-    const r = await fetch(`/api/attendance/stats?class_name=${encodeURIComponent(cls)}`);
-    const d = await r.json();
-    document.getElementById('stat-total').textContent = d.total;
-    document.getElementById('stat-present').textContent = d.present;
-    document.getElementById('stat-late').textContent = d.late;
-    document.getElementById('stat-absent').textContent = d.absent;
-}
-
 async function loadTodayCheckins() {
-    const cls = document.getElementById('class-select').value;
-    const r = await fetch(`/api/attendance/history?class_name=${encodeURIComponent(cls)}&date_from=${new Date().toISOString().split('T')[0]}`);
-    const d = await r.json();
-    document.getElementById('today-checkins').innerHTML = d.records.map(r => `
-        <div class="p-3 border-b border-border flex justify-between items-center text-sm">
-            <span class="font-medium">${r.student_name}</span>
-            <span class="text-muted-foreground text-xs">${r.check_in_time}</span>
-        </div>
-    `).join('') || '<div class="p-6 text-center text-xs text-muted-foreground">Chưa có ai</div>';
+    const container = document.getElementById('today-checkins');
+    const today = new Date().toISOString().split('T')[0];
+    try {
+        const resp = await fetch(`/api/attendance/history?date_from=${today}`);
+        const data = await resp.json();
+        if (data.records.length === 0) {
+            container.innerHTML = '<div class="p-6 text-center text-xs text-muted-foreground">Chưa có ai</div>';
+            return;
+        }
+        container.innerHTML = data.records.map(r => `
+            <div class="p-3 border-b border-border flex justify-between items-center text-sm">
+                <div>
+                    <span class="font-medium">${r.student_name}</span>
+                    <span class="text-[10px] text-indigo-500 ml-2">(${r.class_name})</span>
+                </div>
+                <span class="text-muted-foreground text-xs">${r.check_in_time}</span>
+            </div>
+        `).join('');
+    } catch(e) { console.error(e); }
 }
 
 async function loadHistory() {
-    const cls = document.getElementById('class-select').value;
-    const from = document.getElementById('history-date-from').value;
-    const to = document.getElementById('history-date-to').value;
-    
-    let url = `/api/attendance/history?class_name=${encodeURIComponent(cls)}`;
-    if (from) url += `&date_from=${from}`;
-    if (to) url += `&date_to=${to}`;
-
     const body = document.getElementById('history-body');
+    const dateFrom = document.getElementById('history-date-from').value;
+    const dateTo = document.getElementById('history-date-to').value;
+    
     body.innerHTML = '<tr><td colspan="7" class="text-center py-8"><div class="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div></td></tr>';
 
     try {
-        const resp = await fetch(url);
+        const resp = await fetch(`/api/attendance/history?date_from=${dateFrom}&date_to=${dateTo}`);
         const data = await resp.json();
         body.innerHTML = data.records.map((r, i) => `
             <tr class="hover:bg-gray-50 transition-colors">

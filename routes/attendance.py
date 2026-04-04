@@ -100,27 +100,30 @@ def _extract_face(img, size=(200, 200)):
     return face_gray, img[y:y+h, x:x+w], (int(x), int(y), int(w), int(h))
 
 
-def _get_model_path(class_name):
-    """Đường dẫn file model LBPH cho một lớp."""
+def _get_model_path(class_name="_GLOBAL_"):
+    """Đường dẫn file model LBPH (mặc định cho toàn trường)."""
     safe_name = class_name.replace(" ", "_").replace("/", "_")
     return os.path.join(FACE_MODEL_DIR, f"lbph_{safe_name}.yml")
 
 
-def _get_label_map_path(class_name):
-    """Đường dẫn file label map (student_id ↔ label) cho một lớp."""
+def _get_label_map_path(class_name="_GLOBAL_"):
+    """Đường dẫn file label map (mặc định cho toàn trường)."""
     safe_name = class_name.replace(" ", "_").replace("/", "_")
     return os.path.join(FACE_MODEL_DIR, f"labels_{safe_name}.pkl")
 
 
-def _train_model_for_class(class_name):
+def _train_model_for_class(class_name=None):
     """
-    Huấn luyện LBPH Recognizer cho tất cả học sinh trong lớp.
-    - LBPH cần huấn luyện toàn bộ tập dữ liệu để gán nhãn nhất quán.
-    - Dữ liệu nguồn: Ảnh thẻ + Mẫu mặt chụp từ camera.
-    Returns:
-        (trained_count)
+    Huấn luyện LBPH Recognizer. 
+    Nếu class_name=None hoặc "_GLOBAL_", huấn luyện cho toàn bộ học sinh trường.
     """
-    students = Student.query.filter_by(student_class=class_name).all()
+    if not class_name or class_name == "_GLOBAL_":
+        students = Student.query.all()
+        save_name = "_GLOBAL_"
+    else:
+        students = Student.query.filter_by(student_class=class_name).all()
+        save_name = class_name
+
     faces = []
     labels = []
     label_map = {}  # label_int → student_id
@@ -167,9 +170,9 @@ def _train_model_for_class(class_name):
         radius=2, neighbors=8, grid_x=8, grid_y=8, threshold=120.0
     )
     recognizer.train(faces, np.array(labels))
-    recognizer.save(_get_model_path(class_name))
+    recognizer.save(_get_model_path(save_name))
 
-    with open(_get_label_map_path(class_name), "wb") as f:
+    with open(_get_label_map_path(save_name), "wb") as f:
         pickle.dump(label_map, f)
 
     return len(label_map)
@@ -203,7 +206,8 @@ def register(app):
         elif not selected_class and classes:
             selected_class = classes[0]
 
-        model_ready = os.path.exists(_get_model_path(selected_class)) if selected_class else False
+        # Kiểm tra model toàn trường (mặc định mới)
+        model_ready = os.path.exists(_get_model_path("_GLOBAL_"))
 
         return render_template(
             "attendance.html",
@@ -217,14 +221,15 @@ def register(app):
     def api_attendance_students():
         """API lấy danh sách học sinh kèm trạng thái training chi tiết."""
         class_name = request.args.get("class_name", "")
-        if not class_name:
-            return jsonify({"students": []})
-
-        students = Student.query.filter_by(student_class=class_name)\
-            .order_by(Student.name).all()
+        
+        query = Student.query
+        if class_name:
+            query = query.filter_by(student_class=class_name)
+            
+        students = query.order_by(Student.name).all()
         today = datetime.date.today()
         
-        labels_path = _get_label_map_path(class_name)
+        labels_path = _get_label_map_path(class_name if class_name else "_GLOBAL_")
         trained_ids = []
         if os.path.exists(labels_path):
             with open(labels_path, "rb") as f:
@@ -245,6 +250,7 @@ def register(app):
                 "id": s.id,
                 "name": s.name,
                 "student_code": s.student_code,
+                "student_class": s.student_class,
                 "has_portrait": has_portrait,
                 "enrollment_count": enrollment_count,
                 "is_trained": s.id in trained_ids,
@@ -258,16 +264,14 @@ def register(app):
     @app.route("/api/attendance/train", methods=["POST"])
     @login_required
     def api_attendance_train():
-        """Huấn luyện model."""
+        """Huấn luyện model (Ưu tiên toàn trường)."""
         data = request.get_json() or {}
-        class_name = data.get("class_name", "")
-        if not class_name:
-            return jsonify({"error": "Chưa chọn lớp."}), 400
+        class_name = data.get("class_name", "_GLOBAL_")
         try:
             trained_count = _train_model_for_class(class_name)
             return jsonify({
                 "success": True,
-                "message": f"Đã huấn luyện dữ liệu khuôn mặt cho {trained_count} học sinh.",
+                "message": f"Đã huấn luyện dữ liệu khuôn mặt cho {trained_count} học sinh (Phạm vi: toàn trường).",
                 "trained": trained_count
             })
         except Exception as e:
@@ -296,18 +300,42 @@ def register(app):
             "enrollment_count": count
         })
 
+    @app.route("/api/attendance/reset_enrollment", methods=["POST"])
+    @login_required
+    def api_attendance_reset_enrollment():
+        """Xóa toàn bộ mẫu camera của 1 học sinh."""
+        data = request.get_json() or {}
+        student_id = data.get("student_id")
+        if not student_id:
+            return jsonify({"error": "Thiếu student_id."}), 400
+        e_dir = _get_enrollment_path(student_id)
+        if os.path.exists(e_dir):
+            import shutil
+            try:
+                shutil.rmtree(e_dir)
+                os.makedirs(e_dir, exist_ok=True)
+            except: pass
+        return jsonify({"success": True, "message": "Đã xóa toàn bộ mẫu của học sinh."})
+
     @app.route("/api/attendance/recognize", methods=["POST"])
     @login_required
     def api_attendance_recognize():
-        """Nhận diện khuôn mặt từ ảnh camera."""
+        """Nhận diện khuôn mặt từ ảnh camera dựa trên dữ liệu toàn trường."""
         data = request.get_json() or {}
-        class_name = data.get("class_name", "")
         image_base64 = data.get("image_base64", "")
-        if not class_name or not image_base64:
-            return jsonify({"error": "Thiếu dữ liệu."}), 400
-        recognizer, label_map = _load_model(class_name)
+        if not image_base64:
+            return jsonify({"error": "Thiếu dữ liệu ảnh."}), 400
+        
+        # Luôn load model toàn trường
+        recognizer, label_map = _load_model("_GLOBAL_")
         if recognizer is None:
-            return jsonify({"matched": False, "error": "Chưa huấn luyện model cho lớp này."})
+            # Fallback nếu chưa có model toàn trường thì thử dùng model theo lớp nếu có gửi lên
+            class_name = data.get("class_name", "")
+            if class_name:
+                recognizer, label_map = _load_model(class_name)
+
+        if recognizer is None:
+            return jsonify({"matched": False, "error": "Chưa huấn luyện dữ liệu khuôn mặt toàn trường."})
         camera_img = _base64_to_cv2(image_base64)
         face_gray, _, box = _extract_face(camera_img)
         if face_gray is None:
@@ -406,10 +434,14 @@ def register(app):
     def api_attendance_stats():
         class_name = request.args.get("class_name", "")
         today = datetime.date.today()
-        if not class_name:
-            return jsonify({"total": 0, "present": 0, "absent": 0, "late": 0})
-        total_students = Student.query.filter_by(student_class=class_name).count()
-        today_records = AttendanceRecord.query.filter_by(class_name=class_name, attendance_date=today).all()
+        
+        if class_name:
+            total_students = Student.query.filter_by(student_class=class_name).count()
+            today_records = AttendanceRecord.query.filter_by(class_name=class_name, attendance_date=today).all()
+        else:
+            total_students = Student.query.count()
+            today_records = AttendanceRecord.query.filter_by(attendance_date=today).all()
+
         present = sum(1 for r in today_records if r.status == "Có mặt")
         late = sum(1 for r in today_records if r.status == "Trễ")
         return jsonify({
