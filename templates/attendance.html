@@ -370,9 +370,10 @@ async function captureAndRecognize(isAuto = false) {
             ctx.clearRect(0, 0, overlay.width, overlay.height);
             
             // Nếu quá 1.2 giây không thấy mặt, reset kết quả nhận diện về trạng thái chờ
-            if (Date.now() - lastFaceSeenTime > 1200) {
+            if (Date.now() - lastFaceSeenTime > 1200 && resDiv.getAttribute('data-last-sid') !== 'searching') {
+                 resDiv.setAttribute('data-last-sid', 'searching');
                  resDiv.innerHTML = `
-                    <div class="text-center py-10 opacity-60 flex flex-col items-center gap-4 animate-pulse">
+                    <div class="text-center py-10 opacity-60 flex flex-col items-center gap-4">
                         <div class="w-12 h-12 rounded-full border-2 border-indigo-200 flex items-center justify-center relative">
                             <div class="w-3 h-3 bg-indigo-500 rounded-full animate-ping"></div>
                             <div class="absolute inset-0 border-t-2 border-indigo-500 rounded-full animate-spin"></div>
@@ -384,16 +385,19 @@ async function captureAndRecognize(isAuto = false) {
         }
 
         if (data.matched) {
-            // Hiển thị kết quả nhận diện
-            resDiv.innerHTML = `
-                <div class="text-center space-y-3 bg-emerald-50 p-4 rounded-xl border border-emerald-100 animate-scale-in">
-                    <p class="font-bold text-lg text-emerald-800">${data.student_name}</p>
-                    <p class="text-xs text-emerald-600">${data.student_code}</p>
-                    <div class="pt-2">
-                        <button id="btn-confirm-${data.student_id}" onclick="confirmCheckin(${data.student_id}, '${data.captured_photo}', ${data.confidence})" class="btn-primary w-full py-2.5 shadow-md hover:scale-[1.02] transition-transform">Xác nhận có mặt</button>
+            // Chỉ cập nhật UI nếu học sinh thay đổi hoặc trước đó đang ở trạng thái khác
+            if (resDiv.getAttribute('data-last-sid') !== String(data.student_id)) {
+                resDiv.setAttribute('data-last-sid', data.student_id);
+                resDiv.innerHTML = `
+                    <div class="text-center space-y-3 bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                        <p class="font-bold text-lg text-emerald-800">${data.student_name}</p>
+                        <p class="text-xs text-emerald-600">${data.student_code}</p>
+                        <div class="pt-2">
+                            <button id="btn-confirm-${data.student_id}" onclick="confirmCheckin(${data.student_id}, '${data.captured_photo}', ${data.confidence})" class="btn-primary w-full py-2.5 shadow-md">Xác nhận có mặt</button>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
             
             // Tự động confirm nếu độ tin cậy cực cao (> 85%) và đang ở chế độ tự động
             if (isAutoCheckbox && data.confidence > 0.85) {
