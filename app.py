@@ -181,6 +181,19 @@ def ensure_student_conduct_columns():
     db.session.commit()
 
 
+def ensure_attendance_qr_columns():
+    """Thêm cột attendance_mode và qr_scan_method cho bảng attendance_record (SQLite cũ)."""
+    insp = inspect(db.engine)
+    if not insp.has_table("attendance_record"):
+        return
+    cols = {c["name"] for c in insp.get_columns("attendance_record")}
+    if "attendance_mode" not in cols:
+        db.session.execute(text("ALTER TABLE attendance_record ADD COLUMN attendance_mode VARCHAR(20) DEFAULT 'face'"))
+    if "qr_scan_method" not in cols:
+        db.session.execute(text("ALTER TABLE attendance_record ADD COLUMN qr_scan_method VARCHAR(30)"))
+    db.session.commit()
+
+
 def create_database():
     db.create_all()
     ensure_student_parent_columns()
@@ -192,6 +205,7 @@ def create_database():
     ensure_timetable_slot_week_number_column()
     ensure_student_notification_sender_column()
     ensure_student_conduct_columns()
+    ensure_attendance_qr_columns()
     # AttendanceRecord table is auto-created by db.create_all()
     if not Teacher.query.first():
         hashed_pwd = generate_password_hash("admin")

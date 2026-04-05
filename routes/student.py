@@ -5,6 +5,7 @@ from models import (
 )
 import base64
 import json
+import datetime
 from functools import wraps
 from urllib.parse import quote
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
@@ -33,6 +34,11 @@ def load_student_card_token(token, max_age=90 * 86400):
         return None, "expired"
     except (BadSignature, TypeError, ValueError):
         return None, "invalid"
+
+
+# QR điểm danh — chứa trực tiếp student_id, không hết hạn
+def make_attendance_qr_data(student_id):
+    return f"EDUATT:{student_id}"
 
 # We might need to copy `student_required`, `get_student_ai_advice`, `_student_chat_call_ollama` and `ALLOWED_CHAT_EXTENSIONS` here.
 # Let's extract them:
@@ -342,7 +348,7 @@ def student_notification_read(nid):
 @student_bp.route("/student/the-hoc-sinh")
 @student_required
 def student_id_card():
-    """Thẻ học sinh dạng toàn màn hình để xuất trình trực tuyến; có QR xác minh."""
+    """Thẻ học sinh dạng toàn màn hình; có QR xác minh & QR điểm danh."""
     student_id = session["student_id"]
     student = db.session.get(Student, student_id)
     if not student:
@@ -351,11 +357,22 @@ def student_id_card():
     configs = {c.key: c.value for c in SystemConfig.query.all()}
     school_name = configs.get("school_name", "Trường học")
 
-    token = make_student_card_token(student.id)
-    verify_url = url_for("student.verify_student_card", token=token, _external=True)
-    qr_src = (
+    # Mã QR xác minh thẻ (dùng salt riêng — hiệu lực 90 ngày)
+    verify_token = make_student_card_token(student.id)
+    verify_url = url_for("student.verify_student_card", token=verify_token, _external=True)
+    verify_qr_src = (
         "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="
         + quote(verify_url, safe="")
+    )
+
+    # Mã QR điểm danh — chứa trực tiếp student_id, không hết hạn
+    qr_data = make_attendance_qr_data(student.id)
+    attendance_qr_src = (
+        "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="
+        + quote(qr_data, safe="")
+    )
+    attendance_qr_url = url_for(
+        "student.student_qr_attendance_page", student_id=student.id, _external=True
     )
 
     return render_template(
@@ -363,7 +380,9 @@ def student_id_card():
         student=student,
         school_name=school_name,
         verify_url=verify_url,
-        qr_src=qr_src,
+        qr_src=verify_qr_src,
+        attendance_qr_src=attendance_qr_src,
+        attendance_qr_url=attendance_qr_url,
     )
 
 
@@ -401,9 +420,58 @@ def verify_student_card(token):
     )
 
 
-@student_bp.route("/api/student/chat", methods=["POST"])
+@student_bp.route("/student/qr-diem-danh/<int:student_id>")
+def student_qr_attendance_page(student_id):
+    """
+    Trang điểm danh QR — dành cho học sinh mở trên điện thoại.
+    QR chứa trực tiếp student_id — không hết hạn, không cần token.
+    """
+    student = db.session.get(Student, student_id)
+    if not student:
+        return render_template(
+            "student_qr_attendance.html",
+            valid=False,
+            reason="missing",
+            student=None,
+            school_name=None,
+        )
+
+    configs = {c.key: c.value for c in SystemConfig.query.all()}
+    school_name = configs.get("school_name", "Trường học")
+
+    qr_data = make_attendance_qr_data(student.id)
+
+    return render_template(
+        "student_qr_attendance.html",
+        valid=True,
+        reason=None,
+        student=student,
+        school_name=school_name,
+        qr_data=qr_data,
+    )
+
+
+@student_bp.route("/student/diem-danh-qr")
 @student_required
-def student_chat_api():
+def student_qr_attendance_dashboard():
+    """
+    Trang tạo mã QR điểm danh nhanh — dành cho học sinh bấm nút trên dashboard.
+    QR chứa trực tiếp student_id — không hết hạn.
+    """
+    student_id = session["student_id"]
+    student = db.session.get(Student, student_id)
+    if not student:
+        return redirect(url_for("student.student_logout"))
+
+    qr_data = make_attendance_qr_data(student.id)
+    return render_template(
+        "student_qr_attendance.html",
+        valid=True,
+        reason=None,
+        student=student,
+        school_name=None,
+        qr_data=qr_data,
+    )
     from app_helpers import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa
     """
     API Chatbot cho học sinh.

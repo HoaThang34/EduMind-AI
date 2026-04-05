@@ -344,7 +344,7 @@ class ClassFundExpense(db.Model):
 
 
 class AttendanceRecord(db.Model):
-    """Lịch sử điểm danh bằng nhận diện khuôn mặt."""
+    """Lịch sử điểm danh bằng nhận diện khuôn mặt hoặc mã QR."""
     __tablename__ = "attendance_record"
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey("student.id"), nullable=False, index=True)
@@ -356,6 +356,8 @@ class AttendanceRecord(db.Model):
     notes = db.Column(db.Text, nullable=True)
     recorded_by_id = db.Column(db.Integer, db.ForeignKey("teacher.id"), nullable=True)
     attendance_date = db.Column(db.Date, nullable=False, index=True)
+    attendance_mode = db.Column(db.String(20), default="face")  # 'face' hoặc 'qr'
+    qr_scan_method = db.Column(db.String(30), nullable=True)  # 'camera' (quét QR trên camera) hoặc 'direct' (quét từ app)
 
     student = db.relationship("Student", backref=db.backref("attendance_records", lazy=True))
     recorded_by = db.relationship("Teacher", backref=db.backref("attendance_records_created", lazy=True))

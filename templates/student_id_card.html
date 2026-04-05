@@ -313,7 +313,36 @@
                 </div>
             </footer>
         </article>
+
+        <!-- Attendance QR Section -->
+        <div class="mt-4 bg-white rounded-2xl overflow-hidden shadow-lg">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-500 p-4 text-center text-white">
+                <div class="flex items-center justify-center gap-2 mb-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span class="font-bold text-sm">Quét để điểm danh</span>
+                </div>
+                <p class="text-[10px] opacity-80">Mã QR điểm danh hết hạn sau 12 giờ — tự động làm mới mỗi lần mở thẻ</p>
+            </div>
+            <div class="p-4 flex items-center justify-between gap-3">
+                <div class="text-center flex-1">
+                    <div class="bg-white rounded-xl p-2 shadow-sm border border-gray-100 inline-block mb-1">
+                        <img src="{{ attendance_qr_src }}" width="120" height="120" alt="Mã QR điểm danh">
+                    </div>
+                    <p class="text-[10px] text-gray-500 font-medium">Quét bằng camera điểm danh</p>
+                </div>
+                <div class="flex-1 text-center">
+                    <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
+                        <p class="text-xs font-bold text-emerald-700 mb-1">Hoặc mở trực tiếp</p>
+                        <a href="{{ attendance_qr_url }}" target="_blank"
+                           class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-600 text-white text-[10px] font-bold hover:bg-emerald-700 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            Mở trang điểm danh
+                        </a>
+                        <p class="text-[9px] text-emerald-600 mt-1 leading-tight">Nhấn nút trên trang để điểm danh nhanh</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
-
 </html>

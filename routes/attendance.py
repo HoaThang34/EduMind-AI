@@ -1,7 +1,8 @@
-"""Routes cho hệ thống Điểm danh bằng Nhận diện Khuôn mặt.
+"""Routes cho hệ thống Điểm danh bằng Nhận diện Khuôn mặt và Mã QR.
 
-Sử dụng DeepFace-style engine (ArcFace ONNX + OpenCV DNN).
-Face data lấy từ ảnh thẻ (portrait_filename) của học sinh + mẫu camera.
+Hỗ trợ 2 chế độ:
+  - Face Mode  : Nhận diện khuôn mặt qua ArcFace ONNX
+  - QR Mode    : Quét mã QR trên thẻ học sinh để điểm danh
 """
 import os
 import base64
@@ -17,6 +18,7 @@ from flask import (
 )
 from flask_login import login_required, current_user
 from sqlalchemy import desc
+from urllib.parse import quote
 
 from models import db, Student, AttendanceRecord, ClassRoom
 from app_helpers import UPLOAD_FOLDER, log_change
@@ -36,6 +38,36 @@ os.makedirs(FACE_MODEL_DIR, exist_ok=True)
 
 # Ngưỡng similarity (ArcFace standard: 0.4)
 RECOGNITION_THRESHOLD = 0.40
+
+
+def make_attendance_qr_data(student_id):
+    """
+    Sinh dữ liệu cho mã QR điểm danh.
+    QR chứa trực tiếp student_id dạng text — KHÔNG dùng token.
+    Format: "EDUATT:{student_id}"
+    """
+    return f"EDUATT:{student_id}"
+
+
+def parse_attendance_qr(qr_data):
+    """
+    Đọc student_id từ nội dung QR.
+    Format: "EDUATT:{student_id}"
+    Trả về (student_id: int hoặc None, error: str hoặc None)
+    """
+    if not qr_data:
+        return None, "empty"
+    qr_data = qr_data.strip()
+    if qr_data.startswith("EDUATT:"):
+        try:
+            return int(qr_data.split(":")[1]), None
+        except (ValueError, IndexError):
+            return None, "invalid"
+    # Legacy support: nếu QR chứa trực tiếp student_id dạng số
+    try:
+        return int(qr_data), None
+    except ValueError:
+        return None, "invalid_format"
 
 
 # ─────────────────────────── helpers ────────────────────────────
@@ -466,13 +498,16 @@ def register(app):
     @app.route("/api/attendance/history")
     @login_required
     def api_attendance_history():
-        """API lấy lịch sử điểm danh."""
+        """API lấy lịch sử điểm danh. Hỗ trợ lọc theo mode (face/qr)."""
         class_name = request.args.get("class_name", "")
         date_from = request.args.get("date_from", "")
         date_to = request.args.get("date_to", "")
+        mode_filter = request.args.get("mode", "")  # 'face', 'qr', hoặc '' (tất cả)
         query = AttendanceRecord.query
         if class_name:
             query = query.filter_by(class_name=class_name)
+        if mode_filter in ("face", "qr"):
+            query = query.filter_by(attendance_mode=mode_filter)
         if date_from:
             try:
                 d = datetime.datetime.strptime(date_from, "%Y-%m-%d").date()
@@ -498,6 +533,7 @@ def register(app):
                 "status": r.status,
                 "confidence": r.confidence,
                 "captured_photo": r.captured_photo,
+                "mode": r.attendance_mode or "face",
             })
         return jsonify({"records": result})
 
@@ -579,3 +615,170 @@ def register(app):
         except Exception as e:
             db.session.rollback()
             return jsonify({"error": f"Lỗi hệ thống khi xóa: {str(e)}"}), 500
+
+    @app.route("/api/attendance/qr/checkin", methods=["POST"])
+    @login_required
+    def api_attendance_qr_checkin():
+        """
+        Điểm danh bằng mã QR.
+        Payload: { "qr_data": "<nội dung QR>" }
+        QR chứa trực tiếp student_id dạng "EDUATT:{id}" — không hết hạn.
+        """
+        data = request.get_json() or {}
+        qr_data = data.get("qr_data", "").strip()
+        if not qr_data:
+            return jsonify({"error": "Thiếu mã QR."}), 400
+
+        sid, parse_err = parse_attendance_qr(qr_data)
+        if not sid:
+            return jsonify({"matched": False, "error": f"Mã QR không hợp lệ ({parse_err})."}), 400
+
+        student = db.session.get(Student, sid)
+        if not student:
+            return jsonify({"matched": False, "error": "Không tìm thấy học sinh trong hệ thống."}), 404
+
+        today = datetime.date.today()
+        existing = AttendanceRecord.query.filter_by(
+            student_id=sid, attendance_date=today
+        ).first()
+        if existing:
+            return jsonify({
+                "matched": True,
+                "already_checked": True,
+                "student_id": student.id,
+                "student_name": student.name,
+                "student_code": student.student_code,
+                "student_class": student.student_class,
+                "message": f"{student.name} đã điểm danh hôm nay lúc {existing.check_in_time.strftime('%H:%M:%S')}."
+            })
+
+        record = AttendanceRecord(
+            student_id=sid,
+            class_name=student.student_class,
+            check_in_time=datetime.datetime.now(),
+            captured_photo="",
+            confidence=1.0,
+            status="Có mặt",
+            notes="Điểm danh qua mã QR",
+            recorded_by_id=current_user.id,
+            attendance_date=today,
+            attendance_mode="qr",
+            qr_scan_method="camera",
+        )
+        db.session.add(record)
+        db.session.commit()
+        return jsonify({
+            "matched": True,
+            "already_checked": False,
+            "student_id": student.id,
+            "student_name": student.name,
+            "student_code": student.student_code,
+            "student_class": student.student_class,
+            "message": f"Đã điểm danh {student.name} bằng mã QR."
+        })
+
+    @app.route("/api/attendance/qr/token", methods=["GET"])
+    @login_required
+    def api_attendance_qr_token():
+        """
+        Sinh dữ liệu QR cho 1 học sinh (không dùng token — dùng trực tiếp student_id).
+        Query params: student_id
+        """
+        student_id = request.args.get("student_id", type=int)
+        if not student_id:
+            return jsonify({"error": "Thiếu student_id."}), 400
+
+        student = db.session.get(Student, student_id)
+        if not student:
+            return jsonify({"error": "Không tìm thấy học sinh."}), 404
+
+        qr_data = make_attendance_qr_data(student_id)
+        qr_api_url = (
+            f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="
+            f"{quote(qr_data, safe='')}"
+        )
+
+        return jsonify({
+            "student_id": student_id,
+            "student_name": student.name,
+            "student_code": student.student_code,
+            "qr_data": qr_data,
+            "qr_image_url": qr_api_url,
+        })
+
+    @app.route("/api/attendance/qr/auto-checkin", methods=["POST"])
+    @login_required
+    def api_attendance_qr_auto_checkin():
+        """
+        Điểm danh tự động khi trang QR được mở.
+        Payload: { "qr_data": "<nội dung QR>" }
+        """
+        data = request.get_json() or {}
+        qr_data = data.get("qr_data", "").strip()
+        if not qr_data:
+            return jsonify({"error": "Thiếu mã QR."}), 400
+
+        sid, parse_err = parse_attendance_qr(qr_data)
+        if not sid:
+            return jsonify({"success": False, "error": f"Mã QR không hợp lệ ({parse_err})."}), 400
+
+        student = db.session.get(Student, sid)
+        if not student:
+            return jsonify({"success": False, "error": "Không tìm thấy học sinh."}), 404
+
+        today = datetime.date.today()
+        existing = AttendanceRecord.query.filter_by(
+            student_id=sid, attendance_date=today
+        ).first()
+        if existing:
+            return jsonify({
+                "success": False,
+                "already_checked": True,
+                "student_name": student.name,
+                "check_time": existing.check_in_time.strftime("%H:%M:%S"),
+            })
+
+        record = AttendanceRecord(
+            student_id=sid,
+            class_name=student.student_class,
+            check_in_time=datetime.datetime.now(),
+            captured_photo="",
+            confidence=1.0,
+            status="Có mặt",
+            notes="Điểm danh tự động qua mã QR",
+            recorded_by_id=current_user.id,
+            attendance_date=today,
+            attendance_mode="qr",
+            qr_scan_method="direct",
+        )
+        db.session.add(record)
+        db.session.commit()
+        return jsonify({
+            "success": True,
+            "already_checked": False,
+            "student_name": student.name,
+        })
+
+    @app.route("/api/attendance/qr/url-for-student/<int:student_id>")
+    @login_required
+    def api_attendance_qr_url(student_id):
+        """
+        Trả về QR data và URL ảnh QR của 1 học sinh (dùng cho in ấn / gửi phụ huynh).
+        QR chứa trực tiếp student_id — không hết hạn.
+        """
+        student = db.session.get(Student, student_id)
+        if not student:
+            return jsonify({"error": "Không tìm thấy học sinh."}), 404
+
+        qr_data = make_attendance_qr_data(student_id)
+        qr_api_url = (
+            f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="
+            f"{quote(qr_data, safe='')}"
+        )
+        return jsonify({
+            "student_id": student_id,
+            "student_name": student.name,
+            "student_code": student.student_code,
+            "qr_data": qr_data,
+            "qr_image_url": qr_api_url,
+        })

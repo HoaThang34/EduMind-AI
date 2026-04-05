@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Điểm danh khuôn mặt - EduMind AI{% endblock %}
+{% block title %}Điểm danh - EduMind AI{% endblock %}
 
 {% block content %}
 <div class="page-enter space-y-6">
@@ -9,11 +9,11 @@
         <div>
             <h1 class="text-2xl font-bold tracking-tight text-foreground">
                 <svg class="inline-block w-7 h-7 mr-2 -mt-1 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
-                Điểm danh Khuôn mặt
+                Điểm danh
             </h1>
-            <p class="text-sm text-muted-foreground mt-1">Nâng cao: Huấn luyện đa mẫu từ ảnh thẻ và trực tiếp qua camera</p>
+            <p class="text-sm text-muted-foreground mt-1">Hỗ trợ nhận diện khuôn mặt & quét mã QR trên thẻ học sinh</p>
         </div>
         <div class="flex items-center gap-3">
             <span class="badge border-indigo-200 bg-indigo-50 text-indigo-700 font-bold px-4 py-2">PHẠM VI: TOÀN TRƯỜNG</span>
@@ -25,131 +25,292 @@
         </div>
     </div>
 
+    <!-- Mode Selector Toggle -->
+    <div class="flex items-center justify-center">
+        <div class="inline-flex rounded-xl p-1 bg-gray-100 border border-gray-200 shadow-inner">
+            <button onclick="setAttendanceMode('face')" id="mode-btn-face"
+                class="flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-bold transition-all duration-200 shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                Nhận diện Khuôn mặt
+            </button>
+            <button onclick="setAttendanceMode('qr')" id="mode-btn-qr"
+                class="flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-bold transition-all duration-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                Quét Mã QR
+            </button>
+        </div>
+    </div>
+
     <!-- Quick Stats -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="stats-section">
-        <!-- Stats cards here (same as before) -->
         <div class="glass-panel p-4 hover-card"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center"><svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><div><p class="text-xs text-muted-foreground font-medium">Sĩ số</p><p class="text-xl font-bold text-foreground" id="stat-total">0</p></div></div></div>
         <div class="glass-panel p-4 hover-card"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center"><svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div><p class="text-xs text-muted-foreground font-medium">Có mặt</p><p class="text-xl font-bold text-emerald-600" id="stat-present">0</p></div></div></div>
         <div class="glass-panel p-4 hover-card"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center"><svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div><p class="text-xs text-muted-foreground font-medium">Đi trễ</p><p class="text-xl font-bold text-amber-600" id="stat-late">0</p></div></div></div>
         <div class="glass-panel p-4 hover-card"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center"><svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div><p class="text-xs text-muted-foreground font-medium">Vắng</p><p class="text-xl font-bold text-red-600" id="stat-absent">0</p></div></div></div>
     </div>
 
-    <!-- Tabs -->
-    <div class="flex border-b border-border gap-1">
-        <button onclick="switchTab('camera')" id="tab-camera" class="tab-btn px-4 py-2.5 text-sm font-medium text-muted-foreground border-b-2 border-transparent transition-colors hover:text-foreground active-tab">
-            <svg class="inline w-4 h-4 mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-            Điểm danh Camera
-        </button>
-        <button onclick="switchTab('list')" id="tab-list" class="tab-btn px-4 py-2.5 text-sm font-medium text-muted-foreground border-b-2 border-transparent transition-colors hover:text-foreground">
-            <svg class="inline w-4 h-4 mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-            Quản lý dữ liệu khuôn mặt
-        </button>
-        <button onclick="switchTab('history')" id="tab-history" class="tab-btn px-4 py-2.5 text-sm font-medium text-muted-foreground border-b-2 border-transparent transition-colors hover:text-foreground">
-            <svg class="inline w-4 h-4 mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            Lịch sử
-        </button>
-    </div>
+    <!-- ==================== FACE MODE ==================== -->
+    <div id="mode-panel-face">
+        <!-- Tabs -->
+        <div class="flex border-b border-border gap-1">
+            <button onclick="switchTab('camera')" id="tab-camera" class="tab-btn px-4 py-2.5 text-sm font-medium text-muted-foreground border-b-2 border-transparent transition-colors hover:text-foreground active-tab">
+                <svg class="inline w-4 h-4 mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                Điểm danh Camera
+            </button>
+            <button onclick="switchTab('list')" id="tab-list" class="tab-btn px-4 py-2.5 text-sm font-medium text-muted-foreground border-b-2 border-transparent transition-colors hover:text-foreground">
+                <svg class="inline w-4 h-4 mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                Quản lý dữ liệu khuôn mặt
+            </button>
+            <button onclick="switchTab('history')" id="tab-history" class="tab-btn px-4 py-2.5 text-sm font-medium text-muted-foreground border-b-2 border-transparent transition-colors hover:text-foreground">
+                <svg class="inline w-4 h-4 mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Lịch sử
+            </button>
+        </div>
 
-    <!-- TAB: Camera Scan -->
-    <div id="panel-camera" class="tab-panel">
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            <div class="lg:col-span-3">
-                <div class="glass-panel overflow-hidden">
-                    <div class="p-4 border-b border-border flex items-center justify-between">
-                        <h3 class="text-sm font-semibold text-foreground flex items-center gap-2">Camera trực tiếp</h3>
-                        <div class="flex gap-2">
-                            <button onclick="startCamera('camera-video', 'camera-placeholder', 'scan-overlay', 'start-cam-btn', 'stop-cam-btn')" id="start-cam-btn" class="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5">Bật camera</button>
-                            <button onclick="stopCamera('camera-video', 'camera-placeholder', 'scan-overlay', 'start-cam-btn', 'stop-cam-btn')" id="stop-cam-btn" class="btn-destructive text-xs px-3 py-1.5 hidden flex items-center gap-1.5">Tắt camera</button>
+        <!-- TAB: Camera Scan -->
+        <div id="panel-camera" class="tab-panel mt-6">
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                <div class="lg:col-span-3">
+                    <div class="glass-panel overflow-hidden">
+                        <div class="p-4 border-b border-border flex items-center justify-between">
+                            <h3 class="text-sm font-semibold text-foreground flex items-center gap-2">
+                                <span class="w-2 h-2 bg-indigo-500 rounded-full"></span>
+                                Camera trực tiếp — Chế độ Khuôn mặt
+                            </h3>
+                            <div class="flex gap-2">
+                                <button onclick="startCamera('camera-video', 'camera-placeholder', 'scan-overlay', 'start-cam-btn', 'stop-cam-btn')" id="start-cam-btn" class="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5">Bật camera</button>
+                                <button onclick="stopCamera('camera-video', 'camera-placeholder', 'scan-overlay', 'start-cam-btn', 'stop-cam-btn')" id="stop-cam-btn" class="btn-destructive text-xs px-3 py-1.5 hidden flex items-center gap-1.5">Tắt camera</button>
+                            </div>
                         </div>
-                    </div>
                         <div class="relative bg-gray-950 aspect-video flex items-center justify-center overflow-hidden">
                             <video id="camera-video" autoplay playsinline class="w-full h-full object-cover hidden"></video>
                             <canvas id="face-overlay" class="absolute inset-0 w-full h-full object-cover pointer-events-none z-10"></canvas>
                             <canvas id="camera-canvas" class="hidden"></canvas>
                             <div id="camera-placeholder" class="flex flex-col items-center justify-center gap-4 text-gray-400 py-16">
-                            <svg class="w-20 h-20 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                            <p class="text-sm">Nhấn "Bật camera" để bắt đầu điểm danh</p>
-                        </div>
-                        <div id="scan-overlay" class="absolute inset-0 hidden">
-                            <div class="absolute inset-0 bg-black/20"></div>
-                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 sm:w-64 sm:h-64 border-2 border-indigo-400 border-dashed rounded-2xl">
-                                <div id="scan-line" class="absolute left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-indigo-400 to-transparent opacity-80 animate-scan-line"></div>
+                                <svg class="w-20 h-20 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                <p class="text-sm">Nhấn "Bật camera" để bắt đầu điểm danh khuôn mặt</p>
+                            </div>
+                            <div id="scan-overlay" class="absolute inset-0 hidden">
+                                <div class="absolute inset-0 bg-black/20"></div>
+                                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 sm:w-64 sm:h-64 border-2 border-indigo-400 border-dashed rounded-2xl">
+                                    <div id="scan-line" class="absolute left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-indigo-400 to-transparent opacity-80 animate-scan-line"></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="p-4 border-t border-border flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                             <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                             <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Hệ thống đang quét tự động</span>
+                        <div class="p-4 border-t border-border flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                                <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Hệ thống đang quét tự động</span>
+                            </div>
+                            <input type="checkbox" id="auto-recognize" class="hidden" checked>
+                            <button id="recognize-btn" class="hidden" disabled></button>
                         </div>
-                        <input type="checkbox" id="auto-recognize" class="hidden" checked>
-                        <button id="recognize-btn" class="hidden" disabled></button>
+                    </div>
+                </div>
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="glass-panel" id="result-panel">
+                        <div class="p-4 border-b border-border"><h3 class="text-sm font-semibold">Kết quả nhận diện</h3></div>
+                        <div class="p-6" id="recognize-result">
+                            <div class="text-center py-6 text-muted-foreground text-sm">Chưa có kết quả</div>
+                        </div>
+                    </div>
+                    <div class="glass-panel">
+                        <div class="p-4 border-b border-border"><h3 class="text-sm font-semibold">Đã điểm danh hôm nay</h3></div>
+                        <div class="max-h-64 overflow-y-auto" id="today-checkins"></div>
                     </div>
                 </div>
             </div>
-            <div class="lg:col-span-2 space-y-4">
-                <div class="glass-panel" id="result-panel">
-                    <div class="p-4 border-b border-border"><h3 class="text-sm font-semibold">Kết quả nhận diện</h3></div>
-                    <div class="p-6" id="recognize-result">
-                        <div class="text-center py-6 text-muted-foreground text-sm">Chưa có kết quả</div>
+        </div>
+
+        <!-- TAB: Student Management -->
+        <div id="panel-list" class="tab-panel hidden mt-6">
+            <div class="glass-panel overflow-hidden">
+                <div class="p-4 border-b border-border flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <h3 class="text-sm font-semibold text-foreground">Dữ liệu mẫu khuôn mặt</h3>
+                        <button onclick="trainModel()" id="train-selected-btn" class="btn-outline text-xs px-3 py-1.5 flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            Huấn luyện Toàn trường (Cập nhật mẫu mới)
+                        </button>
+                    </div>
+                    <span class="badge badge-secondary text-xs" id="student-count-badge">0 học sinh</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="table-shadcn">
+                        <thead>
+                            <tr>
+                                <th>Học sinh</th>
+                                <th class="text-center text-indigo-600">Lớp</th>
+                                <th class="text-center">Ảnh thẻ</th>
+                                <th class="text-center">Mẫu camera</th>
+                                <th class="text-center">Trạng thái mô hình</th>
+                                <th class="text-center">Thao tác dữ liệu</th>
+                            </tr>
+                        </thead>
+                        <tbody id="student-list-body">
+                            <tr><td colspan="6" class="text-center py-8 text-muted-foreground">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: History -->
+        <div id="panel-history" class="tab-panel hidden mt-6">
+            <div class="glass-panel overflow-hidden">
+                <div class="p-4 border-b border-border flex flex-wrap items-center gap-3">
+                    <h3 class="text-sm font-semibold text-foreground mr-auto">Lịch sử điểm danh</h3>
+                    <div class="flex items-center gap-2">
+                        <select id="history-mode-filter" class="input-shadcn text-xs w-36" onchange="loadHistory()">
+                            <option value="">Tất cả</option>
+                            <option value="face">Khuôn mặt</option>
+                            <option value="qr">Mã QR</option>
+                        </select>
+                        <input type="date" id="history-date-from" class="input-shadcn w-36 text-sm" onchange="loadHistory()">
+                        <input type="date" id="history-date-to" class="input-shadcn w-36 text-sm" onchange="loadHistory()">
                     </div>
                 </div>
+                <div class="overflow-x-auto">
+                    <table class="table-shadcn" id="history-table">
+                        <thead>
+                            <tr><th>#</th><th>Học sinh</th><th>Lớp</th><th>Ngày</th><th>Giờ</th><th class="text-center">Trạng thái</th><th class="text-center">Mode</th><th class="text-center">Thao tác</th></tr>
+                        </thead>
+                        <tbody id="history-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== QR MODE ==================== -->
+    <div id="mode-panel-qr" class="hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <!-- QR Camera Scanner -->
+            <div class="lg:col-span-3">
+                <div class="glass-panel overflow-hidden">
+                    <div class="p-4 border-b border-border flex items-center justify-between">
+                        <h3 class="text-sm font-semibold text-foreground flex items-center gap-2">
+                            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                            Camera — Quét mã QR trên thẻ học sinh
+                        </h3>
+                        <div class="flex gap-2">
+                            <button onclick="startCamera('qr-video', 'qr-placeholder', 'qr-overlay', 'start-qr-btn', 'stop-qr-btn')" id="start-qr-btn" class="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                Bật camera
+                            </button>
+                            <button onclick="stopCamera('qr-video', 'qr-placeholder', 'qr-overlay', 'start-qr-btn', 'stop-qr-btn')" id="stop-qr-btn" class="btn-destructive text-xs px-3 py-1.5 hidden flex items-center gap-1.5">
+                                Tắt camera
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- QR scan area with animated frame -->
+                    <div class="relative bg-gray-950 aspect-square max-h-96 mx-auto flex items-center justify-center overflow-hidden" id="qr-scan-container">
+                        <video id="qr-video" autoplay playsinline class="w-full h-full object-cover hidden"></video>
+                        <canvas id="qr-canvas" class="hidden"></canvas>
+                        <div id="qr-placeholder" class="flex flex-col items-center justify-center gap-4 text-gray-400 py-16 px-4 text-center">
+                            <div class="w-24 h-24 border-4 border-dashed border-gray-600 rounded-2xl flex items-center justify-center">
+                                <svg class="w-12 h-12 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">Quét mã QR trên thẻ học sinh</p>
+                                <p class="text-xs mt-1 opacity-60">Đưa mã QR vào khung hình</p>
+                            </div>
+                        </div>
+
+                        <!-- Animated QR scan frame overlay -->
+                        <div id="qr-overlay" class="absolute inset-0 hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-black/30"></div>
+                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-52 h-52">
+                                <!-- Corner brackets -->
+                                <div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-indigo-400 rounded-tl-lg"></div>
+                                <div class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-indigo-400 rounded-tr-lg"></div>
+                                <div class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-indigo-400 rounded-bl-lg"></div>
+                                <div class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-indigo-400 rounded-br-lg"></div>
+                                <!-- Scan line -->
+                                <div id="qr-scan-line" class="absolute left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-indigo-300 to-transparent opacity-80 animate-scan-line" style="top: 50%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- QR detected flash -->
+                        <div id="qr-detected-flash" class="absolute inset-0 bg-emerald-500/20 pointer-events-none opacity-0 transition-opacity duration-200"></div>
+                    </div>
+
+                    <div class="p-4 border-t border-border">
+                        <div class="flex items-center gap-3">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <div class="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Quét QR tự động</span>
+                                </div>
+                                <p class="text-[10px] text-muted-foreground">Yêu cầu quyền truy cập camera. Đưa mã QR vào khung hình để quét tự động.</p>
+                            </div>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="auto-qr-scan" class="sr-only" checked>
+                                <div id="auto-qr-toggle" onclick="toggleAutoQrScan()" class="w-10 h-6 rounded-full bg-indigo-500 relative transition-colors cursor-pointer">
+                                    <div class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform translate-x-4" id="auto-qr-dot"></div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructions Card -->
+                <div class="glass-panel p-4 mt-4">
+                    <h4 class="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Hướng dẫn sử dụng QR điểm danh</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="flex items-start gap-2">
+                            <div class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold flex-shrink-0">1</div>
+                            <p class="text-xs text-muted-foreground leading-relaxed">Yêu cầu học sinh mở <strong class="text-foreground">Thẻ học sinh điện tử</strong> trên điện thoại</p>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <div class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold flex-shrink-0">2</div>
+                            <p class="text-xs text-muted-foreground leading-relaxed">Bật camera và hướng vào <strong class="text-foreground">mã QR</strong> trên thẻ học sinh</p>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <div class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold flex-shrink-0">3</div>
+                            <p class="text-xs text-muted-foreground leading-relaxed">Hệ thống tự động nhận diện và ghi nhận điểm danh ngay lập tức</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QR Results + Today Checkins -->
+            <div class="lg:col-span-2 space-y-4">
+                <div class="glass-panel">
+                    <div class="p-4 border-b border-border flex items-center justify-between">
+                        <h3 class="text-sm font-semibold flex items-center gap-2">
+                            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                            Kết quả quét QR
+                        </h3>
+                        <div id="qr-count-badge" class="badge bg-indigo-50 text-indigo-700 text-xs font-bold">0 lượt hôm nay</div>
+                    </div>
+                    <div class="p-4 min-h-40" id="qr-result-area">
+                        <div class="flex flex-col items-center justify-center py-8 text-center">
+                            <div class="w-12 h-12 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center mb-3">
+                                <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                            </div>
+                            <p class="text-xs text-muted-foreground">Đưa mã QR vào camera để bắt đầu</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QR Check-in History (today) -->
                 <div class="glass-panel">
                     <div class="p-4 border-b border-border"><h3 class="text-sm font-semibold">Đã điểm danh hôm nay</h3></div>
-                    <div class="max-h-64 overflow-y-auto" id="today-checkins"></div>
+                    <div class="max-h-64 overflow-y-auto" id="qr-today-checkins"></div>
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- TAB: Student Management -->
-    <div id="panel-list" class="tab-panel hidden">
-        <div class="glass-panel overflow-hidden">
-            <div class="p-4 border-b border-border flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <h3 class="text-sm font-semibold text-foreground">Dữ liệu mẫu khuôn mặt</h3>
-                    <button onclick="trainModel()" id="train-selected-btn" class="btn-outline text-xs px-3 py-1.5 flex items-center gap-1.5">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        Huấn luyện Toàn trường (Cập nhật mẫu mới)
-                    </button>
+                <!-- Quick Student List for manual QR input -->
+                <div class="glass-panel">
+                    <div class="p-4 border-b border-border"><h3 class="text-sm font-semibold">Điểm danh nhanh bằng lớp</h3></div>
+                    <div class="p-4 space-y-3">
+                        <select id="qr-class-select" class="input-shadcn w-full text-xs" onchange="loadQrClassStudents()">
+                            <option value="">— Chọn lớp —</option>
+                        </select>
+                        <div id="qr-class-students" class="space-y-2 max-h-48 overflow-y-auto"></div>
+                    </div>
                 </div>
-                <span class="badge badge-secondary text-xs" id="student-count-badge">0 học sinh</span>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="table-shadcn">
-                    <thead>
-                        <tr>
-                            <th>Học sinh</th>
-                            <th class="text-center text-indigo-600">Lớp</th>
-                            <th class="text-center">Ảnh thẻ</th>
-                            <th class="text-center">Mẫu camera</th>
-                            <th class="text-center">Trạng thái mô hình</th>
-                            <th class="text-center">Thao tác dữ liệu</th>
-                        </tr>
-                    </thead>
-                    <tbody id="student-list-body">
-                        <tr><td colspan="6" class="text-center py-8 text-muted-foreground">Đang tải...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- TAB: History (Not modified, remains same) -->
-    <div id="panel-history" class="tab-panel hidden">
-        <div class="glass-panel overflow-hidden">
-            <div class="p-4 border-b border-border flex flex-wrap items-center gap-3">
-                <h3 class="text-sm font-semibold text-foreground mr-auto">Lịch sử điểm danh</h3>
-                <input type="date" id="history-date-from" class="input-shadcn w-36 text-sm" onchange="loadHistory()">
-                <input type="date" id="history-date-to" class="input-shadcn w-36 text-sm" onchange="loadHistory()">
-            </div>
-            <div class="overflow-x-auto">
-                <table class="table-shadcn" id="history-table">
-                    <thead>
-                        <tr><th>#</th><th>Học sinh</th><th>Lớp</th><th>Ngày</th><th>Giờ</th><th class="text-center">Trạng thái</th><th class="text-center">Thao tác</th></tr>
-                    </thead>
-                    <tbody id="history-body"></tbody>
-                </table>
             </div>
         </div>
     </div>
@@ -169,12 +330,10 @@
             <div class="relative bg-gray-950 aspect-square rounded-xl overflow-hidden max-w-xs mx-auto border-4 border-white shadow-lg">
                 <video id="enroll-video" autoplay playsinline class="w-full h-full object-cover"></video>
                 <div class="absolute inset-0 border-4 border-indigo-400/50 rounded-xl pointer-events-none"></div>
-                <!-- Frame hints -->
                 <div class="absolute inset-0 flex items-center justify-center">
                     <div class="w-48 h-48 border-2 border-white/30 border-dashed rounded-full"></div>
                 </div>
             </div>
-            
             <div class="grid grid-cols-2 gap-4">
                 <div class="text-center p-4 rounded-xl bg-gray-50 border border-border">
                     <p class="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-1">Mẫu đã chụp</p>
@@ -184,13 +343,11 @@
                     <p class="text-xs text-muted-foreground leading-relaxed italic">Gợi ý: Chụp 5-10 mẫu với các góc độ nghiêng nhẹ để nhận diện tốt hơn.</p>
                 </div>
             </div>
-
             <div class="space-y-4">
                 <button onclick="startAutoEnrollment()" id="enroll-auto-btn" class="btn-primary w-full py-4 font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-100 transition-all hover:scale-[1.02]">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg>
                     BẮT ĐẦU CHỤP TỰ ĐỘNG (30 ẢNH)
                 </button>
-                
                 <div id="enroll-progress-container" class="hidden space-y-2">
                     <div class="flex justify-between text-[10px] font-bold text-indigo-600 uppercase">
                         <span id="enroll-status-text">Đang chuẩn bị...</span>
@@ -200,7 +357,6 @@
                         <div id="enroll-progress-bar" class="h-full bg-indigo-600 w-0 transition-all duration-300"></div>
                     </div>
                 </div>
-
                 <div class="flex gap-2 pt-2">
                     <button onclick="trainModel()" class="btn-outline flex-1 py-2 text-xs font-bold text-gray-600 border-gray-200">Chỉ huấn luyện lại</button>
                     <button onclick="closeEnrollModal()" class="btn-ghost flex-1 py-2 text-xs font-bold text-red-500">Đóng</button>
@@ -210,25 +366,89 @@
     </div>
 </div>
 
-<!-- Other Modals (History photo, etc) -->
+<!-- MODAL: QR Success Popup -->
+<div id="qr-success-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="closeQrSuccessModal()">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm animate-scale-in overflow-hidden" onclick="event.stopPropagation()">
+        <div class="bg-gradient-to-r from-emerald-500 to-teal-500 p-6 text-center text-white">
+            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <h3 class="text-xl font-black">Điểm danh thành công!</h3>
+        </div>
+        <div class="p-6 text-center" id="qr-success-content">
+            <!-- Filled by JS -->
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: QR Error Popup -->
+<div id="qr-error-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="closeQrErrorModal()">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm animate-scale-in overflow-hidden" onclick="event.stopPropagation()">
+        <div class="bg-gradient-to-r from-red-500 to-rose-500 p-6 text-center text-white">
+            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+            </div>
+            <h3 class="text-xl font-black">Điểm danh thất bại</h3>
+        </div>
+        <div class="p-6 text-center" id="qr-error-content">
+            <!-- Filled by JS -->
+        </div>
+    </div>
+</div>
+
+<!-- Photo Modal -->
 <div id="photo-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="this.classList.add('hidden')">
     <img id="photo-modal-img" class="max-w-full max-h-full rounded-xl" src="">
 </div>
 
 <style>
     .active-tab { color: #4f46e5; border-bottom-color: #4f46e5; font-weight: 700; }
+    .active-mode-btn { background: white; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06); }
     @keyframes scan-line { 0% { top: 0%; } 100% { top: 100%; } }
     .animate-scan-line { animation: scan-line 2s linear infinite; }
+    @keyframes qr-flash { 0% { opacity: 1; } 100% { opacity: 0; } }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
 // ===================== STATE =====================
 let camStream = null;
 let currentEnrollStudentId = null;
 let isProcessingRecognize = false;
 let lastFaceSeenTime = Date.now();
+let currentAttendanceMode = 'face';
+let qrScanInterval = null;
+let autoQrScanEnabled = true;
+let qrCooldown = false;
+let qrClassStudentsCache = {};
 
-// ===================== TABS =====================
+// ===================== MODE SWITCHING =====================
+function setAttendanceMode(mode) {
+    currentAttendanceMode = mode;
+
+    // Update button styles
+    const faceBtn = document.getElementById('mode-btn-face');
+    const qrBtn = document.getElementById('mode-btn-qr');
+    if (mode === 'face') {
+        faceBtn.classList.add('active-mode-btn');
+        qrBtn.classList.remove('active-mode-btn');
+        document.getElementById('mode-panel-face').classList.remove('hidden');
+        document.getElementById('mode-panel-qr').classList.add('hidden');
+        // Stop QR camera if running
+        stopQrCamera();
+    } else {
+        qrBtn.classList.add('active-mode-btn');
+        faceBtn.classList.remove('active-mode-btn');
+        document.getElementById('mode-panel-qr').classList.remove('hidden');
+        document.getElementById('mode-panel-face').classList.add('hidden');
+        // Stop face camera if running
+        stopCamera('camera-video', 'camera-placeholder', 'scan-overlay', 'start-cam-btn', 'stop-cam-btn');
+        loadQrTodayCheckins();
+        loadQrClassOptions();
+    }
+}
+
+// ===================== TABS (Face Mode) =====================
 function switchTab(tab) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
@@ -238,15 +458,13 @@ function switchTab(tab) {
     if (tab === 'history') loadHistory();
 }
 
-// ===================== CAMERA HELPERS =====================
+// ===================== CAMERA HELPERS (Face) =====================
 async function startCamera(vidId, placeholderId, overlayId, startBtnId, stopBtnId) {
     try {
         camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
         const video = document.getElementById(vidId);
         video.srcObject = camStream;
         video.classList.remove('hidden');
-        
-        // Tự động khớp kích thước overlay với video
         video.onloadedmetadata = () => {
             const overlay = document.getElementById('face-overlay');
             if (overlay) {
@@ -254,23 +472,25 @@ async function startCamera(vidId, placeholderId, overlayId, startBtnId, stopBtnI
                 overlay.height = video.videoHeight;
             }
         };
-
         if (placeholderId) document.getElementById(placeholderId).classList.add('hidden');
         if (overlayId) document.getElementById(overlayId).classList.remove('hidden');
         if (startBtnId) document.getElementById(startBtnId).classList.add('hidden');
         if (stopBtnId) document.getElementById(stopBtnId).classList.remove('hidden');
         if (vidId === 'camera-video') {
             document.getElementById('recognize-btn').disabled = false;
-            // Tự động kích hoạt vòng lặp nếu checkbox đã được tích sẵn
             if (document.getElementById('auto-recognize').checked && !autoScanInterval) {
                 autoScanInterval = setInterval(() => captureAndRecognize(true), 100);
             }
+        }
+        // QR mode camera
+        if (vidId === 'qr-video') {
+            if (autoQrScanEnabled) startQrScanLoop();
         }
     } catch(e) { alert('Lỗi camera: ' + e.message); }
 }
 
 function stopCamera(vidId, placeholderId, overlayId, startBtnId, stopBtnId) {
-    if (camStream) {
+    if (vidId === 'camera-video' && camStream) {
         camStream.getTracks().forEach(t => t.stop());
         camStream = null;
     }
@@ -283,109 +503,407 @@ function stopCamera(vidId, placeholderId, overlayId, startBtnId, stopBtnId) {
     if (stopBtnId) document.getElementById(stopBtnId).classList.add('hidden');
     if (vidId === 'camera-video') {
         document.getElementById('recognize-btn').disabled = true;
-        
-        // Xóa khung nhận diện khi tắt cam
         const overlay = document.getElementById('face-overlay');
         if (overlay) {
             const ctx = overlay.getContext('2d');
             ctx.clearRect(0, 0, overlay.width, overlay.height);
         }
-
-        if (autoScanInterval) {
-            clearInterval(autoScanInterval);
-            autoScanInterval = null;
-        }
+        if (autoScanInterval) { clearInterval(autoScanInterval); autoScanInterval = null; }
+    }
+    if (vidId === 'qr-video') {
+        stopQrScanLoop();
     }
 }
 
-// ===================== RECOGNITION =====================
+// ===================== QR SCAN FUNCTIONS =====================
+function stopQrCamera() {
+    if (camStream) {
+        camStream.getTracks().forEach(t => t.stop());
+        camStream = null;
+    }
+    const video = document.getElementById('qr-video');
+    if (video) { video.srcObject = null; video.classList.add('hidden'); }
+    const placeholder = document.getElementById('qr-placeholder');
+    if (placeholder) placeholder.classList.remove('hidden');
+    const overlay = document.getElementById('qr-overlay');
+    if (overlay) overlay.classList.add('hidden');
+    const startBtn = document.getElementById('start-qr-btn');
+    if (startBtn) startBtn.classList.remove('hidden');
+    const stopBtn = document.getElementById('stop-qr-btn');
+    if (stopBtn) stopBtn.classList.add('hidden');
+    stopQrScanLoop();
+}
+
+function stopQrScanLoop() {
+    if (qrScanInterval) { clearInterval(qrScanInterval); qrScanInterval = null; }
+}
+
+function startQrScanLoop() {
+    stopQrScanLoop();
+    qrScanInterval = setInterval(scanQrFrame, 200);
+}
+
+async function scanQrFrame() {
+    if (!autoQrScanEnabled || qrCooldown || !camStream) return;
+
+    const video = document.getElementById('qr-video');
+    if (!video || video.readyState < 2) return;
+
+    const canvas = document.getElementById('qr-canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+
+    if (code) {
+        qrCooldown = true;
+
+        // Flash effect
+        const flash = document.getElementById('qr-detected-flash');
+        if (flash) {
+            flash.style.opacity = '1';
+            setTimeout(() => { flash.style.opacity = '0'; }, 300);
+        }
+
+        showQrProcessing();
+
+        // QR chứa trực tiếp "EDUATT:{student_id}" hoặc URL "/student/qr-diem-danh/{student_id}"
+        // Chuẩn hóa về "EDUATT:{student_id}"
+        const qrData = parseQrForAttendance(code.data);
+
+        await submitQrToken(qrData);
+        setTimeout(() => { qrCooldown = false; }, 2500);
+    }
+}
+
+/** Trích xuất dữ liệu QR điểm danh từ bất kỳ format nào */
+function parseQrForAttendance(rawData) {
+    if (!rawData) return null;
+    const data = rawData.trim();
+
+    // Format mới: "EDUATT:{id}"
+    if (data.startsWith('EDUATT:')) {
+        return data;
+    }
+
+    // Format cũ: /student/qr-diem-danh/{student_id} (số)
+    const matchOld = data.match(/\/student\/qr-diem-danh\/(\d+)/);
+    if (matchOld) {
+        return `EDUATT:${matchOld[1]}`;
+    }
+
+    // Raw student_id number
+    if (/^\d+$/.test(data)) {
+        return `EDUATT:${data}`;
+    }
+
+    // Fallback: dùng nguyên data
+    return data;
+}
+
+function showQrProcessing() {
+    const area = document.getElementById('qr-result-area');
+    area.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-6">
+            <div class="w-10 h-10 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin mb-3"></div>
+            <p class="text-xs font-bold text-indigo-600">Đang xác minh mã QR...</p>
+        </div>
+    `;
+}
+
+async function submitQrToken(qrData) {
+    // Chuẩn hóa qrData về "EDUATT:{id}" nếu cần
+    const normalized = parseQrForAttendance(qrData);
+    try {
+        const resp = await fetch('/api/attendance/qr/checkin', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ qr_data: normalized })
+        });
+        const data = await resp.json();
+
+        if (data.matched) {
+            if (data.already_checked) {
+                showQrAlreadyChecked(data);
+            } else {
+                showQrSuccess(data);
+                loadQrTodayCheckins();
+                loadQrTodayCount();
+                loadStats();
+            }
+        } else {
+            showQrError(data.error || 'Mã QR không hợp lệ.');
+        }
+    } catch(e) {
+        showQrError('Lỗi kết nối: ' + e.message);
+    }
+}
+
+function showQrSuccess(data) {
+    const area = document.getElementById('qr-result-area');
+    area.innerHTML = `
+        <div class="flex flex-col items-center py-4 animate-fade-in">
+            <div class="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mb-3">
+                <svg class="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <p class="font-black text-lg text-emerald-700">${data.student_name}</p>
+            <p class="text-xs text-emerald-600 font-mono mt-1">${data.student_code} — ${data.student_class}</p>
+            <div class="mt-3 px-4 py-2 bg-emerald-50 rounded-xl border border-emerald-100 w-full text-center">
+                <p class="text-xs font-bold text-emerald-700">${data.message}</p>
+            </div>
+        </div>
+    `;
+    // Show modal
+    const modal = document.getElementById('qr-success-modal');
+    const content = document.getElementById('qr-success-content');
+    content.innerHTML = `
+        <div class="text-center">
+            <p class="text-2xl font-black text-gray-900">${data.student_name}</p>
+            <p class="text-sm text-gray-500 mt-1">${data.student_code} — ${data.student_class}</p>
+            <div class="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-xl text-emerald-700 text-sm font-bold">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Điểm danh QR thành công
+            </div>
+        </div>
+    `;
+    modal.classList.remove('hidden');
+    setTimeout(() => closeQrSuccessModal(), 3000);
+}
+
+function showQrAlreadyChecked(data) {
+    const area = document.getElementById('qr-result-area');
+    area.innerHTML = `
+        <div class="flex flex-col items-center py-4 animate-fade-in">
+            <div class="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center mb-3">
+                <svg class="w-7 h-7 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <p class="font-black text-lg text-amber-700">${data.student_name}</p>
+            <p class="text-xs text-amber-600 font-mono mt-1">${data.student_code} — ${data.student_class}</p>
+            <div class="mt-3 px-4 py-2 bg-amber-50 rounded-xl border border-amber-100 w-full text-center">
+                <p class="text-xs font-bold text-amber-700">${data.message}</p>
+            </div>
+        </div>
+    `;
+}
+
+function showQrError(msg) {
+    const area = document.getElementById('qr-result-area');
+    area.innerHTML = `
+        <div class="flex flex-col items-center py-4 animate-fade-in">
+            <div class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mb-3">
+                <svg class="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+            </div>
+            <p class="text-sm font-bold text-red-700">${msg}</p>
+        </div>
+    `;
+    const modal = document.getElementById('qr-error-modal');
+    const content = document.getElementById('qr-error-content');
+    content.innerHTML = `<p class="text-sm text-gray-600">${msg}</p>`;
+    modal.classList.remove('hidden');
+    setTimeout(() => closeQrErrorModal(), 3000);
+}
+
+function closeQrSuccessModal() {
+    document.getElementById('qr-success-modal').classList.add('hidden');
+}
+function closeQrErrorModal() {
+    document.getElementById('qr-error-modal').classList.add('hidden');
+}
+
+function toggleAutoQrScan() {
+    autoQrScanEnabled = !autoQrScanEnabled;
+    const toggle = document.getElementById('auto-qr-toggle');
+    const dot = document.getElementById('auto-qr-dot');
+    if (autoQrScanEnabled) {
+        toggle.className = 'w-10 h-6 rounded-full bg-indigo-500 relative transition-colors cursor-pointer';
+        dot.className = 'absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform translate-x-4';
+        if (camStream) startQrScanLoop();
+    } else {
+        toggle.className = 'w-10 h-6 rounded-full bg-gray-300 relative transition-colors cursor-pointer';
+        dot.className = 'absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform';
+        stopQrScanLoop();
+    }
+}
+
+async function loadQrClassOptions() {
+    try {
+        const resp = await fetch('/api/attendance/students');
+        const data = await resp.json();
+        const classes = [...new Set(data.students.map(s => s.student_class).filter(Boolean))].sort();
+        const sel = document.getElementById('qr-class-select');
+        sel.innerHTML = '<option value="">— Chọn lớp —</option>' +
+            classes.map(c => `<option value="${c}">${c}</option>`).join('');
+    } catch(e) { console.error(e); }
+}
+
+async function loadQrClassStudents() {
+    const cls = document.getElementById('qr-class-select').value;
+    const container = document.getElementById('qr-class-students');
+    if (!cls) { container.innerHTML = ''; return; }
+
+    if (qrClassStudentsCache[cls]) {
+        renderQrClassStudents(qrClassStudentsCache[cls]);
+        return;
+    }
+
+    try {
+        const resp = await fetch('/api/attendance/students?class_name=' + encodeURIComponent(cls));
+        const data = await resp.json();
+        qrClassStudentsCache[cls] = data.students;
+        renderQrClassStudents(data.students);
+    } catch(e) { container.innerHTML = '<p class="text-xs text-red-500">Lỗi tải dữ liệu</p>'; }
+}
+
+function renderQrClassStudents(students) {
+    const container = document.getElementById('qr-class-students');
+    const today = new Date().toISOString().split('T')[0];
+    container.innerHTML = students.map(s => `
+        <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <div>
+                <p class="text-xs font-bold text-gray-800">${s.name}</p>
+                <p class="text-[10px] text-muted-foreground font-mono">${s.student_code}</p>
+            </div>
+            <div class="flex items-center gap-2">
+                ${s.already_checked ? `
+                    <span class="badge bg-emerald-100 text-emerald-700 text-[10px] font-bold">Đã điểm danh ${s.check_time ? 'lúc ' + s.check_time : ''}</span>
+                ` : `
+                    <button onclick="doQrManualCheckin(${s.id}, '${s.name.replace(/'/g, "\\'")}')"
+                        class="text-xs font-bold px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors">
+                        QR Check-in
+                    </button>
+                `}
+            </div>
+        </div>
+    `).join('') || '<p class="text-xs text-muted-foreground text-center py-4">Không có học sinh nào</p>';
+}
+
+async function doQrManualCheckin(sid, name) {
+    if (!confirm(`Điểm danh cho ${name} bằng QR?`)) return;
+    try {
+        // QR chứa trực tiếp EDUATT:{student_id}
+        const qrData = `EDUATT:${sid}`;
+        const resp = await fetch('/api/attendance/qr/checkin', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ qr_data: qrData })
+        });
+        const data = await resp.json();
+        if (data.matched) {
+            showQrSuccess(data);
+            loadQrClassStudents();
+            loadQrTodayCheckins();
+            loadQrTodayCount();
+            loadStats();
+        } else {
+            showQrError(data.error || 'Không thể điểm danh.');
+        }
+    } catch(e) { alert('Lỗi: ' + e.message); }
+}
+
+async function loadQrTodayCheckins() {
+    const container = document.getElementById('qr-today-checkins');
+    const today = new Date().toISOString().split('T')[0];
+    try {
+        const resp = await fetch(`/api/attendance/history?date_from=${today}&mode=qr`);
+        const data = await resp.json();
+        if (data.records.length === 0) {
+            container.innerHTML = '<div class="p-6 text-center text-xs text-muted-foreground">Chưa ai điểm danh QR hôm nay</div>';
+            return;
+        }
+        container.innerHTML = data.records.map(r => `
+            <div class="p-3 border-b border-border flex justify-between items-center text-sm">
+                <div>
+                    <span class="font-medium">${r.student_name}</span>
+                    <span class="text-[10px] text-indigo-500 ml-2">(${r.class_name})</span>
+                    <span class="ml-1 inline-flex items-center">
+                        <svg class="w-3 h-3 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                    </span>
+                </div>
+                <span class="text-muted-foreground text-xs">${r.check_in_time}</span>
+            </div>
+        `).join('');
+    } catch(e) { console.error(e); }
+}
+
+async function loadQrTodayCount() {
+    const badge = document.getElementById('qr-count-badge');
+    const today = new Date().toISOString().split('T')[0];
+    try {
+        const resp = await fetch(`/api/attendance/history?date_from=${today}&mode=qr`);
+        const data = await resp.json();
+        badge.textContent = `${data.records.length} lượt hôm nay`;
+    } catch(e) { badge.textContent = '0 lượt hôm nay'; }
+}
+
+// ===================== RECOGNITION (Face) =====================
 let autoScanInterval = null;
 
 async function captureAndRecognize(isAuto = false) {
     if (isProcessingRecognize || !camStream) return;
-    
-    // Nếu đang ở chế độ tự động và checkbox không được chọn, dừng quét
     const isAutoCheckbox = document.getElementById('auto-recognize').checked;
     if (isAuto && !isAutoCheckbox) return;
 
     isProcessingRecognize = true;
-    
     const video = document.getElementById('camera-video');
     const canvas = document.getElementById('camera-canvas');
-    
-    // Tối ưu: Giảm kích thước ảnh gửi lên server để tăng tốc độ xử lý (0.1s cần nhanh)
-    const scale = 0.5; 
-    canvas.width = video.videoWidth * scale; 
+    const scale = 0.5;
+    canvas.width = video.videoWidth * scale;
     canvas.height = video.videoHeight * scale;
     canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-    const base64 = canvas.toDataURL('image/jpeg', 0.7); // Giảm chất lượng 1 chút để giảm latency
-
+    const base64 = canvas.toDataURL('image/jpeg', 0.7);
     const cls = document.getElementById('class-select').value;
     const resDiv = document.getElementById('recognize-result');
-    
-    // Chỉ hiện loading nếu không phải quét tự động để tránh nhấp nháy UI
+
     if (!isAuto) {
         resDiv.innerHTML = '<div class="flex flex-col items-center py-4"><div class="w-8 h-8 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin"></div><p class="text-xs mt-2 font-medium">Đang nhận diện...</p></div>';
     }
 
     try {
         const resp = await fetch('/api/attendance/recognize', {
-            method: 'POST', 
+            method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ class_name: cls, image_base64: base64 })
         });
         const data = await resp.json();
-        
-        // Vẽ khung nhận diện
+
         const overlay = document.getElementById('face-overlay');
         const ctx = overlay.getContext('2d');
         ctx.clearRect(0, 0, overlay.width, overlay.height);
 
         if (data.box) {
             const [rx, ry, rw, rh] = data.box.map(v => v / scale);
-            const color = data.matched ? '#10b981' : '#6366f1'; // Emerald or Indigo
-            
+            const color = data.matched ? '#10b981' : '#6366f1';
             ctx.strokeStyle = color;
             ctx.lineWidth = 2;
             ctx.strokeRect(rx, ry, rw, rh);
-            
-            // Vẽ 4 góc định vị (Artistic corners)
             ctx.lineWidth = 5;
             const len = 20;
-            // Top-left
             ctx.beginPath(); ctx.moveTo(rx, ry + len); ctx.lineTo(rx, ry); ctx.lineTo(rx + len, ry); ctx.stroke();
-            // Top-right
             ctx.beginPath(); ctx.moveTo(rx + rw - len, ry); ctx.lineTo(rx + rw, ry); ctx.lineTo(rx + rw, ry + len); ctx.stroke();
-            // Bottom-left
             ctx.beginPath(); ctx.moveTo(rx, ry + rh - len); ctx.lineTo(rx, ry + rh); ctx.lineTo(rx + len, ry + rh); ctx.stroke();
-            // Bottom-right
             ctx.beginPath(); ctx.moveTo(rx + rw - len, ry + rh); ctx.lineTo(rx + rw, ry + rh); ctx.lineTo(rx + rw, ry + rh - len); ctx.stroke();
-            
-            // Hiệu ứng scan line trong khung
             ctx.fillStyle = color + '22';
             ctx.fillRect(rx, ry, rw, rh);
-            lastFaceSeenTime = Date.now(); // Cập nhật thời điểm cuối cùng thấy mặt
+            lastFaceSeenTime = Date.now();
         } else {
-            // Không phát hiện khuôn mặt trong khung hình
             ctx.clearRect(0, 0, overlay.width, overlay.height);
-            
-            // Nếu quá 1.2 giây không thấy mặt, reset kết quả nhận diện về trạng thái chờ
             if (Date.now() - lastFaceSeenTime > 1200 && resDiv.getAttribute('data-last-sid') !== 'searching') {
-                 resDiv.setAttribute('data-last-sid', 'searching');
-                 resDiv.innerHTML = `
+                resDiv.setAttribute('data-last-sid', 'searching');
+                resDiv.innerHTML = `
                     <div class="text-center py-10 opacity-60 flex flex-col items-center gap-4">
                         <div class="w-12 h-12 rounded-full border-2 border-indigo-200 flex items-center justify-center relative">
                             <div class="w-3 h-3 bg-indigo-500 rounded-full animate-ping"></div>
                             <div class="absolute inset-0 border-t-2 border-indigo-500 rounded-full animate-spin"></div>
                         </div>
                         <p class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Đang tìm khuôn mặt...</p>
-                    </div>
-                `;
+                    </div>`;
             }
         }
 
         if (data.matched) {
-            // Chỉ cập nhật UI nếu học sinh thay đổi hoặc trước đó đang ở trạng thái khác
             if (resDiv.getAttribute('data-last-sid') !== String(data.student_id)) {
                 resDiv.setAttribute('data-last-sid', data.student_id);
                 resDiv.innerHTML = `
@@ -395,11 +913,8 @@ async function captureAndRecognize(isAuto = false) {
                         <div class="pt-2">
                             <button id="btn-confirm-${data.student_id}" onclick="confirmCheckin(${data.student_id}, '${data.captured_photo}', ${data.confidence})" class="btn-primary w-full py-2.5 shadow-md">Xác nhận có mặt</button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }
-            
-            // Tự động confirm nếu độ tin cậy cực cao (> 85%) và đang ở chế độ tự động
             if (isAutoCheckbox && data.confidence > 0.85) {
                 const btn = document.getElementById(`btn-confirm-${data.student_id}`);
                 if (btn) {
@@ -408,46 +923,33 @@ async function captureAndRecognize(isAuto = false) {
                 }
             }
         } else {
-            // Nếu không khớp và không phải tự động, hiện lỗi. Nếu tự động thì giữ nguyên màn hình chờ.
             if (!isAuto) {
                 resDiv.innerHTML = `<div class="text-center p-4 bg-red-50 text-red-700 text-sm rounded-xl border border-red-100">${data.error}</div>`;
             } else if (!resDiv.querySelector('.bg-emerald-50')) {
-                // Chỉ reset về "Chờ..." nếu hiện tại không đang hiển thị 1 kết quả thành công
                 resDiv.innerHTML = '<div class="text-center py-6 text-muted-foreground text-sm flex flex-col items-center gap-3"><div class="w-2 h-2 bg-indigo-400 rounded-full animate-ping"></div> Đang quét khuôn mặt...</div>';
             }
         }
-    } catch(e) { 
-        if (!isAuto) resDiv.innerHTML = `<p class="text-red-500 text-center text-xs">Lỗi kết nối: ${e.message}</p>`; 
+    } catch(e) {
+        if (!isAuto) resDiv.innerHTML = `<p class="text-red-500 text-center text-xs">Lỗi kết nối: ${e.message}</p>`;
     } finally {
         isProcessingRecognize = false;
     }
 }
 
-// Khởi chạy vòng lặp 0.1s khi checkbox được tích
 document.getElementById('auto-recognize').addEventListener('change', function(e) {
     if (e.target.checked) {
         if (!autoScanInterval) {
-            autoScanInterval = setInterval(() => {
-                captureAndRecognize(true);
-            }, 100); // 0.1 giây
+            autoScanInterval = setInterval(() => captureAndRecognize(true), 100);
             showToast('Đã bật nhận diện tự động (0.1s)', 'success');
         }
     } else {
-        if (autoScanInterval) {
-            clearInterval(autoScanInterval);
-            autoScanInterval = null;
-            showToast('Đã tắt nhận diện tự động', 'info');
-        }
+        if (autoScanInterval) { clearInterval(autoScanInterval); autoScanInterval = null; }
+        showToast('Đã tắt nhận diện tự động', 'info');
     }
 });
 
 async function confirmCheckin(sid, photo, conf) {
-    // Ngưng quét tự động tạm thời để tránh ghi nhận trùng lặp trong khi đang gửi request checkin
     const wasAuto = document.getElementById('auto-recognize').checked;
-    if (wasAuto) {
-         // Tạm dừng 1 chút để UI phản hồi
-    }
-
     try {
         const resp = await fetch('/api/attendance/checkin', {
             method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -457,28 +959,23 @@ async function confirmCheckin(sid, photo, conf) {
         if (data.success) {
             showToast(data.message, 'success');
             document.getElementById('recognize-result').innerHTML = '<div class="text-center py-6 text-emerald-600 font-bold bg-emerald-50 rounded-xl animate-fade-in">✓ Đã ghi nhận thành công!</div>';
-            loadStats(); 
+            loadStats();
             loadTodayCheckins();
-            
-            // Chờ 2 giây sau khi thành công mới cho phép quét tiếp (tránh lặp lại cùng 1 người quá nhanh)
             if (wasAuto) {
                 isProcessingRecognize = true;
                 setTimeout(() => { isProcessingRecognize = false; }, 2000);
             }
         } else {
             if (!data.error.includes('đã điểm danh')) alert(data.error);
-            // Nếu đã điểm danh rồi thì cũng cho qua để quét người tiếp theo
             isProcessingRecognize = false;
         }
-    } catch(e) {
-        console.error(e);
-    }
+    } catch(e) { console.error(e); }
 }
 
 // ===================== TRAINING & ENROLLMENT =====================
 async function loadStats() {
     try {
-        const resp = await fetch(`/api/attendance/stats`);
+        const resp = await fetch('/api/attendance/stats');
         const data = await resp.json();
         document.getElementById('stat-total').textContent = data.total || 0;
         document.getElementById('stat-present').textContent = data.present || 0;
@@ -490,7 +987,7 @@ async function loadStats() {
 async function loadStudentList() {
     const body = document.getElementById('student-list-body');
     try {
-        const resp = await fetch(`/api/attendance/students`);
+        const resp = await fetch('/api/attendance/students');
         const data = await resp.json();
         document.getElementById('student-count-badge').textContent = `${data.students.length} học sinh`;
         body.innerHTML = data.students.map(s => `
@@ -507,28 +1004,23 @@ async function loadStudentList() {
                     <span class="badge ${s.enrollment_count > 0 ? 'bg-indigo-50 text-indigo-700' : 'bg-gray-100 text-muted-foreground'} text-[10px]">${s.enrollment_count} mẫu</span>
                 </td>
                 <td class="text-center">
-                    ${s.is_trained 
-                        ? '<span class="badge bg-emerald-100 text-emerald-700 text-[10px] font-bold">Đã huấn luyện</span>' 
+                    ${s.is_trained
+                        ? '<span class="badge bg-emerald-100 text-emerald-700 text-[10px] font-bold">Đã huấn luyện</span>'
                         : '<span class="badge bg-amber-50 text-amber-600 text-[10px] border border-amber-100">Chưa sẵn sàng</span>'}
                 </td>
                 <td class="text-center">
                     <div class="flex items-center justify-center gap-1">
                         <button onclick="openEnrollModal(${s.id}, '${s.name.replace(/'/g, "\\'")}', ${s.enrollment_count})" class="text-indigo-600 hover:bg-indigo-100 px-2 py-1 rounded text-[10px] font-bold transition-colors">Chụp mẫu</button>
-                        ${s.enrollment_count > 0 ? `
-                            <button onclick="resetEnrollment(${s.id}, '${s.name.replace(/'/g, "\\'")}')" class="text-red-500 hover:bg-red-50 px-2 py-1 rounded text-[10px] transition-colors" title="Xóa mẫu để chụp lại">Xóa mẫu</button>
-                        ` : ''}
-                        ${s.enrollment_count > 0 ? `
-                            <button onclick="trainModel()" class="text-emerald-600 hover:bg-emerald-50 px-2 py-1 rounded text-[10px] font-bold transition-colors" title="Cập nhật mô hình toàn trường">Huấn luyện lại</button>
-                        ` : ''}
+                        ${s.enrollment_count > 0 ? `<button onclick="resetEnrollment(${s.id}, '${s.name.replace(/'/g, "\\'")}')" class="text-red-500 hover:bg-red-50 px-2 py-1 rounded text-[10px] transition-colors">Xóa mẫu</button>` : ''}
+                        ${s.enrollment_count > 0 ? `<button onclick="trainModel()" class="text-emerald-600 hover:bg-emerald-50 px-2 py-1 rounded text-[10px] font-bold transition-colors">Huấn luyện lại</button>` : ''}
                     </div>
                 </td>
-            </tr>
-        `).join('');
+            </tr>`).join('');
     } catch(e) { console.error(e); }
 }
 
 async function resetEnrollment(sid, name) {
-    if (!confirm(`Bạn có chắc chắn muốn xóa toàn bộ mẫu camera của học sinh ${name}?`)) return;
+    if (!confirm(`Xóa toàn bộ mẫu camera của ${name}?`)) return;
     try {
         const resp = await fetch('/api/attendance/reset_enrollment', {
             method: 'POST',
@@ -536,40 +1028,30 @@ async function resetEnrollment(sid, name) {
             body: JSON.stringify({ student_id: sid })
         });
         const data = await resp.json();
-        if (data.success) {
-            showToast(data.message, 'success');
-            loadStudentList();
-            trainModel(); // Tự động huấn luyện lại để cập nhật mô hình (xóa dữ liệu cũ của HS này)
-        } else alert(data.error);
+        if (data.success) { showToast(data.message, 'success'); loadStudentList(); trainModel(); }
+        else alert(data.error);
     } catch(e) { alert('Lỗi: ' + e.message); }
 }
 
 async function trainModel() {
     const btn = document.getElementById('train-btn');
     if (btn) btn.disabled = true;
-    
     try {
         const resp = await fetch('/api/attendance/train', {
-            method: 'POST', 
+            method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ class_name: '_GLOBAL_' }) // Luôn huấn luyện toàn trường
+            body: JSON.stringify({ class_name: '_GLOBAL_' })
         });
         const data = await resp.json();
         if (data.success) {
             showToast(data.message, 'success');
             loadStudentList();
             if (currentEnrollStudentId) closeEnrollModal();
-        } else {
-            alert(data.error);
-        }
-    } catch(e) { 
-        alert('Lỗi kết nối server khi huấn luyện'); 
-    } finally {
-        if (btn) btn.disabled = false;
-    }
+        } else alert(data.error);
+    } catch(e) { alert('Lỗi kết nối server khi huấn luyện'); }
+    finally { if (btn) btn.disabled = false; }
 }
 
-// ===================== ENROLLMENT CAMERA =====================
 function openEnrollModal(sid, name, count) {
     currentEnrollStudentId = sid;
     document.getElementById('enroll-student-name').textContent = `Học sinh: ${name}`;
@@ -589,23 +1071,17 @@ let isAutoEnrolling = false;
 async function startAutoEnrollment() {
     if (isAutoEnrolling) return;
     isAutoEnrolling = true;
-    
     const btn = document.getElementById('enroll-auto-btn');
     const progCont = document.getElementById('enroll-progress-container');
     const bar = document.getElementById('enroll-progress-bar');
     const statusText = document.getElementById('enroll-status-text');
     const pctText = document.getElementById('enroll-pct-text');
-    
     btn.disabled = true;
     btn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> ĐANG CHỤP...';
     progCont.classList.remove('hidden');
-    
     const TOTAL_SAMPLES = 30;
     let captured = 0;
-    
-    // Gợi ý cho người dùng
     statusText.innerText = "Hãy quay nhẹ đầu...";
-
     for (let i = 0; i < TOTAL_SAMPLES; i++) {
         const success = await captureEnrollmentSample(true);
         if (success) {
@@ -615,17 +1091,13 @@ async function startAutoEnrollment() {
             pctText.innerText = `${pct}%`;
             statusText.innerText = `Đã thu thập: ${captured}/${TOTAL_SAMPLES}`;
         }
-        // Delay nhỏ để tránh nghẽn server và đảm bảo 30 ảnh trong ~1-2 giây
-        await new Promise(r => setTimeout(r, 40)); 
+        await new Promise(r => setTimeout(r, 40));
     }
-    
     isAutoEnrolling = false;
     btn.disabled = false;
     btn.innerHTML = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg> BẮT ĐẦU CHỤP TỰ ĐỘNG (30 ẢNH)';
-    
     statusText.innerText = "Đang cập nhật mô hình...";
-    await trainModel(); // Tự động huấn luyện luôn sau khi chụp xong
-    
+    await trainModel();
     progCont.classList.add('hidden');
     bar.style.width = '0%';
     showToast(`Đã thu thập xong ${captured} mẫu và cập nhật mô hình!`, 'success');
@@ -634,36 +1106,28 @@ async function startAutoEnrollment() {
 async function captureEnrollmentSample(isSilent = false) {
     const video = document.getElementById('enroll-video');
     if (!video || !currentEnrollStudentId) return false;
-
     const canvas = document.createElement('canvas');
     canvas.width = 400; canvas.height = 400;
-    canvas.getContext('2d').drawImage(video, 200, 0, 400, 400, 0, 0, 400, 400); // Lấy vùng trung tâm
+    canvas.getContext('2d').drawImage(video, 200, 0, 400, 400, 0, 0, 400, 400);
     const base64 = canvas.toDataURL('image/jpeg', 0.85);
-
     if (!isSilent) {
         const btn = document.getElementById('enroll-auto-btn');
         if (btn) btn.disabled = true;
     }
-    
     try {
         const resp = await fetch('/api/attendance/enroll_camera', {
-            method: 'POST', 
+            method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ student_id: currentEnrollStudentId, image_base64: base64 })
         });
         const data = await resp.json();
         if (data.success) {
             document.getElementById('enroll-count').textContent = data.enrollment_count;
-            if (!isSilent) showToast(data.message);
             return true;
-        } else {
-            if (!isSilent) alert(data.error);
-            return false;
         }
-    } catch(e) { 
-        if (!isSilent) console.error(e); 
         return false;
-    } finally {
+    } catch(e) { return false; }
+    finally {
         if (!isSilent) {
             const btn = document.getElementById('enroll-auto-btn');
             if (btn) btn.disabled = false;
@@ -677,7 +1141,6 @@ function showToast(m, t='success') {
     let bg = 'bg-indigo-600';
     if (t === 'error') bg = 'bg-red-600';
     if (t === 'info') bg = 'bg-blue-600';
-    
     div.className = `fixed bottom-6 right-6 px-6 py-3 rounded-xl shadow-2xl text-white ${bg} animate-fade-in-up z-[100] font-bold`;
     div.textContent = m; document.body.appendChild(div);
     setTimeout(() => div.remove(), 3000);
@@ -700,8 +1163,7 @@ async function loadTodayCheckins() {
                     <span class="text-[10px] text-indigo-500 ml-2">(${r.class_name})</span>
                 </div>
                 <span class="text-muted-foreground text-xs">${r.check_in_time}</span>
-            </div>
-        `).join('');
+            </div>`).join('');
     } catch(e) { console.error(e); }
 }
 
@@ -709,11 +1171,14 @@ async function loadHistory() {
     const body = document.getElementById('history-body');
     const dateFrom = document.getElementById('history-date-from').value;
     const dateTo = document.getElementById('history-date-to').value;
-    
-    body.innerHTML = '<tr><td colspan="7" class="text-center py-8"><div class="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div></td></tr>';
+    const modeFilter = document.getElementById('history-mode-filter').value;
+
+    body.innerHTML = '<tr><td colspan="8" class="text-center py-8"><div class="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div></td></tr>';
 
     try {
-        const resp = await fetch(`/api/attendance/history?date_from=${dateFrom}&date_to=${dateTo}`);
+        const params = new URLSearchParams({ date_from: dateFrom, date_to: dateTo });
+        if (modeFilter) params.set('mode', modeFilter);
+        const resp = await fetch(`/api/attendance/history?${params.toString()}`);
         const data = await resp.json();
         body.innerHTML = data.records.map((r, i) => `
             <tr class="hover:bg-gray-50 transition-colors">
@@ -726,26 +1191,20 @@ async function loadHistory() {
                 <td class="text-sm font-medium text-gray-600">${r.attendance_date}</td>
                 <td class="text-sm text-gray-500">${r.check_in_time}</td>
                 <td class="text-center">
-                    <span class="badge ${r.status === 'Có mặt' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'} text-[10px] font-bold">
-                        ${r.status}
-                    </span>
+                    <span class="badge ${r.status === 'Có mặt' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'} text-[10px] font-bold">${r.status}</span>
+                </td>
+                <td class="text-center">
+                    <span class="badge ${r.mode === 'qr' ? 'bg-indigo-100 text-indigo-700' : 'bg-blue-100 text-blue-700'} text-[10px] font-bold">${r.mode === 'qr' ? 'QR' : 'Face'}</span>
                 </td>
                 <td class="text-center">
                     <div class="flex items-center justify-center gap-3">
-                        ${r.captured_photo ? `
-                            <button onclick="showPhoto('/uploads/attendance_photos/${r.captured_photo}')" class="text-indigo-600 hover:text-indigo-800 transition-colors" title="Xem ảnh">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            </button>
-                        ` : '<span class="text-gray-300 text-[10px]">N/A</span>'}
-                        <button onclick="deleteRecord(${r.id})" class="text-red-500 hover:text-red-700 transition-colors" title="Xóa dữ liệu">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                        </button>
+                        ${r.captured_photo ? `<button onclick="showPhoto('/uploads/attendance_photos/${r.captured_photo}')" class="text-indigo-600 hover:text-indigo-800 transition-colors" title="Xem ảnh"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></button>` : '<span class="text-gray-300 text-[10px]">N/A</span>'}
+                        <button onclick="deleteRecord(${r.id})" class="text-red-500 hover:text-red-700 transition-colors" title="Xóa dữ liệu"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                     </div>
                 </td>
-            </tr>
-        `).join('') || '<tr><td colspan="7" class="text-center py-12 text-muted-foreground">Không có dữ liệu lịch sử</td></tr>';
+            </tr>`).join('') || '<tr><td colspan="8" class="text-center py-12 text-muted-foreground">Không có dữ liệu lịch sử</td></tr>';
     } catch(e) {
-        body.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-red-500 text-sm">Lỗi tải dữ liệu: ${e.message}</td></tr>`;
+        body.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-red-500 text-sm">Lỗi tải dữ liệu: ${e.message}</td></tr>`;
     }
 }
 
@@ -757,34 +1216,34 @@ function showPhoto(url) {
 }
 
 async function deleteRecord(rid) {
-    if (!confirm('Bạn có chắc chắn muốn xóa dữ liệu điểm danh này?')) return;
-    
+    if (!confirm('Xóa dữ liệu điểm danh này?')) return;
     try {
-        const resp = await fetch(`/api/attendance/delete/${rid}`, {
-            method: 'DELETE',
-            headers: {'Content-Type': 'application/json'}
-        });
+        const resp = await fetch(`/api/attendance/delete/${rid}`, { method: 'DELETE', headers: {'Content-Type': 'application/json'} });
         const data = await resp.json();
-        if (data.success) {
-            showToast(data.message, 'success');
-            loadHistory();
-            loadStats();
-        } else {
-            alert(data.error);
-        }
-    } catch (e) {
-        alert('Lỗi kết nối: ' + e.message);
-    }
+        if (data.success) { showToast(data.message, 'success'); loadHistory(); loadStats(); }
+        else alert(data.error);
+    } catch (e) { alert('Lỗi kết nối: ' + e.message); }
 }
 
-function onClassChange() { 
-    loadStats(); 
-    loadStudentList(); 
-    loadTodayCheckins(); 
-    if (document.getElementById('tab-history').classList.contains('active-tab')) {
+function onClassChange() {
+    loadStats();
+    loadStudentList();
+    loadTodayCheckins();
+    if (document.getElementById('tab-history') && document.getElementById('tab-history').classList.contains('active-tab')) {
         loadHistory();
     }
 }
-document.addEventListener('DOMContentLoaded', onClassChange);
+
+// ===================== INIT =====================
+document.addEventListener('DOMContentLoaded', function() {
+    // Set initial mode
+    setAttendanceMode('face');
+    loadStats();
+    loadTodayCheckins();
+    // Set default dates for history
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('history-date-from').value = today;
+    document.getElementById('history-date-to').value = today;
+});
 </script>
 {% endblock %}
