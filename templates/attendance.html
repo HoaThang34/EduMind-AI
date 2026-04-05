@@ -161,6 +161,9 @@
                 <div class="p-4 border-b border-border flex flex-wrap items-center gap-3">
                     <h3 class="text-sm font-semibold text-foreground mr-auto">Lịch sử điểm danh</h3>
                     <div class="flex items-center gap-2">
+                        <button id="btn-delete-selected" onclick="deleteSelectedHistory()" class="hidden text-xs font-bold px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors">
+                            <i class="fas fa-trash-alt mr-1"></i> Xóa đã chọn (<span id="selected-count">0</span>)
+                        </button>
                         <select id="history-mode-filter" class="input-shadcn text-xs w-36" onchange="loadHistory()">
                             <option value="">Tất cả</option>
                             <option value="face">Khuôn mặt</option>
@@ -173,7 +176,10 @@
                 <div class="overflow-x-auto">
                     <table class="table-shadcn" id="history-table">
                         <thead>
-                            <tr><th>#</th><th>Học sinh</th><th>Lớp</th><th>Ngày</th><th>Giờ</th><th class="text-center">Trạng thái</th><th class="text-center">Mode</th><th class="text-center">Thao tác</th></tr>
+                            <tr>
+                                <th class="w-8"><input type="checkbox" id="history-check-all" onchange="toggleAllHistory(this)" class="w-4 h-4 rounded accent-indigo-600 cursor-pointer"></th>
+                                <th>#</th><th>Học sinh</th><th>Lớp</th><th>Ngày</th><th>Giờ</th><th class="text-center">Trạng thái</th><th class="text-center">Mode</th><th class="text-center">Lượt</th><th class="text-center">Thao tác</th>
+                            </tr>
                         </thead>
                         <tbody id="history-body"></tbody>
                     </table>
@@ -399,6 +405,24 @@
 <!-- Photo Modal -->
 <div id="photo-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="this.classList.add('hidden')">
     <img id="photo-modal-img" class="max-w-full max-h-full rounded-xl" src="">
+</div>
+
+<!-- Chi tiết điểm danh học sinh -->
+<div id="student-detail-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden" onclick="event.stopPropagation()">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+            <div>
+                <h3 class="font-bold text-base" id="detail-student-name">—</h3>
+                <p class="text-xs opacity-80 font-mono" id="detail-student-code">—</p>
+            </div>
+            <button onclick="closeStudentDetail()" class="text-white/80 hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="overflow-y-auto flex-1 p-4" id="detail-records-list">
+            <!-- Filled by JS -->
+        </div>
+    </div>
 </div>
 
 <style>
@@ -1164,6 +1188,11 @@ async function loadTodayCheckins() {
 
 async function loadHistory() {
     const body = document.getElementById('history-body');
+    // Reset check all
+    const checkAll = document.getElementById('history-check-all');
+    if (checkAll) checkAll.checked = false;
+    updateSelectedCount();
+
     const dateFrom = document.getElementById('history-date-from').value;
     const dateTo = document.getElementById('history-date-to').value;
     const modeFilter = document.getElementById('history-mode-filter').value;
@@ -1177,6 +1206,7 @@ async function loadHistory() {
         const data = await resp.json();
         body.innerHTML = data.records.map((r, i) => `
             <tr class="hover:bg-gray-50 transition-colors">
+                <td class="text-center"><input type="checkbox" class="history-row-check w-4 h-4 rounded accent-indigo-600 cursor-pointer" value="${r.id}" onchange="updateSelectedCount()"></td>
                 <td class="font-mono text-xs text-muted-foreground">${i+1}</td>
                 <td>
                     <div class="font-bold text-sm text-foreground">${r.student_name}</div>
@@ -1192,14 +1222,20 @@ async function loadHistory() {
                     <span class="badge ${r.mode === 'qr' ? 'bg-indigo-100 text-indigo-700' : 'bg-blue-100 text-blue-700'} text-[10px] font-bold">${r.mode === 'qr' ? 'QR' : 'Face'}</span>
                 </td>
                 <td class="text-center">
+                    ${r.total_checkins_today > 1
+                        ? `<span class="text-xs font-bold text-indigo-600 cursor-pointer hover:text-indigo-800 underline" onclick="showStudentDetail(${r.student_id}, '${r.student_name.replace(/'/g, "\\'")}')" title="Xem tất cả lượt điểm danh">${r.total_checkins_today} lượt</span>`
+                        : `<span class="text-[10px] text-gray-400">${r.total_checkins_today}</span>`
+                    }
+                </td>
+                <td class="text-center">
                     <div class="flex items-center justify-center gap-3">
                         ${r.captured_photo ? `<button onclick="showPhoto('/uploads/attendance_photos/${r.captured_photo}')" class="text-indigo-600 hover:text-indigo-800 transition-colors" title="Xem ảnh"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></button>` : '<span class="text-gray-300 text-[10px]">N/A</span>'}
                         <button onclick="deleteRecord(${r.id})" class="text-red-500 hover:text-red-700 transition-colors" title="Xóa dữ liệu"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                     </div>
                 </td>
-            </tr>`).join('') || '<tr><td colspan="8" class="text-center py-12 text-muted-foreground">Không có dữ liệu lịch sử</td></tr>';
+            </tr>`).join('') || '<tr><td colspan="10" class="text-center py-12 text-muted-foreground">Không có dữ liệu lịch sử</td></tr>';
     } catch(e) {
-        body.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-red-500 text-sm">Lỗi tải dữ liệu: ${e.message}</td></tr>`;
+        body.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-red-500 text-sm">Lỗi tải dữ liệu: ${e.message}</td></tr>`;
     }
 }
 
@@ -1208,6 +1244,114 @@ function showPhoto(url) {
     const img = document.getElementById('photo-modal-img');
     img.src = url;
     modal.classList.remove('hidden');
+}
+
+async function showStudentDetail(studentId, studentName) {
+    const modal = document.getElementById('student-detail-modal');
+    const list = document.getElementById('detail-records-list');
+    const nameEl = document.getElementById('detail-student-name');
+    const codeEl = document.getElementById('detail-student-code');
+
+    nameEl.textContent = studentName;
+    list.innerHTML = '<div class="flex justify-center py-8"><div class="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div></div>';
+    modal.classList.remove('hidden');
+
+    try {
+        const resp = await fetch(`/api/attendance/history/${studentId}`);
+        const data = await resp.json();
+
+        if (!data.student) {
+            list.innerHTML = '<p class="text-center text-gray-400 py-8">Không có dữ liệu</p>';
+            return;
+        }
+
+        nameEl.textContent = data.student.name;
+        codeEl.textContent = `${data.student.student_code} — ${data.student.student_class}`;
+
+        if (Object.keys(data.by_date).length === 0) {
+            list.innerHTML = '<p class="text-center text-gray-400 py-8">Chưa có lịch sử điểm danh</p>';
+            return;
+        }
+
+        let html = `<div class="space-y-4">`;
+        for (const [date, records] of Object.entries(data.by_date)) {
+            html += `
+                <div>
+                    <div class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 px-1">${date}</div>
+                    <div class="space-y-1.5">`;
+            for (const r of records) {
+                const modeBadge = r.mode === 'qr'
+                    ? `<span class="badge bg-indigo-100 text-indigo-700 text-[10px] font-bold">QR</span>`
+                    : `<span class="badge bg-blue-100 text-blue-700 text-[10px] font-bold">Face</span>`;
+                const statusColor = r.status === 'Có mặt' ? 'emerald' : 'amber';
+                html += `
+                    <div class="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-700">${r.check_in_time}</span>
+                            ${modeBadge}
+                        </div>
+                        <span class="badge bg-${statusColor}-100 text-${statusColor}-800 text-[10px] font-bold">${r.status}</span>
+                    </div>`;
+            }
+            html += `</div></div>`;
+        }
+        html += `</div>
+            <p class="text-center text-xs text-gray-400 mt-4">Tổng: ${data.total_records} lượt điểm danh</p>`;
+        list.innerHTML = html;
+    } catch(e) {
+        list.innerHTML = `<p class="text-center text-red-500 py-8">Lỗi tải dữ liệu: ${e.message}</p>`;
+    }
+}
+
+function closeStudentDetail() {
+    document.getElementById('student-detail-modal').classList.add('hidden');
+}
+
+function toggleAllHistory(source) {
+    const checks = document.querySelectorAll('.history-row-check');
+    checks.forEach(c => { c.checked = source.checked; });
+    updateSelectedCount();
+}
+
+function updateSelectedCount() {
+    const checks = document.querySelectorAll('.history-row-check:checked');
+    const count = checks.length;
+    const btn = document.getElementById('btn-delete-selected');
+    const countEl = document.getElementById('selected-count');
+    if (countEl) countEl.textContent = count;
+    if (btn) {
+        if (count > 0) {
+            btn.classList.remove('hidden');
+            btn.classList.add('inline-flex');
+        } else {
+            btn.classList.add('hidden');
+            btn.classList.remove('inline-flex');
+        }
+    }
+}
+
+async function deleteSelectedHistory() {
+    const checks = document.querySelectorAll('.history-row-check:checked');
+    if (checks.length === 0) return;
+
+    const ids = Array.from(checks).map(c => parseInt(c.value));
+    if (!confirm(`Xóa ${ids.length} bản ghi đã chọn?`)) return;
+
+    try {
+        const resp = await fetch('/api/attendance/delete/bulk', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ record_ids: ids })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            showToast(data.message, 'success');
+            loadHistory();
+            loadStats();
+        } else {
+            alert(data.error);
+        }
+    } catch(e) { alert('Lỗi kết nối: ' + e.message); }
 }
 
 async function deleteRecord(rid) {

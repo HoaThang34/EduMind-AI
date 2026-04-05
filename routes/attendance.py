@@ -519,11 +519,23 @@ def register(app):
                 query = query.filter(AttendanceRecord.attendance_date <= d)
             except ValueError:
                 pass
-        records = query.order_by(desc(AttendanceRecord.check_in_time)).limit(200).all()
-        result = []
+        records = query.order_by(
+            AttendanceRecord.attendance_date.desc(),
+            AttendanceRecord.check_in_time.desc(),
+        ).limit(500).all()
+
+        # Mỗi HS mỗi ngày chỉ lấy bản ghi MỚI NHẤT
+        seen = {}  # (student_id, date_str) -> record
         for r in records:
+            key = (r.student_id, r.attendance_date)
+            if key not in seen:
+                seen[key] = r
+
+        result = []
+        for r in seen.values():
             result.append({
                 "id": r.id,
+                "student_id": r.student_id,
                 "student_name": r.student.name if r.student else "N/A",
                 "student_code": r.student.student_code if r.student else "",
                 "class_name": r.class_name,
@@ -533,8 +545,51 @@ def register(app):
                 "confidence": r.confidence,
                 "captured_photo": r.captured_photo,
                 "mode": r.attendance_mode or "face",
+                "total_checkins_today": AttendanceRecord.query.filter_by(
+                    student_id=r.student_id, attendance_date=r.attendance_date
+                ).count(),
             })
         return jsonify({"records": result})
+
+    @app.route("/api/attendance/history/<int:student_id>")
+    @login_required
+    def api_attendance_history_detail(student_id):
+        """
+        API chi tiết: tất cả lượt điểm danh của 1 học sinh.
+        Trả về nhóm theo ngày.
+        """
+        student = db.session.get(Student, student_id)
+        if not student:
+            return jsonify({"error": "Không tìm thấy học sinh."}), 404
+
+        records = AttendanceRecord.query.filter_by(student_id=student_id).order_by(
+            desc(AttendanceRecord.attendance_date),
+            desc(AttendanceRecord.check_in_time),
+        ).limit(500).all()
+
+        # Nhóm theo ngày
+        from collections import defaultdict
+        by_date = defaultdict(list)
+        for r in records:
+            date_key = r.attendance_date.strftime("%d/%m/%Y")
+            by_date[date_key].append({
+                "id": r.id,
+                "check_in_time": r.check_in_time.strftime("%H:%M:%S"),
+                "status": r.status,
+                "mode": r.attendance_mode or "face",
+                "notes": r.notes or "",
+            })
+
+        return jsonify({
+            "student": {
+                "id": student.id,
+                "name": student.name,
+                "student_code": student.student_code,
+                "student_class": student.student_class,
+            },
+            "by_date": dict(by_date),
+            "total_records": len(records),
+        })
 
     @app.route("/uploads/attendance_photos/<path:filename>")
     @login_required
@@ -557,13 +612,23 @@ def register(app):
             total_students = Student.query.count()
             today_records = AttendanceRecord.query.filter_by(attendance_date=today).all()
 
-        present = sum(1 for r in today_records if r.status == "Có mặt")
-        late = sum(1 for r in today_records if r.status == "Trễ")
+        # Đếm theo HỌC SINH DUY NHẤT — mỗi HS chỉ tính 1 lần
+        present_students = set()
+        late_students = set()
+        for r in today_records:
+            if r.status == "Có mặt":
+                present_students.add(r.student_id)
+            elif r.status == "Trễ":
+                late_students.add(r.student_id)
+
+        # Ưu tiên: Có mặt > Trễ (nếu HS có cả 2, chỉ tính Có mặt)
+        late_students -= present_students
+
         return jsonify({
             "total": total_students,
-            "present": present,
-            "late": late,
-            "absent": total_students - len(today_records),
+            "present": len(present_students),
+            "late": len(late_students),
+            "absent": total_students - len(present_students) - len(late_students),
         })
 
     @app.route("/api/attendance/model_status")
@@ -611,6 +676,48 @@ def register(app):
             db.session.delete(record)
             db.session.commit()
             return jsonify({"success": True, "message": "Đã xóa dữ liệu điểm danh."})
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": f"Lỗi hệ thống khi xóa: {str(e)}"}), 500
+
+    @app.route("/api/attendance/delete/bulk", methods=["POST"])
+    @login_required
+    def api_attendance_delete_bulk():
+        """Xóa nhiều bản ghi điểm danh cùng lúc."""
+        data = request.get_json() or {}
+        record_ids = data.get("record_ids", [])
+
+        if not record_ids:
+            return jsonify({"error": "Không có bản ghi nào được chọn."}), 400
+
+        if not isinstance(record_ids, list):
+            return jsonify({"error": "Dữ liệu không hợp lệ."}), 400
+
+        deleted_count = 0
+        for rid in record_ids:
+            record = db.session.get(AttendanceRecord, rid)
+            if record:
+                # Chốt quyền: Admin hoặc chính người tạo bản ghi
+                if current_user.role != 'admin' and record.recorded_by_id != current_user.id:
+                    continue
+                # Xóa ảnh vật lý
+                if record.captured_photo:
+                    photo_path = os.path.join(ATTENDANCE_PHOTO_DIR, record.captured_photo)
+                    if os.path.exists(photo_path):
+                        try:
+                            os.remove(photo_path)
+                        except Exception:
+                            pass
+                db.session.delete(record)
+                deleted_count += 1
+
+        try:
+            db.session.commit()
+            return jsonify({
+                "success": True,
+                "message": f"Đã xóa {deleted_count} bản ghi.",
+                "deleted_count": deleted_count,
+            })
         except Exception as e:
             db.session.rollback()
             return jsonify({"error": f"Lỗi hệ thống khi xóa: {str(e)}"}), 500
