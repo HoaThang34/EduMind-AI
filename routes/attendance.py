@@ -302,9 +302,9 @@ def register(app):
                     if f.lower().endswith(('.jpg', '.png'))
                 ])
 
-            already_checked = AttendanceRecord.query.filter_by(
+            today_records = AttendanceRecord.query.filter_by(
                 student_id=s.id, attendance_date=today
-            ).first()
+            ).order_by(AttendanceRecord.check_in_time).all()
 
             result.append({
                 "id": s.id,
@@ -314,9 +314,10 @@ def register(app):
                 "has_portrait": has_portrait,
                 "enrollment_count": enrollment_count,
                 "is_trained": s.id in trained_ids,
-                "already_checked": bool(already_checked),
-                "check_time": already_checked.check_in_time.strftime("%H:%M") if already_checked else None,
-                "status": already_checked.status if already_checked else None,
+                "already_checked": len(today_records) > 0,
+                "check_times": [r.check_in_time.strftime("%H:%M") for r in today_records],
+                "total_today": len(today_records),
+                "status": today_records[-1].status if today_records else None,
             })
 
         return jsonify({"students": result})
@@ -481,8 +482,6 @@ def register(app):
         student = db.session.get(Student, student_id)
         if not student:
             return jsonify({"error": "Không tìm thấy học sinh."}), 404
-        if AttendanceRecord.query.filter_by(student_id=student_id, attendance_date=datetime.date.today()).first():
-            return jsonify({"error": f"{student.name} đã điểm danh hôm nay."})
         if not captured_photo and image_base64:
             captured_photo = _save_captured_photo(image_base64)
         record = AttendanceRecord(
@@ -638,19 +637,6 @@ def register(app):
             return jsonify({"matched": False, "error": "Không tìm thấy học sinh trong hệ thống."}), 404
 
         today = datetime.date.today()
-        existing = AttendanceRecord.query.filter_by(
-            student_id=sid, attendance_date=today
-        ).first()
-        if existing:
-            return jsonify({
-                "matched": True,
-                "already_checked": True,
-                "student_id": student.id,
-                "student_name": student.name,
-                "student_code": student.student_code,
-                "student_class": student.student_class,
-                "message": f"{student.name} đã điểm danh hôm nay lúc {existing.check_in_time.strftime('%H:%M:%S')}."
-            })
 
         record = AttendanceRecord(
             student_id=sid,
@@ -674,7 +660,7 @@ def register(app):
             "student_name": student.name,
             "student_code": student.student_code,
             "student_class": student.student_class,
-            "message": f"Đã điểm danh {student.name} bằng mã QR."
+            "message": f"Đã điểm danh {student.name} lúc {record.check_in_time.strftime('%H:%M:%S')}."
         })
 
     @app.route("/api/attendance/qr/token", methods=["GET"])
@@ -727,17 +713,6 @@ def register(app):
             return jsonify({"success": False, "error": "Không tìm thấy học sinh."}), 404
 
         today = datetime.date.today()
-        existing = AttendanceRecord.query.filter_by(
-            student_id=sid, attendance_date=today
-        ).first()
-        if existing:
-            return jsonify({
-                "success": False,
-                "already_checked": True,
-                "student_name": student.name,
-                "check_time": existing.check_in_time.strftime("%H:%M:%S"),
-            })
-
         record = AttendanceRecord(
             student_id=sid,
             class_name=student.student_class,
@@ -757,6 +732,43 @@ def register(app):
             "success": True,
             "already_checked": False,
             "student_name": student.name,
+            "check_time": record.check_in_time.strftime("%H:%M:%S"),
+        })
+
+    @app.route("/api/attendance/qr/status/<int:student_id>")
+    @login_required
+    def api_attendance_qr_status(student_id):
+        """
+        API chỉ-đọc: lấy danh sách lượt điểm danh QR hôm nay của 1 học sinh.
+        Payload: { "qr_data": "<EDUATT:{id}>" }
+        KHÔNG tạo bản ghi mới.
+        """
+        qr_data = request.args.get("qr_data", "").strip()
+        if qr_data:
+            sid, _ = parse_attendance_qr(qr_data)
+            if sid:
+                student_id = sid
+
+        student = db.session.get(Student, student_id)
+        if not student:
+            return jsonify({"error": "Không tìm thấy học sinh."}), 404
+
+        today = datetime.date.today()
+        records = AttendanceRecord.query.filter_by(
+            student_id=student_id, attendance_date=today, attendance_mode="qr"
+        ).order_by(AttendanceRecord.check_in_time).all()
+
+        return jsonify({
+            "student_id": student_id,
+            "student_name": student.name,
+            "records": [
+                {
+                    "check_time": r.check_in_time.strftime("%H:%M:%S"),
+                    "status": r.status,
+                }
+                for r in records
+            ],
+            "total_today": len(records),
         })
 
     @app.route("/api/attendance/qr/url-for-student/<int:student_id>")

@@ -392,21 +392,19 @@ function initQrCode() {
     }
 }
 
-// Check if already checked in today (non-intrusive check)
-async function checkIfCheckedToday() {
+// Check today's QR attendance records (read-only, no new record created)
+async function checkTodayRecords() {
     const statusArea = document.getElementById('status-area');
     if (!statusArea || !qrData) return;
 
     try {
-        const resp = await fetch('/api/attendance/qr/auto-checkin', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ qr_data: qrData })
-        });
+        const resp = await fetch(`/api/attendance/qr/status/{{ student.id }}?qr_data=${encodeURIComponent(qrData)}`);
         const data = await resp.json();
 
-        if (data.already_checked || (!data.success && data.already_checked !== false)) {
-            const checkTime = data.check_time || '';
+        if (data.total_today > 0) {
+            const recordLines = data.records.map(r =>
+                `<span>• ${r.check_time} — ${r.status}</span>`
+            ).join('');
             statusArea.innerHTML = `
                 <div class="status-checked">
                     <div class="icon">
@@ -415,8 +413,8 @@ async function checkIfCheckedToday() {
                         </svg>
                     </div>
                     <div class="text">
-                        <strong>Đã điểm danh hôm nay!</strong>
-                        ${checkTime ? `<span>Thời gian: ${checkTime}</span>` : ''}
+                        <strong>Đã điểm danh hôm nay (${data.total_today} lượt)</strong>
+                        <div style="font-size:0.72rem; margin-top:4px; opacity:0.8;">${recordLines}</div>
                     </div>
                 </div>
             `;
@@ -428,7 +426,7 @@ async function checkIfCheckedToday() {
 
 document.addEventListener('DOMContentLoaded', () => {
     initQrCode();
-    checkIfCheckedToday();
+    checkTodayRecords();
 });
 </script>
 </body>

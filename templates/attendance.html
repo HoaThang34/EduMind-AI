@@ -626,14 +626,10 @@ async function submitQrToken(qrData) {
         const data = await resp.json();
 
         if (data.matched) {
-            if (data.already_checked) {
-                showQrAlreadyChecked(data);
-            } else {
-                showQrSuccess(data);
-                loadQrTodayCheckins();
-                loadQrTodayCount();
-                loadStats();
-            }
+            showQrSuccess(data);
+            loadQrTodayCheckins();
+            loadQrTodayCount();
+            loadStats();
         } else {
             showQrError(data.error || 'Mã QR không hợp lệ.');
         }
@@ -759,25 +755,24 @@ async function loadQrClassStudents() {
 
 function renderQrClassStudents(students) {
     const container = document.getElementById('qr-class-students');
-    const today = new Date().toISOString().split('T')[0];
-    container.innerHTML = students.map(s => `
+    container.innerHTML = students.map(s => {
+        const timesLabel = s.total_today > 0
+            ? `<span class="text-[10px] text-emerald-600 font-bold ml-1">(${s.total_today} lượt: ${s.check_times ? s.check_times.join(', ') : ''})</span>`
+            : '';
+        return `
         <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors">
             <div>
-                <p class="text-xs font-bold text-gray-800">${s.name}</p>
+                <p class="text-xs font-bold text-gray-800">${s.name}${timesLabel}</p>
                 <p class="text-[10px] text-muted-foreground font-mono">${s.student_code}</p>
             </div>
             <div class="flex items-center gap-2">
-                ${s.already_checked ? `
-                    <span class="badge bg-emerald-100 text-emerald-700 text-[10px] font-bold">Đã điểm danh ${s.check_time ? 'lúc ' + s.check_time : ''}</span>
-                ` : `
-                    <button onclick="doQrManualCheckin(${s.id}, '${s.name.replace(/'/g, "\\'")}')"
-                        class="text-xs font-bold px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors">
-                        QR Check-in
-                    </button>
-                `}
+                <button onclick="doQrManualCheckin(${s.id}, '${s.name.replace(/'/g, "\\'")}')"
+                    class="text-xs font-bold px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors">
+                    QR Check-in
+                </button>
             </div>
         </div>
-    `).join('') || '<p class="text-xs text-muted-foreground text-center py-4">Không có học sinh nào</p>';
+    `}).join('') || '<p class="text-xs text-muted-foreground text-center py-4">Không có học sinh nào</p>';
 }
 
 async function doQrManualCheckin(sid, name) {
