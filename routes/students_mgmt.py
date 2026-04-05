@@ -77,6 +77,24 @@ def _find_position_column(df_columns):
     return None
 
 
+def _find_id_card_column(df_columns):
+    """Cột CCCD/CMND: 'cccd', 'cmnd', 'số cccd', 'id card', 'căn cước'."""
+    for c in df_columns:
+        cl = str(c).strip().lower()
+        if any(x in cl for x in ["cccd", "cmnd", "căn cước", "can cuoc", "id card", "số cccd"]):
+            return c
+    return None
+
+
+def _find_ethnicity_column(df_columns):
+    """Cột dân tộc: 'dân tộc', 'dan toc', 'ethnicity', 'dantoc'."""
+    for c in df_columns:
+        cl = str(c).strip().lower()
+        if any(x in cl for x in ["dân tộc", "dan toc", "ethnicity", "dantoc"]):
+            return c
+    return None
+
+
 def _format_dob_from_excel_cell(v):
     """Chuẩn hóa ô Excel (datetime hoặc chuỗi) thành chuỗi hiển thị."""
     if v is None or (isinstance(v, float) and math.isnan(v)):
@@ -208,6 +226,8 @@ def register(app):
             parent_phone=_empty_to_none(request.form.get("parent_phone")),
             date_of_birth=_empty_to_none(request.form.get("date_of_birth")),
             position=_empty_to_none(request.form.get("position")),
+            id_card=_empty_to_none(request.form.get("id_card")),
+            ethnicity=_empty_to_none(request.form.get("ethnicity")),
         )
         db.session.add(st)
         db.session.flush()
@@ -250,6 +270,8 @@ def register(app):
             s.parent_phone = _empty_to_none(request.form.get("parent_phone"))
             s.date_of_birth = _empty_to_none(request.form.get("date_of_birth"))
             s.position = _empty_to_none(request.form.get("position"))
+            s.id_card = _empty_to_none(request.form.get("id_card"))
+            s.ethnicity = _empty_to_none(request.form.get("ethnicity"))
             if request.form.get("remove_portrait"):
                 _delete_portrait_file(s.portrait_filename)
                 s.portrait_filename = None
@@ -371,6 +393,8 @@ def register(app):
                 parent_name_col, parent_phone_col = _find_parent_import_columns(df.columns)
                 dob_col = _find_dob_column(df.columns)
                 pos_col = _find_position_column(df.columns)
+                id_card_col = _find_id_card_column(df.columns)
+                ethnicity_col = _find_ethnicity_column(df.columns)
 
                 # Lặp qua từng dòng trong Excel
                 for index, row in df.iterrows():
@@ -405,6 +429,14 @@ def register(app):
                         pos = _excel_cell_str(row.get(pos_col))
                         if pos:
                             entry["position"] = pos
+                    if id_card_col:
+                        idc = _excel_cell_str(row.get(id_card_col))
+                        if idc:
+                            entry["id_card"] = idc
+                    if ethnicity_col:
+                        eth = _excel_cell_str(row.get(ethnicity_col))
+                        if eth:
+                            entry["ethnicity"] = eth
                     preview_data.append(entry)
             
                 # Chuyển sang trang xác nhận
@@ -413,6 +445,8 @@ def register(app):
                 )
                 has_dob_cols = bool(dob_col)
                 has_position_cols = bool(pos_col)
+                has_id_card_cols = bool(id_card_col)
+                has_ethnicity_cols = bool(ethnicity_col)
                 return render_template(
                     "confirm_import.html",
                     students=preview_data,
@@ -420,6 +454,8 @@ def register(app):
                     has_parent_cols=has_parent_cols,
                     has_dob_cols=has_dob_cols,
                     has_position_cols=has_position_cols,
+                    has_id_card_cols=has_id_card_cols,
+                    has_ethnicity_cols=has_ethnicity_cols,
                 )
 
             except Exception as e:
@@ -438,6 +474,8 @@ def register(app):
             'Họ và tên': ['Nguyễn Văn A', 'Trần Thị B', 'Lê Hoàng C'],
             'Lớp': ['10 Anh A', '10 Anh A', '10 Tin A'],
             'Ngày sinh': ['15/08/2008', '03/12/2008', '20/01/2008'],
+            'CCCD/CMND': ['001201012345', '001201012346', '001201012347'],
+            'Dân tộc': ['Kinh', 'Tày', 'Hmong'],
             'Chức vụ': ['Lớp trưởng', 'Bí thư', ''],
             'Họ tên phụ huynh': ['Nguyễn Văn Ph', 'Trần Thị X', 'Lê Văn Y'],
             'SĐT phụ huynh': ['0912345678', '0987654321', '0901122334'],
@@ -478,6 +516,8 @@ def register(app):
             parent_name_col, parent_phone_col = _find_parent_import_columns(df.columns)
             dob_col = _find_dob_column(df.columns)
             pos_col = _find_position_column(df.columns)
+            id_card_col = _find_id_card_column(df.columns)
+            ethnicity_col = _find_ethnicity_column(df.columns)
         
             count = 0
             skipped = 0
@@ -503,6 +543,8 @@ def register(app):
                 pp = _excel_cell_str(row.get(parent_phone_col)) if parent_phone_col else None
                 dob = _format_dob_from_excel_cell(row.get(dob_col)) if dob_col else None
                 pos = _excel_cell_str(row.get(pos_col)) if pos_col else None
+                idc = _excel_cell_str(row.get(id_card_col)) if id_card_col else None
+                eth = _excel_cell_str(row.get(ethnicity_col)) if ethnicity_col else None
                 new_student = Student(
                     name=name,
                     student_class=s_class,
@@ -511,6 +553,8 @@ def register(app):
                     parent_phone=pp,
                     date_of_birth=dob,
                     position=pos,
+                    id_card=idc,
+                    ethnicity=eth,
                 )
                 db.session.add(new_student)
             

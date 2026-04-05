@@ -31,6 +31,12 @@
                             {% if has_position_cols|default(false) %}
                             <th class="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase">Chức vụ</th>
                             {% endif %}
+                            {% if has_id_card_cols|default(false) %}
+                            <th class="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase">CCCD/CMND</th>
+                            {% endif %}
+                            {% if has_ethnicity_cols|default(false) %}
+                            <th class="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase">Dân tộc</th>
+                            {% endif %}
                             {% if has_parent_cols %}
                             <th class="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase">Phụ huynh</th>
                             <th class="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase">SĐT PH</th>
@@ -58,6 +64,12 @@
                             {% endif %}
                             {% if has_position_cols|default(false) %}
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-indigo-600 font-semibold">{{ s.position or '—' }}</td>
+                            {% endif %}
+                            {% if has_id_card_cols|default(false) %}
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-muted-foreground">{{ s.id_card or '—' }}</td>
+                            {% endif %}
+                            {% if has_ethnicity_cols|default(false) %}
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{{ s.ethnicity or '—' }}</td>
                             {% endif %}
                             {% if has_parent_cols %}
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{{ s.parent_name or '—' }}</td>

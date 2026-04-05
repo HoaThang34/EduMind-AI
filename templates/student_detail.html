@@ -44,6 +44,12 @@
                     }}</strong></p>
             <p class="text-muted-foreground text-sm mt-1"><i class="fas fa-calendar-day mr-1"></i> Ngày sinh:
                 <strong>{{ student.date_of_birth or '—' }}</strong></p>
+            <p class="text-muted-foreground text-sm mt-1"><i class="fas fa-id-card mr-1"></i> CCCD/CMND:
+                <strong class="font-mono">{{ student.id_card or '—' }}</strong>
+                <span class="mx-1.5 text-[hsl(240,5.9%,80%)]">|</span>
+                <i class="fas fa-users mr-1"></i> Dân tộc:
+                <strong>{{ student.ethnicity or '—' }}</strong>
+            </p>
             <p class="text-muted-foreground text-sm mt-1">
                 <i class="fas fa-user-friends mr-1"></i> Phụ huynh:
                 <strong>{{ student.parent_name or '—' }}</strong>

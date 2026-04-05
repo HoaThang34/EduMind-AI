@@ -91,6 +91,8 @@ class Student(db.Model):
     warning_level = db.Column(db.String(20), default="Xanh") # Xanh, Vàng, Đỏ
     academic_rank = db.Column(db.String(20), default="Khá")
     academic_warning_level = db.Column(db.String(20), default="Xanh") # Xanh, Vàng, Đỏ
+    id_card = db.Column(db.String(20), nullable=True)  # Số CCCD/CMND
+    ethnicity = db.Column(db.String(50), nullable=True)  # Dân tộc
 
 
 class ViolationType(db.Model):
