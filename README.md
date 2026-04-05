@@ -1,6 +1,8 @@
 # EduMind AI - Hệ Thống Quản Lý Giáo Dục Thông Minh Tích Hợp AI
 
-![Logo EduMind AI: bộ não nhiều màu mọc từ cuốn sách mở, biểu trưng tri thức và phát triển](logo/logo.png)
+<div align="center">
+  <img src="logo/logo.png" alt="EduMind AI Logo" width="180">
+</div>
 
 ---
 
