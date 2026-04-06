@@ -627,6 +627,10 @@
     @keyframes qr-flash { 0% { opacity: 1; } 100% { opacity: 0; } }
 </style>
 
+<audio id="attendance-success-sound" preload="auto" class="hidden" aria-hidden="true">
+    <source src="{{ url_for('musics_file', filename='diemdanh.mp3') }}" type="audio/mpeg">
+</audio>
+
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
 // ===================== STATE =====================
@@ -646,6 +650,16 @@ function localTodayISO() {
     return d.getFullYear() + '-' +
         String(d.getMonth() + 1).padStart(2, '0') + '-' +
         String(d.getDate()).padStart(2, '0');
+}
+
+function playAttendanceSuccessSound() {
+    const el = document.getElementById('attendance-success-sound');
+    if (!el) return;
+    try {
+        el.currentTime = 0;
+        const p = el.play();
+        if (p && typeof p.catch === 'function') p.catch(function () {});
+    } catch (e) {}
 }
 
 // ===================== MODE SWITCHING =====================
@@ -868,6 +882,7 @@ async function submitQrToken(qrData) {
 }
 
 function showQrSuccess(data) {
+    playAttendanceSuccessSound();
     const area = document.getElementById('qr-result-area');
     area.innerHTML = `
         <div class="flex flex-col items-center py-4 animate-fade-in">
@@ -1182,6 +1197,7 @@ async function confirmCheckin(sid, photo, conf) {
         const data = await resp.json();
         if (data.success) {
             showToast(data.message, 'success');
+            playAttendanceSuccessSound();
             document.getElementById('recognize-result').innerHTML = '<div class="text-center py-6 text-emerald-600 font-bold bg-emerald-50 rounded-xl animate-fade-in">✓ Đã ghi nhận thành công!</div>';
             loadStats();
             loadTodayCheckins();

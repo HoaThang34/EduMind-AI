@@ -24,6 +24,11 @@ def logo_file(filename):
     return send_from_directory(os.path.join(basedir, "logo"), filename)
 
 
+@app.route("/musics/<path:filename>")
+def musics_file(filename):
+    return send_from_directory(os.path.join(basedir, "musics"), filename)
+
+
 app.config["SECRET_KEY"] = "chia-khoa-bi-mat-cua-ban-ne-123456"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(basedir, "database.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
