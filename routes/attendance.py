@@ -20,8 +20,8 @@ from flask_login import login_required, current_user
 from sqlalchemy import desc
 from urllib.parse import quote
 
-from models import db, Student, AttendanceRecord, ClassRoom
-from app_helpers import UPLOAD_FOLDER, log_change
+from models import db, Student, AttendanceRecord, ClassRoom, AttendanceMonitoringSession, SessionViolationRecord, ViolationType, Violation, SystemConfig
+from app_helpers import UPLOAD_FOLDER, log_change, update_student_conduct
 from routes.face_engine import get_engine, cosine_similarity
 
 # Thư mục lưu ảnh điểm danh
@@ -268,6 +268,7 @@ def register(app):
             classes=classes,
             selected_class=selected_class,
             model_ready=model_ready,
+            violation_rules=ViolationType.query.all(),
         )
 
     @app.route("/api/attendance/students")
@@ -491,8 +492,51 @@ def register(app):
             recorded_by_id=current_user.id, attendance_date=datetime.date.today(),
         )
         db.session.add(record)
+        db.session.flush()
+
+        # ── Auto-detect: nếu có phiên theo dõi đang mở cho lớp này ──
+        auto_detected = None
+        now = datetime.datetime.now()
+        today_date = datetime.date.today()
+        now_min = now.hour * 60 + now.minute
+
+        # Lọc theo lớp + ngày + trạng thái, sau đó so sánh CHỈ giờ-phút
+        candidate_sessions = AttendanceMonitoringSession.query.filter_by(
+            class_name=student.student_class,
+            session_date=today_date,
+            status="open",
+        ).all()
+        open_session = None
+        for s in candidate_sessions:
+            start_min = s.start_time.hour * 60 + s.start_time.minute
+            end_min = s.end_time.hour * 60 + s.end_time.minute if s.end_time else 24 * 60
+            if start_min <= now_min <= end_min:
+                open_session = s
+                break
+        if open_session:
+            record.monitoring_session_id = open_session.id
+            viol = SessionViolationRecord(
+                session_id=open_session.id,
+                student_id=student_id,
+                violation_type_name="___auto___",
+                points_deducted=0,
+                status="pending",
+                notes="Tự động phát hiện khi điểm danh trong giờ theo dõi",
+            )
+            db.session.add(viol)
+            db.session.flush()
+            auto_detected = {
+                "violation_id": viol.id,
+                "session_id": open_session.id,
+                "recorded_at": viol.recorded_at.strftime("%H:%M"),
+            }
+
         db.session.commit()
-        return jsonify({"success": True, "message": f"Đã điểm danh {student.name}."})
+        return jsonify({
+            "success": True,
+            "message": f"Đã điểm danh {student.name}.",
+            "auto_detected": auto_detected,
+        })
 
     @app.route("/api/attendance/history")
     @login_required
@@ -759,6 +803,43 @@ def register(app):
             qr_scan_method="camera",
         )
         db.session.add(record)
+        db.session.flush()
+
+        # ── Auto-detect: nếu có phiên theo dõi đang mở cho lớp này ──
+        auto_detected = None
+        now = datetime.datetime.now()
+        now_min = now.hour * 60 + now.minute
+
+        candidate_sessions = AttendanceMonitoringSession.query.filter_by(
+            class_name=student.student_class,
+            session_date=today,
+            status="open",
+        ).all()
+        open_session = None
+        for s in candidate_sessions:
+            start_min = s.start_time.hour * 60 + s.start_time.minute
+            end_min = s.end_time.hour * 60 + s.end_time.minute if s.end_time else 24 * 60
+            if start_min <= now_min <= end_min:
+                open_session = s
+                break
+        if open_session:
+            record.monitoring_session_id = open_session.id
+            viol = SessionViolationRecord(
+                session_id=open_session.id,
+                student_id=sid,
+                violation_type_name="___auto___",
+                points_deducted=0,
+                status="pending",
+                notes="Tự động phát hiện khi điểm danh trong giờ theo dõi",
+            )
+            db.session.add(viol)
+            db.session.flush()
+            auto_detected = {
+                "violation_id": viol.id,
+                "session_id": open_session.id,
+                "recorded_at": viol.recorded_at.strftime("%H:%M"),
+            }
+
         db.session.commit()
         return jsonify({
             "matched": True,
@@ -900,4 +981,450 @@ def register(app):
             "student_code": student.student_code,
             "qr_data": qr_data,
             "qr_image_url": qr_api_url,
+        })
+
+    # ──────────── MONITORING SESSION APIs ────────────
+
+    @app.route("/api/attendance/monitoring/sessions")
+    @login_required
+    def api_monitoring_sessions():
+        """API lấy danh sách phiên theo dõi (hỗ trợ lọc theo ngày, lớp, trạng thái)."""
+        date_from = request.args.get("date_from", "")
+        date_to = request.args.get("date_to", "")
+        class_filter = request.args.get("class_name", "")
+        status_filter = request.args.get("status", "")
+
+        query = AttendanceMonitoringSession.query
+
+        if date_from:
+            try:
+                d = datetime.datetime.strptime(date_from, "%Y-%m-%d").date()
+                query = query.filter(AttendanceMonitoringSession.session_date >= d)
+            except ValueError:
+                pass
+        if date_to:
+            try:
+                d = datetime.datetime.strptime(date_to, "%Y-%m-%d").date()
+                query = query.filter(AttendanceMonitoringSession.session_date <= d)
+            except ValueError:
+                pass
+        if class_filter:
+            query = query.filter_by(class_name=class_filter)
+        if status_filter in ("open", "confirmed", "cancelled"):
+            query = query.filter_by(status=status_filter)
+
+        # Nếu là GVCN, chỉ thấy phiên của lớp mình
+        if current_user.role == "homeroom_teacher" and current_user.assigned_class:
+            query = query.filter_by(class_name=current_user.assigned_class)
+
+        sessions = query.order_by(
+            AttendanceMonitoringSession.session_date.desc(),
+            AttendanceMonitoringSession.start_time.desc(),
+        ).limit(200).all()
+
+        result = []
+        for s in sessions:
+            pending_count = SessionViolationRecord.query.filter_by(
+                session_id=s.id, status="pending"
+            ).count()
+            result.append({
+                "id": s.id,
+                "class_name": s.class_name,
+                "start_time": s.start_time.strftime("%H:%M"),
+                "end_time": s.end_time.strftime("%H:%M") if s.end_time else None,
+                "session_date": s.session_date.strftime("%d/%m/%Y"),
+                "status": s.status,
+                "pending_violations": pending_count,
+                "teacher_name": s.teacher.full_name if s.teacher else "N/A",
+            })
+        return jsonify({"sessions": result})
+
+    @app.route("/api/attendance/monitoring/create-session", methods=["POST"])
+    @login_required
+    def api_create_monitoring_session():
+        """Tạo mới một phiên theo dõi điểm danh theo giờ."""
+        data = request.get_json() or {}
+        class_name = data.get("class_name", "")
+        start_time_str = data.get("start_time", "")   # "07:00"
+        end_time_str = data.get("end_time", "")       # "08:00"
+        notes = data.get("notes", "")
+
+        if not class_name:
+            return jsonify({"error": "Thiếu thông tin lớp."}), 400
+        if not start_time_str:
+            return jsonify({"error": "Thiếu giờ bắt đầu."}), 400
+
+        try:
+            today_date = datetime.date.today()
+            start_dt = datetime.datetime.combine(today_date, datetime.time.fromisoformat(start_time_str))
+            end_dt = None
+            if end_time_str:
+                end_dt = datetime.datetime.combine(today_date, datetime.time.fromisoformat(end_time_str))
+        except ValueError:
+            return jsonify({"error": "Định dạng giờ không hợp lệ (VD: 07:00)."}), 400
+
+        today = datetime.date.today()
+
+        # Kiểm tra: không tạo trùng phiên cùng lớp cùng giờ nếu đang mở
+        existing = AttendanceMonitoringSession.query.filter_by(
+            class_name=class_name,
+            session_date=today,
+            status="open",
+        ).first()
+        if existing:
+            return jsonify({
+                "error": f"Phiên theo dõi lớp {class_name} đang mở từ {existing.start_time.strftime('%H:%M')}. Vui lòng đóng phiên cũ trước."
+            }), 409
+
+        session = AttendanceMonitoringSession(
+            teacher_id=current_user.id,
+            class_name=class_name,
+            start_time=start_dt,
+            end_time=end_dt,
+            session_date=today,
+            status="open",
+            notes=notes,
+        )
+        db.session.add(session)
+        db.session.commit()
+        return jsonify({
+            "success": True,
+            "message": f"Đã mở phiên theo dõi lớp {class_name} từ {start_time_str}.",
+            "session_id": session.id,
+        })
+
+    @app.route("/api/attendance/monitoring/session/<int:session_id>")
+    @login_required
+    def api_monitoring_session_detail(session_id):
+        """API lấy chi tiết 1 phiên theo dõi (gồm các vi phạm đã đánh dấu)."""
+        session = db.session.get(AttendanceMonitoringSession, session_id)
+        if not session:
+            return jsonify({"error": "Không tìm thấy phiên."}), 404
+
+        # Kiểm tra quyền truy cập
+        if current_user.role == "homeroom_teacher" and current_user.assigned_class:
+            if session.class_name != current_user.assigned_class:
+                return jsonify({"error": "Bạn không có quyền xem phiên này."}), 403
+
+        # Lấy danh sách vi phạm trong phiên
+        from sqlalchemy import desc as sql_desc
+        viol_records = SessionViolationRecord.query.filter_by(
+            session_id=session_id
+        ).order_by(SessionViolationRecord.recorded_at.desc()).all()
+
+        students = Student.query.filter_by(student_class=session.class_name).order_by(Student.name).all()
+
+        return jsonify({
+            "session": {
+                "id": session.id,
+                "class_name": session.class_name,
+                "start_time": session.start_time.strftime("%H:%M"),
+                "end_time": session.end_time.strftime("%H:%M") if session.end_time else None,
+                "session_date": session.session_date.strftime("%d/%m/%Y"),
+                "status": session.status,
+                "notes": session.notes or "",
+                "teacher_name": session.teacher.full_name if session.teacher else "N/A",
+            },
+            "violation_types": [{"id": v.id, "name": v.name, "points_deducted": v.points_deducted}
+                                for v in ViolationType.query.all()],
+            "students": [{
+                "id": s.id,
+                "name": s.name,
+                "student_code": s.student_code,
+            } for s in students],
+            "violations": [{
+                "id": v.id,
+                "student_id": v.student_id,
+                "student_name": v.student.name if v.student else "?",
+                "student_code": v.student.student_code if v.student else "",
+                "violation_type_name": v.violation_type_name,
+                "points_deducted": v.points_deducted,
+                "status": v.status,
+                "recorded_at": v.recorded_at.strftime("%H:%M"),
+                "notes": v.notes or "",
+            } for v in viol_records],
+        })
+
+    @app.route("/api/attendance/monitoring/add-violation", methods=["POST"])
+    @login_required
+    def api_add_session_violation():
+        """Đánh dấu một học sinh vi phạm trong phiên theo dõi (chưa xác nhận)."""
+        data = request.get_json() or {}
+        session_id = data.get("session_id")
+        student_id = data.get("student_id")
+        violation_type_name = data.get("violation_type_name", "")
+        notes = data.get("notes", "")
+
+        if not session_id or not student_id or not violation_type_name:
+            return jsonify({"error": "Thiếu thông tin bắt buộc."}), 400
+
+        session = db.session.get(AttendanceMonitoringSession, session_id)
+        if not session:
+            return jsonify({"error": "Không tìm thấy phiên."}), 404
+        if session.status != "open":
+            return jsonify({"error": "Phiên đã đóng hoặc bị hủy, không thể thêm vi phạm."}), 400
+
+        student = db.session.get(Student, student_id)
+        if not student:
+            return jsonify({"error": "Không tìm thấy học sinh."}), 404
+
+        # Kiểm tra trùng vi phạm cùng loại trong phiên (tránh đánh dấu 2 lần cùng 1 lỗi)
+        existing = SessionViolationRecord.query.filter_by(
+            session_id=session_id,
+            student_id=student_id,
+            violation_type_name=violation_type_name,
+            status="pending",
+        ).first()
+        if existing:
+            return jsonify({"error": f"{student.name} đã được đánh dấu vi phạm '{violation_type_name}' trong phiên này."}), 409
+
+        # Tìm điểm trừ
+        rule = ViolationType.query.filter_by(name=violation_type_name).first()
+        points = rule.points_deducted if rule else 0
+
+        record = SessionViolationRecord(
+            session_id=session_id,
+            student_id=student_id,
+            violation_type_name=violation_type_name,
+            points_deducted=points,
+            status="pending",
+            notes=notes,
+        )
+        db.session.add(record)
+        db.session.commit()
+        return jsonify({
+            "success": True,
+            "message": f"Đã đánh dấu vi phạm '{violation_type_name}' cho {student.name}.",
+            "record_id": record.id,
+            "points_deducted": points,
+        })
+
+    @app.route("/api/attendance/monitoring/remove-violation", methods=["POST"])
+    @login_required
+    def api_remove_session_violation():
+        """Xóa bỏ một bản ghi vi phạm trong phiên (chỉ pending)."""
+        data = request.get_json() or {}
+        record_id = data.get("record_id")
+        if not record_id:
+            return jsonify({"error": "Thiếu record_id."}), 400
+
+        record = db.session.get(SessionViolationRecord, record_id)
+        if not record:
+            return jsonify({"error": "Không tìm thấy bản ghi."}), 404
+        if record.status != "pending":
+            return jsonify({"error": "Chỉ xóa được bản ghi chưa xác nhận."}), 400
+
+        session = db.session.get(AttendanceMonitoringSession, record.session_id)
+        if session and session.status != "open":
+            return jsonify({"error": "Phiên đã đóng, không thể xóa."}), 400
+
+        db.session.delete(record)
+        db.session.commit()
+        return jsonify({"success": True, "message": "Đã xóa bản ghi vi phạm."})
+
+    @app.route("/api/attendance/monitoring/update-violation-type", methods=["POST"])
+    @login_required
+    def api_update_violation_type():
+        """
+        Cập nhật loại vi phạm cho bản ghi trong phiên.
+        - Nếu bản ghi đang là placeholder '___auto___': cập nhật trực tiếp.
+        - Nếu bản ghi đã có loại thực: xóa bản ghi cũ, tạo bản ghi mới với loại mới.
+        Payload: { violation_id, violation_type_name }
+        """
+        data = request.get_json() or {}
+        violation_id = data.get("violation_id")
+        violation_type_name = data.get("violation_type_name", "").strip()
+
+        if not violation_id:
+            return jsonify({"error": "Thiếu violation_id."}), 400
+        if not violation_type_name:
+            return jsonify({"error": "Thiếu loại vi phạm."}), 400
+
+        record = db.session.get(SessionViolationRecord, violation_id)
+        if not record:
+            return jsonify({"error": "Không tìm thấy bản ghi vi phạm."}), 404
+        if record.status != "pending":
+            return jsonify({"error": "Chỉ cập nhật được bản ghi chưa xác nhận."}), 400
+
+        session = db.session.get(AttendanceMonitoringSession, record.session_id)
+        if session and session.status != "open":
+            return jsonify({"error": "Phiên đã đóng hoặc bị hủy, không thể cập nhật."}), 400
+
+        student = db.session.get(Student, record.student_id)
+        student_name = student.name if student else "?"
+
+        # Tìm điểm trừ
+        rule = ViolationType.query.filter_by(name=violation_type_name).first()
+        points = rule.points_deducted if rule else 0
+
+        if record.violation_type_name == "___auto___":
+            # Placeholder — cập nhật trực tiếp
+            record.violation_type_name = violation_type_name
+            record.points_deducted = points
+            record.notes = "Tự động phát hiện khi điểm danh trong giờ theo dõi"
+            db.session.commit()
+            return jsonify({
+                "success": True,
+                "message": f"Đã cập nhật vi phạm cho {student_name} thành '{violation_type_name}'.",
+                "points_deducted": points,
+            })
+        else:
+            # Đã có loại thực — xóa bản ghi cũ, tạo bản ghi mới (để đúng logic trùng loại)
+            saved_session_id = record.session_id
+            saved_student_id = record.student_id
+            db.session.delete(record)
+            db.session.flush()
+
+            # Kiểm tra trùng với loại mới
+            existing = SessionViolationRecord.query.filter_by(
+                session_id=saved_session_id,
+                student_id=saved_student_id,
+                violation_type_name=violation_type_name,
+                status="pending",
+            ).first()
+            if existing:
+                db.session.rollback()
+                return jsonify({
+                    "error": f"{student_name} đã được đánh dấu vi phạm '{violation_type_name}' trong phiên này.",
+                    "existing_id": existing.id,
+                }), 409
+
+            new_record = SessionViolationRecord(
+                session_id=saved_session_id,
+                student_id=saved_student_id,
+                violation_type_name=violation_type_name,
+                points_deducted=points,
+                status="pending",
+                notes="Cập nhật loại vi phạm trong giờ theo dõi",
+            )
+            db.session.add(new_record)
+            db.session.commit()
+            return jsonify({
+                "success": True,
+                "message": f"Đã đổi vi phạm của {student_name} sang '{violation_type_name}'.",
+                "new_violation_id": new_record.id,
+                "points_deducted": points,
+            })
+
+    @app.route("/api/attendance/monitoring/confirm-violations", methods=["POST"])
+    @login_required
+    def api_confirm_session_violations():
+        """
+        Xác nhận toàn bộ vi phạm trong phiên — chuyển thành Violation chính thức,
+        trừ điểm học sinh, và đóng phiên theo dõi.
+        """
+        data = request.get_json() or {}
+        session_id = data.get("session_id")
+        close_session = data.get("close_session", True)
+
+        if not session_id:
+            return jsonify({"error": "Thiếu session_id."}), 400
+
+        session = db.session.get(AttendanceMonitoringSession, session_id)
+        if not session:
+            return jsonify({"error": "Không tìm thấy phiên."}), 404
+        if session.status != "open":
+            return jsonify({"error": "Phiên không còn mở."}), 400
+
+        pending = SessionViolationRecord.query.filter_by(
+            session_id=session_id, status="pending"
+        ).all()
+
+        if not pending:
+            return jsonify({"error": "Không có vi phạm nào để xác nhận."}), 400
+
+        # Lấy week number hiện tại
+        w_cfg = SystemConfig.query.filter_by(key="current_week").first()
+        current_week = int(w_cfg.value) if w_cfg else 1
+
+        confirmed_count = 0
+        errors = []
+
+        for record in pending:
+            student = db.session.get(Student, record.student_id)
+            if not student:
+                errors.append(f"Không tìm thấy HS ID {record.student_id}")
+                continue
+
+            # Trừ điểm
+            old_score = student.current_score or 100
+            student.current_score = max(0, old_score - record.points_deducted)
+
+            # Tạo Violation chính thức
+            violation = Violation(
+                student_id=record.student_id,
+                violation_type_name=record.violation_type_name,
+                points_deducted=record.points_deducted,
+                week_number=current_week,
+                lesson_book_entry_id=None,
+            )
+            db.session.add(violation)
+            db.session.flush()  # Lấy ID của violation mới
+
+            # Cập nhật trạng thái bản ghi trong phiên
+            record.status = "confirmed"
+            record.official_violation_id = violation.id
+
+            # Log thay đổi
+            log_change(
+                'violation',
+                f'Vi phạm (theo dõi {session.start_time.strftime("%H:%M")}-{session.end_time.strftime("%H:%M") if session.end_time else "?"}): {record.violation_type_name} (-{record.points_deducted} điểm)',
+                student_id=student.id,
+                student_name=student.name,
+                student_class=student.student_class,
+                old_value=old_score,
+                new_value=student.current_score,
+            )
+
+            # Cập nhật hạnh kiểm
+            update_student_conduct(student.id)
+            confirmed_count += 1
+
+        # Đóng phiên theo dõi
+        if close_session:
+            session.status = "confirmed"
+            session.end_time = datetime.datetime.now()
+
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "message": f"Đã xác nhận {confirmed_count} vi phạm."
+                        + (f" Phiên theo dõi đã đóng." if close_session else ""),
+            "confirmed_count": confirmed_count,
+            "errors": errors if errors else None,
+        })
+
+    @app.route("/api/attendance/monitoring/cancel-session", methods=["POST"])
+    @login_required
+    def api_cancel_monitoring_session():
+        """Hủy phiên theo dõi (xóa toàn bộ bản ghi vi phạm pending, đóng phiên)."""
+        data = request.get_json() or {}
+        session_id = data.get("session_id")
+        if not session_id:
+            return jsonify({"error": "Thiếu session_id."}), 400
+
+        session = db.session.get(AttendanceMonitoringSession, session_id)
+        if not session:
+            return jsonify({"error": "Không tìm thấy phiên."}), 404
+        if session.status != "open":
+            return jsonify({"error": "Phiên không còn mở."}), 400
+
+        # Chỉ người tạo hoặc admin mới được hủy
+        if current_user.role != "admin" and session.teacher_id != current_user.id:
+            return jsonify({"error": "Bạn không có quyền hủy phiên này."}), 403
+
+        # Xóa các bản ghi pending
+        pending = SessionViolationRecord.query.filter_by(
+            session_id=session_id, status="pending"
+        ).all()
+        for p in pending:
+            db.session.delete(p)
+
+        session.status = "cancelled"
+        session.end_time = datetime.datetime.now()
+        db.session.commit()
+        return jsonify({
+            "success": True,
+            "message": f"Đã hủy phiên theo dõi lớp {session.class_name}."
         })

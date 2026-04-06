@@ -57,6 +57,10 @@
                 <svg class="inline w-4 h-4 mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                 Điểm danh Camera
             </button>
+            <button onclick="switchTab('monitoring')" id="tab-monitoring" class="tab-btn px-4 py-2.5 text-sm font-medium text-muted-foreground border-b-2 border-transparent transition-colors hover:text-foreground">
+                <svg class="inline w-4 h-4 mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Theo dõi & Vi phạm
+            </button>
             <button onclick="switchTab('list')" id="tab-list" class="tab-btn px-4 py-2.5 text-sm font-medium text-muted-foreground border-b-2 border-transparent transition-colors hover:text-foreground">
                 <svg class="inline w-4 h-4 mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                 Quản lý dữ liệu khuôn mặt
@@ -117,6 +121,194 @@
                     <div class="glass-panel">
                         <div class="p-4 border-b border-border"><h3 class="text-sm font-semibold">Đã điểm danh hôm nay</h3></div>
                         <div class="max-h-64 overflow-y-auto" id="today-checkins"></div>
+                    </div>
+        </div>
+        </div>
+        </div>
+
+        <!-- TAB: Monitoring (Theo dõi & Vi phạm) -->
+        <div id="panel-monitoring" class="tab-panel hidden mt-6">
+            <!-- Monitoring Header: Open Session -->
+            <div class="glass-panel mb-6" id="monitoring-header">
+                <div class="p-4 border-b border-border">
+                    <h3 class="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Theo dõi điểm danh theo giờ — Phát hiện vi phạm trong giờ
+                    </h3>
+                </div>
+                <div class="p-4 space-y-4">
+                    <!-- Session Status Banner -->
+                    <div id="monitoring-session-banner" class="hidden p-4 rounded-xl border-2">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div id="banner-status-dot" class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+                                <div>
+                                    <p class="font-bold text-sm" id="banner-session-title">Đang theo dõi lớp ...</p>
+                                    <p class="text-xs text-muted-foreground" id="banner-session-time"></p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="refreshSessionViolations()" class="btn-ghost text-xs px-3 py-1.5 flex items-center gap-1.5 text-indigo-600 hover:bg-indigo-50" title="Làm mới vi phạm (phát hiện check-in mới)">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                    Làm mới
+                                </button>
+                                <span id="banner-violation-badge" class="badge bg-red-50 text-red-600 text-xs font-bold hidden">
+                                    <span id="banner-violation-count">0</span> vi phạm
+                                </span>
+                                <button onclick="confirmSessionViolations()" id="btn-confirm-violations" class="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5 hidden">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    Xác nhận & Xử phạt
+                                </button>
+                                <button onclick="cancelMonitoringSession()" id="btn-cancel-session" class="btn-ghost text-xs px-3 py-1.5 text-red-500 hidden">Hủy phiên</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Open Session Form -->
+                    <div id="monitoring-open-form">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                            <div>
+                                <label class="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Chọn lớp</label>
+                                <select id="monitor-class-select" class="input-shadcn w-full text-sm">
+                                    <option value="">— Chọn lớp —</option>
+                                    {% for c in classes %}<option value="{{ c }}" {% if selected_class == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Giờ bắt đầu</label>
+                                <input type="time" id="monitor-start-time" class="input-shadcn w-full text-sm" value="07:00">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Giờ kết thúc</label>
+                                <input type="time" id="monitor-end-time" class="input-shadcn w-full text-sm" value="08:00">
+                            </div>
+                        </div>
+                        <div class="mt-3 flex items-center gap-3">
+                            <button onclick="openMonitoringSession()" id="btn-open-session" class="btn-primary flex items-center gap-2 text-sm shadow-indigo-100">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Mở phiên theo dõi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Session Sessions List -->
+            <div class="glass-panel overflow-hidden mb-6">
+                <div class="p-4 border-b border-border flex flex-wrap items-center justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-foreground">Phiên theo dõi gần đây</h3>
+                    <div class="flex items-center gap-2">
+                        <input type="date" id="monitor-history-date" class="input-shadcn w-36 text-xs" onchange="loadMonitoringSessions()">
+                        <select id="monitor-history-status" class="input-shadcn w-28 text-xs" onchange="loadMonitoringSessions()">
+                            <option value="">Tất cả</option>
+                            <option value="open">Đang mở</option>
+                            <option value="confirmed">Đã xác nhận</option>
+                            <option value="cancelled">Đã hủy</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="table-shadcn">
+                        <thead>
+                            <tr>
+                                <th>Lớp</th>
+                                <th>Ngày</th>
+                                <th>Giờ</th>
+                                <th class="text-center">Trạng thái</th>
+                                <th class="text-center">Vi phạm</th>
+                                <th class="text-center">GV thực hiện</th>
+                                <th class="text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="monitor-sessions-body">
+                            <tr><td colspan="7" class="text-center py-8 text-muted-foreground">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Student List for Violation Marking (when session is open) -->
+            <div id="monitoring-student-panel" class="hidden">
+                <div class="glass-panel overflow-hidden">
+                    <div class="p-4 border-b border-border flex flex-wrap items-center justify-between gap-3">
+                        <h3 class="text-sm font-semibold text-foreground">
+                            Danh sách học sinh lớp <span id="monitor-class-label">—</span>
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <button onclick="refreshSessionViolations()" class="btn-ghost text-xs px-3 py-1.5 flex items-center gap-1.5 text-indigo-600 hover:bg-indigo-50" title="Làm mới vi phạm (phát hiện check-in mới)">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                Làm mới vi phạm
+                            </button>
+                            <input type="text" id="monitor-student-search" class="input-shadcn w-48 text-xs" placeholder="Tìm tên học sinh..." oninput="filterMonitoringStudents()">
+                            <select id="monitor-violation-type-select" class="input-shadcn w-48 text-xs">
+                                <option value="">— Chọn lỗi —</option>
+                                {% for r in violation_rules %}<option value="{{ r.name }}">{{ r.name }} (-{{ r.points_deducted }}đ)</option>{% endfor %}
+                            </select>
+                            <button onclick="openAddViolationModal()" id="btn-add-violation" class="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                Thêm vi phạm
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto max-h-80 overflow-y-auto">
+                        <table class="table-shadcn">
+                            <thead>
+                                <tr>
+                                    <th>Học sinh</th>
+                                    <th class="text-center">Mã</th>
+                                    <th class="text-center">Trạng thái vi phạm</th>
+                                    <th class="text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="monitor-students-body">
+                                <tr><td colspan="4" class="text-center py-8 text-muted-foreground">Đang tải...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Violations List for Current Session -->
+            <div id="monitoring-violations-panel" class="hidden mt-4">
+                <div class="glass-panel overflow-hidden">
+                    <div class="p-4 border-b border-border flex items-center justify-between">
+                        <h3 class="text-sm font-semibold text-foreground flex items-center gap-2">
+                            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            Vi phạm đã đánh dấu
+                        </h3>
+                        <button onclick="removeSelectedViolation()" id="btn-remove-violation" class="hidden text-xs font-bold px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors">
+                            Xóa đã chọn
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto max-h-64 overflow-y-auto">
+                        <table class="table-shadcn">
+                            <thead>
+                                <tr>
+                                    <th class="w-6"><input type="checkbox" id="monitor-violation-check-all" onchange="toggleAllMonitorViolations(this)" class="w-4 h-4 rounded accent-red-600 cursor-pointer"></th>
+                                    <th>Học sinh</th>
+                                    <th>Loại vi phạm</th>
+                                    <th class="text-center">Điểm trừ</th>
+                                    <th class="text-center">Giờ</th>
+                                    <th class="text-center">Ghi chú</th>
+                                    <th class="text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="monitor-violations-body">
+                                <tr><td colspan="7" class="text-center py-8 text-muted-foreground">Chưa có vi phạm nào</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="p-4 border-t border-border flex items-center justify-between">
+                        <p class="text-xs text-muted-foreground">
+                            Tổng cộng: <span id="monitor-total-violations" class="font-bold text-red-600">0</span> vi phạm =
+                            <span id="monitor-total-points" class="font-bold text-red-600">0</span> điểm trừ
+                        </p>
+                        <div class="flex items-center gap-2">
+                            <button onclick="confirmSessionViolations()" id="btn-confirm-violations-2" class="btn-primary text-sm px-4 py-2 flex items-center gap-2 shadow-lg shadow-indigo-100">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                Xác nhận & Đưa lên hệ thống xử phạt
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -480,6 +672,9 @@ function switchTab(tab) {
     document.getElementById('tab-' + tab).classList.add('active-tab');
     if (tab === 'list') loadStudentList();
     if (tab === 'history') loadHistory();
+    if (tab === 'monitoring') {
+        loadMonitoringSessions();
+    }
 }
 
 // ===================== CAMERA HELPERS (Face) =====================
@@ -995,11 +1190,15 @@ async function confirmCheckin(sid, photo, conf) {
 async function loadStats() {
     try {
         const resp = await fetch('/api/attendance/stats');
-        const data = await resp.json();
-        document.getElementById('stat-total').textContent = data.total || 0;
-        document.getElementById('stat-present').textContent = data.present || 0;
-        document.getElementById('stat-late').textContent = data.late || 0;
-        document.getElementById('stat-absent').textContent = data.absent || 0;
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok || data.error) {
+            console.error('loadStats:', data.error || resp.status);
+            return;
+        }
+        document.getElementById('stat-total').textContent = data.total ?? 0;
+        document.getElementById('stat-present').textContent = data.present ?? 0;
+        document.getElementById('stat-late').textContent = data.late ?? 0;
+        document.getElementById('stat-absent').textContent = data.absent ?? 0;
     } catch(e) { console.error(e); }
 }
 
@@ -1007,7 +1206,14 @@ async function loadStudentList() {
     const body = document.getElementById('student-list-body');
     try {
         const resp = await fetch('/api/attendance/students');
-        const data = await resp.json();
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok || data.error || !Array.isArray(data.students)) {
+            const msg = (data && data.error) ? data.error : `Lỗi máy chủ (${resp.status}). Kiểm tra log server hoặc khởi động lại ứng dụng.`;
+            body.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-600 text-sm">${msg}</td></tr>`;
+            const badge = document.getElementById('student-count-badge');
+            if (badge) badge.textContent = '—';
+            return;
+        }
         document.getElementById('student-count-badge').textContent = `${data.students.length} học sinh`;
         body.innerHTML = data.students.map(s => `
             <tr class="hover:bg-gray-50 transition-colors">
@@ -1035,7 +1241,10 @@ async function loadStudentList() {
                     </div>
                 </td>
             </tr>`).join('');
-    } catch(e) { console.error(e); }
+    } catch(e) {
+        body.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-600 text-sm">Lỗi tải: ${e.message}</td></tr>`;
+        console.error(e);
+    }
 }
 
 async function resetEnrollment(sid, name) {
@@ -1373,6 +1582,449 @@ function onClassChange() {
     }
 }
 
+// ===================== MONITORING SESSION =====================
+let currentMonitoringSession = null;
+let monitorStudents = [];
+let monitorViolations = [];
+let violationTypes = [];
+
+async function loadMonitoringSessions() {
+    const body = document.getElementById('monitor-sessions-body');
+    const dateVal = document.getElementById('monitor-history-date').value;
+    const statusVal = document.getElementById('monitor-history-status').value;
+
+    const params = new URLSearchParams();
+    if (dateVal) { params.set('date_from', dateVal); params.set('date_to', dateVal); }
+    if (statusVal) params.set('status', statusVal);
+
+    try {
+        const resp = await fetch(`/api/attendance/monitoring/sessions?${params.toString()}`);
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok || data.error) {
+            body.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-red-500 text-sm">${data.error || 'Lỗi tải danh sách phiên (' + resp.status + ')'}</td></tr>`;
+            return;
+        }
+        const sessions = Array.isArray(data.sessions) ? data.sessions : [];
+
+        if (sessions.length === 0) {
+            body.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-muted-foreground text-sm">Không có phiên theo dõi nào cho ngày đã chọn. Đổi ngày lọc hoặc mở phiên mới.</td></tr>';
+            return;
+        }
+
+        body.innerHTML = sessions.map((s, i) => {
+            const statusClass = s.status === 'open' ? 'bg-emerald-100 text-emerald-700' : s.status === 'confirmed' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500';
+            const statusLabel = s.status === 'open' ? 'Đang mở' : s.status === 'confirmed' ? 'Đã xác nhận' : 'Đã hủy';
+            const timeLabel = s.end_time ? `${s.start_time} – ${s.end_time}` : `${s.start_time} – ...`;
+            return `<tr class="hover:bg-gray-50 transition-colors">
+                <td class="font-medium text-sm">${s.class_name}</td>
+                <td class="text-xs text-gray-600">${s.session_date}</td>
+                <td class="text-xs text-gray-600">${timeLabel}</td>
+                <td class="text-center"><span class="badge ${statusClass} text-[10px] font-bold">${statusLabel}</span></td>
+                <td class="text-center"><span class="badge bg-red-50 text-red-600 text-[10px] font-bold">${s.pending_violations} lỗi</span></td>
+                <td class="text-xs text-gray-500">${s.teacher_name}</td>
+                <td class="text-center">
+                    ${s.status === 'open' ? `<button onclick="openSessionDetail(${s.id})" class="text-indigo-600 hover:text-indigo-800 text-xs font-bold px-2 py-1 rounded hover:bg-indigo-50 transition-colors">Xem & Thêm</button>` : `<button onclick="openSessionDetail(${s.id})" class="text-gray-500 hover:text-gray-700 text-xs font-bold px-2 py-1 rounded hover:bg-gray-100 transition-colors">Xem chi tiết</button>`}
+                </td>
+            </tr>`;
+        }).join('');
+
+        // Khôi phục phiên đang mở sau F5 / vào lại tab (một phiên open duy nhất trong kết quả)
+        const todayIso = new Date().toISOString().split('T')[0];
+        const openSessions = sessions.filter(s => s.status === 'open');
+        const showOpenOnly = statusVal === 'open';
+        if (!currentMonitoringSession && dateVal === todayIso && (!statusVal || showOpenOnly) && openSessions.length === 1) {
+            await openSessionDetail(openSessions[0].id);
+        }
+    } catch(e) {
+        body.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-red-500 text-sm">Lỗi tải dữ liệu: ${e.message}</td></tr>`;
+    }
+}
+
+async function openMonitoringSession() {
+    const className = document.getElementById('monitor-class-select').value;
+    const startTime = document.getElementById('monitor-start-time').value;
+    const endTime = document.getElementById('monitor-end-time').value;
+
+    if (!className) { showToast('Vui lòng chọn lớp!', 'error'); return; }
+    if (!startTime) { showToast('Vui lòng chọn giờ bắt đầu!', 'error'); return; }
+
+    try {
+        const resp = await fetch('/api/attendance/monitoring/create-session', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ class_name: className, start_time: startTime, end_time: endTime })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            showToast(data.message, 'success');
+            loadMonitoringSessions();
+            openSessionDetail(data.session_id);
+        } else {
+            showToast(data.error || 'Không thể mở phiên.', 'error');
+        }
+    } catch(e) { showToast('Lỗi: ' + e.message, 'error'); }
+}
+
+async function openSessionDetail(sessionId) {
+    try {
+        const resp = await fetch(`/api/attendance/monitoring/session/${sessionId}`);
+        const data = await resp.json();
+        if (data.error) { showToast(data.error, 'error'); return; }
+
+        currentMonitoringSession = data.session;
+        monitorStudents = data.students;
+        monitorViolations = data.violations || [];
+        violationTypes = data.violation_types || [];
+
+        // Update banner
+        const banner = document.getElementById('monitoring-session-banner');
+        banner.classList.remove('hidden');
+        banner.className = 'p-4 rounded-xl border-2 ' + (data.session.status === 'open' ? 'border-emerald-300 bg-emerald-50' : 'border-gray-300 bg-gray-50');
+
+        document.getElementById('banner-session-title').textContent =
+            `Theo dõi lớp ${data.session.class_name} — ${data.session.session_date}`;
+        document.getElementById('banner-session-time').textContent =
+            `${data.session.start_time}` + (data.session.end_time ? ` → ${data.session.end_time}` : ' → ...') +
+            ` | Trạng thái: ${data.session.status}`;
+
+        // Violation count badge
+        const pendingViolations = monitorViolations.filter(v => v.status === 'pending');
+        const badge = document.getElementById('banner-violation-badge');
+        const countEl = document.getElementById('banner-violation-count');
+        const confirmBtn = document.getElementById('btn-confirm-violations');
+        const confirmBtn2 = document.getElementById('btn-confirm-violations-2');
+        const cancelBtn = document.getElementById('btn-cancel-session');
+
+        if (pendingViolations.length > 0) {
+            badge.classList.remove('hidden');
+            countEl.textContent = pendingViolations.length;
+            confirmBtn.classList.remove('hidden');
+            confirmBtn2 && confirmBtn2.classList.remove('hidden');
+            cancelBtn.classList.add('hidden');
+        } else {
+            badge.classList.add('hidden');
+            confirmBtn.classList.add('hidden');
+            confirmBtn2 && confirmBtn2.classList.add('hidden');
+            cancelBtn.classList.remove('hidden');
+        }
+
+        // Populate violation type select
+        const typeSelect = document.getElementById('monitor-violation-type-select');
+        if (typeSelect) {
+            typeSelect.innerHTML = '<option value="">— Chọn lỗi —</option>' +
+                data.violation_types.map(v => `<option value="${v.name}">${v.name} (-${v.points_deducted}đ)</option>`).join('');
+        }
+
+        // Show student panel
+        document.getElementById('monitor-class-label').textContent = data.session.class_name;
+        document.getElementById('monitoring-student-panel').classList.remove('hidden');
+
+        renderMonitoringStudents();
+        renderMonitoringViolations();
+
+        // Show violations panel if any
+        if (pendingViolations.length > 0) {
+            document.getElementById('monitoring-violations-panel').classList.remove('hidden');
+        } else {
+            document.getElementById('monitoring-violations-panel').classList.add('hidden');
+        }
+
+        // Hide open form
+        document.getElementById('monitoring-open-form').classList.add('hidden');
+    } catch(e) { showToast('Lỗi tải phiên: ' + e.message, 'error'); }
+}
+
+function renderViolationSelect(violationTypes, studentViolations) {
+    if (!violationTypes || violationTypes.length === 0) return '<span class="text-xs text-gray-400">Chưa có loại lỗi</span>';
+    return `<select
+        class="violation-type-select text-xs border border-red-300 rounded-lg px-2 py-1 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-400 cursor-pointer w-full max-w-40"
+        onchange="updateStudentViolationType(this, ${studentViolations[0]?.id})"
+    >
+        <option value="">— Chọn lỗi —</option>
+        ${violationTypes.map(v =>
+            `<option value="${v.name}" ${studentViolations[0]?.violation_type_name === v.name ? 'selected' : ''}>${v.name} (-${v.points_deducted}đ)</option>`
+        ).join('')}
+    </select>`;
+}
+
+function renderMonitoringStudents() {
+    const body = document.getElementById('monitor-students-body');
+    const searchVal = document.getElementById('monitor-student-search').value.toLowerCase();
+    const filtered = monitorStudents.filter(s =>
+        (s.name || '').toLowerCase().includes(searchVal) ||
+        String(s.student_code || '').toLowerCase().includes(searchVal));
+
+    if (filtered.length === 0) {
+        body.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-muted-foreground text-sm">Không tìm thấy học sinh</td></tr>';
+        return;
+    }
+
+    body.innerHTML = filtered.map(s => {
+        const studentViolations = monitorViolations.filter(v => v.student_id === s.id && v.status === 'pending');
+        const hasViolation = studentViolations.length > 0;
+        const isAuto = studentViolations[0]?.violation_type_name === '___auto___';
+
+        // Badge vi phạm cụ thể
+        let violationBadge = '';
+        if (hasViolation) {
+            if (isAuto) {
+                violationBadge = `<span class="badge bg-amber-100 border border-amber-300 text-amber-800 text-[10px] font-bold animate-pulse">⏱ Đang chờ ghi nhận</span>`;
+            } else {
+                violationBadge = studentViolations.map(v =>
+                    `<span class="badge bg-red-100 text-red-700 text-[10px] font-bold mr-1">${v.violation_type_name} (-${v.points_deducted}đ)</span>`
+                ).join('');
+            }
+        }
+
+        // Select loại vi phạm: luôn hiển thị nếu có vi phạm, HOẶC chưa có vi phạm (để thêm mới)
+        const showSelect = hasViolation;
+
+        return `<tr class="hover:bg-gray-50 transition-colors">
+            <td class="font-medium text-sm">${s.name}</td>
+            <td class="text-center text-xs font-mono text-gray-500">${s.student_code || '—'}</td>
+            <td class="text-center">
+                ${violationBadge || '<span class="text-xs text-gray-300">—</span>'}
+            </td>
+            <td class="text-center">
+                <div class="flex items-center justify-center gap-1 flex-wrap">
+                    ${showSelect ? renderViolationSelect(violationTypes, studentViolations) : ''}
+                    ${hasViolation
+                        ? `<button onclick="removeMonitorViolation(${studentViolations[0].id})" class="text-red-400 hover:text-red-600 transition-colors ml-1 flex-shrink-0" title="Xóa vi phạm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                           </button>`
+                        : `<button onclick="openAddViolationForStudent(${s.id}, '${s.name.replace(/'/g, "\\'")}')"
+                            class="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors flex-shrink-0">
+                            Đánh dấu vi phạm
+                           </button>`
+                    }
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+async function updateStudentViolationType(selectEl, violationId) {
+    const newType = selectEl.value;
+    if (!newType || !violationId) return;
+
+    // Tạm khóa select
+    selectEl.disabled = true;
+
+    try {
+        const resp = await fetch('/api/attendance/monitoring/update-violation-type', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ violation_id: violationId, violation_type_name: newType })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            showToast(data.message, 'success');
+            await openSessionDetail(currentMonitoringSession.id);
+        } else {
+            showToast(data.error || 'Không thể cập nhật.', 'error');
+            selectEl.disabled = false;
+        }
+    } catch(e) {
+        showToast('Lỗi: ' + e.message, 'error');
+        selectEl.disabled = false;
+    }
+}
+
+function filterMonitoringStudents() {
+    renderMonitoringStudents();
+}
+
+function renderMonitoringViolations() {
+    const body = document.getElementById('monitor-violations-body');
+    const pending = monitorViolations.filter(v => v.status === 'pending');
+
+    const totalViolations = document.getElementById('monitor-total-violations');
+    const totalPoints = document.getElementById('monitor-total-points');
+    const removeBtn = document.getElementById('btn-remove-violation');
+
+    if (totalViolations) totalViolations.textContent = pending.length;
+    if (totalPoints) totalPoints.textContent = pending.reduce((sum, v) => sum + v.points_deducted, 0);
+
+    if (pending.length === 0) {
+        body.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-muted-foreground text-sm">Chưa có vi phạm nào được đánh dấu</td></tr>';
+        if (removeBtn) removeBtn.classList.add('hidden');
+        return;
+    }
+
+    if (removeBtn) removeBtn.classList.remove('hidden');
+
+    body.innerHTML = pending.map(v => `<tr class="hover:bg-gray-50 transition-colors">
+        <td class="text-center"><input type="checkbox" class="monitor-violation-check w-4 h-4 rounded accent-red-600 cursor-pointer" value="${v.id}" onchange="updateMonitorViolationSelection()"></td>
+        <td class="font-medium text-sm">${v.student_name}<br><span class="text-[10px] text-gray-400 font-mono">${v.student_code}</span></td>
+        <td class="text-sm text-red-700 font-bold">${v.violation_type_name}</td>
+        <td class="text-center"><span class="badge bg-red-100 text-red-700 text-xs font-bold">-${v.points_deducted}đ</span></td>
+        <td class="text-center text-xs text-gray-500">${v.recorded_at}</td>
+        <td class="text-center text-xs text-gray-500 max-w-32 truncate">${v.notes || '—'}</td>
+        <td class="text-center">
+            <button onclick="removeMonitorViolation(${v.id})" class="text-red-500 hover:text-red-700 transition-colors" title="Xóa">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+        </td>
+    </tr>`).join('');
+}
+
+function toggleAllMonitorViolations(source) {
+    document.querySelectorAll('.monitor-violation-check').forEach(c => { c.checked = source.checked; });
+    updateMonitorViolationSelection();
+}
+
+function updateMonitorViolationSelection() {
+    const selected = document.querySelectorAll('.monitor-violation-check:checked');
+    const btn = document.getElementById('btn-remove-violation');
+    if (btn) {
+        if (selected.length > 0) {
+            btn.classList.remove('hidden');
+        } else {
+            btn.classList.add('hidden');
+        }
+    }
+}
+
+async function openAddViolationModal() {
+    const type = document.getElementById('monitor-violation-type-select').value;
+    if (!type) { showToast('Vui lòng chọn loại vi phạm trước!', 'error'); return; }
+    if (!currentMonitoringSession) { showToast('Không có phiên theo dõi đang mở.', 'error'); return; }
+    if (currentMonitoringSession.status !== 'open') { showToast('Phiên đã đóng, không thể thêm vi phạm.', 'error'); return; }
+
+    showToast('Nhấn vào nút "Đánh dấu vi phạm" bên cạnh tên học sinh để thêm.', 'info');
+}
+
+async function openAddViolationForStudent(studentId, studentName) {
+    const type = document.getElementById('monitor-violation-type-select').value;
+    if (!type) {
+        showToast('Vui lòng chọn loại vi phạm từ danh sách trước!', 'error');
+        return;
+    }
+
+    try {
+        const resp = await fetch('/api/attendance/monitoring/add-violation', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                session_id: currentMonitoringSession.id,
+                student_id: studentId,
+                violation_type_name: type,
+                notes: ''
+            })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            showToast(data.message, 'success');
+            await openSessionDetail(currentMonitoringSession.id);
+        } else {
+            showToast(data.error || 'Không thể thêm vi phạm.', 'error');
+        }
+    } catch(e) { showToast('Lỗi: ' + e.message, 'error'); }
+}
+
+// ── Refresh violations khi có check-in mới trong giờ theo dõi ──
+async function refreshSessionViolations() {
+    if (!currentMonitoringSession) return;
+    showToast('Đang làm mới...', 'info');
+    await openSessionDetail(currentMonitoringSession.id);
+}
+
+async function removeMonitorViolation(recordId) {
+    if (!confirm('Xóa bản ghi vi phạm này?')) return;
+    try {
+        const resp = await fetch('/api/attendance/monitoring/remove-violation', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ record_id: recordId })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            showToast(data.message, 'success');
+            await openSessionDetail(currentMonitoringSession.id);
+        } else {
+            showToast(data.error || 'Không thể xóa.', 'error');
+        }
+    } catch(e) { showToast('Lỗi: ' + e.message, 'error'); }
+}
+
+async function removeSelectedViolation() {
+    const checks = document.querySelectorAll('.monitor-violation-check:checked');
+    if (checks.length === 0) return;
+    const ids = Array.from(checks).map(c => parseInt(c.value));
+    if (!confirm(`Xóa ${ids.length} bản ghi vi phạm đã chọn?`)) return;
+    let deleted = 0;
+    for (const id of ids) {
+        try {
+            const resp = await fetch('/api/attendance/monitoring/remove-violation', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ record_id: id })
+            });
+            const data = await resp.json();
+            if (data.success) deleted++;
+        } catch(e) {}
+    }
+    showToast(`Đã xóa ${deleted} bản ghi.`, 'success');
+    await openSessionDetail(currentMonitoringSession.id);
+}
+
+async function confirmSessionViolations() {
+    if (!currentMonitoringSession) return;
+    const pending = monitorViolations.filter(v => v.status === 'pending');
+    if (pending.length === 0) {
+        showToast('Không có vi phạm nào để xác nhận.', 'error');
+        return;
+    }
+
+    const totalPoints = pending.reduce((sum, v) => sum + v.points_deducted, 0);
+    if (!confirm(`Xác nhận đưa ${pending.length} vi phạm lên hệ thống xử phạt?\n\nTổng điểm trừ: ${totalPoints} điểm\n\nHành động này sẽ:\n• Trừ điểm học sinh\n• Cập nhật hạnh kiểm\n• Đóng phiên theo dõi`)) return;
+
+    try {
+        const resp = await fetch('/api/attendance/monitoring/confirm-violations', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ session_id: currentMonitoringSession.id, close_session: true })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            showToast(data.message, 'success');
+            currentMonitoringSession = null;
+            document.getElementById('monitoring-session-banner').classList.add('hidden');
+            document.getElementById('monitoring-student-panel').classList.add('hidden');
+            document.getElementById('monitoring-violations-panel').classList.add('hidden');
+            document.getElementById('monitoring-open-form').classList.remove('hidden');
+            loadMonitoringSessions();
+            loadStats();
+        } else {
+            showToast(data.error || 'Xác nhận thất bại.', 'error');
+        }
+    } catch(e) { showToast('Lỗi: ' + e.message, 'error'); }
+}
+
+async function cancelMonitoringSession() {
+    if (!currentMonitoringSession) return;
+    if (!confirm('Hủy phiên theo dõi? Tất cả vi phạm đã đánh dấu sẽ bị xóa.')) return;
+    try {
+        const resp = await fetch('/api/attendance/monitoring/cancel-session', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ session_id: currentMonitoringSession.id })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            showToast(data.message, 'success');
+            currentMonitoringSession = null;
+            document.getElementById('monitoring-session-banner').classList.add('hidden');
+            document.getElementById('monitoring-student-panel').classList.add('hidden');
+            document.getElementById('monitoring-violations-panel').classList.add('hidden');
+            document.getElementById('monitoring-open-form').classList.remove('hidden');
+            loadMonitoringSessions();
+        } else {
+            showToast(data.error || 'Không thể hủy phiên.', 'error');
+        }
+    } catch(e) { showToast('Lỗi: ' + e.message, 'error'); }
+}
+
 // ===================== INIT =====================
 document.addEventListener('DOMContentLoaded', function() {
     // Set initial mode
@@ -1383,6 +2035,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('history-date-from').value = today;
     document.getElementById('history-date-to').value = today;
+    // Set default dates for monitoring
+    document.getElementById('monitor-history-date').value = today;
+    // Load monitoring sessions
+    loadMonitoringSessions();
 });
 </script>
 {% endblock %}

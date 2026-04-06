@@ -194,6 +194,19 @@ def ensure_attendance_qr_columns():
     db.session.commit()
 
 
+def ensure_attendance_monitoring_session_column():
+    """Liên kết điểm danh với phiên theo dõi — cột monitoring_session_id (SQLite cũ chưa có)."""
+    insp = inspect(db.engine)
+    if not insp.has_table("attendance_record"):
+        return
+    cols = {c["name"] for c in insp.get_columns("attendance_record")}
+    if "monitoring_session_id" not in cols:
+        db.session.execute(
+            text("ALTER TABLE attendance_record ADD COLUMN monitoring_session_id INTEGER")
+        )
+    db.session.commit()
+
+
 def create_database():
     db.create_all()
     ensure_student_parent_columns()
@@ -206,6 +219,7 @@ def create_database():
     ensure_student_notification_sender_column()
     ensure_student_conduct_columns()
     ensure_attendance_qr_columns()
+    ensure_attendance_monitoring_session_column()
     # AttendanceRecord table is auto-created by db.create_all()
     if not Teacher.query.first():
         hashed_pwd = generate_password_hash("admin")
@@ -219,7 +233,9 @@ def create_database():
     db.session.commit()
 
 
+# Migration nhẹ khi khởi động (flask run / import app — không chỉ python app.py)
+with app.app_context():
+    create_database()
+
 if __name__ == "__main__":
-    with app.app_context():
-        create_database()
     app.run(debug=True)

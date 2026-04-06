@@ -360,6 +360,49 @@ class AttendanceRecord(db.Model):
     attendance_date = db.Column(db.Date, nullable=False, index=True)
     attendance_mode = db.Column(db.String(20), default="face")  # 'face' hoặc 'qr'
     qr_scan_method = db.Column(db.String(30), nullable=True)  # 'camera' (quét QR trên camera) hoặc 'direct' (quét từ app)
+    monitoring_session_id = db.Column(db.Integer, db.ForeignKey("attendance_monitoring_session.id"), nullable=True)  # Phiên theo dõi
 
     student = db.relationship("Student", backref=db.backref("attendance_records", lazy=True))
     recorded_by = db.relationship("Teacher", backref=db.backref("attendance_records_created", lazy=True))
+    monitoring_session = db.relationship("AttendanceMonitoringSession", backref=db.backref("attendance_records", lazy=True))
+
+
+class AttendanceMonitoringSession(db.Model):
+    """Phiên theo dõi điểm danh theo giờ — giáo viên mở phiên trong 1 khung giờ,
+    đánh dấu HS vi phạm trong phiên, sau đó xác nhận để đưa lên hệ thống xử phạt."""
+    __tablename__ = "attendance_monitoring_session"
+    id = db.Column(db.Integer, primary_key=True)
+    teacher_id = db.Column(db.Integer, db.ForeignKey("teacher.id"), nullable=False, index=True)
+    class_name = db.Column(db.String(50), nullable=False, index=True)
+    start_time = db.Column(db.DateTime, nullable=False)       # Giờ bắt đầu theo dõi
+    end_time = db.Column(db.DateTime, nullable=True)            # Giờ kết thúc theo dõi (None = đang mở)
+    session_date = db.Column(db.Date, nullable=False, index=True)
+    # Trạng thái: 'open' = đang mở, 'confirmed' = đã xác nhận xử phạt, 'cancelled' = đã hủy
+    status = db.Column(db.String(20), default="open")
+    notes = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+    teacher = db.relationship("Teacher", backref=db.backref("monitoring_sessions", lazy=True))
+
+
+class SessionViolationRecord(db.Model):
+    """Bản ghi vi phạm trong phiên theo dõi — được đánh dấu trong giờ theo dõi,
+    sau đó chuyển thành Violation chính thức khi giáo viên xác nhận."""
+    __tablename__ = "session_violation_record"
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(db.Integer, db.ForeignKey("attendance_monitoring_session.id"), nullable=False, index=True)
+    student_id = db.Column(db.Integer, db.ForeignKey("student.id"), nullable=False, index=True)
+    violation_type_name = db.Column(db.String(200), nullable=False)
+    points_deducted = db.Column(db.Integer, nullable=False)
+    # Trạng thái: 'pending' = chờ xác nhận, 'confirmed' = đã xác nhận (chuyển thành Violation)
+    status = db.Column(db.String(20), default="pending")
+    # Thời điểm vi phạm được ghi nhận trong phi��n
+    recorded_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    # Ghi chú của giáo viên trong phiên
+    notes = db.Column(db.Text, nullable=True)
+    # Violation chính thức được tạo (sau khi confirm)
+    official_violation_id = db.Column(db.Integer, db.ForeignKey("violation.id"), nullable=True)
+
+    session = db.relationship("AttendanceMonitoringSession", backref=db.backref("violation_records", lazy=True))
+    student = db.relationship("Student", backref=db.backref("session_violation_records", lazy=True))
+    official_violation = db.relationship("Violation")
