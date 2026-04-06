@@ -17,7 +17,7 @@ from flask import (
     render_template, request, jsonify, url_for,
 )
 from flask_login import login_required, current_user
-from sqlalchemy import desc
+from sqlalchemy import desc, or_
 from urllib.parse import quote
 
 from models import db, Student, AttendanceRecord, ClassRoom, AttendanceMonitoringSession, SessionViolationRecord, ViolationType, Violation, SystemConfig
@@ -38,6 +38,30 @@ os.makedirs(FACE_MODEL_DIR, exist_ok=True)
 
 # Ngưỡng similarity (ArcFace standard: 0.4)
 RECOGNITION_THRESHOLD = 0.40
+
+# Phiên theo dõi toàn trường (giá trị lưu DB — tránh trùng tên lớp thật)
+MONITORING_CLASS_ALL = "__ALL_SCHOOL__"
+MONITORING_CLASS_ALL_LABEL = "Toàn trường"
+
+
+def _monitoring_class_label(class_name):
+    return MONITORING_CLASS_ALL_LABEL if class_name == MONITORING_CLASS_ALL else class_name
+
+
+def _pick_monitoring_session_in_window(candidate_sessions, student_class, now_min):
+    """Ưu tiên phiên đúng lớp, sau đó phiên toàn trường — cùng khung giờ."""
+    def _pick(class_name_filter):
+        for s in candidate_sessions:
+            if s.class_name != class_name_filter:
+                continue
+            sm = s.start_time.hour * 60 + s.start_time.minute
+            em = s.end_time.hour * 60 + s.end_time.minute if s.end_time else 24 * 60
+            if sm <= now_min <= em:
+                return s
+        return None
+
+    hit = _pick(student_class)
+    return hit if hit else _pick(MONITORING_CLASS_ALL)
 
 
 def make_attendance_qr_data(student_id):
@@ -269,6 +293,7 @@ def register(app):
             selected_class=selected_class,
             model_ready=model_ready,
             violation_rules=ViolationType.query.all(),
+            today_iso=datetime.date.today().isoformat(),
         )
 
     @app.route("/api/attendance/students")
@@ -500,19 +525,17 @@ def register(app):
         today_date = datetime.date.today()
         now_min = now.hour * 60 + now.minute
 
-        # Lọc theo lớp + ngày + trạng thái, sau đó so sánh CHỈ giờ-phút
-        candidate_sessions = AttendanceMonitoringSession.query.filter_by(
-            class_name=student.student_class,
-            session_date=today_date,
-            status="open",
+        # Lọc theo lớp HS hoặc phiên toàn trường + ngày + trạng thái, so sánh CHỈ giờ-phút
+        candidate_sessions = AttendanceMonitoringSession.query.filter(
+            AttendanceMonitoringSession.session_date == today_date,
+            AttendanceMonitoringSession.status == "open",
+            or_(
+                AttendanceMonitoringSession.class_name == student.student_class,
+                AttendanceMonitoringSession.class_name == MONITORING_CLASS_ALL,
+            ),
         ).all()
-        open_session = None
-        for s in candidate_sessions:
-            start_min = s.start_time.hour * 60 + s.start_time.minute
-            end_min = s.end_time.hour * 60 + s.end_time.minute if s.end_time else 24 * 60
-            if start_min <= now_min <= end_min:
-                open_session = s
-                break
+        open_session = _pick_monitoring_session_in_window(
+            candidate_sessions, student.student_class, now_min)
         if open_session:
             record.monitoring_session_id = open_session.id
             viol = SessionViolationRecord(
@@ -810,18 +833,16 @@ def register(app):
         now = datetime.datetime.now()
         now_min = now.hour * 60 + now.minute
 
-        candidate_sessions = AttendanceMonitoringSession.query.filter_by(
-            class_name=student.student_class,
-            session_date=today,
-            status="open",
+        candidate_sessions = AttendanceMonitoringSession.query.filter(
+            AttendanceMonitoringSession.session_date == today,
+            AttendanceMonitoringSession.status == "open",
+            or_(
+                AttendanceMonitoringSession.class_name == student.student_class,
+                AttendanceMonitoringSession.class_name == MONITORING_CLASS_ALL,
+            ),
         ).all()
-        open_session = None
-        for s in candidate_sessions:
-            start_min = s.start_time.hour * 60 + s.start_time.minute
-            end_min = s.end_time.hour * 60 + s.end_time.minute if s.end_time else 24 * 60
-            if start_min <= now_min <= end_min:
-                open_session = s
-                break
+        open_session = _pick_monitoring_session_in_window(
+            candidate_sessions, student.student_class, now_min)
         if open_session:
             record.monitoring_session_id = open_session.id
             viol = SessionViolationRecord(
@@ -1013,9 +1034,14 @@ def register(app):
         if status_filter in ("open", "confirmed", "cancelled"):
             query = query.filter_by(status=status_filter)
 
-        # Nếu là GVCN, chỉ thấy phiên của lớp mình
+        # GVCN: phiên lớp mình + phiên toàn trường
         if current_user.role == "homeroom_teacher" and current_user.assigned_class:
-            query = query.filter_by(class_name=current_user.assigned_class)
+            query = query.filter(
+                or_(
+                    AttendanceMonitoringSession.class_name == current_user.assigned_class,
+                    AttendanceMonitoringSession.class_name == MONITORING_CLASS_ALL,
+                )
+            )
 
         sessions = query.order_by(
             AttendanceMonitoringSession.session_date.desc(),
@@ -1030,6 +1056,7 @@ def register(app):
             result.append({
                 "id": s.id,
                 "class_name": s.class_name,
+                "class_display": _monitoring_class_label(s.class_name),
                 "start_time": s.start_time.strftime("%H:%M"),
                 "end_time": s.end_time.strftime("%H:%M") if s.end_time else None,
                 "session_date": s.session_date.strftime("%d/%m/%Y"),
@@ -1072,8 +1099,9 @@ def register(app):
             status="open",
         ).first()
         if existing:
+            lbl = _monitoring_class_label(class_name)
             return jsonify({
-                "error": f"Phiên theo dõi lớp {class_name} đang mở từ {existing.start_time.strftime('%H:%M')}. Vui lòng đóng phiên cũ trước."
+                "error": f"Phiên theo dõi ({lbl}) đang mở từ {existing.start_time.strftime('%H:%M')}. Vui lòng đóng phiên cũ trước."
             }), 409
 
         session = AttendanceMonitoringSession(
@@ -1087,9 +1115,10 @@ def register(app):
         )
         db.session.add(session)
         db.session.commit()
+        lbl = _monitoring_class_label(class_name)
         return jsonify({
             "success": True,
-            "message": f"Đã mở phiên theo dõi lớp {class_name} từ {start_time_str}.",
+            "message": f"Đã mở phiên theo dõi ({lbl}) từ {start_time_str}.",
             "session_id": session.id,
         })
 
@@ -1103,7 +1132,7 @@ def register(app):
 
         # Kiểm tra quyền truy cập
         if current_user.role == "homeroom_teacher" and current_user.assigned_class:
-            if session.class_name != current_user.assigned_class:
+            if session.class_name not in (current_user.assigned_class, MONITORING_CLASS_ALL):
                 return jsonify({"error": "Bạn không có quyền xem phiên này."}), 403
 
         # Lấy danh sách vi phạm trong phiên
@@ -1112,12 +1141,22 @@ def register(app):
             session_id=session_id
         ).order_by(SessionViolationRecord.recorded_at.desc()).all()
 
-        students = Student.query.filter_by(student_class=session.class_name).order_by(Student.name).all()
+        if session.class_name == MONITORING_CLASS_ALL:
+            if current_user.role == "homeroom_teacher" and current_user.assigned_class:
+                students = Student.query.filter_by(
+                    student_class=current_user.assigned_class
+                ).order_by(Student.name).all()
+            else:
+                students = Student.query.order_by(Student.student_class, Student.name).all()
+        else:
+            students = Student.query.filter_by(student_class=session.class_name).order_by(Student.name).all()
 
         return jsonify({
             "session": {
                 "id": session.id,
                 "class_name": session.class_name,
+                "class_display": _monitoring_class_label(session.class_name),
+                "scope_all": session.class_name == MONITORING_CLASS_ALL,
                 "start_time": session.start_time.strftime("%H:%M"),
                 "end_time": session.end_time.strftime("%H:%M") if session.end_time else None,
                 "session_date": session.session_date.strftime("%d/%m/%Y"),
@@ -1131,6 +1170,7 @@ def register(app):
                 "id": s.id,
                 "name": s.name,
                 "student_code": s.student_code,
+                "student_class": s.student_class,
             } for s in students],
             "violations": [{
                 "id": v.id,
@@ -1332,6 +1372,12 @@ def register(app):
 
         if not pending:
             return jsonify({"error": "Không có vi phạm nào để xác nhận."}), 400
+
+        unset = [r for r in pending if r.violation_type_name in ("___auto___", "", None)]
+        if unset:
+            return jsonify({
+                "error": "Còn vi phạm chưa chọn loại lỗi. Dùng cột «Loại vi phạm» hoặc nút «Chọn lỗi» để chọn trước khi xác nhận.",
+            }), 400
 
         # Lấy week number hiện tại
         w_cfg = SystemConfig.query.filter_by(key="current_week").first()

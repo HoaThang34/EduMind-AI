@@ -171,6 +171,7 @@
                                 <label class="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Chọn lớp</label>
                                 <select id="monitor-class-select" class="input-shadcn w-full text-sm">
                                     <option value="">— Chọn lớp —</option>
+                                    <option value="__ALL_SCHOOL__">Toàn trường</option>
                                     {% for c in classes %}<option value="{{ c }}" {% if selected_class == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
                                 </select>
                             </div>
@@ -198,7 +199,7 @@
                 <div class="p-4 border-b border-border flex flex-wrap items-center justify-between gap-3">
                     <h3 class="text-sm font-semibold text-foreground">Phiên theo dõi gần đây</h3>
                     <div class="flex items-center gap-2">
-                        <input type="date" id="monitor-history-date" class="input-shadcn w-36 text-xs" onchange="loadMonitoringSessions()">
+                        <input type="date" id="monitor-history-date" class="input-shadcn w-36 text-xs" value="{{ today_iso }}" onchange="loadMonitoringSessions()">
                         <select id="monitor-history-status" class="input-shadcn w-28 text-xs" onchange="loadMonitoringSessions()">
                             <option value="">Tất cả</option>
                             <option value="open">Đang mở</option>
@@ -255,13 +256,14 @@
                             <thead>
                                 <tr>
                                     <th>Học sinh</th>
+                                    <th class="text-center w-24 monitor-col-class hidden">Lớp</th>
                                     <th class="text-center">Mã</th>
                                     <th class="text-center">Trạng thái vi phạm</th>
                                     <th class="text-center">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody id="monitor-students-body">
-                                <tr><td colspan="4" class="text-center py-8 text-muted-foreground">Đang tải...</td></tr>
+                                <tr><td colspan="5" class="text-center py-8 text-muted-foreground">Đang tải...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -361,8 +363,8 @@
                             <option value="face">Khuôn mặt</option>
                             <option value="qr">Mã QR</option>
                         </select>
-                        <input type="date" id="history-date-from" class="input-shadcn w-36 text-sm" onchange="loadHistory()">
-                        <input type="date" id="history-date-to" class="input-shadcn w-36 text-sm" onchange="loadHistory()">
+                        <input type="date" id="history-date-from" class="input-shadcn w-36 text-sm" value="{{ today_iso }}" onchange="loadHistory()">
+                        <input type="date" id="history-date-to" class="input-shadcn w-36 text-sm" value="{{ today_iso }}" onchange="loadHistory()">
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -637,6 +639,14 @@ let qrScanInterval = null;
 let autoQrScanEnabled = true;
 let qrCooldown = false;
 let qrClassStudentsCache = {};
+
+/** Ngày hôm nay theo giờ trình duyệt (YYYY-MM-DD). Không dùng toISOString() vì đó là UTC, dễ lệch 1 ngày. */
+function localTodayISO() {
+    const d = new Date();
+    return d.getFullYear() + '-' +
+        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        String(d.getDate()).padStart(2, '0');
+}
 
 // ===================== MODE SWITCHING =====================
 function setAttendanceMode(mode) {
@@ -1019,7 +1029,7 @@ async function doQrManualCheckin(sid, name) {
 
 async function loadQrTodayCheckins() {
     const container = document.getElementById('qr-today-checkins');
-    const today = new Date().toISOString().split('T')[0];
+    const today = localTodayISO();
     try {
         const resp = await fetch(`/api/attendance/history?date_from=${today}&mode=qr`);
         const data = await resp.json();
@@ -1044,7 +1054,7 @@ async function loadQrTodayCheckins() {
 
 async function loadQrTodayCount() {
     const badge = document.getElementById('qr-count-badge');
-    const today = new Date().toISOString().split('T')[0];
+    const today = localTodayISO();
     try {
         const resp = await fetch(`/api/attendance/history?date_from=${today}&mode=qr`);
         const data = await resp.json();
@@ -1376,7 +1386,7 @@ function showToast(m, t='success') {
 
 async function loadTodayCheckins() {
     const container = document.getElementById('today-checkins');
-    const today = new Date().toISOString().split('T')[0];
+    const today = localTodayISO();
     try {
         const resp = await fetch(`/api/attendance/history?date_from=${today}`);
         const data = await resp.json();
@@ -1616,7 +1626,7 @@ async function loadMonitoringSessions() {
             const statusLabel = s.status === 'open' ? 'Đang mở' : s.status === 'confirmed' ? 'Đã xác nhận' : 'Đã hủy';
             const timeLabel = s.end_time ? `${s.start_time} – ${s.end_time}` : `${s.start_time} – ...`;
             return `<tr class="hover:bg-gray-50 transition-colors">
-                <td class="font-medium text-sm">${s.class_name}</td>
+                <td class="font-medium text-sm">${s.class_display || s.class_name}</td>
                 <td class="text-xs text-gray-600">${s.session_date}</td>
                 <td class="text-xs text-gray-600">${timeLabel}</td>
                 <td class="text-center"><span class="badge ${statusClass} text-[10px] font-bold">${statusLabel}</span></td>
@@ -1629,7 +1639,7 @@ async function loadMonitoringSessions() {
         }).join('');
 
         // Khôi phục phiên đang mở sau F5 / vào lại tab (một phiên open duy nhất trong kết quả)
-        const todayIso = new Date().toISOString().split('T')[0];
+        const todayIso = localTodayISO();
         const openSessions = sessions.filter(s => s.status === 'open');
         const showOpenOnly = statusVal === 'open';
         if (!currentMonitoringSession && dateVal === todayIso && (!statusVal || showOpenOnly) && openSessions.length === 1) {
@@ -1681,8 +1691,9 @@ async function openSessionDetail(sessionId) {
         banner.classList.remove('hidden');
         banner.className = 'p-4 rounded-xl border-2 ' + (data.session.status === 'open' ? 'border-emerald-300 bg-emerald-50' : 'border-gray-300 bg-gray-50');
 
+        const disp = data.session.class_display || data.session.class_name;
         document.getElementById('banner-session-title').textContent =
-            `Theo dõi lớp ${data.session.class_name} — ${data.session.session_date}`;
+            (data.session.scope_all ? `Theo dõi toàn trường — ${data.session.session_date}` : `Theo dõi lớp ${disp} — ${data.session.session_date}`);
         document.getElementById('banner-session-time').textContent =
             `${data.session.start_time}` + (data.session.end_time ? ` → ${data.session.end_time}` : ' → ...') +
             ` | Trạng thái: ${data.session.status}`;
@@ -1716,7 +1727,11 @@ async function openSessionDetail(sessionId) {
         }
 
         // Show student panel
-        document.getElementById('monitor-class-label').textContent = data.session.class_name;
+        document.getElementById('monitor-class-label').textContent =
+            data.session.scope_all ? 'Toàn trường' : disp;
+        document.querySelectorAll('.monitor-col-class').forEach(el => {
+            el.classList.toggle('hidden', !data.session.scope_all);
+        });
         document.getElementById('monitoring-student-panel').classList.remove('hidden');
 
         renderMonitoringStudents();
@@ -1750,12 +1765,16 @@ function renderViolationSelect(violationTypes, studentViolations) {
 function renderMonitoringStudents() {
     const body = document.getElementById('monitor-students-body');
     const searchVal = document.getElementById('monitor-student-search').value.toLowerCase();
+    const scopeAll = currentMonitoringSession && currentMonitoringSession.scope_all;
+    const colSpan = scopeAll ? 5 : 4;
+
     const filtered = monitorStudents.filter(s =>
         (s.name || '').toLowerCase().includes(searchVal) ||
-        String(s.student_code || '').toLowerCase().includes(searchVal));
+        String(s.student_code || '').toLowerCase().includes(searchVal) ||
+        String(s.student_class || '').toLowerCase().includes(searchVal));
 
     if (filtered.length === 0) {
-        body.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-muted-foreground text-sm">Không tìm thấy học sinh</td></tr>';
+        body.innerHTML = `<tr><td colspan="${colSpan}" class="text-center py-8 text-muted-foreground text-sm">Không tìm thấy học sinh</td></tr>`;
         return;
     }
 
@@ -1779,8 +1798,12 @@ function renderMonitoringStudents() {
         // Select loại vi phạm: luôn hiển thị nếu có vi phạm, HOẶC chưa có vi phạm (để thêm mới)
         const showSelect = hasViolation;
 
+        const classCell = scopeAll
+            ? `<td class="text-center text-xs font-medium text-indigo-600 monitor-col-class">${s.student_class || '—'}</td>`
+            : '';
         return `<tr class="hover:bg-gray-50 transition-colors">
             <td class="font-medium text-sm">${s.name}</td>
+            ${classCell}
             <td class="text-center text-xs font-mono text-gray-500">${s.student_code || '—'}</td>
             <td class="text-center">
                 ${violationBadge || '<span class="text-xs text-gray-300">—</span>'}
@@ -1834,6 +1857,14 @@ function filterMonitoringStudents() {
     renderMonitoringStudents();
 }
 
+function escAttr(s) {
+    return String(s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
+function escapeHtml(s) {
+    return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function renderMonitoringViolations() {
     const body = document.getElementById('monitor-violations-body');
     const pending = monitorViolations.filter(v => v.status === 'pending');
@@ -1853,19 +1884,43 @@ function renderMonitoringViolations() {
 
     if (removeBtn) removeBtn.classList.remove('hidden');
 
-    body.innerHTML = pending.map(v => `<tr class="hover:bg-gray-50 transition-colors">
+    body.innerHTML = pending.map(v => {
+        const isAuto = v.violation_type_name === '___auto___';
+        const types = violationTypes || [];
+        let optionsHtml = '';
+        if (isAuto) {
+            optionsHtml += '<option value="" selected>— Chọn lỗi —</option>';
+        }
+        types.forEach(t => {
+            const sel = !isAuto && v.violation_type_name === t.name ? ' selected' : '';
+            optionsHtml += `<option value="${escAttr(t.name)}"${sel}>${escapeHtml(t.name)} (-${t.points_deducted}đ)</option>`;
+        });
+        const typeCell = `
+            <div class="flex flex-col gap-2 min-w-[10rem]">
+                ${isAuto ? `
+                <button type="button" class="btn-primary text-xs px-3 py-1.5 w-fit shadow-sm"
+                    onclick="document.getElementById('monitor-viol-pick-${v.id}').focus()"
+                    title="Mở danh sách để chọn loại vi phạm">Chọn lỗi</button>` : ''}
+                <select id="monitor-viol-pick-${v.id}"
+                    class="monitor-viol-pick text-xs border border-red-200 rounded-lg px-2 py-1.5 bg-white w-full max-w-[16rem] focus:outline-none focus:ring-2 focus:ring-red-400"
+                    onchange="updateStudentViolationType(this, ${v.id})"
+                    title="Chọn loại vi phạm">${optionsHtml}</select>
+                ${!isAuto ? `<span class="text-[10px] text-gray-500">Đổi loại: chọn mục khác trong danh sách</span>` : ''}
+            </div>`;
+        return `<tr class="hover:bg-gray-50 transition-colors">
         <td class="text-center"><input type="checkbox" class="monitor-violation-check w-4 h-4 rounded accent-red-600 cursor-pointer" value="${v.id}" onchange="updateMonitorViolationSelection()"></td>
-        <td class="font-medium text-sm">${v.student_name}<br><span class="text-[10px] text-gray-400 font-mono">${v.student_code}</span></td>
-        <td class="text-sm text-red-700 font-bold">${v.violation_type_name}</td>
+        <td class="font-medium text-sm">${escapeHtml(v.student_name)}<br><span class="text-[10px] text-gray-400 font-mono">${escapeHtml(v.student_code)}</span></td>
+        <td class="text-sm align-top">${typeCell}</td>
         <td class="text-center"><span class="badge bg-red-100 text-red-700 text-xs font-bold">-${v.points_deducted}đ</span></td>
         <td class="text-center text-xs text-gray-500">${v.recorded_at}</td>
-        <td class="text-center text-xs text-gray-500 max-w-32 truncate">${v.notes || '—'}</td>
+        <td class="text-center text-xs text-gray-500 max-w-32 truncate">${escapeHtml(v.notes || '—')}</td>
         <td class="text-center">
             <button onclick="removeMonitorViolation(${v.id})" class="text-red-500 hover:text-red-700 transition-colors" title="Xóa">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
             </button>
         </td>
-    </tr>`).join('');
+    </tr>`;
+    }).join('');
 }
 
 function toggleAllMonitorViolations(source) {
@@ -1975,6 +2030,11 @@ async function confirmSessionViolations() {
         showToast('Không có vi phạm nào để xác nhận.', 'error');
         return;
     }
+    const autoLeft = pending.filter(v => v.violation_type_name === '___auto___');
+    if (autoLeft.length > 0) {
+        showToast(`Còn ${autoLeft.length} vi phạm chưa chọn loại lỗi. Dùng nút «Chọn lỗi» hoặc danh sách trong cột Loại vi phạm.`, 'error');
+        return;
+    }
 
     const totalPoints = pending.reduce((sum, v) => sum + v.points_deducted, 0);
     if (!confirm(`Xác nhận đưa ${pending.length} vi phạm lên hệ thống xử phạt?\n\nTổng điểm trừ: ${totalPoints} điểm\n\nHành động này sẽ:\n• Trừ điểm học sinh\n• Cập nhật hạnh kiểm\n• Đóng phiên theo dõi`)) return;
@@ -1993,6 +2053,7 @@ async function confirmSessionViolations() {
             document.getElementById('monitoring-student-panel').classList.add('hidden');
             document.getElementById('monitoring-violations-panel').classList.add('hidden');
             document.getElementById('monitoring-open-form').classList.remove('hidden');
+            document.querySelectorAll('.monitor-col-class').forEach(el => el.classList.add('hidden'));
             loadMonitoringSessions();
             loadStats();
         } else {
@@ -2018,6 +2079,7 @@ async function cancelMonitoringSession() {
             document.getElementById('monitoring-student-panel').classList.add('hidden');
             document.getElementById('monitoring-violations-panel').classList.add('hidden');
             document.getElementById('monitoring-open-form').classList.remove('hidden');
+            document.querySelectorAll('.monitor-col-class').forEach(el => el.classList.add('hidden'));
             loadMonitoringSessions();
         } else {
             showToast(data.error || 'Không thể hủy phiên.', 'error');
@@ -2031,11 +2093,10 @@ document.addEventListener('DOMContentLoaded', function() {
     setAttendanceMode('face');
     loadStats();
     loadTodayCheckins();
-    // Set default dates for history
-    const today = new Date().toISOString().split('T')[0];
+    // Đồng bộ ngày theo giờ máy người dùng (HTML đã có value từ server; ghi đè nếu múi giờ client khác server)
+    const today = localTodayISO();
     document.getElementById('history-date-from').value = today;
     document.getElementById('history-date-to').value = today;
-    // Set default dates for monitoring
     document.getElementById('monitor-history-date').value = today;
     // Load monitoring sessions
     loadMonitoringSessions();
