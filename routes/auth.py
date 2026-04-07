@@ -10,7 +10,7 @@ def login():
         user = Teacher.query.filter_by(username=request.form["username"]).first()
         if user and user.check_password(request.form["password"]):
             login_user(user)
-            return redirect(url_for("dashboard"))
+            return redirect(url_for("home"))
         flash("Sai thông tin đăng nhập!", "error")
     return render_template("login.html")
 
