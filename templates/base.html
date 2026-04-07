@@ -877,6 +877,12 @@
                             <i class="fas fa-history w-6 text-center text-lg mr-3"></i>
                             <span class="text-sm">Lịch sử tuần</span>
                         </a>
+                        <a href="{{ url_for('violation_history') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'violation_history' %}active bg-gradient-to-r from-red-50 to-rose-50 text-red-600 font-semibold{% endif %}">
+                            <i class="fas fa-shield-alt w-6 text-center text-lg mr-3 text-red-400 group-hover:text-red-500"></i>
+                            <span class="text-sm">Lịch sử vi phạm</span>
+                            <span class="ml-auto bg-red-100 text-red-600 text-[10px] font-bold px-1.5 py-0.5 rounded">HOT</span>
+                        </a>
                         {% if current_user.role in ['admin', 'homeroom_teacher'] %}
                         <a href="{{ url_for('changelog') }}"
                             class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'changelog' %}active{% endif %}">

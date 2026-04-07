@@ -619,6 +619,81 @@ def register(app):
                                display_score=display_score,
                                total_added=total_added,
                                warning=warning)
+
+    @app.route("/violation_history")
+    @login_required
+    def violation_history():
+        """Xem lịch sử vi phạm theo tuần và lớp - Tối ưu mobile."""
+        page = request.args.get('page', 1, type=int)
+        per_page = 20
+
+        selected_week = request.args.get('week', type=int)
+        selected_class = request.args.get('class_select', '').strip()
+
+        # Lấy danh sách tuần có dữ liệu
+        weeks = [w[0] for w in db.session.query(Violation.week_number).distinct().order_by(Violation.week_number.desc()).all()]
+
+        # Lấy danh sách lớp
+        all_classes = [c.name for c in ClassRoom.query.order_by(ClassRoom.name).all()]
+
+        # Mặc định chọn tuần mới nhất
+        if not selected_week and weeks:
+            selected_week = weeks[0]
+
+        # Query vi phạm
+        query = db.session.query(Violation).join(Student)
+
+        if selected_week:
+            query = query.filter(Violation.week_number == selected_week)
+        if selected_class:
+            query = query.filter(Student.student_class == selected_class)
+
+        violations = query.order_by(Violation.date_committed.desc()).paginate(page=page, per_page=per_page, error_out=False)
+
+        # Thống kê tổng quan theo tuần
+        weekly_stats = []
+        for w in weeks[:8]:  # Chỉ lấy 8 tuần gần nhất
+            total_v = Violation.query.filter_by(week_number=w).count()
+            total_pts = db.session.query(func.sum(Violation.points_deducted)).filter(Violation.week_number == w).scalar() or 0
+            weekly_stats.append({'week': w, 'total': total_v, 'points': total_pts})
+
+        # Thống kê theo lớp cho tuần đã chọn
+        class_stats = []
+        if selected_week:
+            for cls in ClassRoom.query.order_by(ClassRoom.name).all():
+                stu_count = Student.query.filter_by(student_class=cls.name).count()
+                if stu_count == 0:
+                    continue
+                cls_vios = Violation.query.filter_by(week_number=selected_week).join(Student).filter(Student.student_class == cls.name).all()
+                cls_total = len(cls_vios)
+                cls_pts = sum(v.points_deducted for v in cls_vios)
+                class_stats.append({
+                    'name': cls.name,
+                    'total': cls_total,
+                    'points': cls_pts,
+                    'students': stu_count
+                })
+
+        # Sắp xếp theo tổng vi phạm giảm dần
+        class_stats.sort(key=lambda x: x['total'], reverse=True)
+
+        # Biểu đồ theo tuần
+        chart_labels = json.dumps([f"T{w['week']}" for w in weekly_stats])
+        chart_data = json.dumps([w['total'] for w in weekly_stats])
+
+        return render_template(
+            "violation_history.html",
+            violations=violations,
+            weeks=weeks,
+            selected_week=selected_week,
+            selected_class=selected_class,
+            all_classes=all_classes,
+            weekly_stats=weekly_stats,
+            class_stats=class_stats,
+            chart_labels=chart_labels,
+            chart_data=chart_data
+        )
+
     @app.route("/changelog")
     @login_required
     def changelog():
