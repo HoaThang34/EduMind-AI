@@ -313,11 +313,12 @@ def register(app):
             db.session.add(slot)
             db.session.flush()
 
-        # Allowed fields
+        # Allowed fields (lesson_date handled separately)
         allowed_fields = {
             "subject_name", "topic", "objectives", "teaching_method",
             "evaluation", "homework", "notes",
             "attendance_present", "attendance_absent",
+            "lesson_date",
         }
         if field not in allowed_fields:
             return jsonify({"error": "Trường không hợp lệ."}), 400
@@ -329,20 +330,24 @@ def register(app):
             except (ValueError, TypeError):
                 value = None
 
+        # Parse lesson_date from string dd/mm/yyyy if provided
+        if field == "lesson_date":
+            value = None
+            raw = data.get("value", "").strip()
+            if raw:
+                for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y"):
+                    try:
+                        value = datetime.datetime.strptime(raw, fmt).date()
+                        break
+                    except ValueError:
+                        pass
+
         setattr(slot, field, value)
-        slot.lesson_date = lesson_date_for_grid_cell(week_number, day_of_week)
         slot.updated_at = datetime.datetime.utcnow()
         week.updated_at = datetime.datetime.utcnow()
         db.session.commit()
 
-        ld = slot.lesson_date
-        return jsonify({
-            "ok": True,
-            "slot_id": slot.id,
-            "week_id": week.id,
-            "lesson_date": ld.isoformat() if ld else None,
-            "lesson_date_display": ld.strftime("%d/%m/%Y") if ld else "",
-        })
+        return jsonify({"ok": True, "slot_id": slot.id, "week_id": week.id})
 
     # ── API: save week-level notes ─────────────────────────────────────────────
 

@@ -80,18 +80,35 @@
     .cell-subject input::placeholder { color: #93c5fd; font-weight: 400; }
 
     /* ── Ngày dạy (tự điền) ───────────────────────────────────────────────────── */
-    .cell-date {
-        font-size: 0.62rem;
-        color: #64748b;
-        padding: 2px 6px 0;
-        border-bottom: 1px dashed #e2e8f0;
-        font-weight: 500;
+    /* ── Lesson date input ──────────────────────────────────────────────────── */
+    .cell-date-wrap {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        padding: 2px 6px 1px;
+        border-bottom: 1px dashed #cbd5e1;
     }
-    .cell-date.is-today {
+    .cell-date-wrap label {
+        font-size: 0.6rem;
+        color: #94a3b8;
+        white-space: nowrap;
+    }
+    .cell-date-wrap input {
+        border: none;
+        border-bottom: 1px solid #cbd5e1;
+        background: transparent;
+        font-size: 0.65rem;
+        color: #334155;
+        padding: 1px 2px;
+        width: 82px;
+        outline: none;
+        font-family: inherit;
+    }
+    .cell-date-wrap input:focus {
+        border-bottom-color: #1d4ed8;
         color: #1d4ed8;
-        font-weight: 700;
-        background: #eff6ff;
     }
+    .cell-date-wrap input::placeholder { color: #cbd5e1; }
 
     /* ── Main textarea (topic) ───────────────────────────────────────────────── */
     .cell-content {
@@ -114,6 +131,9 @@
     }
     .cell-content textarea::placeholder { color: #9ca3af; }
     .cell-content textarea:focus { background: #fffbeb; }
+
+    /* ── Highlight today column ──────────────────────────────────────────────── */
+    .col-today { background: #fffbeb !important; }
 
     /* ── Attendance mini row ─────────────────────────────────────────────────── */
     .cell-attendance {
@@ -346,11 +366,21 @@ const DAYS = [1, 2, 3, 4, 5, 6, 7];  // Thứ 2 – CN
 const FIELDS = ['subject_name', 'topic', 'attendance_present', 'attendance_absent'];
 const WEEK_ID = {{ week_record.id if week_record else 'null' | tojson }};
 const DAY_META = {{ day_meta | tojson }};
-const TODAY_ISO = {{ today_iso | tojson }};
 
 // ── Data store: week_data[day][period] = { field: value, el: DOM, saved: bool }
 const weekData = {};
 let weekIdCache = WEEK_ID;
+let todayISO = null;
+
+// Init: compute today's ISO date from DAY_META
+(function(){
+    // highlight today column in the table header + each body cell
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth()+1).padStart(2,'0');
+    const d = String(today.getDate()).padStart(2,'0');
+    todayISO = y + '-' + m + '-' + d;
+})();
 
 // ── Init grid rows ─────────────────────────────────────────────────────────────
 function initGrid() {
@@ -366,7 +396,7 @@ function initGrid() {
         // Day cells
         for (const d of DAYS) {
             if (!weekData[d]) weekData[d] = {};
-            weekData[d][p] = { subject_name: '', topic: '', attendance_present: '', attendance_absent: '' };
+            weekData[d][p] = { subject_name: '', topic: '', attendance_present: '', attendance_absent: '', lesson_date: '' };
             const td = document.createElement('td');
             td.id = 'cell-' + d + '-' + p;
             td.innerHTML = buildCellHTML(d, p);
@@ -379,11 +409,18 @@ function initGrid() {
 // ── Build cell HTML ────────────────────────────────────────────────────────────
 function buildCellHTML(day, period) {
     const meta = DAY_META[day - 1] || {};
-    const dateStr = meta.display_full || '';
-    const todayCls = (meta.iso === TODAY_ISO) ? ' is-today' : '';
+    const dateHint = meta.display_full || 'dd/mm/yyyy';
     return `
 <div class="cell-wrap">
-    <div class="cell-date${todayCls}">${dateStr}</div>
+    <div class="cell-date-wrap">
+        <label>📅</label>
+        <input type="text"
+            id="dt-${day}-${period}"
+            placeholder="${dateHint}"
+            data-day="${day}" data-period="${period}" data-field="lesson_date"
+            onblur="saveCell(this)"
+            style="max-width:90px">
+    </div>
     <div class="cell-subject">
         <input type="text"
             id="sn-${day}-${period}"
@@ -444,6 +481,7 @@ async function loadWeek() {
                 topic: slot.topic || '',
                 attendance_present: slot.attendance_present != null ? String(slot.attendance_present) : '',
                 attendance_absent: slot.attendance_absent != null ? String(slot.attendance_absent) : '',
+                lesson_date: slot.lesson_date || '',
             };
             // Fill DOM
             const sn = document.getElementById('sn-' + d + '-' + p);
@@ -454,10 +492,9 @@ async function loadWeek() {
             if (tp) tp.value = weekData[d][p].topic;
             if (ap && weekData[d][p].attendance_present !== '') ap.value = weekData[d][p].attendance_present;
             if (ab && weekData[d][p].attendance_absent !== '') ab.value = weekData[d][p].attendance_absent;
-            const cell = document.getElementById('cell-' + d + '-' + p);
-            if (cell && slot.lesson_date_display) {
-                const cd = cell.querySelector('.cell-date');
-                if (cd) cd.textContent = slot.lesson_date_display;
+            if (slot.lesson_date) {
+                const dtEl = document.getElementById('dt-' + d + '-' + p);
+                if (dtEl) dtEl.value = slot.lesson_date;
             }
         }
     } catch (e) {
@@ -498,13 +535,6 @@ async function saveCell(el) {
         const j = await r.json();
         if (j.ok) {
             weekIdCache = j.week_id;
-            if (j.lesson_date_display) {
-                const cell = document.getElementById('cell-' + day + '-' + period);
-                if (cell) {
-                    const cd = cell.querySelector('.cell-date');
-                    if (cd) cd.textContent = j.lesson_date_display;
-                }
-            }
             showToast();
         }
     } catch (e) {
@@ -562,10 +592,36 @@ function showToast(msg) {
     setTimeout(() => t.classList.remove('show'), 1800);
 }
 
+// ── Highlight today column ────────────────────────────────────────────────────
+function highlightTodayColumn() {
+    if (!todayISO) return;
+    // Find which day index matches today in day_meta
+    const todayIdx = DAY_META.findIndex(function(d){ return d.iso === todayISO; });
+    if (todayIdx === -1) return;
+    const dayNum = todayIdx + 1; // day 1-7
+    // Style the header cell
+    var hdrCells = document.querySelectorAll('#lessonBookGrid thead th');
+    hdrCells.forEach(function(cell){ cell.classList.remove('col-today'); });
+    if (hdrCells[dayNum]) hdrCells[dayNum].classList.add('col-today');
+    // Style all data cells in that column
+    PERIODS.forEach(function(p){
+        var td = document.getElementById('cell-' + dayNum + '-' + p);
+        if (td) {
+            td.classList.add('col-today');
+            // Also prefill date placeholder with today's date
+            var dtEl = document.getElementById('dt-' + dayNum + '-' + p);
+            if (dtEl && !dtEl.value) {
+                dtEl.placeholder = todayISO;
+            }
+        }
+    });
+}
+
 // ── Boot ────────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function () {
     initGrid();
     loadWeek();
+    highlightTodayColumn();
 });
 </script>
 {% endblock %}
