@@ -1,0 +1,571 @@
+{% extends "base.html" %}
+{% block title %}Sổ đầu bài — Tuần {{ week_number }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* ── Grid table ──────────────────────────────────────────────────────────── */
+    .lb-grid {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.78rem;
+        table-layout: fixed;
+    }
+    .lb-grid th {
+        background: #1e40af;
+        color: #fff;
+        font-weight: 600;
+        text-align: center;
+        padding: 8px 6px;
+        border: 1px solid #1e3a8a;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        font-size: 0.72rem;
+        white-space: nowrap;
+    }
+    .lb-grid th.period-col {
+        background: #1d4ed8;
+        min-width: 44px;
+        width: 44px;
+    }
+    .lb-grid td {
+        border: 1px solid #d1d5db;
+        vertical-align: top;
+        padding: 0;
+        background: #fff;
+    }
+    .lb-grid tr:hover td { background: #eff6ff; }
+    .lb-grid .period-label {
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-weight: 700;
+        font-size: 0.72rem;
+        text-align: center;
+        padding: 6px 4px;
+        border: 1px solid #bfdbfe;
+        width: 44px;
+        min-width: 44px;
+        position: sticky;
+        left: 0;
+        z-index: 5;
+    }
+
+    /* ── Cell wrapper ─────────────────────────────────────────────────────────── */
+    .cell-wrap {
+        display: flex;
+        flex-direction: column;
+        min-height: 80px;
+        height: 100%;
+    }
+
+    /* ── Subject row inside cell ────────────────────────────────────────────── */
+    .cell-subject {
+        background: #f0f9ff;
+        padding: 3px 6px;
+        border-bottom: 1px dashed #93c5fd;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #1d4ed8;
+    }
+    .cell-subject input {
+        background: transparent;
+        border: none;
+        outline: none;
+        width: 100%;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #1d4ed8;
+        padding: 0;
+    }
+    .cell-subject input::placeholder { color: #93c5fd; font-weight: 400; }
+
+    /* ── Ngày dạy (tự điền) ───────────────────────────────────────────────────── */
+    .cell-date {
+        font-size: 0.62rem;
+        color: #64748b;
+        padding: 2px 6px 0;
+        border-bottom: 1px dashed #e2e8f0;
+        font-weight: 500;
+    }
+    .cell-date.is-today {
+        color: #1d4ed8;
+        font-weight: 700;
+        background: #eff6ff;
+    }
+
+    /* ── Main textarea (topic) ───────────────────────────────────────────────── */
+    .cell-content {
+        flex: 1;
+        padding: 4px 6px;
+    }
+    .cell-content textarea {
+        width: 100%;
+        height: 100%;
+        min-height: 56px;
+        border: none;
+        outline: none;
+        resize: none;
+        font-family: 'Be Vietnam Pro', sans-serif;
+        font-size: 0.72rem;
+        line-height: 1.45;
+        color: #1f2937;
+        background: transparent;
+        padding: 0;
+    }
+    .cell-content textarea::placeholder { color: #9ca3af; }
+    .cell-content textarea:focus { background: #fffbeb; }
+
+    /* ── Attendance mini row ─────────────────────────────────────────────────── */
+    .cell-attendance {
+        display: flex;
+        gap: 4px;
+        padding: 3px 6px;
+        background: #fef9c3;
+        border-top: 1px dashed #fde047;
+        align-items: center;
+    }
+    .cell-attendance span {
+        font-size: 0.65rem;
+        color: #854d0e;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+    .cell-attendance input {
+        width: 32px;
+        border: 1px solid #facc15;
+        border-radius: 3px;
+        text-align: center;
+        font-size: 0.68rem;
+        padding: 1px 2px;
+        background: #fff;
+        outline: none;
+        color: #854d0e;
+    }
+    .cell-attendance input:focus { border-color: #eab308; background: #fefce8; }
+
+    /* ── Saved / dirty indicator ──────────────────────────────────────────────── */
+    .cell-saved {
+        font-size: 0.6rem;
+        color: #22c55e;
+        margin-left: 4px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .cell-saved.show { opacity: 1; }
+
+    /* ── Week navigation ─────────────────────────────────────────────────────── */
+    .week-nav-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 16px;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 500;
+        transition: all 0.15s;
+    }
+    .week-nav-btn:hover { transform: translateY(-1px); }
+
+    /* ── Cell hover highlight ─────────────────────────────────────────────────── */
+    .lb-grid td:hover { background-color: #eff6ff !important; }
+
+    /* ── Print styles ─────────────────────────────────────────────────────────── */
+    @media print {
+        .lb-grid { font-size: 0.7rem; }
+        .lb-grid th { background: #1e40af !important; -webkit-print-color-adjust: exact; }
+        .lb-grid td { border: 1px solid #666 !important; }
+        .cell-content textarea { border: none; }
+        .cell-subject { background: #dbeafe !important; -webkit-print-color-adjust: exact; }
+        .cell-attendance { background: #fef9c3 !important; -webkit-print-color-adjust: exact; }
+        .no-print { display: none !important; }
+        .lb-grid { table-layout: auto; }
+    }
+
+    /* ── Toast notification ───────────────────────────────────────────────────── */
+    .save-toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: #16a34a;
+        color: #fff;
+        padding: 10px 18px;
+        border-radius: 10px;
+        font-size: 0.82rem;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
+        z-index: 9999;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.3s;
+        pointer-events: none;
+    }
+    .save-toast.show { opacity: 1; transform: translateY(0); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-[1400px] mx-auto space-y-4">
+
+    {# ── Page header ──────────────────────────────────────────────────────────── #}
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 no-print">
+        <div>
+            <a href="{{ url_for('lesson_book') }}"
+                class="inline-flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 font-medium mb-1">
+                <i class="fas fa-arrow-left text-xs"></i> Sổ đầu bài
+            </a>
+            <h1 class="text-xl font-bold text-foreground flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-blue-700 text-white flex items-center justify-center text-sm">
+                    <i class="fas fa-calendar-week"></i>
+                </span>
+                Sổ đầu bài — Tuần {{ week_number }}
+            </h1>
+            <p class="text-muted-foreground text-sm mt-0.5">{{ week_label }} · {{ class_name }} · {{ school_year }}</p>
+        </div>
+        <div class="flex items-center gap-3 flex-wrap">
+            <button onclick="window.print()" class="btn-outline py-2 px-4 rounded-lg text-sm flex items-center gap-2">
+                <i class="fas fa-print text-xs"></i> In sổ
+            </button>
+            <a href="{{ url_for('lesson_book') }}"
+                class="btn-outline py-2 px-4 rounded-lg text-sm flex items-center gap-2">
+                <i class="fas fa-list text-xs"></i> Danh sách
+            </a>
+        </div>
+    </div>
+
+    {# ── Controls: class + week navigation ───────────────────────────────────── #}
+    <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl p-3 shadow-sm no-print">
+        <div class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-muted-foreground whitespace-nowrap">Lớp:</label>
+                <select id="select_class" class="input-shadcn py-1.5 text-sm min-w-[120px]" onchange="reloadGrid()">
+                    <option value="">— Chọn lớp —</option>
+                    {% for c in classes %}
+                    <option value="{{ c }}" {% if c == class_name %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+                <a href="{{ url_for('lesson_book_grid', class_name=class_name, week_number=prev_week, school_year=school_year, semester=semester) if prev_week else '#' }}"
+                    class="week-nav-btn border border-slate-200 bg-white hover:bg-slate-50 text-slate-700
+                    {% if not prev_week %}opacity-40 pointer-events-none{% endif %}">
+                    <i class="fas fa-chevron-left text-xs"></i> Tuần trước
+                </a>
+                <div class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-sm font-semibold text-blue-700">
+                    <i class="fas fa-calendar text-xs"></i>
+                    Tuần {{ week_number }}
+                    {% if current_school_week and week_number == current_school_week %}
+                    <span class="ml-1 px-1.5 py-0.5 bg-green-500 text-white text-[10px] rounded-full font-bold">Hiện tại</span>
+                    {% endif %}
+                </div>
+                <a href="{{ url_for('lesson_book_grid', class_name=class_name, week_number=next_week, school_year=school_year, semester=semester) if next_week else '#' }}"
+                    class="week-nav-btn border border-slate-200 bg-white hover:bg-slate-50 text-slate-700
+                    {% if not next_week %}opacity-40 pointer-events-none{% endif %}">
+                    Tuần sau <i class="fas fa-chevron-right text-xs"></i>
+                </a>
+            </div>
+
+            <a href="{{ url_for('lesson_book_grid', class_name=class_name, week_number=week_number, school_year=school_year, semester=semester) }}"
+                class="text-xs text-teal-600 hover:underline flex items-center gap-1">
+                <i class="fas fa-sync-alt text-[10px]"></i> Tải lại dữ liệu
+            </a>
+        </div>
+    </div>
+
+    {# ── Hidden form for filter + grid data ─────────────────────────────────── #}
+    <form id="gridForm" method="GET" action="{{ url_for('lesson_book_grid') }}">
+        <input type="hidden" name="class_name" id="form_class" value="{{ class_name }}">
+        <input type="hidden" name="week_number" value="{{ week_number }}">
+        <input type="hidden" name="school_year" value="{{ school_year }}">
+        <input type="hidden" name="semester" value="{{ semester }}">
+    </form>
+
+    {# ── Week notes ───────────────────────────────────────────────────────────── #}
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 no-print">
+        <div class="flex items-start gap-2">
+            <i class="fas fa-sticky-note text-amber-500 mt-0.5"></i>
+            <div class="flex-1">
+                <label class="block text-xs font-semibold text-amber-700 mb-1">Ghi chú tuần</label>
+                <textarea id="week_notes" rows="2"
+                    placeholder="Nhận xét chung, kế hoạch tuần tới…"
+                    class="w-full px-3 py-1.5 border border-amber-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-300 resize-none"
+                    onblur="saveWeekNotes()">{{ week_record.teacher_notes or '' }}</textarea>
+                <div id="week_notes_saved" class="text-xs text-green-600 mt-1" style="display:none">
+                    <i class="fas fa-check-circle mr-1"></i> Đã lưu
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ── GRID TABLE ───────────────────────────────────────────────────────────── #}
+    <div class="overflow-x-auto rounded-xl border border-slate-300 shadow-sm bg-white">
+        <table class="lb-grid" id="lessonBookGrid">
+            <colgroup>
+                <col style="width:48px; min-width:48px;"> {# Period label #}
+                <col style="width:100px; min-width:100px;"> {# Thứ 2 #}
+                <col style="width:100px; min-width:100px;"> {# Thứ 3 #}
+                <col style="width:100px; min-width:100px;"> {# Thứ 4 #}
+                <col style="width:100px; min-width:100px;"> {# Thứ 5 #}
+                <col style="width:100px; min-width:100px;"> {# Thứ 6 #}
+                <col style="width:100px; min-width:100px;"> {# Thứ 7 #}
+                <col style="width:100px; min-width:100px;"> {# CN #}
+            </colgroup>
+            <thead>
+                <tr>
+                    <th class="period-col">Tiết</th>
+                    {% for dm in day_meta %}
+                    <th class="{% if dm.iso == today_iso %}ring-2 ring-amber-300 ring-inset{% endif %}">{{ dm.label }}<br><span class="font-normal text-blue-200 text-[10px]">{{ dm.date }}</span></th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody id="gridBody">
+                {# Rows injected by JS #}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="text-center text-xs text-muted-foreground py-2">
+        Nhấn <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-[10px] font-mono">Tab</kbd>
+        để di chuyển giữa các ô. Dữ liệu tự động lưu khi rời khỏi ô.
+    </div>
+</div>
+
+{# ── Save toast ─────────────────────────────────────────────────────────────── #}
+<div class="save-toast" id="saveToast">
+    <i class="fas fa-check-circle mr-1.5"></i> Đã lưu!
+</div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────────
+const CLASS_NAME = {{ class_name | tojson }};
+const WEEK_NUMBER = {{ week_number | tojson }};
+const SCHOOL_YEAR = {{ school_year | tojson }};
+const SEMESTER = {{ semester | tojson }};
+const PERIODS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];  // max 15 tiết/ngày
+const DAYS = [1, 2, 3, 4, 5, 6, 7];  // Thứ 2 – CN
+const FIELDS = ['subject_name', 'topic', 'attendance_present', 'attendance_absent'];
+const WEEK_ID = {{ week_record.id if week_record else 'null' | tojson }};
+const DAY_META = {{ day_meta | tojson }};
+const TODAY_ISO = {{ today_iso | tojson }};
+
+// ── Data store: week_data[day][period] = { field: value, el: DOM, saved: bool }
+const weekData = {};
+let weekIdCache = WEEK_ID;
+
+// ── Init grid rows ─────────────────────────────────────────────────────────────
+function initGrid() {
+    const tbody = document.getElementById('gridBody');
+    tbody.innerHTML = '';
+    for (const p of PERIODS) {
+        const tr = document.createElement('tr');
+        // Period label cell
+        const tdLabel = document.createElement('td');
+        tdLabel.className = 'period-label';
+        tdLabel.textContent = 'Tiết ' + p;
+        tr.appendChild(tdLabel);
+        // Day cells
+        for (const d of DAYS) {
+            if (!weekData[d]) weekData[d] = {};
+            weekData[d][p] = { subject_name: '', topic: '', attendance_present: '', attendance_absent: '' };
+            const td = document.createElement('td');
+            td.id = 'cell-' + d + '-' + p;
+            td.innerHTML = buildCellHTML(d, p);
+            tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+    }
+}
+
+// ── Build cell HTML ────────────────────────────────────────────────────────────
+function buildCellHTML(day, period) {
+    const meta = DAY_META[day - 1] || {};
+    const dateStr = meta.display_full || '';
+    const todayCls = (meta.iso === TODAY_ISO) ? ' is-today' : '';
+    return `
+<div class="cell-wrap">
+    <div class="cell-date${todayCls}">${dateStr}</div>
+    <div class="cell-subject">
+        <input type="text"
+            id="sn-${day}-${period}"
+            placeholder="Môn…"
+            data-day="${day}" data-period="${period}" data-field="subject_name"
+            onblur="saveCell(this)"
+            onkeydown="handleCellKey(this, event)">
+    </div>
+    <div class="cell-content">
+        <textarea
+            id="tp-${day}-${period}"
+            placeholder="Nội dung bài dạy…"
+            data-day="${day}" data-period="${period}" data-field="topic"
+            onblur="saveCell(this)"
+            onkeydown="handleCellKey(this, event)"></textarea>
+    </div>
+    <div class="cell-attendance">
+        <span>Có:</span>
+        <input type="number" min="0" max="100"
+            id="ap-${day}-${period}"
+            data-day="${day}" data-period="${period}" data-field="attendance_present"
+            placeholder="0"
+            onblur="saveCell(this)">
+        <span>Vắng:</span>
+        <input type="number" min="0" max="100"
+            id="ab-${day}-${period}"
+            data-day="${day}" data-period="${period}" data-field="attendance_absent"
+            placeholder="0"
+            onblur="saveCell(this)">
+    </div>
+</div>`;
+}
+
+// ── Load week data from API ────────────────────────────────────────────────────
+async function loadWeek() {
+    if (!CLASS_NAME) return;
+    const url = '{{ url_for("api_lesson_book_load") }}'
+        + '?class_name=' + encodeURIComponent(CLASS_NAME)
+        + '&week_number=' + encodeURIComponent(WEEK_NUMBER)
+        + '&school_year=' + encodeURIComponent(SCHOOL_YEAR);
+    try {
+        const r = await fetch(url);
+        const j = await r.json();
+        if (j.error) { console.warn(j.error); return; }
+        weekIdCache = j.week_id;
+
+        // Update week notes textarea
+        const notesEl = document.getElementById('week_notes');
+        if (notesEl) notesEl.value = j.teacher_notes || '';
+
+        // Fill cells
+        for (const slot of (j.slots || [])) {
+            const d = slot.day_of_week;
+            const p = slot.period_number;
+            if (!weekData[d]) weekData[d] = {};
+            weekData[d][p] = {
+                subject_name: slot.subject_name || '',
+                topic: slot.topic || '',
+                attendance_present: slot.attendance_present != null ? String(slot.attendance_present) : '',
+                attendance_absent: slot.attendance_absent != null ? String(slot.attendance_absent) : '',
+            };
+            // Fill DOM
+            const sn = document.getElementById('sn-' + d + '-' + p);
+            const tp = document.getElementById('tp-' + d + '-' + p);
+            const ap = document.getElementById('ap-' + d + '-' + p);
+            const ab = document.getElementById('ab-' + d + '-' + p);
+            if (sn) sn.value = weekData[d][p].subject_name;
+            if (tp) tp.value = weekData[d][p].topic;
+            if (ap && weekData[d][p].attendance_present !== '') ap.value = weekData[d][p].attendance_present;
+            if (ab && weekData[d][p].attendance_absent !== '') ab.value = weekData[d][p].attendance_absent;
+            const cell = document.getElementById('cell-' + d + '-' + p);
+            if (cell && slot.lesson_date_display) {
+                const cd = cell.querySelector('.cell-date');
+                if (cd) cd.textContent = slot.lesson_date_display;
+            }
+        }
+    } catch (e) {
+        console.warn('Không tải được dữ liệu tuần:', e);
+    }
+}
+
+// ── Save single cell ───────────────────────────────────────────────────────────
+async function saveCell(el) {
+    const day = parseInt(el.dataset.day);
+    const period = parseInt(el.dataset.period);
+    const field = el.dataset.field;
+    const value = el.value;
+    // Skip if unchanged
+    if (weekData[day] && weekData[day][period] && weekData[day][period][field] === value) return;
+    if (value === '' && (!weekData[day] || !weekData[day][period] || weekData[day][period][field] === '')) return;
+
+    if (!weekData[day]) weekData[day] = {};
+    if (!weekData[day][period]) weekData[day][period] = {};
+    weekData[day][period][field] = value;
+
+    const payload = {
+        class_name: CLASS_NAME,
+        week_number: WEEK_NUMBER,
+        school_year: SCHOOL_YEAR,
+        day_of_week: day,
+        period_number: period,
+        field: field,
+        value: value,
+    };
+
+    try {
+        const r = await fetch('{{ url_for("api_lesson_book_save") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        const j = await r.json();
+        if (j.ok) {
+            weekIdCache = j.week_id;
+            if (j.lesson_date_display) {
+                const cell = document.getElementById('cell-' + day + '-' + period);
+                if (cell) {
+                    const cd = cell.querySelector('.cell-date');
+                    if (cd) cd.textContent = j.lesson_date_display;
+                }
+            }
+            showToast();
+        }
+    } catch (e) {
+        console.warn('Lỗi lưu ô:', e);
+    }
+}
+
+// ── Save week notes ────────────────────────────────────────────────────────────
+async function saveWeekNotes() {
+    const notesEl = document.getElementById('week_notes');
+    if (!weekIdCache) {
+        // Need to create week first by saving any cell
+        showToast('Lưu nội dung trước để tạo tuần!');
+        return;
+    }
+    try {
+        const r = await fetch('{{ url_for("api_lesson_book_save_week_notes") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ week_id: weekIdCache, notes: notesEl.value }),
+        });
+        const j = await r.json();
+        if (j.ok) {
+            const savedEl = document.getElementById('week_notes_saved');
+            if (savedEl) { savedEl.style.display = 'block'; setTimeout(() => { savedEl.style.display = 'none'; }, 2000); }
+        }
+    } catch (e) {
+        console.warn('Lỗi lưu ghi chú tuần:', e);
+    }
+}
+
+// ── Keyboard navigation ────────────────────────────────────────────────────────
+function handleCellKey(el, evt) {
+    if (evt.key === 'Tab' && !evt.shiftKey) {
+        // Auto-save handled by blur
+    }
+    if (evt.key === 'Enter' && !evt.shiftKey && el.tagName === 'TEXTAREA') {
+        // Allow multi-line in textarea; just skip
+    }
+}
+
+// ── Reload grid when class changes ───────────────────────────────────────────
+function reloadGrid() {
+    const sel = document.getElementById('select_class');
+    const form = document.getElementById('gridForm');
+    document.getElementById('form_class').value = sel.value;
+    form.submit();
+}
+
+// ── Toast helper ───────────────────────────────────────────────────────────────
+function showToast(msg) {
+    const t = document.getElementById('saveToast');
+    if (msg) t.innerHTML = '<i class="fas fa-info-circle mr-1.5"></i> ' + msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// ── Boot ────────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    initGrid();
+    loadWeek();
+});
+</script>
+{% endblock %}

@@ -212,8 +212,66 @@ def ensure_attendance_monitoring_session_column():
     db.session.commit()
 
 
+def ensure_lesson_book_week_and_slot_tables():
+    """Tạo bảng lesson_book_week và lesson_book_slot (SQLite cũ chưa có)."""
+    insp = inspect(db.engine)
+    if not insp.has_table("lesson_book_week"):
+        db.session.execute(text("""
+            CREATE TABLE lesson_book_week (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                teacher_id INTEGER NOT NULL,
+                class_name VARCHAR(50) NOT NULL,
+                week_number INTEGER NOT NULL,
+                school_year VARCHAR(20) NOT NULL,
+                semester INTEGER DEFAULT 1,
+                teacher_notes TEXT,
+                created_at DATETIME,
+                updated_at DATETIME,
+                FOREIGN KEY (teacher_id) REFERENCES teacher(id),
+                UNIQUE (teacher_id, class_name, week_number)
+            )
+        """))
+    insp = inspect(db.engine)  # refresh after first create
+    if not insp.has_table("lesson_book_slot"):
+        db.session.execute(text("""
+            CREATE TABLE lesson_book_slot (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                week_id INTEGER NOT NULL,
+                day_of_week INTEGER NOT NULL,
+                period_number INTEGER NOT NULL DEFAULT 1,
+                subject_name VARCHAR(100),
+                topic TEXT,
+                objectives TEXT,
+                teaching_method TEXT,
+                evaluation TEXT,
+                homework TEXT,
+                notes TEXT,
+                attendance_present INTEGER,
+                attendance_absent INTEGER,
+                lesson_date DATE,
+                created_at DATETIME,
+                updated_at DATETIME,
+                FOREIGN KEY (week_id) REFERENCES lesson_book_week(id),
+                UNIQUE (week_id, day_of_week, period_number)
+            )
+        """))
+    db.session.commit()
+
+
+def ensure_lesson_book_slot_lesson_date_column():
+    """Thêm cột lesson_date cho lesson_book_slot (SQLite cũ)."""
+    insp = inspect(db.engine)
+    if not insp.has_table("lesson_book_slot"):
+        return
+    cols = {c["name"] for c in insp.get_columns("lesson_book_slot")}
+    if "lesson_date" not in cols:
+        db.session.execute(text("ALTER TABLE lesson_book_slot ADD COLUMN lesson_date DATE"))
+    db.session.commit()
+
+
 def create_database():
     db.create_all()
+    insp = inspect(db.engine)
     ensure_student_parent_columns()
     ensure_student_portrait_column()
     ensure_student_date_of_birth_column()
@@ -225,6 +283,8 @@ def create_database():
     ensure_student_conduct_columns()
     ensure_attendance_qr_columns()
     ensure_attendance_monitoring_session_column()
+    ensure_lesson_book_week_and_slot_tables()
+    ensure_lesson_book_slot_lesson_date_column()
     # AttendanceRecord table is auto-created by db.create_all()
     if not Teacher.query.first():
         hashed_pwd = generate_password_hash("admin")

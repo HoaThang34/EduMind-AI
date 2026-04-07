@@ -6,14 +6,21 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
             <h1 class="text-2xl font-semibold tracking-tight text-foreground">Sổ đầu bài điện tử</h1>
-            <p class="text-muted-foreground mt-1 text-sm">Ghi nhận nội dung tiết dạy, mục tiêu và điểm danh theo lớp/môn.</p>
+            <p class="text-muted-foreground mt-1 text-sm">Ghi nhận nội dung tiết dạy theo tuần, lớp và môn.</p>
         </div>
-        <a href="{{ url_for('lesson_book_add') }}"
-            class="btn-primary inline-flex items-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium">
-            <i class="fas fa-plus text-xs"></i> Thêm tiết dạy
-        </a>
+        <div class="flex gap-2 flex-wrap">
+            <a href="{{ url_for('lesson_book_grid', class_name=current_user.assigned_class or '', week_number='') }}"
+                class="btn-primary inline-flex items-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium">
+                <i class="fas fa-th-large text-xs"></i> Giao diện lưới (theo tuần)
+            </a>
+            <a href="{{ url_for('lesson_book_add') }}"
+                class="btn-outline inline-flex items-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium border border-teal-300 text-teal-700 hover:bg-teal-50">
+                <i class="fas fa-plus text-xs"></i> Thêm tiết dạy
+            </a>
+        </div>
     </div>
 
+    {# ── Filter bar ─────────────────────────────────────────────────────────────── #}
     <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl p-4 shadow-card">
         <form method="GET" action="{{ url_for('lesson_book') }}" class="flex flex-wrap gap-3 items-end">
             <div>
@@ -35,21 +42,72 @@
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-medium text-muted-foreground mb-1">Từ ngày</label>
-                <input type="date" name="date_from" value="{{ date_from }}"
-                    class="input-shadcn py-2 text-sm">
+                <label class="block text-xs font-medium text-muted-foreground mb-1">Năm học</label>
+                <input type="text" name="school_year" value="{{ year_filter }}"
+                    class="input-shadcn py-2 text-sm" placeholder="2025-2026">
             </div>
             <div>
-                <label class="block text-xs font-medium text-muted-foreground mb-1">Đến ngày</label>
-                <input type="date" name="date_to" value="{{ date_to }}"
-                    class="input-shadcn py-2 text-sm">
+                <label class="block text-xs font-medium text-muted-foreground mb-1">Học kỳ</label>
+                <select name="semester" class="input-shadcn py-2 text-sm min-w-[120px]">
+                    <option value="">— Tất cả —</option>
+                    <option value="1" {% if sem_filter == 1 %}selected{% endif %}>HK1</option>
+                    <option value="2" {% if sem_filter == 2 %}selected{% endif %}>HK2</option>
+                </select>
             </div>
-            <button type="submit" class="btn-outline py-2 px-4 text-sm rounded-lg">Lọc</button>
+            <div>
+                <label class="block text-xs font-medium text-muted-foreground mb-1">Tuần</label>
+                <input type="number" name="week_number" min="1" max="53" value="{{ week_filter or '' }}"
+                    class="input-shadcn py-2 text-sm" placeholder="Số tuần">
+            </div>
+            <button type="submit" class="btn-primary py-2 px-4 text-sm rounded-lg">Lọc</button>
             <a href="{{ url_for('lesson_book') }}" class="text-sm text-indigo-600 hover:underline py-2">Xóa lọc</a>
         </form>
     </div>
 
+    {# ── Week cards (new grid style) ───────────────────────────────────────────── #}
+    {% if weeks %}
+    <div>
+        <h2 class="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
+            Sổ tuần &nbsp;<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs">{{ weeks|length }}</span>
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {% for w in weeks %}
+            <div class="bg-white border border-blue-200 rounded-xl p-4 shadow-sm hover:shadow-md transition group">
+                <div class="flex items-start justify-between mb-2">
+                    <div>
+                        <div class="font-bold text-blue-800 text-sm">Tuần {{ w.week_number }}
+                            {% if current_week_number and w.week_number == current_week_number %}
+                            <span class="ml-1 px-1.5 py-0.5 bg-green-500 text-white text-[10px] rounded-full font-bold">Hiện tại</span>
+                            {% endif %}
+                        </div>
+                        <div class="text-xs text-muted-foreground">{{ w.school_year }} · HK{{ w.semester }}</div>
+                    </div>
+                    <span class="px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full text-xs font-semibold">{{ w.class_name }}</span>
+                </div>
+                {% if w.teacher_notes %}
+                <p class="text-xs text-slate-600 mb-2 line-clamp-2 italic">{{ w.teacher_notes }}</p>
+                {% endif %}
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-muted-foreground">
+                        {{ w.slots|length }} tiết &nbsp;·&nbsp;
+                        {{ w.updated_at.strftime('%d/%m/%Y') if w.updated_at else '' }}
+                    </span>
+                    <a href="{{ url_for('lesson_book_grid', class_name=w.class_name, week_number=w.week_number, school_year=w.school_year, semester=w.semester) }}"
+                        class="btn-primary py-1.5 px-3 rounded-lg text-xs font-medium flex items-center gap-1">
+                        <i class="fas fa-th-large text-[10px]"></i> Mở sổ
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {# ── Legacy entry table (backwards compat) ─────────────────────────────────── #}
     <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl overflow-hidden shadow-card">
+        <div class="px-4 py-3 border-b border-[hsl(240,5.9%,90%)] flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-muted-foreground">Tiết dạy đã ghi &nbsp;<span class="bg-slate-100 px-2 py-0.5 rounded-full text-xs">{{ entries|length }}</span></h2>
+        </div>
         <div class="overflow-x-auto">
             <table class="table-shadcn w-full text-sm">
                 <thead class="bg-accent/80">
@@ -58,7 +116,6 @@
                         <th class="px-4 py-3 text-left font-semibold text-muted-foreground">Tiết</th>
                         <th class="px-4 py-3 text-left font-semibold text-muted-foreground">Lớp</th>
                         <th class="px-4 py-3 text-left font-semibold text-muted-foreground">Môn</th>
-                        <th class="px-4 py-3 text-left font-semibold text-muted-foreground whitespace-nowrap">TKB</th>
                         <th class="px-4 py-3 text-left font-semibold text-muted-foreground min-w-[200px]">Nội dung bài dạy</th>
                         <th class="px-4 py-3 text-left font-semibold text-muted-foreground whitespace-nowrap">Điểm danh</th>
                         <th class="px-4 py-3 text-left font-semibold text-muted-foreground whitespace-nowrap">Giáo viên</th>
@@ -72,14 +129,9 @@
                         <td class="px-4 py-3">{{ e.period_number }}</td>
                         <td class="px-4 py-3 font-medium">{{ e.class_name }}</td>
                         <td class="px-4 py-3">{{ e.subject.name if e.subject else '—' }}</td>
-                        <td class="px-4 py-3 text-xs text-muted-foreground">
-                            {% if e.timetable_slot %}
-                            <span class="text-teal-700 font-medium">Đã gắn</span>
-                            {% else %}—{% endif %}
-                        </td>
                         <td class="px-4 py-3 text-muted-foreground">
                             {% set t = e.topic %}
-                            {{ t[:120] }}{% if t|length > 120 %}…{% endif %}
+                            {{ t[:100] }}{% if t|length > 100 %}…{% endif %}
                         </td>
                         <td class="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
                             {% if e.attendance_present is not none or e.attendance_absent is not none %}
@@ -103,8 +155,8 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="9" class="px-4 py-12 text-center text-muted-foreground">
-                            Chưa có tiết dạy nào. <a href="{{ url_for('lesson_book_add') }}" class="text-indigo-600 font-medium hover:underline">Thêm tiết dạy đầu tiên</a>
+                        <td colspan="8" class="px-4 py-12 text-center text-muted-foreground">
+                            Chưa có tiết dạy nào.
                         </td>
                     </tr>
                     {% endfor %}

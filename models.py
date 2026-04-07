@@ -295,6 +295,59 @@ class LessonBookEntry(db.Model):
     timetable_slot = db.relationship("TimetableSlot", backref=db.backref("lesson_book_entries", lazy=True))
 
 
+class LessonBookWeek(db.Model):
+    """
+    Mỗi tuần/lớp/gv có một bản ghi meta (tuần nào, năm học, ghi chú tuần).
+    Dùng để gộp các tiết trong tuần và lưu thông tin tuần.
+    """
+    __tablename__ = "lesson_book_week"
+    id = db.Column(db.Integer, primary_key=True)
+    teacher_id = db.Column(db.Integer, db.ForeignKey("teacher.id"), nullable=False, index=True)
+    class_name = db.Column(db.String(50), nullable=False, index=True)
+    week_number = db.Column(db.Integer, nullable=False, index=True)  # ISO week (1-53)
+    school_year = db.Column(db.String(20), nullable=False)
+    semester = db.Column(db.Integer, default=1)
+    teacher_notes = db.Column(db.Text)  # Ghi chú chung tuần
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint("teacher_id", "class_name", "week_number", name="uq_lbw_teacher_class_week"),
+    )
+
+    teacher = db.relationship("Teacher", backref=db.backref("lesson_book_weeks", lazy=True))
+
+
+class LessonBookSlot(db.Model):
+    """
+    Mỗi ô cell trong sổ đầu bài — tương ứng 1 tiết (period) trong 1 ngày (day_of_week) của 1 tuần.
+    Dùng để ghi nhanh nội dung trực tiếp trên lưới, không cần form riêng.
+    """
+    __tablename__ = "lesson_book_slot"
+    id = db.Column(db.Integer, primary_key=True)
+    week_id = db.Column(db.Integer, db.ForeignKey("lesson_book_week.id"), nullable=False, index=True)
+    day_of_week = db.Column(db.Integer, nullable=False)   # 1=Thứ 2, 7=Chủ nhật
+    period_number = db.Column(db.Integer, nullable=False, default=1)
+    lesson_date = db.Column(db.Date, nullable=True, index=True)  # Ngày dạy (tự điền theo cột tuần)
+    subject_name = db.Column(db.String(100))               # Tên môn (ghi nhanh, không bắt buộc)
+    topic = db.Column(db.Text)                             # Nội dung bài dạy
+    objectives = db.Column(db.Text)
+    teaching_method = db.Column(db.Text)
+    evaluation = db.Column(db.Text)
+    homework = db.Column(db.Text)
+    notes = db.Column(db.Text)
+    attendance_present = db.Column(db.Integer)
+    attendance_absent = db.Column(db.Integer)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint("week_id", "day_of_week", "period_number", name="uq_lbs_week_day_period"),
+    )
+
+    week = db.relationship("LessonBookWeek", backref=db.backref("slots", lazy=True, cascade="all, delete-orphan"))
+
+
 class StudentNotification(db.Model):
     """Thông báo cho học sinh (TKB, v.v.) — tách bảng notification giáo viên."""
     id = db.Column(db.Integer, primary_key=True)
