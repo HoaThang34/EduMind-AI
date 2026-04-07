@@ -75,7 +75,21 @@ def register(app):
     @app.route("/home")
     @login_required
     def home():
-        return render_template("home.html")
+        cfg = {}
+        try:
+            for row in SystemConfig.query.filter(
+                SystemConfig.key.in_(["school_name", "school_year"])
+            ).all():
+                cfg[row.key] = (row.value or "").strip()
+        except Exception:
+            pass
+        school_name = cfg.get("school_name") or "THPT Chuyên Nguyễn Tất Thành"
+        school_year = cfg.get("school_year") or "2025-2026"
+        return render_template(
+            "home.html",
+            school_name=school_name,
+            school_year=school_year,
+        )
 
 
     @app.route('/docs')

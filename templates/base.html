@@ -735,7 +735,7 @@
 </head>
 
 <body
-    class="h-screen w-screen overflow-hidden bg-[hsl(0,0%,98%)] text-foreground selection:bg-indigo-500 selection:text-white">
+    class="h-screen w-screen overflow-hidden bg-[hsl(0,0%,98%)] text-foreground selection:bg-indigo-500 selection:text-white {% if request.endpoint == 'home' %}page-home{% endif %}">
     <script>
         try {
             if (localStorage.getItem('edu_sidebar_desktop_collapsed') === '1')

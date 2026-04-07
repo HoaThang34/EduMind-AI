@@ -48,7 +48,348 @@
 {% endmacro %}
 
 {% block content %}
-<div class="home-page mx-auto max-w-6xl space-y-8 pb-8 px-4">
+<style>
+@media (max-width: 767px) {
+    body.page-home .ambient-mesh { display: none !important; }
+    body.page-home #sidebar,
+    body.page-home #sidebar-overlay { display: none !important; pointer-events: none !important; }
+    body.page-home #main-column > header { display: none !important; }
+    body.page-home main > .p-6 { padding: 0 !important; }
+    body.page-home #flash-container { display: none !important; }
+}
+
+/* Mobile-first styles */
+.mobile-app {
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --header-height: 56px;
+    --nav-height: 64px;
+    --accent-blue: #3B82F6;
+    --accent-indigo: #6366F1;
+    --bg-gray: #F8FAFC;
+    --text-primary: #1E293B;
+    --text-secondary: #64748B;
+    --text-muted: #94A3B8;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+    --card-shadow-hover: 0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+}
+
+.mobile-nav-item-active { color: #3B82F6 !important; }
+.mobile-nav-item-active i { color: #3B82F6 !important; }
+</style>
+
+<!-- MOBILE APP INTERFACE -->
+<div class="md:hidden mobile-app flex flex-col h-[100dvh] bg-[#F8FAFC] text-slate-900 overflow-hidden">
+
+    <!-- Status Bar Spacer -->
+    <div style="padding-top: var(--safe-top);"></div>
+
+    <!-- Header -->
+    <header class="shrink-0 px-4 py-3 flex items-center justify-between bg-white border-b border-slate-100">
+        <div class="flex items-center gap-3">
+            <img src="{{ url_for('logo_file', filename='logo.png') }}" alt="" class="w-9 h-9 rounded-xl object-cover shadow-sm">
+            <div>
+                <h1 class="text-sm font-bold text-slate-800 leading-tight">{{ school_name }}</h1>
+                <p class="text-[10px] text-slate-500">Năm học {{ school_year }}</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-1">
+            <a href="{{ url_for('notifications') }}"
+                class="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-slate-100 transition">
+                <i class="far fa-bell text-lg text-slate-600"></i>
+                {% set unread_count = current_user.notifications | selectattr('is_read', 'equalto', False) | list | length %}
+                {% if unread_count > 0 %}
+                <span class="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+                {% endif %}
+            </a>
+            <a href="{{ url_for('profile') }}"
+                class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-slate-100 transition">
+                <i class="fas fa-cog text-lg text-slate-600"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- Scrollable Content -->
+    <main class="flex-1 overflow-y-auto overflow-x-hidden">
+
+        <!-- Greeting Section -->
+        <section class="px-4 pt-5 pb-3">
+            <div class="flex items-center gap-3 mb-1">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-blue-200">
+                    {{ current_user.full_name[0] | upper }}
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500">Xin chào</p>
+                    <h2 class="text-lg font-bold text-slate-800 leading-tight">{{ current_user.full_name }}</h2>
+                </div>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">Tuần {{ current_week_number }} — {{ "Now" if current_week_number == 1 else "Tiếp tục công việc" }}</p>
+        </section>
+
+        <!-- Week Status Card -->
+        <section class="px-4 mb-4">
+            <div class="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-2xl p-4 text-white shadow-xl shadow-indigo-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-white/80">Tuần hiện tại</p>
+                        <p class="text-2xl font-bold">Tuần {{ current_week_number }}</p>
+                        <p class="text-[10px] text-white/70 mt-1">{{ school_year }}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                            <i class="fas fa-calendar-check text-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Actions Grid -->
+        <section class="px-4 mb-4">
+            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Thao tác nhanh</h3>
+            <div class="grid grid-cols-4 gap-2">
+
+                <a href="{{ url_for('add_violation') }}"
+                    class="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-white shadow-sm active:scale-95 transition-all">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-500">
+                        <i class="fas fa-minus-circle text-lg"></i>
+                    </span>
+                    <span class="text-[10px] font-medium text-slate-700 text-center leading-tight">Ghi VP</span>
+                </a>
+
+                <a href="{{ url_for('add_bonus') }}"
+                    class="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-white shadow-sm active:scale-95 transition-all">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500">
+                        <i class="fas fa-plus-circle text-lg"></i>
+                    </span>
+                    <span class="text-[10px] font-medium text-slate-700 text-center leading-tight">Cộng điểm</span>
+                </a>
+
+                <a href="{{ url_for('grades.manage_grades') }}"
+                    class="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-white shadow-sm active:scale-95 transition-all">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-500">
+                        <i class="fas fa-pencil-alt text-lg"></i>
+                    </span>
+                    <span class="text-[10px] font-medium text-slate-700 text-center leading-tight">Nhập điểm</span>
+                </a>
+
+                <a href="{{ url_for('weekly_report') }}"
+                    class="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-white shadow-sm active:scale-95 transition-all">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-500">
+                        <i class="fas fa-chart-bar text-lg"></i>
+                    </span>
+                    <span class="text-[10px] font-medium text-slate-700 text-center leading-tight">Báo cáo</span>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- Featured Features -->
+        <section class="px-4 mb-4">
+            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Tính năng nổi bật</h3>
+            <div class="space-y-2">
+
+                <!-- AI Assistant Card -->
+                <a href="{{ url_for('ai_engine.assistant_chatbot') }}"
+                    class="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-teal-50 to-emerald-50 border border-emerald-100 active:scale-[0.99] transition-all">
+                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-lg shadow-emerald-200">
+                        <i class="fas fa-robot text-lg"></i>
+                    </span>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-semibold text-slate-800">Trợ lý AI</span>
+                            <span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500 text-white">MỚI</span>
+                        </div>
+                        <span class="text-[11px] text-slate-500 leading-relaxed">Hỏi đáp, gợi ý thông minh</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-xs text-slate-400"></i>
+                </a>
+
+                <!-- OCR Grades Card -->
+                <a href="{{ url_for('ai_engine.ocr_grades') }}"
+                    class="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 active:scale-[0.99] transition-all">
+                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-blue-500 text-white shadow-lg shadow-indigo-200">
+                        <i class="fas fa-magic text-lg"></i>
+                    </span>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-semibold text-slate-800">Nhập điểm AI</span>
+                            <span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-indigo-500 text-white">AI</span>
+                        </div>
+                        <span class="text-[11px] text-slate-500 leading-relaxed">Chụp ảnh bảng điểm, tự động nhận diện</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-xs text-slate-400"></i>
+                </a>
+
+                <!-- Attendance Card -->
+                <a href="{{ url_for('attendance') }}"
+                    class="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-100 active:scale-[0.99] transition-all">
+                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 text-white shadow-lg shadow-violet-200">
+                        <i class="fas fa-camera text-lg"></i>
+                    </span>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-semibold text-slate-800">Điểm danh khuôn mặt</span>
+                            <span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-violet-500 text-white">AI</span>
+                        </div>
+                        <span class="text-[11px] text-slate-500 leading-relaxed">Nhận diện khuôn mặt tự động</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-xs text-slate-400"></i>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- Management Section -->
+        <section class="px-4 mb-4">
+            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Quản lý</h3>
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden divide-y divide-slate-100">
+
+                <a href="{{ url_for('manage_students') }}" class="flex items-center gap-3 p-3 active:bg-slate-50 transition">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-500">
+                        <i class="fas fa-user-graduate text-sm"></i>
+                    </span>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-sm font-medium text-slate-700">Quản lý học sinh</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-xs text-slate-400"></i>
+                </a>
+
+                <a href="{{ url_for('lesson_book') }}" class="flex items-center gap-3 p-3 active:bg-slate-50 transition">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-500">
+                        <i class="fas fa-book-open text-sm"></i>
+                    </span>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-sm font-medium text-slate-700">Sổ đầu bài</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-xs text-slate-400"></i>
+                </a>
+
+                <a href="{{ url_for('timetable_view') }}" class="flex items-center gap-3 p-3 active:bg-slate-50 transition">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-500">
+                        <i class="fas fa-calendar-alt text-sm"></i>
+                    </span>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-sm font-medium text-slate-700">Thời khóa biểu</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-xs text-slate-400"></i>
+                </a>
+
+                <a href="{{ url_for('manage_rules') }}" class="flex items-center gap-3 p-3 active:bg-slate-50 transition">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-500">
+                        <i class="fas fa-gavel text-sm"></i>
+                    </span>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-sm font-medium text-slate-700">Quy định & Điểm trừ</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-xs text-slate-400"></i>
+                </a>
+
+                <a href="{{ url_for('index') }}" class="flex items-center gap-3 p-3 active:bg-slate-50 transition">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-500">
+                        <i class="fas fa-list-ul text-sm"></i>
+                    </span>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-sm font-medium text-slate-700">Bảng điểm rèn luyện</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-xs text-slate-400"></i>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- Communication Section -->
+        <section class="px-4 mb-4">
+            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Trao đổi</h3>
+            <div class="grid grid-cols-2 gap-2">
+
+                <a href="{{ url_for('group_chat') }}"
+                    class="flex items-center gap-2 p-3 rounded-2xl bg-white shadow-sm active:scale-95 transition-all">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-500">
+                        <i class="fas fa-comments text-sm"></i>
+                    </span>
+                    <div class="min-w-0">
+                        <span class="text-xs font-medium text-slate-700 block truncate">Phòng chat</span>
+                    </div>
+                </a>
+
+                <a href="{{ url_for('private_chats') }}"
+                    class="flex items-center gap-2 p-3 rounded-2xl bg-white shadow-sm active:scale-95 transition-all">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-500">
+                        <i class="fas fa-envelope text-sm"></i>
+                    </span>
+                    <div class="min-w-0">
+                        <span class="text-xs font-medium text-slate-700 block truncate">Tin nhắn</span>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- Useful Tools -->
+        <section class="px-4 pb-6">
+            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Công cụ</h3>
+            <div class="grid grid-cols-3 gap-2">
+
+                <a href="{{ url_for('ai_engine.voice_to_text') }}"
+                    class="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-white shadow-sm active:scale-95 transition-all">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-50 text-rose-500">
+                        <i class="fas fa-microphone-alt text-sm"></i>
+                    </span>
+                    <span class="text-[10px] font-medium text-slate-700 text-center leading-tight">Chuẩn hóa NX</span>
+                </a>
+
+                <a href="{{ url_for('dashboard') }}"
+                    class="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-white shadow-sm active:scale-95 transition-all">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-50 text-sky-500">
+                        <i class="fas fa-chart-pie text-sm"></i>
+                    </span>
+                    <span class="text-[10px] font-medium text-slate-700 text-center leading-tight">Dashboard</span>
+                </a>
+
+                <a href="{{ url_for('docs') }}"
+                    class="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-white shadow-sm active:scale-95 transition-all">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-50 text-slate-500">
+                        <i class="fas fa-book-open text-sm"></i>
+                    </span>
+                    <span class="text-[10px] font-medium text-slate-700 text-center leading-tight">Hướng dẫn</span>
+                </a>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="shrink-0 border-t border-slate-200 bg-white pb-[var(--safe-bottom)] shadow-[0_-4px_20px_rgba(0,0,0,0.04)]">
+        <div class="grid grid-cols-5 gap-0 h-16">
+            <a href="{{ url_for('home') }}" class="flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium mobile-nav-item-active">
+                <i class="fas fa-home text-xl"></i>
+                <span>Trang chủ</span>
+            </a>
+            <a href="{{ url_for('grades.manage_grades') }}" class="flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-slate-400">
+                <i class="fas fa-pencil-alt text-xl"></i>
+                <span>Nhập điểm</span>
+            </a>
+            <a href="{{ url_for('add_violation') }}" class="flex flex-col items-center justify-center gap-0.5 -mt-4">
+                <span class="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-indigo-300 active:scale-95 transition-transform">
+                    <i class="fas fa-plus text-lg"></i>
+                </span>
+            </a>
+            <a href="{{ url_for('group_chat') }}" class="flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-slate-400">
+                <i class="fas fa-comments text-xl"></i>
+                <span>Chat</span>
+            </a>
+            <a href="{{ url_for('profile') }}" class="flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-slate-400">
+                <i class="fas fa-user text-xl"></i>
+                <span>Tài khoản</span>
+            </a>
+        </div>
+    </nav>
+
+</div>
+
+<div class="hidden md:block home-page mx-auto max-w-6xl space-y-8 pb-8 px-4">
     <!-- Header -->
     <header class="text-center space-y-4 pt-4">
         <div>
