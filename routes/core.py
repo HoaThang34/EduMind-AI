@@ -32,7 +32,7 @@ def register(app):
     @app.route("/", methods=["GET", "POST"])
     def welcome():
         if current_user.is_authenticated:
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('home'))
     
         if request.method == "POST":
             login_type = request.form.get("login_type", "staff")
