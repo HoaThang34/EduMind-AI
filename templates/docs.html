@@ -437,12 +437,40 @@
                 </div>
             </section>
 
-            <!-- CTA Back to Home -->
-            <div class="pt-8 border-t border-[hsl(240,5.9%,90%)] flex justify-between items-center text-sm">
-                <p class="text-muted-foreground italic">Cảm ơn thầy cô đã tin dùng EduMind AI.</p>
-                <a href="{{ url_for('welcome') }}" class="btn-primary flex items-center gap-2 px-6 py-2.5">
-                    <i class="fas fa-home"></i> Về trang chủ
-                </a>
+            <!-- Footer Contact Info -->
+            <div class="pt-8 border-t border-[hsl(240,5.9%,90%)]">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-sm">
+                    <div>
+                        <p class="font-bold text-foreground mb-1 flex items-center gap-2">
+                            <i class="fas fa-users text-indigo-500"></i> Tác giả
+                        </p>
+                        <p class="text-muted-foreground">Agent_LLM Thành Viên:</p>
+                        <p class="text-foreground">Hòa Quang Thắng, Hồ Lực Nguyên</p>
+                        <p class="text-xs text-muted-foreground mt-1">
+                            <i class="fas fa-school text-amber-500 mr-1"></i>
+                            Trường THPT Chuyên Nguyễn Tất Thành - Tỉnh Lào Cai
+                        </p>
+                    </div>
+                    <div>
+                        <p class="font-bold text-foreground mb-1 flex items-center gap-2">
+                            <i class="fas fa-address-card text-emerald-500"></i> Liên hệ
+                        </p>
+                        <p class="text-muted-foreground">
+                            <i class="fas fa-envelope text-rose-400 w-4"></i>
+                            <a href="mailto:hoathang34.09@gmail.com" class="hover:text-foreground transition">hoathang34.09@gmail.com</a>
+                        </p>
+                        <p class="text-muted-foreground">
+                            <i class="fas fa-phone text-emerald-400 w-4"></i>
+                            <a href="tel:0389823083" class="hover:text-foreground transition">0389 823 083</a>
+                        </p>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                    <p class="text-muted-foreground italic">Cảm ơn thầy cô đã tin dùng EduMind AI.</p>
+                    <a href="{{ url_for('welcome') }}" class="btn-primary flex items-center gap-2 px-6 py-2.5">
+                        <i class="fas fa-home"></i> Về trang chủ
+                    </a>
+                </div>
             </div>
         </main>
     </div>
