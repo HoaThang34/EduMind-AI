@@ -41,7 +41,11 @@
         </button>
         <button onclick="exportReportToPNG()"
             class="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 shadow-card transition">
-            <i class="fas fa-download mr-2"></i> Xuất PNG
+            <i class="fas fa-download mr-2"></i> Xuất Báo Cáo PNG
+        </button>
+        <button onclick="exportChartsWithComments()" id="exportChartsBtn"
+            class="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 shadow-card transition">
+            <i class="fas fa-chart-bar mr-2"></i> Xuất Biểu Đồ + Nhận Xét AI
         </button>
     </div>
 
@@ -95,6 +99,55 @@
                 <div class="flex justify-between items-center p-3 bg-accent rounded-lg">
                     <span class="font-medium text-foreground">Vi phạm gần đây:</span>
                     <span class="font-bold text-foreground">{{ recent_violations|length }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BIỂU ĐỒ HỌC TẬP VÀ NỀ NẾP -->
+    <div id="chartsSection" class="bg-white rounded-xl shadow-card border border-[hsl(240,5.9%,90%)] overflow-hidden mb-6">
+        <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-[hsl(240,5.9%,90%)]">
+            <h3 class="text-lg font-bold text-foreground">
+                <i class="fas fa-chart-pie text-blue-600 mr-2"></i> Biểu Đồ Phân Tích Học Tập & Nề Nếp
+            </h3>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Biểu đồ điểm số -->
+                <div>
+                    <h4 class="text-md font-bold text-foreground mb-3 text-center">
+                        <i class="fas fa-chart-bar text-indigo-600 mr-1"></i> Phân Bố Điểm Trung Bình Các Môn
+                    </h4>
+                    <div class="relative h-64">
+                        <canvas id="gradesChart"></canvas>
+                    </div>
+                </div>
+                <!-- Biểu đồ nề nếp -->
+                <div>
+                    <h4 class="text-md font-bold text-foreground mb-3 text-center">
+                        <i class="fas fa-chart-line text-green-600 mr-1"></i> Biến Động Điểm Rèn Luyện
+                    </h4>
+                    <div class="relative h-64 flex items-center justify-center">
+                        <canvas id="conductChart"></canvas>
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div class="text-center">
+                                <span class="text-3xl font-bold" id="conductScore">{{ student.current_score }}</span>
+                                <span class="text-sm text-muted-foreground">/100</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Nhận xét AI về biểu đồ -->
+            <div class="mt-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-100">
+                <h4 class="text-md font-bold text-purple-700 mb-2">
+                    <i class="fas fa-brain mr-2"></i> Nhận Xét Trực Quan Của AI
+                </h4>
+                <div id="chartAIComments" class="text-foreground leading-relaxed italic">
+                    <p class="text-muted-foreground text-center">
+                        <i class="fas fa-chart-area mr-1"></i> Nhấn "Xuất Biểu Đồ + Nhận Xét AI" để xem phân tích trực quan
+                    </p>
                 </div>
             </div>
         </div>
@@ -207,6 +260,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
     async function generateAIReport() {
@@ -280,6 +334,229 @@
         } catch (error) {
             console.error('Error:', error);
             alert('Có lỗi khi xuất file PNG');
+            document.querySelectorAll('.no-export').forEach(el => el.style.display = '');
+            button.innerHTML = originalHTML;
+            button.disabled = false;
+        }
+    }
+
+    // Dữ liệu cho biểu đồ - chỉ lấy các trường cần thiết
+    const transcriptData = [
+        {% for item in transcript_data %}
+        {
+            subject: { name: '{{ item.subject.name }}' },
+            avg_score: {{ item.avg_score if item.avg_score else 'null' }},
+            tx_scores: {{ item.tx_scores|tojson }},
+            gk_scores: {{ item.gk_scores|tojson }},
+            hk_scores: {{ item.hk_scores|tojson }}
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+    const studentData = {
+        name: '{{ student.name }}',
+        student_code: '{{ student.student_code }}',
+        current_score: {{ student.current_score }},
+        total_violations: {{ total_violations }},
+        gpa: {{ gpa if gpa else 'null' }}
+    };
+
+    let gradesChartInstance = null;
+    let conductChartInstance = null;
+
+    // Khởi tạo biểu đồ khi trang load
+    document.addEventListener('DOMContentLoaded', function() {
+        initGradesChart();
+        initConductChart();
+    });
+
+    function initGradesChart() {
+        const ctx = document.getElementById('gradesChart').getContext('2d');
+        
+        // Lọc dữ liệu có điểm TB
+        const validData = transcriptData.filter(item => item.avg_score !== null);
+        const labels = validData.map(item => item.subject.name);
+        const scores = validData.map(item => item.avg_score);
+        
+        // Màu sắc dựa trên điểm số
+        const colors = scores.map(score => {
+            if (score >= 8) return 'rgba(34, 197, 94, 0.8)';      // Xanh lá - Giỏi
+            if (score >= 6.5) return 'rgba(59, 130, 246, 0.8)';   // Xanh dương - Khá
+            if (score >= 5) return 'rgba(234, 179, 8, 0.8)';      // Vàng - TB
+            return 'rgba(239, 68, 68, 0.8)';                     // Đỏ - Yếu
+        });
+
+        gradesChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Điểm TB',
+                    data: scores,
+                    backgroundColor: colors,
+                    borderColor: colors.map(c => c.replace('0.8', '1')),
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Điểm: ' + context.parsed.y.toFixed(2);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 10,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+    }
+
+    function initConductChart() {
+        const ctx = document.getElementById('conductChart').getContext('2d');
+        const currentScore = studentData.current_score;
+        
+        // Doughnut chart cho điểm rèn luyện
+        conductChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Điểm còn lại', 'Điểm đã trừ'],
+                datasets: [{
+                    data: [currentScore, 100 - currentScore],
+                    backgroundColor: [
+                        currentScore >= 80 ? 'rgba(34, 197, 94, 0.8)' :
+                        currentScore >= 65 ? 'rgba(59, 130, 246, 0.8)' :
+                        currentScore >= 50 ? 'rgba(234, 179, 8, 0.8)' :
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(229, 231, 235, 0.5)'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                if (context.label === 'Điểm còn lại') {
+                                    return 'Điểm rèn luyện: ' + currentScore + '/100';
+                                }
+                                return 'Điểm đã trừ: ' + (100 - currentScore);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    async function generateChartAIComments() {
+        const commentsDiv = document.getElementById('chartAIComments');
+        
+        // Thu thập dữ liệu phân tích
+        const validData = transcriptData.filter(item => item.avg_score !== null);
+        const scores = validData.map(item => item.avg_score);
+        const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+        const highest = scores.length > 0 ? Math.max(...scores) : 0;
+        const lowest = scores.length > 0 ? Math.min(...scores) : 0;
+        const strongSubjects = validData.filter(item => item.avg_score >= 8).map(item => item.subject.name);
+        const weakSubjects = validData.filter(item => item.avg_score < 5).map(item => item.subject.name);
+        
+        try {
+            const response = await fetch('/api/generate_chart_comments/{{ student.id }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    semester: {{ semester }},
+                    school_year: '{{ school_year }}',
+                    gpa: studentData.gpa,
+                    avg_score: avgScore.toFixed(2),
+                    highest_score: highest.toFixed(2),
+                    lowest_score: lowest.toFixed(2),
+                    strong_subjects: strongSubjects,
+                    weak_subjects: weakSubjects,
+                    total_subjects: validData.length,
+                    conduct_score: studentData.current_score,
+                    total_violations: studentData.total_violations
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.comments) {
+                commentsDiv.innerHTML = '<p class="text-foreground">' + data.comments.replace(/\n/g, '<br>') + '</p>';
+                return data.comments;
+            } else {
+                commentsDiv.innerHTML = '<p class="text-red-600">Không thể tạo nhận xét. Vui lòng thử lại.</p>';
+                return null;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            commentsDiv.innerHTML = '<p class="text-red-600">Lỗi kết nối khi tạo nhận xét.</p>';
+            return null;
+        }
+    }
+
+    async function exportChartsWithComments() {
+        const button = document.getElementById('exportChartsBtn');
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang tạo...';
+        button.disabled = true;
+        
+        // 1. Tạo nhận xét AI trước
+        await generateChartAIComments();
+        
+        // 2. Đợi charts render hoàn tất
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // 3. Ẩn các nút export
+        document.querySelectorAll('.no-export').forEach(el => el.style.display = 'none');
+        
+        try {
+            const chartsSection = document.getElementById('chartsSection');
+            
+            const canvas = await html2canvas(chartsSection, {
+                scale: 2,
+                backgroundColor: '#ffffff',
+                logging: false,
+                useCORS: true,
+                allowTaint: true,
+                windowWidth: chartsSection.scrollWidth,
+                windowHeight: chartsSection.scrollHeight
+            });
+            
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'Bieu_Do_Hoc_Tap_Nen_Nep_{{ student.student_code }}_HK{{ semester }}.png';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                // Restore buttons
+                document.querySelectorAll('.no-export').forEach(el => el.style.display = '');
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            }, 'image/png');
+        } catch (error) {
+            console.error('Error exporting charts:', error);
+            alert('Có lỗi khi xuất biểu đồ. Vui lòng thử lại.');
             document.querySelectorAll('.no-export').forEach(el => el.style.display = '');
             button.innerHTML = originalHTML;
             button.disabled = false;
