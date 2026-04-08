@@ -1080,6 +1080,12 @@ async function loadQrTodayCount() {
 // ===================== RECOGNITION (Face) =====================
 let autoScanInterval = null;
 
+// Auto-confirmation delay tracking
+let pendingConfirmStudentId = null;
+let pendingConfirmStartTime = null;
+let confirmDelayTimer = null;
+const CONFIRM_DELAY_MS = 1500; // 1.5 seconds delay for accurate confirmation
+
 async function captureAndRecognize(isAuto = false) {
     if (isProcessingRecognize || !camStream) return;
     const isAutoCheckbox = document.getElementById('auto-recognize').checked;
@@ -1143,25 +1149,63 @@ async function captureAndRecognize(isAuto = false) {
         }
 
         if (data.matched) {
-            if (resDiv.getAttribute('data-last-sid') !== String(data.student_id)) {
+            const studentIdStr = String(data.student_id);
+            const now = Date.now();
+
+            // If this is a different student than pending, reset the timer
+            if (pendingConfirmStudentId !== studentIdStr) {
+                pendingConfirmStudentId = studentIdStr;
+                pendingConfirmStartTime = now;
+
+                // Show student info with progress bar
                 resDiv.setAttribute('data-last-sid', data.student_id);
                 resDiv.innerHTML = `
                     <div class="text-center space-y-3 bg-emerald-50 p-4 rounded-xl border border-emerald-100">
                         <p class="font-bold text-lg text-emerald-800">${data.student_name}</p>
                         <p class="text-xs text-emerald-600">${data.student_code}</p>
                         <div class="pt-2">
-                            <button id="btn-confirm-${data.student_id}" onclick="confirmCheckin(${data.student_id}, '${data.captured_photo}', ${data.confidence})" class="btn-primary w-full py-2.5 shadow-md">Xác nhận có mặt</button>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+                                <div id="confirm-progress" class="bg-emerald-600 h-2.5 rounded-full transition-all duration-100" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-emerald-600 font-medium">Đang xác nhận...</p>
                         </div>
                     </div>`;
+
+                // Start progress animation
+                if (confirmDelayTimer) clearInterval(confirmDelayTimer);
+                confirmDelayTimer = setInterval(() => {
+                    const elapsed = Date.now() - pendingConfirmStartTime;
+                    const progress = Math.min((elapsed / CONFIRM_DELAY_MS) * 100, 100);
+                    const progressBar = document.getElementById('confirm-progress');
+                    if (progressBar) {
+                        progressBar.style.width = progress + '%';
+                    }
+                }, 50);
             }
-            if (isAutoCheckbox && data.confidence > 0.85) {
-                const btn = document.getElementById(`btn-confirm-${data.student_id}`);
-                if (btn) {
-                    btn.innerHTML = '<div class="flex items-center justify-center gap-2"><div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Đang tự động ghi nhận...</div>';
-                    setTimeout(() => confirmCheckin(data.student_id, data.captured_photo, data.confidence), 300);
+
+            // Check if enough time has passed for confirmation (1.5 seconds of consistent recognition)
+            if (now - pendingConfirmStartTime >= CONFIRM_DELAY_MS) {
+                // Clear timer and reset tracking
+                if (confirmDelayTimer) {
+                    clearInterval(confirmDelayTimer);
+                    confirmDelayTimer = null;
                 }
+                pendingConfirmStudentId = null;
+                pendingConfirmStartTime = null;
+
+                // Auto-confirm attendance
+                confirmCheckin(data.student_id, data.captured_photo, data.confidence);
             }
         } else {
+            // Face not matched - reset pending confirmation
+            if (pendingConfirmStudentId !== null) {
+                pendingConfirmStudentId = null;
+                pendingConfirmStartTime = null;
+                if (confirmDelayTimer) {
+                    clearInterval(confirmDelayTimer);
+                    confirmDelayTimer = null;
+                }
+            }
             if (!isAuto) {
                 resDiv.innerHTML = `<div class="text-center p-4 bg-red-50 text-red-700 text-sm rounded-xl border border-red-100">${data.error}</div>`;
             } else if (!resDiv.querySelector('.bg-emerald-50')) {
