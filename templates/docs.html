@@ -22,7 +22,7 @@
                 </div>
                 <div>
                     <div class="text-[11px] font-bold text-indigo-600 uppercase tracking-widest">Phiên bản</div>
-                    <div class="text-sm font-bold text-indigo-900">v2.5.0 (AI Enhanced)</div>
+                    <div class="text-sm font-bold text-indigo-900">v2.6.0 (Smart School)</div>
                 </div>
             </div>
         </div>
@@ -48,6 +48,18 @@
                 <a href="#grades"
                     class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition group">
                     <i class="fas fa-graduation-cap w-4 text-amber-500"></i> Điểm số & Học tập
+                </a>
+                <a href="#attendance"
+                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition group">
+                    <i class="fas fa-face-smile w-4 text-pink-500"></i> Điểm danh & Nhận diện
+                </a>
+                <a href="#lessonbook"
+                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition group">
+                    <i class="fas fa-book w-4 text-cyan-500"></i> Sổ đầu bài & TKB
+                </a>
+                <a href="#classfund"
+                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition group">
+                    <i class="fas fa-piggy-bank w-4 text-green-500"></i> Quỹ lớp
                 </a>
                 <a href="#communication"
                     class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition group">
@@ -222,10 +234,159 @@
                 </div>
             </section>
 
-            <!-- 5. Communication -->
+            <!-- 5. Attendance & Face Recognition -->
+            <section id="attendance" class="glass-panel p-8 md:p-10 scroll-mt-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <div
+                        class="w-12 h-12 bg-pink-50 rounded-xl flex items-center justify-center text-pink-600 text-xl border border-pink-100">
+                        <i class="fas fa-face-smile"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-foreground">5. Điểm danh Thông minh</h2>
+                        <p class="text-sm text-muted-foreground">Nhận diện khuôn mặt & Mã QR tiên tiến</p>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="border-l-4 border-pink-300 pl-4">
+                            <h3 class="text-base font-bold text-foreground flex items-center gap-2 mb-2">
+                                <i class="fas fa-camera text-pink-600"></i> Face Recognition (ArcFace)
+                            </h3>
+                            <p class="text-sm text-muted-foreground leading-relaxed">
+                                Công nghệ nhận diện khuôn mặt <strong>ArcFace ONNX</strong> với độ chính xác cao. 
+                                Học sinh chỉ cần đứng trước camera là hệ thống tự động nhận diện và ghi nhận điểm danh 
+                                trong &lt; 2 giây. Hỗ trợ đăng ký nhiều mẫu khuôn mặt cho mỗi học sinh.
+                            </p>
+                            <div class="mt-2 flex flex-wrap gap-1">
+                                <span class="badge badge-secondary text-[10px]">ArcFace Deep Learning</span>
+                                <span class="badge badge-secondary text-[10px]">512-dim Embeddings</span>
+                            </div>
+                        </div>
+                        <div class="border-l-4 border-blue-300 pl-4">
+                            <h3 class="text-base font-bold text-foreground flex items-center gap-2 mb-2">
+                                <i class="fas fa-qrcode text-blue-600"></i> QR Code Scan
+                            </h3>
+                            <p class="text-sm text-muted-foreground leading-relaxed">
+                                Mỗi học sinh có mã QR cá nhân trên thẻ học sinh. Giáo viên hoặc học sinh trực 
+                                tuần chỉ cần quét mã để ghi nhận điểm danh nhanh chóng. Phù hợp cho các lớp 
+                                không có thiết bị camera hoặc điểm danh di động.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                        <h4 class="font-bold text-foreground text-sm mb-3 flex items-center gap-2">
+                            <i class="fas fa-list-check text-indigo-500"></i> Tính năng nổi bật
+                        </h4>
+                        <ul class="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
+                            <li><strong>Phiên điểm danh động:</strong> Tạo phiên điểm danh theo lớp hoặc toàn trường, tự động ghi nhận thời gian</li>
+                            <li><strong>Cảnh báo đi muộn:</strong> Tự động phát hiện và ghi nhận vi phạm đi muộn theo khung giờ quy định</li>
+                            <li><strong>Lịch sử điểm danh:</strong> Tra cứu lịch sử điểm danh theo ngày, tuần, tháng với ảnh minh chứng</li>
+                            <li><strong>Offline mode:</strong> Điểm danh được ngay cả khi mạng chậm, đồng bộ sau</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. Lesson Book & Timetable -->
+            <section id="lessonbook" class="glass-panel p-8 md:p-10 scroll-mt-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <div
+                        class="w-12 h-12 bg-cyan-50 rounded-xl flex items-center justify-center text-cyan-600 text-xl border border-cyan-100">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-foreground">6. Sổ Đầu Bài & Thời Khóa Biểu AI</h2>
+                        <p class="text-sm text-muted-foreground">Quản lý tiết dạy thông minh</p>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div class="border-l-4 border-cyan-300 pl-6 space-y-4">
+                        <h3 class="text-lg font-bold text-foreground flex items-center gap-3">
+                            <i class="fas fa-table text-cyan-600"></i> Sổ Đầu Bài Điện Tử
+                        </h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed">
+                            Thay thế sổ đầu bài giấy truyền thống bằng giao diện lưới theo tuần. 
+                            Giáo viên dễ dàng ghi nhận nội dung bài dạy, sĩ số, đánh giá tiết học 
+                            trên bất kỳ thiết bị nào. Dữ liệu được lưu trữ an toàn và tra cứu nhanh chóng.
+                        </p>
+                        <ul class="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
+                            <li>Giao diện lưới tuần (Thứ 2 - Chủ nhật) dễ quan sát</li>
+                            <li>Đánh dấu tiết học bị hủy, thay thế hoặc học bù</li>
+                            <li>Tích hợp với dữ liệu điểm danh tự động điền sĩ số</li>
+                            <li>Xuất báo cáo sổ đầu bài theo tháng/học kỳ</li>
+                        </ul>
+                    </div>
+
+                    <div class="border-l-4 border-purple-300 pl-6 space-y-4">
+                        <h3 class="text-lg font-bold text-foreground flex items-center gap-3">
+                            <i class="fas fa-calendar-alt text-purple-600"></i> Thời Khóa Biểu AI
+                        </h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed">
+                            Hệ thống TKB thông minh với khả năng <strong>xếp lịch tự động bằng AI</strong>. 
+                            Chỉ cần nhập danh sách giáo viên, môn học và ràng buộc, AI sẽ đề xuất lịch học 
+                            tối ưu, tránh xung đột và cân bằng khối lượng giảng dạy.
+                        </p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                            <div class="p-3 bg-purple-50 rounded-lg">
+                                <h4 class="font-bold text-purple-800 text-xs mb-1">Xếp lịch AI</h4>
+                                <p class="text-xs text-muted-foreground">Ollama AI phân tích và đề xuất lịch học phù hợp, hỗ trợ nhập TKB từ Excel</p>
+                            </div>
+                            <div class="p-3 bg-purple-50 rounded-lg">
+                                <h4 class="font-bold text-purple-800 text-xs mb-1">Xem lịch đa chiều</h4>
+                                <p class="text-xs text-muted-foreground">Xem TKB theo lớp, theo giáo viên, hoặc theo phòng học. Hỗ trợ tuần linh hoạt</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. Class Fund -->
+            <section id="classfund" class="glass-panel p-8 md:p-10 scroll-mt-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <div
+                        class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-600 text-xl border border-green-100">
+                        <i class="fas fa-piggy-bank"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-foreground">7. Quỹ Lớp Minh Bạch</h2>
+                        <p class="text-sm text-muted-foreground">Quản lý tài chính lớp học</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-muted-foreground">
+                    <div class="space-y-3">
+                        <h4 class="font-bold text-foreground flex items-center gap-2">
+                            <i class="fas fa-hand-holding-dollar text-green-500"></i> Thu & Chi
+                        </h4>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>Ghi nhận khoản thu từ phụ huynh theo từng học sinh hoặc đóng chung</li>
+                            <li>Phân loại chi tiêu: dụng cụ học tập, vệ sinh, hoạt động ngoại khóa...</li>
+                            <li>Hỗ trợ nhập liệu nhanh từ file Excel cho thu quỹ hàng tháng</li>
+                        </ul>
+                    </div>
+                    <div class="space-y-3">
+                        <h4 class="font-bold text-foreground flex items-center gap-2">
+                            <i class="fas fa-chart-pie text-amber-500"></i> Báo cáo & Minh bạch
+                        </h4>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>Số dư quỹ theo thời gian thực, phân theo năm học</li>
+                            <li>Báo cáo thu chi chi tiết có thể gửi phụ huynh qua tin nhắn</li>
+                            <li>Lịch sử giao dịch đầy đủ, không thể sửa xóa (chỉ admin)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-4 p-3 bg-green-50 rounded-lg border border-green-100">
+                    <p class="text-xs text-green-800 m-0">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Chức năng này giúp lớp trưởng và GVCN quản lý quỹ lớp minh bạch, dễ dàng báo cáo 
+                        với phụ huynh và nhà trường mà không cần sổ sách phức tạp.
+                    </p>
+                </div>
+            </section>
+
+            <!-- 8. Communication -->
             <section id="communication" class="glass-panel p-8 md:p-10 scroll-mt-6">
                 <h3 class="text-xl font-bold text-foreground mb-6 flex items-center gap-3">
-                    <i class="fas fa-envelopes-bulk text-blue-600"></i> 5. Kết nối & Thông tin liên lạc
+                    <i class="fas fa-envelopes-bulk text-blue-600"></i> 8. Kết nối & Thông tin liên lạc
                 </h3>
                 <div class="space-y-6">
                     <div class="flex gap-4 items-start">
@@ -248,9 +409,9 @@
                 </div>
             </section>
 
-            <!-- 6. Technology & Security -->
+            <!-- 9. Technology & Security -->
             <section id="security" class="glass-panel p-8 md:p-10 scroll-mt-6 bg-slate-50 border-slate-200">
-                <h3 class="text-xl font-bold text-foreground mb-6">6. Nền tảng Công nghệ & Bảo mật</h3>
+                <h3 class="text-xl font-bold text-foreground mb-6">9. Nền tảng Công nghệ & Bảo mật</h3>
                 <div class="prose prose-sm prose-slate text-muted-foreground max-w-none">
                     <p>
                         Chúng tôi hiểu rằng dữ liệu học sinh là tài sản quý giá và nhạy cảm. Vì vậy, EduMind AI được xây
@@ -259,11 +420,20 @@
                     <ul class="space-y-2">
                         <li><strong>AI Local:</strong> Trí tuệ nhân tạo (Ollama) chạy trực tiếp trên máy chủ của trường,
                             không gửi dữ liệu ra internet.</li>
+                        <li><strong>Nhận diện khuôn mặt Local:</strong> ArcFace ONNX chạy local với OpenCV DNN, 
+                            không phụ thuộc dịch vụ đám mây, đảm bảo tốc độ và quyền riêng tư.</li>
                         <li><strong>Cơ sở dữ liệu biệt lập:</strong> Dữ liệu được mã hóa và lưu trữ tại chỗ, quyền truy
                             cập được phân tầng nghiêm ngặt giữa Admin, GVCN và Học sinh.</li>
-                        <li><strong>Tech stack:</strong> Backend Python/Flask tối ưu hóa hiệu năng, Frontend Tailwind
-                            CSS/Vanilla JS đảm bảo tốc độ tải trang cực nhanh.</li>
+                        <li><strong>Tech stack:</strong> Backend Python/Flask + SQLAlchemy, Frontend Tailwind
+                            CSS/Vanilla JS. Hỗ trợ Python 3.14+ không cần TensorFlow.</li>
                     </ul>
+                    <div class="mt-4 p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                        <p class="text-xs text-indigo-800 m-0">
+                            <i class="fas fa-shield-alt mr-1"></i>
+                            <strong>Cập nhật v2.6.0:</strong> Bổ sung ArcFace Face Recognition, Sổ đầu bài điện tử, 
+                            TKB AI, Quỹ lớp minh bạch, và cải tiến Chatbot AI với conversation memory.
+                        </p>
+                    </div>
                 </div>
             </section>
 
