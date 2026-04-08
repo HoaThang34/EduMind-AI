@@ -9,25 +9,190 @@
             <i class="fas fa-arrow-left"></i> Về trang chủ
         </a>
         <h1 class="text-2xl font-semibold tracking-tight text-foreground mb-6">Chính sách bảo mật</h1>
-        <div class="prose prose-slate text-muted-foreground space-y-4">
-            <p><strong>1. Thu thập thông tin</strong><br>
-                Ứng dụng EduMind AI thu thập thông tin cần thiết cho hoạt động quản lý: thông tin tài khoản giáo viên,
-                học sinh; điểm số, nề nếp, lịch sử vi phạm và các dữ liệu liên quan trong phạm vi trường học.</p>
-            <p><strong>2. Lưu trữ và xử lý</strong><br>
-                Dữ liệu được lưu trữ trên máy chủ/hệ thống của nhà trường (local). Các tính năng AI (Ollama) chạy local,
-                không gửi dữ liệu nhạy cảm lên internet nhằm đảm bảo bảo mật.</p>
-            <p><strong>3. Sử dụng thông tin</strong><br>
-                Thông tin chỉ được sử dụng cho mục đích quản lý giáo dục, báo cáo nội bộ và trao đổi giữa giáo viên–học
-                sinh–nhà trường theo quy định hiện hành.</p>
-            <p><strong>4. Chia sẻ thông tin</strong><br>
-                Không chia sẻ dữ liệu cá nhân học sinh cho bên thứ ba ngoài phạm vi và quy định của nhà trường và pháp
-                luật.</p>
-            <p><strong>5. Bảo mật kỹ thuật</strong><br>
-                Ứng dụng sử dụng xác thực đăng nhập, phân quyền theo vai trò; khuyến nghị nhà trường bảo vệ máy chủ và
-                mạng nội bộ.</p>
-            <p><strong>6. Quyền của người dùng</strong><br>
-                Người dùng có quyền truy cập, chỉnh sửa thông tin cá nhân trong phạm vi cho phép của hệ thống. Mọi khiếu
-                nại về bảo mật có thể gửi tới đơn vị quản lý ứng dụng.</p>
+        <div class="prose prose-slate text-muted-foreground space-y-6">
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <p class="text-blue-800 text-sm m-0">
+                    <i class="fas fa-shield-alt mr-2"></i>
+                    <strong>Cam kết của chúng tôi:</strong> EduMind AI coi trọng quyền riêng tư và bảo mật dữ liệu của người dùng. 
+                    Chính sách này giải thích cách chúng tôi thu thập, sử dụng, lưu trữ và bảo vệ thông tin cá nhân của bạn.
+                </p>
+            </div>
+
+            <div class="border-l-4 border-blue-500 pl-4">
+                <h2 class="text-lg font-semibold text-foreground mb-2">1. Phạm vi áp dụng</h2>
+                <p>1.1. Chính sách này áp dụng cho tất cả người dùng EduMind AI bao gồm: học sinh, giáo viên, cán bộ nhà trường và phụ huynh.</p>
+                <p>1.2. Bằng việc sử dụng Hệ thống, bạn đồng ý với việc thu thập và xử lý dữ liệu theo chính sách này.</p>
+                <p>1.3. Chính sách có hiệu lực từ ngày đăng tải và được cập nhật theo lịch sử phiên bản ở cuối trang.</p>
+            </div>
+
+            <div class="border-l-4 border-blue-500 pl-4">
+                <h2 class="text-lg font-semibold text-foreground mb-2">2. Thông tin chúng tôi thu thập</h2>
+                <p>2.1. <strong>Thông tin tài khoản:</strong></p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li>Họ và tên đầy đủ</li>
+                    <li>Địa chỉ email (trường hoặc cá nhân)</li>
+                    <li>Số điện thoại liên hệ</li>
+                    <li>Vai trò (học sinh/giáo viên/quản trị)</li>
+                    <li>Thông tin đăng nhập (mật khẩu được mã hóa)</li>
+                </ul>
+                <p>2.2. <strong>Thông tin học tập và công tác:</strong></p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li>Lớp học, khối, mã học sinh/giáo viên</li>
+                    <li>Điểm số, kết quả học tập</li>
+                    <li>Dữ liệu điểm danh, chuyên cần</li>
+                    <li>Lịch sử vi phạm nề nếp (nếu có)</li>
+                    <li>Hoạt động tham gia ngoại khóa</li>
+                </ul>
+                <p>2.3. <strong>Thông tin kỹ thuật:</strong></p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li>Địa chỉ IP, loại trình duyệt, thiết bị sử dụng</li>
+                    <li>Thời gian truy cập và hoạt động trên Hệ thống</li>
+                    <li>Log file ghi nhận lỗi và sự cố</li>
+                </ul>
+                <p>2.4. <strong>Thông tin từ tương tác AI:</strong> Nội dung câu hỏi và phản hồi khi sử dụng trợ lý AI (không lưu trữ lâu dài).</p>
+            </div>
+
+            <div class="border-l-4 border-blue-500 pl-4">
+                <h2 class="text-lg font-semibold text-foreground mb-2">3. Mục đích sử dụng thông tin</h2>
+                <p>3.1. Chúng tôi sử dụng thông tin cho các mục đích sau:</p>
+                <table class="w-full text-sm border-collapse mt-2">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border p-2 text-left">Mục đích</th>
+                            <th class="border p-2 text-left">Cơ sở pháp lý</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border p-2">Cung cấp và duy trì dịch vụ quản lý giáo dục</td>
+                            <td class="border p-2">Thực hiện hợp đồng/hợp tác giáo dục</td>
+                        </tr>
+                        <tr>
+                            <td class="border p-2">Xác thực danh tính và phân quyền truy cập</td>
+                            <td class="border p-2">Thực hiện hợp đồng</td>
+                        </tr>
+                        <tr>
+                            <td class="border p-2">Báo cáo thống kê cho Sở/Phòng GD&ĐT</td>
+                            <td class="border p-2">Tuân thủ nghĩa vụ pháp lý</td>
+                        </tr>
+                        <tr>
+                            <td class="border p-2">Cải thiện chất lượng dịch vụ và hỗ trợ kỹ thuật</td>
+                            <td class="border p-2">Lợi ích hợp pháp</td>
+                        </tr>
+                        <tr>
+                            <td class="border p-2">Phát hiện và ngăn chặn gian lận, truy cập trái phép</td>
+                            <td class="border p-2">Lợi ích hợp pháp</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>3.2. Không sử dụng dữ liệu cho mục đích quảng cáo, marketing hoặc bán cho bên thứ ba.</p>
+            </div>
+
+            <div class="border-l-4 border-blue-500 pl-4">
+                <h2 class="text-lg font-semibold text-foreground mb-2">4. Cơ chế lưu trữ và bảo mật</h2>
+                <p>4.1. <strong>Lưu trữ local:</strong> Dữ liệu được lưu trữ trên máy chủ nội bộ của nhà trường, không lưu trên đám mây công cộng.</p>
+                <p>4.2. <strong>Bảo mật AI:</strong> Các tính năng AI (Ollama) chạy hoàn toàn local, không gửi dữ liệu nhạy cảm lên internet.</p>
+                <p>4.3. <strong>Biện pháp kỹ thuật:</strong></p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li>Mã hóa mật khẩu bằng thuật toán bcrypt/Argon2</li>
+                    <li>Kết nối HTTPS/TLS cho truyền tải dữ liệu</li>
+                    <li>Tường lửa và giới hạn truy cập mạng nội bộ</li>
+                    <li>Sao lưu dữ liệu định kỳ (hàng ngày/tuần)</li>
+                </ul>
+                <p>4.4. <strong>Biện pháp tổ chức:</strong></p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li>Phân quyền nghiêm ngặt theo vai trò (RBAC)</li>
+                    <li>Đào tạo nhân viên về bảo mật thông tin</li>
+                    <li>Giới hạn truy cập vật lý vào máy chủ</li>
+                </ul>
+            </div>
+
+            <div class="border-l-4 border-blue-500 pl-4">
+                <h2 class="text-lg font-semibold text-foreground mb-2">5. Chia sẻ và tiết lộ thông tin</h2>
+                <p>5.1. <strong>Không chia sẻ với bên thứ ba</strong> trừ các trường hợp sau:</p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li><strong>Cơ quan quản lý giáo dục:</strong> Sở GD&ĐT, Phòng GD&ĐT theo yêu cầu báo cáo chính thức</li>
+                    <li><strong>Cơ quan pháp luật:</strong> Khi có yêu cầu hợp pháp từ cơ quan có thẩm quyền</li>
+                    <li><strong>Phụ huynh/học sinh:</strong> Xem điểm số, thành tích theo phân quyền</li>
+                    <li><strong>Đơn vị bảo trì:</strong> Nhân viên kỹ thuật được ủy quyền, có cam kết bảo mật</li>
+                </ul>
+                <p>5.2. <strong>Chuyển giao dữ liệu:</strong> Không chuyển dữ liệu ra nước ngoài. Trong trường hợp sáp nhập/chuyển nhượng, dữ liệu vẫn thuộc quản lý của nhà trường.</p>
+            </div>
+
+            <div class="border-l-4 border-green-500 pl-4">
+                <h2 class="text-lg font-semibold text-foreground mb-2">6. Quyền của người dùng</h2>
+                <p>6.1. Bạn có các quyền sau đối với dữ liệu cá nhân:</p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li><strong>Quyền truy cập:</strong> Xem thông tin cá nhân và lịch sử hoạt động của mình</li>
+                    <li><strong>Quyền chỉnh sửa:</strong> Cập nhật thông tin không chính xác (trong giới hạn cho phép)</li>
+                    <li><strong>Quyền xóa:</strong> Yêu cầu xóa tài khoản và dữ liệu cá nhân (không bao gồm dữ liệu học tập bắt buộc lưu theo quy định)</li>
+                    <li><strong>Quyền hạn chế:</strong> Yêu cầu hạn chế xử lý dữ liệu trong một số trường hợp</li>
+                    <li><strong>Quyền khiếu nại:</strong> Gửi khiếu nại về cách xử lý dữ liệu đến nhà trường hoặc cơ quan có thẩm quyền</li>
+                </ul>
+                <p>6.2. <strong>Cách thực hiện quyền:</strong> Gửi yêu cầu qua email <strong>privacy@edumind.edu.vn</strong> hoặc liên hệ trực tiếp phòng CNTT. Thời gian phản hồi: 15 ngày làm việc.</p>
+            </div>
+
+            <div class="border-l-4 border-blue-500 pl-4">
+                <h2 class="text-lg font-semibold text-foreground mb-2">7. Thời gian lưu trữ</h2>
+                <p>7.1. Dữ liệu được lưu trữ trong thời gian:</p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li><strong>Tài khoản đang hoạt động:</strong> Trong suốt thời gian học tập/công tác tại trường</li>
+                    <li><strong>Dữ liệu học tập:</strong> Theo quy định của Bộ GD&ĐT (tối thiểu 5 năm sau khi tốt nghiệp)</li>
+                    <li><strong>Log hệ thống:</strong> 12 tháng để phục vụ kiểm tra bảo mật</li>
+                    <li><strong>Tài khoản đã xóa:</strong> Dữ liệu cá nhân được xóa sau 30 ngày từ yêu cầu (trừ dữ liệu bắt buộc lưu)</li>
+                </ul>
+                <p>7.2. Sau thời hạn trên, dữ liệu sẽ được xóa vĩnh viễn hoặc ẩn danh hóa.</p>
+            </div>
+
+            <div class="border-l-4 border-amber-500 pl-4">
+                <h2 class="text-lg font-semibold text-foreground mb-2">8. Cookie và công nghệ theo dõi</h2>
+                <p>8.1. <strong>Cookie cần thiết:</strong> Sử dụng để duy trì phiên đăng nhập, bảo mật và chức năng cơ bản của Hệ thống.</p>
+                <p>8.2. <strong>Cookie phân tích:</strong> Có thể sử dụng để phân tích hiệu suất (không chứa thông tin cá nhân).</p>
+                <p>8.3. <strong>Tùy chọn:</strong> Bạn có thể tắt cookie trong trình duyệt nhưng có thể ảnh hưởng đến chức năng đăng nhập.</p>
+                <p>8.4. Không sử dụng cookie quảng cáo hoặc theo dõi bên thứ ba.</p>
+            </div>
+
+            <div class="border-l-4 border-blue-500 pl-4">
+                <h2 class="text-lg font-semibold text-foreground mb-2">9. Bảo vệ dữ liệu trẻ em</h2>
+                <p>9.1. Hệ thống phục vụ học sinh từ 11-18 tuổi. Dữ liệu của học sinh dưới 16 tuổi được xử lý theo nguyên tắc:</p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li>Thu thập thông tin tối thiểu cần thiết cho mục đích giáo dục</li>
+                    <li>Thông báo và thu thập đồng ý từ phụ huynh khi cần thiết</li>
+                    <li>Không công khai dữ liệu cá nhân học sinh trên các kênh không được kiểm soát</li>
+                    <li>Giáo viên chỉ được truy cập dữ liệu học sinh thuộc lớp/quyền quản lý của mình</li>
+                </ul>
+            </div>
+
+            <div class="border-l-4 border-red-500 pl-4">
+                <h2 class="text-lg font-semibold text-foreground mb-2">10. Thông báo vi phạm bảo mật</h2>
+                <p>10.1. Trong trường hợp xảy ra sự cố rò rỉ dữ liệu, chúng tôi sẽ:</p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li>Khắc phục sự cố trong vòng 72 giờ kể từ khi phát hiện</li>
+                    <li>Thông báo cho cơ quan quản lý giáo dục và pháp luật (nếu cần)</li>
+                    <li>Thông báo cho người dùng bị ảnh hưởng trong vòng 72 giờ</li>
+                    <li>Thực hiện các biện pháp ngăn chặn tái diễn</li>
+                </ul>
+                <p>10.2. Người dùng phát hiện dấu hiệu bất thường vui lòng báo cáo ngay qua <strong>security@edumind.edu.vn</strong>.</p>
+            </div>
+
+            <div class="border-l-4 border-blue-500 pl-4">
+                <h2 class="text-lg font-semibold text-foreground mb-2">11. Liên hệ và khiếu nại</h2>
+                <p>11.1. Mọi thắc mắc về chính sách bảo mật:</p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li><strong>Email:</strong> privacy@edumind.edu.vn</li>
+                    <li><strong>Điện thoại:</strong> Liên hệ phòng CNTT tại trường</li>
+                    <li><strong>Địa chỉ:</strong> Trường THPT Chuyên Nguyễn Tất Thành, tỉnh Lào Cai</li>
+                </ul>
+                <p>11.2. Nếu không hài lòng với cách xử lý dữ liệu, bạn có quyền khiếu nại đến <strong>Sở GD&ĐT tỉnh Lào Cai</strong> hoặc <strong>Cục An toàn thông tin - Bộ TT&TT</strong>.</p>
+            </div>
+
+            <div class="mt-8 p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
+                <p class="m-0"><strong>Lịch sử cập nhật:</strong></p>
+                <ul class="list-none pl-0 space-y-1 mt-2">
+                    <li>• Phiên bản 2.0 - Ngày 08/04/2026: Cập nhật toàn diện 11 phần, bổ sung quyền người dùng, cookie, bảo vệ trẻ em</li>
+                    <li>• Phiên bản 1.0 - Ngày 01/01/2026: Thiết lập chính sách cơ bản</li>
+                </ul>
+            </div>
         </div>
         <div class="mt-8 pt-6 border-t border-[hsl(240,5.9%,90%)]">
             <a href="{{ url_for('welcome') }}"
