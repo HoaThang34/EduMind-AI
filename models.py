@@ -159,6 +159,7 @@ class Subject(db.Model):
     num_tx_columns = db.Column(db.Integer, default=3)
     num_gk_columns = db.Column(db.Integer, default=1)
     num_hk_columns = db.Column(db.Integer, default=1)
+    is_pass_fail = db.Column(db.Boolean, default=False)  # True: môn đạt/không đạt (Thể dục, GDĐP...)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
 

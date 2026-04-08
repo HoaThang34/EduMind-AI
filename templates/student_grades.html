@@ -105,8 +105,13 @@
                     {% for subject in subjects %}
                     {% set subject_grade_data = grades_by_subject.get(subject.id, {'TX': {}, 'GK': {}, 'HK': {}}) %}
                     <div class="border border-[hsl(240,5.9%,90%)] rounded-lg overflow-hidden">
-                        <div class="bg-accent px-4 py-3 border-b border-[hsl(240,5.9%,90%)]">
+                        <div class="bg-accent px-4 py-3 border-b border-[hsl(240,5.9%,90%)] flex items-center justify-between">
                             <h3 class="font-bold text-foreground">{{ subject.name }}</h3>
+                            {% if subject.is_pass_fail %}
+                            <span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-semibold">
+                                <i class="fas fa-check-circle mr-1"></i>Đạt/Không đạt
+                            </span>
+                            {% endif %}
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full">
@@ -262,7 +267,16 @@
                                             {% set avg_tx = tx_scores|sum / tx_scores|length %}
                                             {% set avg_gk = gk_scores|sum / gk_scores|length %}
                                             {% set avg_hk = hk_scores|sum / hk_scores|length %}
-                                            {{ "%.2f"|format((avg_tx + avg_gk * 2 + avg_hk * 3) / 6) }}
+                                            {% set tbm = (avg_tx + avg_gk * 2 + avg_hk * 3) / 6 %}
+                                            {% if subject.is_pass_fail %}
+                                                {% if tbm >= 5 %}
+                                                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-bold">Đạt</span>
+                                                {% else %}
+                                                <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-bold">Không đạt</span>
+                                                {% endif %}
+                                            {% else %}
+                                            {{ "%.2f"|format(tbm) }}
+                                            {% endif %}
                                             {% else %}
                                             -
                                             {% endif %}

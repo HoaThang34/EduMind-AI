@@ -269,6 +269,17 @@ def ensure_lesson_book_slot_lesson_date_column():
     db.session.commit()
 
 
+def ensure_subject_is_pass_fail_column():
+    """Thêm cột is_pass_fail cho bảng subject (SQLite cũ)."""
+    insp = inspect(db.engine)
+    if not insp.has_table("subject"):
+        return
+    cols = {c["name"] for c in insp.get_columns("subject")}
+    if "is_pass_fail" not in cols:
+        db.session.execute(text("ALTER TABLE subject ADD COLUMN is_pass_fail BOOLEAN DEFAULT 0"))
+    db.session.commit()
+
+
 def create_database():
     db.create_all()
     insp = inspect(db.engine)
@@ -285,6 +296,7 @@ def create_database():
     ensure_attendance_monitoring_session_column()
     ensure_lesson_book_week_and_slot_tables()
     ensure_lesson_book_slot_lesson_date_column()
+    ensure_subject_is_pass_fail_column()
     # AttendanceRecord table is auto-created by db.create_all()
     if not Teacher.query.first():
         hashed_pwd = generate_password_hash("admin")

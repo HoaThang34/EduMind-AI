@@ -35,6 +35,7 @@ def register(app):
             num_tx = int(request.form.get("num_tx_columns", 3))
             num_gk = int(request.form.get("num_gk_columns", 1))
             num_hk = int(request.form.get("num_hk_columns", 1))
+            is_pass_fail = request.form.get("is_pass_fail") == "on"
         
             if not name or not code:
                 flash("Vui lòng nhập tên và mã môn học!", "error")
@@ -45,12 +46,13 @@ def register(app):
                 return redirect(url_for("manage_subjects"))
         
             subject = Subject(
-                name=name, 
-                code=code, 
+                name=name,
+                code=code,
                 description=description,
                 num_tx_columns=num_tx,
                 num_gk_columns=num_gk,
-                num_hk_columns=num_hk
+                num_hk_columns=num_hk,
+                is_pass_fail=is_pass_fail
             )
             db.session.add(subject)
             db.session.commit()
@@ -76,7 +78,8 @@ def register(app):
             subject.num_tx_columns = int(request.form.get("num_tx_columns", 3))
             subject.num_gk_columns = int(request.form.get("num_gk_columns", 1))
             subject.num_hk_columns = int(request.form.get("num_hk_columns", 1))
-        
+            subject.is_pass_fail = request.form.get("is_pass_fail") == "on"
+
             db.session.commit()
             flash("Đã cập nhật môn học!", "success")
             return redirect(url_for("manage_subjects"))
