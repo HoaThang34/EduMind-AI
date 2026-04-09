@@ -18,7 +18,7 @@ from models import (
     GroupChatMessage, PrivateMessage, ChangeLog, LessonBookEntry,
 )
 from app_helpers import (
-    admin_required, get_accessible_students, can_access_student, normalize_student_code,
+    admin_required, permission_required, role_or_permission_required, get_accessible_students, can_access_student, normalize_student_code,
     parse_excel_file, import_violations_to_db, calculate_week_from_date, _call_gemini,
     save_weekly_archive, get_current_iso_week, create_notification, log_change,
     UPLOAD_FOLDER, calculate_student_gpa, is_reset_needed, update_student_conduct,
@@ -28,6 +28,7 @@ from app_helpers import (
 def register(app):
     @app.route("/add_violation", methods=["GET", "POST"])
     @login_required
+    @role_or_permission_required('discipline_officer', 'manage_discipline')
     def add_violation():
         if request.method == "POST":
             # Get list of rule IDs (can be multiple)
@@ -179,6 +180,7 @@ def register(app):
 
     @app.route("/bulk_import_violations")
     @login_required
+    @role_or_permission_required('discipline_officer', 'manage_discipline')
     def bulk_import_violations():
         """Display bulk import page"""
         students = Student.query.order_by(Student.student_class, Student.name).all()
@@ -189,6 +191,7 @@ def register(app):
 
     @app.route("/process_bulk_violations", methods=["POST"])
     @login_required
+    @role_or_permission_required('discipline_officer', 'manage_discipline')
     def process_bulk_violations():
         """
         Process bulk violation import from either:
@@ -240,6 +243,7 @@ def register(app):
 
     @app.route("/download_violation_template")
     @login_required
+    @permission_required('view_discipline')
     def download_violation_template():
         """Generate and download Excel template"""
         # Create sample template
@@ -268,6 +272,7 @@ def register(app):
 
     @app.route("/upload_ocr", methods=["POST"])
     @login_required
+    @role_or_permission_required('discipline_officer', 'manage_discipline')
     def upload_ocr():
         """⚡ Đọc CHỈ MÃ HỌC SINH từ thẻ và tìm trực tiếp trong CSDL."""
         uploaded_files = request.files.getlist("files[]")
@@ -392,6 +397,7 @@ def register(app):
     def batch_violation(): return redirect(url_for('add_violation'))
     @app.route("/student/<int:student_id>/violations_timeline")
     @login_required
+    @permission_required('view_discipline')
     def violations_timeline(student_id):
         """Timeline lịch sử vi phạm của học sinh"""
         student = db.session.get(Student, student_id)
@@ -435,6 +441,7 @@ def register(app):
         )
     @app.route("/delete_violation/<int:violation_id>", methods=["POST"])
     @login_required
+    @role_or_permission_required('discipline_officer', 'manage_discipline')
     def delete_violation(violation_id):
         try:
             # 1. Tìm bản ghi vi phạm

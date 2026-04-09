@@ -2,12 +2,14 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from models import Student, Grade, Subject, SystemConfig, Violation, db
 from sqlalchemy import or_, desc
+from app_helpers import permission_required, role_or_permission_required
 import datetime
 
 grades_bp = Blueprint('grades', __name__)
 
 @grades_bp.route("/manage_grades")
 @login_required
+@permission_required('view_grades')
 def manage_grades():
     from app_helpers import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa
     """Danh sách học sinh để chọn nhập điểm"""
@@ -30,6 +32,7 @@ def manage_grades():
 
 @grades_bp.route("/student_grades/<int:student_id>", methods=["GET", "POST"])
 @login_required
+@role_or_permission_required('subject_teacher', 'manage_grades')
 def student_grades(student_id):
     from app_helpers import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa, update_student_academic_status
     """Xem và nhập điểm cho học sinh"""
@@ -169,6 +172,7 @@ def student_grades(student_id):
 
 @grades_bp.route("/delete_grade/<int:grade_id>", methods=["POST"])
 @login_required
+@role_or_permission_required('subject_teacher', 'manage_grades')
 def delete_grade(grade_id):
     from app_helpers import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa, update_student_academic_status
     """Xóa một điểm"""
@@ -189,6 +193,7 @@ def delete_grade(grade_id):
 
 @grades_bp.route("/api/update_grade/<int:grade_id>", methods=["POST"])
 @login_required
+@role_or_permission_required('subject_teacher', 'manage_grades')
 def update_grade_api(grade_id):
     from app_helpers import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa, update_student_academic_status
     """API endpoint để cập nhật điểm inline"""
@@ -222,6 +227,7 @@ def update_grade_api(grade_id):
 
 @grades_bp.route("/student/<int:student_id>/transcript")
 @login_required
+@permission_required('view_grades')
 def student_transcript(student_id):
     from app_helpers import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa
     """Xem bảng điểm tổng hợp (học bạ) của học sinh"""
@@ -289,6 +295,7 @@ def student_transcript(student_id):
 
 @grades_bp.route("/student/<int:student_id>/parent_report")
 @login_required
+@permission_required('view_grades')
 def parent_report(student_id):
     from app_helpers import admin_required, can_access_student, get_accessible_students, log_change, can_access_subject, create_notification, calculate_student_gpa
     """Báo cáo tổng hợp cho phụ huynh"""

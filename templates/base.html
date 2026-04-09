@@ -854,24 +854,27 @@
                             <i class="fas fa-book-open w-6 text-center text-lg mr-3"></i>
                             <span class="text-sm">Sổ đầu bài</span>
                         </a>
+                        {% if current_user.has_permission('view_attendance') %}
                         <a href="{{ url_for('attendance') }}"
                             class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'attendance' %}active bg-gradient-to-r from-indigo-400 to-violet-500 text-white shadow-lg{% endif %}">
                             <i class="fas fa-camera w-6 text-center text-lg mr-3 text-violet-500"></i>
                             <span class="text-sm">Điểm danh khuôn mặt</span>
                             <span class="ml-auto bg-violet-100 text-violet-600 text-[10px] font-bold px-1.5 py-0.5 rounded">NEW</span>
                         </a>
+                        {% endif %}
                         <a href="{{ url_for('timetable_view') }}"
                             class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'timetable_view' or request.endpoint == 'timetable_manage' or request.endpoint == 'timetable_import_xlsx' or request.endpoint == 'timetable_import_ai_preview' or request.endpoint == 'timetable_import_ai_confirm' or request.endpoint == 'timetable_import_ai_cancel' or request.endpoint == 'timetable_xlsx_template' %}active{% endif %}">
                             <i class="fas fa-calendar-alt w-6 text-center text-lg mr-3"></i>
                             <span class="text-sm">Thời khóa biểu</span>
                         </a>
-                        {% if current_user.role in ['admin', 'homeroom_teacher'] %}
+                        {% if current_user.has_permission('view_class_fund') %}
                         <a href="{{ url_for('class_fund') }}"
                             class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'class_fund' %}active{% endif %}">
                             <i class="fas fa-piggy-bank w-6 text-center text-lg mr-3 text-amber-600"></i>
                             <span class="text-sm">Quỹ lớp</span>
                         </a>
                         {% endif %}
+                        {% if current_user.has_permission('view_discipline') %}
                         <a href="{{ url_for('history') }}"
                             class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'history' %}active{% endif %}">
                             <i class="fas fa-history w-6 text-center text-lg mr-3"></i>
@@ -883,7 +886,8 @@
                             <span class="text-sm">Lịch sử vi phạm</span>
                             <span class="ml-auto bg-red-100 text-red-600 text-[10px] font-bold px-1.5 py-0.5 rounded">HOT</span>
                         </a>
-                        {% if current_user.role in ['admin', 'homeroom_teacher'] %}
+                        {% endif %}
+                        {% if current_user.has_permission('view_reports') %}
                         <a href="{{ url_for('changelog') }}"
                             class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'changelog' %}active{% endif %}">
                             <i class="fas fa-database w-6 text-center text-lg mr-3"></i>
@@ -898,11 +902,14 @@
                     <h3 class="sidebar-group-title px-3 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
                         Quản lý</h3>
                     <div class="space-y-1">
+                        {% if current_user.has_permission('view_grades') %}
                         <a href="{{ url_for('grades.manage_grades') }}"
                             class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'grades.manage_grades' %}active{% endif %}">
                             <i class="fas fa-pencil-alt w-6 text-center text-lg mr-3"></i>
                             <span class="text-sm">Nhập điểm số</span>
                         </a>
+                        {% endif %}
+                        {% if current_user.has_permission('manage_grades') %}
                         <a href="{{ url_for('ai_engine.ocr_grades') }}"
                             class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'ai_engine.ocr_grades' %}active bg-indigo-50 text-indigo-600 font-semibold{% endif %}">
                             <i class="fas fa-magic w-6 text-center text-lg mr-3"></i>
@@ -910,11 +917,14 @@
                             <span
                                 class="ml-auto bg-indigo-100 text-indigo-600 text-[10px] font-bold px-1.5 py-0.5 rounded">AI</span>
                         </a>
+                        {% endif %}
+                        {% if current_user.has_permission('view_students') %}
                         <a href="{{ url_for('manage_students') }}"
                             class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'manage_students' %}active{% endif %}">
                             <i class="fas fa-user-graduate w-6 text-center text-lg mr-3"></i>
                             <span class="text-sm">Quản lý học sinh</span>
                         </a>
+                        {% endif %}
 
                         {% if current_user.role == 'admin' %}
                         <a href="{{ url_for('manage_teachers') }}"
@@ -934,7 +944,7 @@
                         </a>
                         {% endif %}
 
-                        {% if current_user.role in ['admin', 'homeroom_teacher'] %}
+                        {% if current_user.has_permission('manage_discipline') %}
                         <a href="{{ url_for('manage_rules') }}"
                             class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'manage_rules' %}active{% endif %}">
                             <i class="fas fa-gavel w-6 text-center text-lg mr-3"></i>
@@ -977,7 +987,7 @@
                             <span class="text-sm">Tin nhắn riêng</span>
                         </a>
 
-                        {% if current_user.role in ['admin', 'homeroom_teacher'] %}
+                        {% if current_user.has_permission('send_notifications') %}
                         <a href="{{ url_for('send_student_notification') }}"
                             class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'send_student_notification' or request.endpoint == 'student_notifications_history' %}active{% endif %}">
                             <i class="fas fa-bullhorn w-6 text-center text-lg mr-3 text-amber-500"></i>
@@ -985,7 +995,7 @@
                         </a>
                         {% endif %}
 
-                        {% if current_user.role == 'admin' %}
+                        {% if current_user.has_permission('send_notifications') %}
                         <a href="{{ url_for('send_notification') }}"
                             class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'send_notification' %}active{% endif %}">
                             <i class="fas fa-paper-plane w-6 text-center text-lg mr-3 text-emerald-500"></i>

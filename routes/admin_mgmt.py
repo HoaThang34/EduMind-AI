@@ -13,6 +13,7 @@ from models import (
     db, Student, Violation, ViolationType, Teacher, SystemConfig, ClassRoom,
     WeeklyArchive, Subject, Grade, BonusType, BonusRecord, Notification,
     GroupChatMessage, PrivateMessage, ChangeLog, ConductSetting,
+    Permission, TeacherPermission,
 )
 from app_helpers import (
     admin_required, get_accessible_students, can_access_student, normalize_student_code,
@@ -338,3 +339,132 @@ def register(app):
             return redirect(url_for("send_notification"))
     
         return render_template("send_notification.html")
+
+    # === PERMISSION MANAGEMENT ROUTES ===
+
+    @app.route("/admin/permissions")
+    @admin_required
+    def manage_permissions():
+        """Trang quản lý phân quyền - Chỉ Admin"""
+        teachers = Teacher.query.filter(Teacher.role != 'admin').order_by(Teacher.full_name).all()
+        permissions = Permission.query.order_by(Permission.category, Permission.name).all()
+        
+        # Group permissions by category
+        permission_groups = {}
+        for p in permissions:
+            if p.category not in permission_groups:
+                permission_groups[p.category] = []
+            permission_groups[p.category].append(p)
+        
+        return render_template("manage_permissions.html", 
+                             teachers=teachers, 
+                             permissions=permissions,
+                             permission_groups=permission_groups)
+
+    @app.route("/admin/permissions/init", methods=["POST"])
+    @admin_required
+    def init_permissions():
+        """Khởi tạo các quyền mặc định cho hệ thống"""
+        default_permissions = [
+            # Grades - Điểm số
+            ('view_grades', 'Xem điểm', 'grades', 'Xem điểm của học sinh'),
+            ('manage_grades', 'Quản lý điểm', 'grades', 'Nhập/sửa điểm học sinh'),
+            
+            # Discipline - Nề nếp
+            ('view_discipline', 'Xem nề nếp', 'discipline', 'Xem vi phạm và điểm cộng'),
+            ('manage_discipline', 'Quản lý nề nếp', 'discipline', 'Thêm/sửa vi phạm và điểm cộng'),
+            
+            # Students - Học sinh
+            ('view_students', 'Xem học sinh', 'students', 'Xem thông tin học sinh'),
+            ('manage_students', 'Quản lý học sinh', 'students', 'Thêm/sửa/xóa học sinh'),
+            
+            # Attendance - Điểm danh
+            ('view_attendance', 'Xem điểm danh', 'attendance', 'Xem lịch sử điểm danh'),
+            ('manage_attendance', 'Quản lý điểm danh', 'attendance', 'Thực hiện điểm danh'),
+            
+            # Timetable - Thời khóa biểu
+            ('view_timetable', 'Xem TKB', 'timetable', 'Xem thời khóa biểu'),
+            ('manage_timetable', 'Quản lý TKB', 'timetable', 'Sửa thời khóa biểu'),
+            
+            # Reports - Báo cáo
+            ('view_reports', 'Xem báo cáo', 'reports', 'Xem các báo cáo thống kê'),
+            ('export_reports', 'Xuất báo cáo', 'reports', 'Xuất file Excel/PDF báo cáo'),
+            
+            # AI Features
+            ('use_ai_chat', 'Sử dụng AI Chat', 'ai', 'Trò chuyện với AI Assistant'),
+            ('use_face_recognition', 'Nhận diện khuôn mặt', 'ai', 'Sử dụng tính năng nhận diện khuôn mặt'),
+            
+            # Lesson Book - Sổ đầu bài
+            ('view_lesson_book', 'Xem sổ đầu bài', 'lesson_book', 'Xem sổ đầu bài'),
+            ('manage_lesson_book', 'Quản lý sổ đầu bài', 'lesson_book', 'Viết sổ đầu bài'),
+            
+            # Class Fund - Quỹ lớp
+            ('view_class_fund', 'Xem quỹ lớp', 'class_fund', 'Xem thu chi quỹ lớp'),
+            ('manage_class_fund', 'Quản lý quỹ lớp', 'class_fund', 'Quản lý thu chi quỹ lớp'),
+            
+            # Messaging
+            ('send_notifications', 'Gửi thông báo', 'messaging', 'Gửi thông báo cho học sinh/phụ huynh'),
+            ('view_all_messages', 'Xem tất cả tin nhắn', 'messaging', 'Xem toàn bộ tin nhắn (admin)'),
+        ]
+        
+        created_count = 0
+        for code, name, category, description in default_permissions:
+            if not Permission.query.filter_by(code=code).first():
+                perm = Permission(code=code, name=name, category=category, description=description)
+                db.session.add(perm)
+                created_count += 1
+        
+        db.session.commit()
+        flash(f"Đã khởi tạo {created_count} quyền mặc định!", "success")
+        return redirect(url_for("manage_permissions"))
+
+    @app.route("/admin/teachers/<int:teacher_id>/permissions", methods=["GET", "POST"])
+    @admin_required
+    def manage_teacher_permissions(teacher_id):
+        """Quản lý quyền của một giáo viên cụ thể"""
+        teacher = Teacher.query.get_or_404(teacher_id)
+        
+        if teacher.role == 'admin':
+            flash("Không thể chỉnh sửa quyền của Admin!", "error")
+            return redirect(url_for("manage_permissions"))
+        
+        if request.method == "POST":
+            # Xóa tất cả quyền cũ
+            TeacherPermission.query.filter_by(teacher_id=teacher_id).delete()
+            
+            # Thêm quyền mới được chọn
+            selected_permissions = request.form.getlist('permissions')
+            for perm_code in selected_permissions:
+                perm = Permission.query.filter_by(code=perm_code).first()
+                if perm:
+                    tp = TeacherPermission(
+                        teacher_id=teacher_id,
+                        permission_id=perm.id,
+                        granted_by=current_user.id
+                    )
+                    db.session.add(tp)
+            
+            db.session.commit()
+            flash(f"Đã cập nhật quyền cho {teacher.full_name}!", "success")
+            return redirect(url_for("manage_permissions"))
+        
+        # GET: Hiển thị form
+        all_permissions = Permission.query.order_by(Permission.category, Permission.name).all()
+        teacher_perm_codes = [p.code for p in teacher.get_all_permissions()]
+        
+        # Group permissions by category
+        permission_groups = {}
+        for p in all_permissions:
+            if p.category not in permission_groups:
+                permission_groups[p.category] = []
+            permission_groups[p.category].append({
+                'id': p.id,
+                'code': p.code,
+                'name': p.name,
+                'description': p.description,
+                'granted': p.code in teacher_perm_codes
+            })
+        
+        return render_template("edit_teacher_permissions.html", 
+                             teacher=teacher,
+                             permission_groups=permission_groups)

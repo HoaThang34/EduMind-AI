@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý Phân quyền{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-foreground">Quản lý Phân quyền Hệ thống</h1>
+            <p class="text-muted-foreground mt-1">Quản lý quyền truy cập và phân quyền cho giáo viên</p>
+        </div>
+        <form action="{{ url_for('init_permissions') }}" method="POST" class="inline">
+            <button type="submit" 
+                class="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium shadow-card shadow-amber-200 transition"
+                onclick="return confirm('Khởi tạo các quyền mặc định cho hệ thống?')">
+                <i class="fas fa-sync-alt"></i>
+                Khởi tạo quyền mặc định
+            </button>
+        </form>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="space-y-2">
+        {% for category, message in messages %}
+        <div class="flex items-center gap-3 p-4 rounded-lg {% if category == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-emerald-50 text-emerald-700 border border-emerald-200{% endif %}">
+            <i class="fas {% if category == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %}"></i>
+            <span class="font-medium">{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Danh sách các quyền trong hệ thống -->
+    <div class="bg-white rounded-xl shadow border border-[hsl(240,5.9%,90%)] overflow-hidden">
+        <div class="bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-4">
+            <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                <i class="fas fa-list-check"></i>
+                Các quyền trong hệ thống
+            </h2>
+        </div>
+        <div class="p-6">
+            {% if permission_groups %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for category, perms in permission_groups.items() %}
+                <div class="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden">
+                    <div class="px-4 py-3 bg-white border-b border-slate-200 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+                                <i class="fas fa-{{ 'graduation-cap' if category == 'grades' else 'shield-alt' if category == 'discipline' else 'users' if category == 'students' else 'clipboard-list' if category == 'attendance' else 'calendar' if category == 'timetable' else 'chart-bar' if category == 'reports' else 'robot' if category == 'ai' else 'book' if category == 'lesson_book' else 'piggy-bank' if category == 'class_fund' else 'bell' if category == 'messaging' else 'cog' }}"></i>
+                            </span>
+                            <span class="font-semibold text-slate-700 capitalize">{{ category.replace('_', ' ') }}</span>
+                        </div>
+                        <span class="px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-bold">{{ perms|length }}</span>
+                    </div>
+                    <div class="p-3 space-y-2">
+                        {% for p in perms %}
+                        <div class="flex items-start gap-2 p-2 rounded-lg hover:bg-white hover:shadow-sm transition">
+                            <code class="text-xs bg-slate-200 px-2 py-0.5 rounded text-slate-700 whitespace-nowrap">{{ p.code }}</code>
+                            <div class="min-w-0">
+                                <p class="text-sm font-medium text-slate-700 truncate">{{ p.name }}</p>
+                                <p class="text-xs text-slate-500">{{ p.description or 'Không có mô tả' }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="flex flex-col items-center justify-center py-12 text-center">
+                <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+                    <i class="fas fa-info-circle text-2xl text-slate-400"></i>
+                </div>
+                <p class="text-slate-600 font-medium">Chưa có quyền nào được định nghĩa</p>
+                <p class="text-slate-500 text-sm mt-1">Vui lòng nhấn "Khởi tạo quyền mặc định" để tạo các quyền cơ bản</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Danh sách giáo viên và quyền của họ -->
+    <div class="bg-white rounded-xl shadow border border-[hsl(240,5.9%,90%)] overflow-hidden">
+        <div class="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4">
+            <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                <i class="fas fa-users-cog"></i>
+                Phân quyền cho Giáo viên
+            </h2>
+        </div>
+        <div class="p-6">
+            {% if teachers %}
+            <div class="overflow-x-auto">
+                <table class="w-full" id="teachersTable">
+                    <thead class="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th class="text-left py-3 px-4 font-semibold text-slate-700 text-sm">ID</th>
+                            <th class="text-left py-3 px-4 font-semibold text-slate-700 text-sm">Họ tên</th>
+                            <th class="text-left py-3 px-4 font-semibold text-slate-700 text-sm">Username</th>
+                            <th class="text-left py-3 px-4 font-semibold text-slate-700 text-sm">Chức vụ</th>
+                            <th class="text-left py-3 px-4 font-semibold text-slate-700 text-sm">Phân công</th>
+                            <th class="text-left py-3 px-4 font-semibold text-slate-700 text-sm">Số quyền</th>
+                            <th class="text-left py-3 px-4 font-semibold text-slate-700 text-sm">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for teacher in teachers %}
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="py-4 px-4 text-slate-500 font-mono text-sm">{{ teacher.id }}</td>
+                            <td class="py-4 px-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
+                                        {{ teacher.full_name[0] | upper }}
+                                    </div>
+                                    <span class="font-medium text-slate-700">{{ teacher.full_name }}</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-slate-500 font-mono text-sm">{{ teacher.username }}</td>
+                            <td class="py-4 px-4">
+                                {% set role_colors = {
+                                    'admin': 'bg-rose-100 text-rose-700',
+                                    'homeroom_teacher': 'bg-purple-100 text-purple-700',
+                                    'subject_teacher': 'bg-blue-100 text-blue-700',
+                                    'discipline_officer': 'bg-amber-100 text-amber-700'
+                                } %}
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium {{ role_colors.get(teacher.role, 'bg-slate-100 text-slate-700') }}">
+                                    <i class="fas fa-{{ 'crown' if teacher.role == 'admin' else 'chalkboard-teacher' if teacher.role == 'homeroom_teacher' else 'book' if teacher.role == 'subject_teacher' else 'shield-alt' }}"></i>
+                                    {{ teacher.get_role_display() }}
+                                </span>
+                            </td>
+                            <td class="py-4 px-4">
+                                {% if teacher.assigned_class %}
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium">
+                                    <i class="fas fa-school"></i>
+                                    Lớp {{ teacher.assigned_class }}
+                                </span>
+                                {% endif %}
+                                {% if teacher.assigned_subject %}
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-sky-100 text-sky-700 rounded-lg text-xs font-medium ml-1">
+                                    <i class="fas fa-book"></i>
+                                    {{ teacher.assigned_subject.name }}
+                                </span>
+                                {% endif %}
+                                {% if not teacher.assigned_class and not teacher.assigned_subject %}
+                                <span class="text-slate-400 text-sm italic">Chưa phân công</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-4 px-4">
+                                {% set perm_count = teacher.get_all_permissions()|length %}
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium {% if perm_count > 0 %}bg-indigo-100 text-indigo-700{% else %}bg-slate-100 text-slate-500{% endif %}">
+                                    <i class="fas fa-key"></i>
+                                    {{ perm_count }} quyền
+                                </span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <a href="{{ url_for('manage_teacher_permissions', teacher_id=teacher.id) }}" 
+                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition shadow-sm">
+                                    <i class="fas fa-key"></i>
+                                    Cấp quyền
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="flex flex-col items-center justify-center py-12 text-center">
+                <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+                    <i class="fas fa-users text-2xl text-slate-400"></i>
+                </div>
+                <p class="text-slate-600 font-medium">Chưa có giáo viên nào trong hệ thống</p>
+                <a href="{{ url_for('add_teacher') }}" class="mt-3 text-indigo-600 hover:text-indigo-700 font-medium">
+                    + Thêm giáo viên mới
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Khởi tạo DataTable nếu có
+$(document).ready(function() {
+    if ($.fn.DataTable) {
+        $('#teachersTable').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/vi.json'
+            },
+            pageLength: 25,
+            ordering: true,
+            responsive: true
+        });
+    }
+});
+</script>
+{% endblock %}

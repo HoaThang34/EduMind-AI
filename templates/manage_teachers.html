@@ -9,13 +9,22 @@
             <h1 class="text-2xl font-bold text-foreground">Quản Lý Giáo Viên</h1>
             <p class="text-muted-foreground mt-1">Thêm, sửa, xóa tài khoản giáo viên trong hệ thống</p>
         </div>
-        <a href="{{ url_for('add_teacher') }}"
-            class="inline-flex items-center gap-2 px-4 py-2.5 btn-primary rounded-lg font-medium shadow-card shadow-indigo-200 transition">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Thêm Giáo Viên
-        </a>
+        <div class="flex gap-2">
+            <a href="{{ url_for('manage_permissions') }}"
+                class="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium shadow-card shadow-amber-200 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2v4a2 2 0 01-2 2H9a2 2 0 01-2-2V9a2 2 0 012-2h6zM5 12a2 2 0 012-2h1m10 0h1a2 2 0 012 2v4a2 2 0 01-2 2h-1m-10 0H5a2 2 0 01-2-2v-4a2 2 0 012-2z" />
+                </svg>
+                Phân quyền
+            </a>
+            <a href="{{ url_for('add_teacher') }}"
+                class="inline-flex items-center gap-2 px-4 py-2.5 btn-primary rounded-lg font-medium shadow-card shadow-indigo-200 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Thêm Giáo Viên
+            </a>
+        </div>
     </div>
 
     <!-- Stats Cards -->

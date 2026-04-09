@@ -30,6 +30,32 @@ def get_default_school_name():
     return config.value if config else "THPT Chuyên Nguyễn Tất Thành"
 
 
+class Permission(db.Model):
+    """Định nghĩa các quyền hệ thống"""
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(50), unique=True, nullable=False)  # Mã quyền
+    name = db.Column(db.String(100), nullable=False)  # Tên hiển thị
+    description = db.Column(db.String(255))  # Mô tả
+    category = db.Column(db.String(50))  # Phân loại: grades, discipline, students, attendance, etc.
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+
+class TeacherPermission(db.Model):
+    """Gán quyền cụ thể cho từng giáo viên - cho phép admin phân quyền linh hoạt"""
+    id = db.Column(db.Integer, primary_key=True)
+    teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False, index=True)
+    permission_id = db.Column(db.Integer, db.ForeignKey('permission.id'), nullable=False)
+    granted_by = db.Column(db.Integer, db.ForeignKey('teacher.id'))  # Admin nào cấp quyền
+    granted_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    
+    # Quan hệ
+    teacher = db.relationship('Teacher', foreign_keys=[teacher_id], backref='teacher_permissions')
+    permission = db.relationship('Permission')
+    grantor = db.relationship('Teacher', foreign_keys=[granted_by])
+    
+    __table_args__ = (db.UniqueConstraint('teacher_id', 'permission_id', name='uq_teacher_permission'),)
+
+
 class Teacher(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
@@ -52,8 +78,40 @@ class Teacher(UserMixin, db.Model):
             # If the password in DB is not hashed, check_password_hash might throw ValueError or return False
             return False
     
-    # Hệ thống phân quyền
-    role = db.Column(db.String(20), default="homeroom_teacher")  # admin, homeroom_teacher, subject_teacher
+    def has_permission(self, permission_code):
+        """Kiểm tra giáo viên có quyền cụ thể không"""
+        # Admin luôn có mọi quyền
+        if self.role == 'admin':
+            return True
+        # Kiểm tra quyền được gán cụ thể
+        return db.session.query(TeacherPermission).join(Permission).filter(
+            TeacherPermission.teacher_id == self.id,
+            Permission.code == permission_code
+        ).first() is not None
+    
+    def get_all_permissions(self):
+        """Lấy danh sách tất cả quyền của giáo viên"""
+        if self.role == 'admin':
+            return [p.code for p in Permission.query.all()]
+        permissions = db.session.query(Permission.code).join(TeacherPermission).filter(
+            TeacherPermission.teacher_id == self.id
+        ).all()
+        return [p[0] for p in permissions]
+
+    def get_role_display(self):
+        """Trả về tên hiển thị của vai trò"""
+        role_map = {
+            'admin': 'Quản trị viên',
+            'homeroom_teacher': 'Giáo viên chủ nhiệm',
+            'subject_teacher': 'Giáo viên bộ môn',
+            'discipline_officer': 'Giáo viên nề nếp',
+            'parent_student': 'Phụ huynh/Học sinh'
+        }
+        return role_map.get(self.role, 'Giáo viên')
+
+    # Hệ thống phân quyền mới
+    # role: admin, homeroom_teacher, subject_teacher, discipline_officer, parent_student
+    role = db.Column(db.String(20), default="homeroom_teacher")
     assigned_class = db.Column(db.String(50))  # Lớp được phân công (cho GVCN)
     assigned_subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'))  # Môn được phân công (cho GVBM)
     created_by = db.Column(db.Integer, db.ForeignKey('teacher.id'))  # Admin tạo tài khoản này

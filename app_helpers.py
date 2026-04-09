@@ -22,7 +22,7 @@ from models import (
     db, Student, Violation, ViolationType, Teacher, SystemConfig, ClassRoom,
     WeeklyArchive, Subject, Grade, ChatConversation, BonusType, BonusRecord,
     Notification, GroupChatMessage, PrivateMessage, ChangeLog, StudentNotification,
-    TimetableSlot, ConductSetting, AttendanceRecord,
+    TimetableSlot, ConductSetting, AttendanceRecord, Permission, TeacherPermission,
 )
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -130,12 +130,50 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
+def permission_required(permission_code):
+    """Decorator kiểm tra quyền cụ thể - cho phép admin hoặc user có permission"""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated:
+                flash("Vui lòng đăng nhập!", "error")
+                return redirect(url_for('auth.login'))
+            if not current_user.has_permission(permission_code):
+                flash("Bạn không có quyền truy cập chức năng này!", "error")
+                return redirect(url_for('dashboard'))
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+
+def role_or_permission_required(role, permission_code):
+    """Decorator cho phép role cụ thể HOẶC có permission"""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated:
+                flash("Vui lòng đăng nhập!", "error")
+                return redirect(url_for('auth.login'))
+            has_access = (current_user.role == role or 
+                         current_user.role == 'admin' or 
+                         current_user.has_permission(permission_code))
+            if not has_access:
+                flash("Bạn không có quyền truy cập chức năng này!", "error")
+                return redirect(url_for('dashboard'))
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+
 def get_role_display(role):
     """Chuyển đổi role code thành tên hiển thị tiếng Việt"""
     role_map = {
         'admin': 'Quản trị viên',
         'homeroom_teacher': 'Giáo viên chủ nhiệm',
-        'subject_teacher': 'Giáo viên bộ môn'
+        'subject_teacher': 'Giáo viên bộ môn',
+        'discipline_officer': 'Giáo viên nề nếp',
+        'parent_student': 'Phụ huynh/Học sinh'
     }
     return role_map.get(role, 'Giáo viên')
 

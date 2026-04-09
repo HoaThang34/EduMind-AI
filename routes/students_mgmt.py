@@ -18,7 +18,7 @@ from models import (
     GroupChatMessage, PrivateMessage, ChangeLog,
 )
 from app_helpers import (
-    admin_required, get_accessible_students, can_access_student, normalize_student_code,
+    admin_required, permission_required, role_or_permission_required, get_accessible_students, can_access_student, normalize_student_code,
     parse_excel_file, import_violations_to_db, calculate_week_from_date, _call_gemini,
     save_weekly_archive, get_current_iso_week, create_notification, log_change,
     UPLOAD_FOLDER, calculate_student_gpa, is_reset_needed,
@@ -209,6 +209,7 @@ def register(app):
         return send_file(path, mimetype=mimetype)
     @app.route("/manage_students")
     @login_required
+    @permission_required('view_students')
     def manage_students():
         # Lấy danh sách học sinh (filtered by role)
         students = get_accessible_students().order_by(Student.student_code.asc()).all()
@@ -217,6 +218,7 @@ def register(app):
 
     @app.route("/add_student", methods=["POST"])
     @login_required
+    @role_or_permission_required('homeroom_teacher', 'manage_students')
     def add_student():
         st = Student(
             name=request.form["student_name"],
@@ -244,6 +246,7 @@ def register(app):
 
     @app.route("/delete_student/<int:student_id>", methods=["POST"])
     @login_required
+    @role_or_permission_required('homeroom_teacher', 'manage_students')
     def delete_student(student_id):
         s = db.session.get(Student, student_id)
         if s:
@@ -256,6 +259,7 @@ def register(app):
 
     @app.route("/edit_student/<int:student_id>", methods=["GET", "POST"])
     @login_required
+    @role_or_permission_required('homeroom_teacher', 'manage_students')
     def edit_student(student_id):
         s = db.session.get(Student, student_id)
         if not s:
@@ -293,6 +297,7 @@ def register(app):
 
     @app.route("/add_class", methods=["POST"])
     @login_required
+    @admin_required
     def add_class():
         if not ClassRoom.query.filter_by(name=request.form["class_name"]).first():
             db.session.add(ClassRoom(name=request.form["class_name"]))
@@ -302,6 +307,7 @@ def register(app):
 
     @app.route("/edit_class/<int:class_id>", methods=["POST"])
     @login_required
+    @admin_required
     def edit_class(class_id):
         """Đổi tên lớp và cập nhật lại lớp cho toàn bộ học sinh"""
         try:
@@ -337,6 +343,7 @@ def register(app):
 
     @app.route("/delete_class/<int:class_id>", methods=["POST"])
     @login_required
+    @admin_required
     def delete_class(class_id):
         """Xóa lớp học"""
         try:
@@ -355,6 +362,7 @@ def register(app):
         return redirect(url_for("manage_students"))
     @app.route("/import_students", methods=["GET", "POST"])
     @login_required
+    @admin_required
     def import_students():
         """Import students from Excel with columns: Mã học sinh, Họ và tên, Lớp"""
         if request.method == "POST":
@@ -467,6 +475,7 @@ def register(app):
 
     @app.route("/download_student_template")
     @login_required
+    @permission_required('view_students')
     def download_student_template():
         """Download Excel template for student import"""
         sample_data = {
@@ -499,6 +508,7 @@ def register(app):
 
     @app.route("/save_imported_students", methods=["POST"])
     @login_required
+    @admin_required
     def save_imported_students():
         """Bước 2: Lưu vào CSDL sau khi xác nhận"""
         filepath = request.form.get("file_path")

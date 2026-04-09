@@ -21,7 +21,7 @@ from sqlalchemy import desc, or_
 from urllib.parse import quote
 
 from models import db, Student, AttendanceRecord, ClassRoom, AttendanceMonitoringSession, SessionViolationRecord, ViolationType, Violation, SystemConfig
-from app_helpers import UPLOAD_FOLDER, log_change, update_student_conduct
+from app_helpers import UPLOAD_FOLDER, log_change, update_student_conduct, permission_required, role_or_permission_required
 from routes.face_engine import get_engine, cosine_similarity
 
 # Thư mục lưu ảnh điểm danh
@@ -275,6 +275,7 @@ def register(app):
 
     @app.route("/attendance")
     @login_required
+    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def attendance():
         """Trang điểm danh chính."""
         classes = [c.name for c in ClassRoom.query.order_by(ClassRoom.name).all()]
@@ -298,6 +299,7 @@ def register(app):
 
     @app.route("/api/attendance/students")
     @login_required
+    @permission_required('view_attendance')
     def api_attendance_students():
         """API lấy danh sách học sinh kèm trạng thái training chi tiết."""
         class_name = request.args.get("class_name", "")
@@ -350,6 +352,7 @@ def register(app):
 
     @app.route("/api/attendance/train", methods=["POST"])
     @login_required
+    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_attendance_train():
         """Huấn luyện model ArcFace (Ưu tiên toàn trường)."""
         data = request.get_json() or {}
@@ -368,6 +371,7 @@ def register(app):
 
     @app.route("/api/attendance/enroll_camera", methods=["POST"])
     @login_required
+    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_attendance_enroll_camera():
         """Lưu mẫu khuôn mặt của 1 học sinh trực tiếp từ camera."""
         data = request.get_json() or {}
@@ -408,6 +412,7 @@ def register(app):
 
     @app.route("/api/attendance/reset_enrollment", methods=["POST"])
     @login_required
+    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_attendance_reset_enrollment():
         """Xóa toàn bộ mẫu camera của 1 học sinh."""
         data = request.get_json() or {}
@@ -426,6 +431,7 @@ def register(app):
 
     @app.route("/api/attendance/recognize", methods=["POST"])
     @login_required
+    @permission_required('manage_attendance')
     def api_attendance_recognize():
         """Nhận diện khuôn mặt từ ảnh camera dựa trên ArcFace embeddings (toàn trường)."""
         data = request.get_json() or {}
@@ -494,6 +500,7 @@ def register(app):
 
     @app.route("/api/attendance/checkin", methods=["POST"])
     @login_required
+    @permission_required('manage_attendance')
     def api_attendance_checkin():
         """Ghi nhận điểm danh cho học sinh."""
         data = request.get_json() or {}
@@ -563,6 +570,7 @@ def register(app):
 
     @app.route("/api/attendance/history")
     @login_required
+    @permission_required('view_attendance')
     def api_attendance_history():
         """API lấy lịch sử điểm danh. Hỗ trợ lọc theo mode (face/qr)."""
         class_name = request.args.get("class_name", "")
@@ -620,6 +628,7 @@ def register(app):
 
     @app.route("/api/attendance/history/<int:student_id>")
     @login_required
+    @permission_required('view_attendance')
     def api_attendance_history_detail(student_id):
         """
         API chi tiết: tất cả lượt điểm danh của 1 học sinh.
@@ -660,12 +669,14 @@ def register(app):
 
     @app.route("/uploads/attendance_photos/<path:filename>")
     @login_required
+    @permission_required('view_attendance')
     def attendance_photo(filename):
         from flask import send_from_directory
         return send_from_directory(ATTENDANCE_PHOTO_DIR, filename)
 
     @app.route("/api/attendance/stats")
     @login_required
+    @permission_required('view_attendance')
     def api_attendance_stats():
         class_name = request.args.get("class_name", "")
         today = datetime.date.today()
@@ -700,6 +711,7 @@ def register(app):
 
     @app.route("/api/attendance/model_status")
     @login_required
+    @permission_required('view_attendance')
     def api_attendance_model_status():
         """Kiểm tra trạng thái model ArcFace."""
         class_name = request.args.get("class_name", "")
@@ -720,6 +732,7 @@ def register(app):
 
     @app.route("/api/attendance/delete/<int:record_id>", methods=["DELETE"])
     @login_required
+    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_attendance_delete(record_id):
         """Xóa một bản ghi điểm danh."""
         record = db.session.get(AttendanceRecord, record_id)
@@ -749,6 +762,7 @@ def register(app):
 
     @app.route("/api/attendance/delete/bulk", methods=["POST"])
     @login_required
+    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_attendance_delete_bulk():
         """Xóa nhiều bản ghi điểm danh cùng lúc."""
         data = request.get_json() or {}
@@ -791,6 +805,7 @@ def register(app):
 
     @app.route("/api/attendance/qr/checkin", methods=["POST"])
     @login_required
+    @permission_required('manage_attendance')
     def api_attendance_qr_checkin():
         """
         Điểm danh bằng mã QR.
@@ -874,6 +889,7 @@ def register(app):
 
     @app.route("/api/attendance/qr/token", methods=["GET"])
     @login_required
+    @permission_required('view_attendance')
     def api_attendance_qr_token():
         """
         Sinh dữ liệu QR cho 1 học sinh (không dùng token — dùng trực tiếp student_id).
@@ -903,6 +919,7 @@ def register(app):
 
     @app.route("/api/attendance/qr/auto-checkin", methods=["POST"])
     @login_required
+    @permission_required('manage_attendance')
     def api_attendance_qr_auto_checkin():
         """
         Điểm danh tự động khi trang QR được mở.
@@ -946,6 +963,7 @@ def register(app):
 
     @app.route("/api/attendance/qr/status/<int:student_id>")
     @login_required
+    @permission_required('view_attendance')
     def api_attendance_qr_status(student_id):
         """
         API chỉ-đọc: lấy danh sách lượt điểm danh QR hôm nay của 1 học sinh.
@@ -982,6 +1000,7 @@ def register(app):
 
     @app.route("/api/attendance/qr/url-for-student/<int:student_id>")
     @login_required
+    @permission_required('view_attendance')
     def api_attendance_qr_url(student_id):
         """
         Trả về QR data và URL ảnh QR của 1 học sinh (dùng cho in ấn / gửi phụ huynh).
@@ -1008,6 +1027,7 @@ def register(app):
 
     @app.route("/api/attendance/monitoring/sessions")
     @login_required
+    @permission_required('view_attendance')
     def api_monitoring_sessions():
         """API lấy danh sách phiên theo dõi (hỗ trợ lọc theo ngày, lớp, trạng thái)."""
         date_from = request.args.get("date_from", "")
@@ -1068,6 +1088,7 @@ def register(app):
 
     @app.route("/api/attendance/monitoring/create-session", methods=["POST"])
     @login_required
+    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_create_monitoring_session():
         """Tạo mới một phiên theo dõi điểm danh theo giờ."""
         data = request.get_json() or {}
@@ -1124,6 +1145,7 @@ def register(app):
 
     @app.route("/api/attendance/monitoring/session/<int:session_id>")
     @login_required
+    @permission_required('view_attendance')
     def api_monitoring_session_detail(session_id):
         """API lấy chi tiết 1 phiên theo dõi (gồm các vi phạm đã đánh dấu)."""
         session = db.session.get(AttendanceMonitoringSession, session_id)
@@ -1187,6 +1209,7 @@ def register(app):
 
     @app.route("/api/attendance/monitoring/add-violation", methods=["POST"])
     @login_required
+    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_add_session_violation():
         """Đánh dấu một học sinh vi phạm trong phiên theo dõi (chưa xác nhận)."""
         data = request.get_json() or {}
@@ -1241,6 +1264,7 @@ def register(app):
 
     @app.route("/api/attendance/monitoring/remove-violation", methods=["POST"])
     @login_required
+    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_remove_session_violation():
         """Xóa bỏ một bản ghi vi phạm trong phiên (chỉ pending)."""
         data = request.get_json() or {}
@@ -1264,6 +1288,7 @@ def register(app):
 
     @app.route("/api/attendance/monitoring/update-violation-type", methods=["POST"])
     @login_required
+    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_update_violation_type():
         """
         Cập nhật loại vi phạm cho bản ghi trong phiên.
@@ -1348,6 +1373,7 @@ def register(app):
 
     @app.route("/api/attendance/monitoring/confirm-violations", methods=["POST"])
     @login_required
+    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_confirm_session_violations():
         """
         Xác nhận toàn bộ vi phạm trong phiên — chuyển thành Violation chính thức,
@@ -1443,6 +1469,7 @@ def register(app):
 
     @app.route("/api/attendance/monitoring/cancel-session", methods=["POST"])
     @login_required
+    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_cancel_monitoring_session():
         """Hủy phiên theo dõi (xóa toàn bộ bản ghi vi phạm pending, đóng phiên)."""
         data = request.get_json() or {}
