@@ -450,7 +450,7 @@ def register(app):
         
         # GET: Hiển thị form
         all_permissions = Permission.query.order_by(Permission.category, Permission.name).all()
-        teacher_perm_codes = [p.code for p in teacher.get_all_permissions()]
+        teacher_perm_codes = teacher.get_all_permissions()
         
         # Group permissions by category
         permission_groups = {}
