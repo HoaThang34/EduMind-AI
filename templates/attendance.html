@@ -1410,7 +1410,7 @@
 
     // Post-checkin cooldown (delay before scanning next person)
     let postCheckinCooldown = false;
-    const POST_CHECKIN_COOLDOWN_MS = 3000; // 3 seconds cooldown
+    const POST_CHECKIN_COOLDOWN_MS = 5000; // 3 seconds cooldown
 
     async function captureAndRecognize(isAuto = false) {
         if (isProcessingRecognize || !camStream) return;
