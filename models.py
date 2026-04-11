@@ -222,6 +222,25 @@ class Subject(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
 
+class ClassSubject(db.Model):
+    """Phân công môn học cho từng lớp - mỗi lớp có thể có các môn học khác nhau"""
+    __tablename__ = "class_subject"
+    __table_args__ = (
+        db.UniqueConstraint("class_name", "subject_id", "school_year", name="uq_class_subject"),
+    )
+    id = db.Column(db.Integer, primary_key=True)
+    class_name = db.Column(db.String(50), nullable=False, index=True)
+    subject_id = db.Column(db.Integer, db.ForeignKey("subject.id"), nullable=False, index=True)
+    school_year = db.Column(db.String(20), nullable=False, default="2025-2026")
+    is_compulsory = db.Column(db.Boolean, default=True)  # True: bắt buộc, False: tự chọn
+    periods_per_week = db.Column(db.Integer, default=3)  # Số tiết/tuần
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    created_by = db.Column(db.Integer, db.ForeignKey("teacher.id"))
+
+    subject = db.relationship("Subject", backref="class_assignments")
+    creator = db.relationship("Teacher", foreign_keys=[created_by])
+
+
 class Grade(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)

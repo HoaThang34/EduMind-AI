@@ -1,6 +1,6 @@
 import os
 from app import app, db
-from models import Teacher, SystemConfig, ViolationType, Subject, ClassRoom
+from models import Teacher, SystemConfig, ViolationType, Subject, ClassRoom, ClassSubject
 from werkzeug.security import generate_password_hash
 
 def rebuild():
@@ -32,16 +32,111 @@ def rebuild():
         ]
         db.session.add_all(configs)
 
-        # 3. Thêm một số môn học mẫu
+        # 3. Thêm đầy đủ các môn học THPT tại Việt Nam
         subjects = [
-            Subject(name="Toán", code="TOAN"),
-            Subject(name="Văn", code="VAN"),
-            Subject(name="Anh", code="ANH"),
-            Subject(name="Lý", code="LY"),
-            Subject(name="Hóa", code="HOA"),
-            Subject(name="Tin học", code="TIN")
+            # Môn học cốt lõi
+            Subject(name="Toán", code="TOAN", description="Môn Toán học", num_tx_columns=5, num_gk_columns=1, num_hk_columns=1),
+            Subject(name="Văn", code="VAN", description="Môn Ngữ văn", num_tx_columns=5, num_gk_columns=1, num_hk_columns=1),
+            Subject(name="Tiếng Anh", code="ANH", description="Môn Tiếng Anh", num_tx_columns=5, num_gk_columns=1, num_hk_columns=1),
+            
+            # Môn Khoa học tự nhiên
+            Subject(name="Vật lý", code="LY", description="Môn Vật lý", num_tx_columns=5, num_gk_columns=1, num_hk_columns=1),
+            Subject(name="Hóa học", code="HOA", description="Môn Hóa học", num_tx_columns=5, num_gk_columns=1, num_hk_columns=1),
+            Subject(name="Sinh học", code="SINH", description="Môn Sinh học", num_tx_columns=5, num_gk_columns=1, num_hk_columns=1),
+            
+            # Môn Khoa học xã hội
+            Subject(name="Lịch sử", code="SU", description="Môn Lịch sử", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
+            Subject(name="Địa lý", code="DIA", description="Môn Địa lý", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
+            Subject(name="Giáo dục công dân", code="GDCD", description="Môn Giáo dục công dân", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
+            
+            # Môn Công nghệ và Tin học
+            Subject(name="Tin học", code="TIN", description="Môn Tin học", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
+            Subject(name="Công nghệ", code="CN", description="Môn Công nghệ", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
+            
+            # Môn Ngoại ngữ 2
+            Subject(name="Tiếng Pháp", code="PHAP", description="Môn Tiếng Pháp", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
+            Subject(name="Tiếng Đức", code="DUC", description="Môn Tiếng Đức", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
+            Subject(name="Tiếng Nhật", code="NHAT", description="Môn Tiếng Nhật", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
+            Subject(name="Tiếng Trung", code="TRUNG", description="Môn Tiếng Trung", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
+            Subject(name="Tiếng Hàn", code="HAN", description="Môn Tiếng Hàn", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
+            Subject(name="Tiếng Nga", code="NGA", description="Môn Tiếng Nga", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
+            
+            # Môn Giáo dục thể chất và Quốc phòng
+            Subject(name="Giáo dục thể chất", code="GDTC", description="Môn Giáo dục thể chất", num_tx_columns=2, num_gk_columns=1, num_hk_columns=1, is_pass_fail=True),
+            Subject(name="Giáo dục quốc phòng - An ninh", code="GDPQ", description="Môn Giáo dục quốc phòng - An ninh", num_tx_columns=2, num_gk_columns=1, num_hk_columns=1, is_pass_fail=True),
+            
+            # Môn Hoạt động trải nghiệm, hướng nghiệp
+            Subject(name="Hoạt động trải nghiệm, hướng nghiệp", code="HTHN", description="Hoạt động trải nghiệm, hướng nghiệp", num_tx_columns=2, num_gk_columns=1, num_hk_columns=1, is_pass_fail=True),
+            
+            # Môn học bổ trợ (tùy chọn theo chuyên ngành)
+            Subject(name="Khoa học tự nhiên", code="KHTN", description="Môn Khoa học tự nhiên (Lý-Hóa-Sinh)", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
+            Subject(name="Khoa học xã hội", code="KHXH", description="Môn Khoa học xã hội (Sử-Địa-GDCD)", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
+            
+            # Các môn chuyên đề khác
+            Subject(name="Hội họa", code="HH", description="Môn Hội họa", num_tx_columns=2, num_gk_columns=1, num_hk_columns=1, is_pass_fail=True),
+            Subject(name="Âm nhạc", code="AM", description="Môn Âm nhạc", num_tx_columns=2, num_gk_columns=1, num_hk_columns=1, is_pass_fail=True),
+            Subject(name="Tư pháp", code="TP", description="Môn Tư pháp", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
+            Subject(name="Triết học", code="TH", description="Môn Triết học", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
+            Subject(name="Kinh tế chính trị", code="KTCT", description="Môn Kinh tế chính trị", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
         ]
         db.session.add_all(subjects)
+
+        # 3.5. Thêm một số lớp mẫu
+        classrooms = [
+            ClassRoom(name="10A"),
+            ClassRoom(name="10A1"),
+            ClassRoom(name="10 Hóa"),
+            ClassRoom(name="11A"),
+            ClassRoom(name="11 Tin"),
+            ClassRoom(name="12A")
+        ]
+        db.session.add_all(classrooms)
+
+        # 3.6. Thêm phân công môn học theo lớp (ví dụ: 10 Hóa không học Tin, 11 Tin học Tin)
+        # Lấy ID của các môn học
+        subject_map = {s.code: s.id for s in Subject.query.all()}
+        
+        class_subjects = [
+            # Lớp 10 Hóa - không học Tin học
+            ClassSubject(class_name="10 Hóa", subject_id=subject_map["TOAN"], school_year="2025-2026", periods_per_week=5),
+            ClassSubject(class_name="10 Hóa", subject_id=subject_map["VAN"], school_year="2025-2026", periods_per_week=5),
+            ClassSubject(class_name="10 Hóa", subject_id=subject_map["ANH"], school_year="2025-2026", periods_per_week=4),
+            ClassSubject(class_name="10 Hóa", subject_id=subject_map["LY"], school_year="2025-2026", periods_per_week=3),
+            ClassSubject(class_name="10 Hóa", subject_id=subject_map["HOA"], school_year="2025-2026", periods_per_week=4),
+            ClassSubject(class_name="10 Hóa", subject_id=subject_map["SINH"], school_year="2025-2026", periods_per_week=3),
+            ClassSubject(class_name="10 Hóa", subject_id=subject_map["SU"], school_year="2025-2026", periods_per_week=2),
+            ClassSubject(class_name="10 Hóa", subject_id=subject_map["DIA"], school_year="2025-2026", periods_per_week=2),
+            ClassSubject(class_name="10 Hóa", subject_id=subject_map["GDCD"], school_year="2025-2026", periods_per_week=1),
+            ClassSubject(class_name="10 Hóa", subject_id=subject_map["GDTC"], school_year="2025-2026", periods_per_week=2),
+            # Không có Tin học cho 10 Hóa
+            
+            # Lớp 11 Tin - có học Tin học
+            ClassSubject(class_name="11 Tin", subject_id=subject_map["TOAN"], school_year="2025-2026", periods_per_week=5),
+            ClassSubject(class_name="11 Tin", subject_id=subject_map["VAN"], school_year="2025-2026", periods_per_week=5),
+            ClassSubject(class_name="11 Tin", subject_id=subject_map["ANH"], school_year="2025-2026", periods_per_week=4),
+            ClassSubject(class_name="11 Tin", subject_id=subject_map["LY"], school_year="2025-2026", periods_per_week=3),
+            ClassSubject(class_name="11 Tin", subject_id=subject_map["HOA"], school_year="2025-2026", periods_per_week=3),
+            ClassSubject(class_name="11 Tin", subject_id=subject_map["SINH"], school_year="2025-2026", periods_per_week=3),
+            ClassSubject(class_name="11 Tin", subject_id=subject_map["TIN"], school_year="2025-2026", periods_per_week=4),  # Có Tin học
+            ClassSubject(class_name="11 Tin", subject_id=subject_map["SU"], school_year="2025-2026", periods_per_week=2),
+            ClassSubject(class_name="11 Tin", subject_id=subject_map["DIA"], school_year="2025-2026", periods_per_week=2),
+            ClassSubject(class_name="11 Tin", subject_id=subject_map["GDCD"], school_year="2025-2026", periods_per_week=1),
+            ClassSubject(class_name="11 Tin", subject_id=subject_map["GDTC"], school_year="2025-2026", periods_per_week=2),
+            
+            # Lớp 10A - lớp thường
+            ClassSubject(class_name="10A", subject_id=subject_map["TOAN"], school_year="2025-2026", periods_per_week=5),
+            ClassSubject(class_name="10A", subject_id=subject_map["VAN"], school_year="2025-2026", periods_per_week=5),
+            ClassSubject(class_name="10A", subject_id=subject_map["ANH"], school_year="2025-2026", periods_per_week=4),
+            ClassSubject(class_name="10A", subject_id=subject_map["LY"], school_year="2025-2026", periods_per_week=2),
+            ClassSubject(class_name="10A", subject_id=subject_map["HOA"], school_year="2025-2026", periods_per_week=2),
+            ClassSubject(class_name="10A", subject_id=subject_map["SINH"], school_year="2025-2026", periods_per_week=2),
+            ClassSubject(class_name="10A", subject_id=subject_map["TIN"], school_year="2025-2026", periods_per_week=2),
+            ClassSubject(class_name="10A", subject_id=subject_map["SU"], school_year="2025-2026", periods_per_week=2),
+            ClassSubject(class_name="10A", subject_id=subject_map["DIA"], school_year="2025-2026", periods_per_week=2),
+            ClassSubject(class_name="10A", subject_id=subject_map["GDCD"], school_year="2025-2026", periods_per_week=1),
+            ClassSubject(class_name="10A", subject_id=subject_map["GDTC"], school_year="2025-2026", periods_per_week=2),
+        ]
+        db.session.add_all(class_subjects)
 
         # 4. Thêm một số loại vi phạm mẫu
         rules = [

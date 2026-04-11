@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Phân Công Môn Học Theo Lớp{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-2xl font-semibold tracking-tight text-foreground mb-2">
+            <i class="fas fa-layer-group text-indigo-600"></i> Phân Công Môn Học Theo Lớp
+        </h1>
+        <p class="text-muted-foreground">Chọn lớp và tích vào các môn học mà lớp đó sẽ học</p>
+    </div>
+
+    <!-- Form chọn lớp và môn học -->
+    <div class="bg-white rounded-xl shadow-card p-6 border border-[hsl(240,5.9%,90%)]">
+        <form method="POST" id="classSubjectForm">
+            <input type="hidden" name="school_year" value="{{ school_year }}">
+            
+            <!-- Chọn lớp -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-foreground mb-2">Chọn lớp *</label>
+                <select name="class_name" id="classSelect" required class="w-full md:w-1/3 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 input-shadcn"
+                    onchange="loadClassSubjects()">
+                    <option value="">-- Chọn lớp --</option>
+                    {% for cls in classes %}
+                    <option value="{{ cls.name }}" {% if cls.name == selected_class %}selected{% endif %}>{{ cls.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Danh sách môn học -->
+            {% if selected_class %}
+            <div class="mb-6">
+                <h3 class="text-lg font-bold text-foreground mb-4">
+                    <i class="fas fa-check-square text-indigo-600 mr-2"></i>Chọn môn học cho lớp {{ selected_class }}
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for subject in subjects %}
+                    <div class="border border-slate-200 rounded-lg p-4 hover:border-indigo-300 transition-colors">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" 
+                                   name="subject_{{ subject.id }}" 
+                                   id="subject_{{ subject.id }}"
+                                   {% if subject.id in class_subjects %}checked{% endif %}
+                                   class="w-5 h-5 text-indigo-600 rounded mt-0.5">
+                            <div class="flex-1">
+                                <div class="font-medium text-foreground">{{ subject.name }}</div>
+                                <div class="text-xs text-muted-foreground">{{ subject.code }}</div>
+                                <div class="mt-2 flex items-center gap-2">
+                                    <label class="text-xs text-muted-foreground">Số tiết/tuần:</label>
+                                    <input type="number" 
+                                           name="periods_{{ subject.id }}" 
+                                           value="{% if subject.id in class_subjects %}{{ class_subjects[subject.id].periods_per_week }}{% else %}3{% endif %}"
+                                           min="1" max="10"
+                                           class="w-16 px-2 py-1 border border-slate-300 rounded text-sm input-shadcn"
+                                           onclick="event.stopPropagation()">
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Nút lưu -->
+            <div class="flex gap-3">
+                <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium">
+                    <i class="fas fa-save mr-2"></i>Lưu phân công
+                </button>
+                <a href="{{ url_for('manage_class_subjects') }}" class="px-6 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors font-medium">
+                    <i class="fas fa-times mr-2"></i>Hủy
+                </a>
+            </div>
+            {% else %}
+            <div class="text-center py-12 text-muted-foreground">
+                <i class="fas fa-hand-pointer text-4xl mb-3 text-slate-300"></i>
+                <p>Vui lòng chọn một lớp để bắt đầu phân công môn học</p>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Danh sách phân công theo lớp -->
+    {% if selected_class %}
+    <div class="bg-white rounded-xl shadow-card p-6 mt-6 border border-[hsl(240,5.9%,90%)]">
+        <h2 class="text-xl font-bold text-foreground mb-4">
+            <i class="fas fa-list text-indigo-600"></i> Các môn học hiện tại của lớp {{ selected_class }}
+        </h2>
+        
+        {% if class_subjects %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {% for subject_id, cs in class_subjects.items() %}
+            <div class="flex items-center justify-between bg-slate-50 px-4 py-2 rounded-lg">
+                <div>
+                    <span class="font-medium text-foreground">{{ cs.subject.name }}</span>
+                    <span class="text-xs text-muted-foreground ml-2">({{ cs.periods_per_week }} tiết/tuần)</span>
+                </div>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                    {{ cs.subject.code }}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8 text-muted-foreground">
+            <p>Chưa có môn học nào được phân công cho lớp này</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function loadClassSubjects() {
+    const classSelect = document.getElementById('classSelect');
+    const selectedClass = classSelect.value;
+    if (selectedClass) {
+        window.location.href = "{{ url_for('manage_class_subjects') }}?class_name=" + selectedClass + "&school_year={{ school_year }}";
+    }
+}
+</script>
+{% endblock %}
