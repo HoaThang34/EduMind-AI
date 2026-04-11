@@ -221,7 +221,7 @@ def register(app):
     @role_or_permission_required('homeroom_teacher', 'manage_students')
     def add_student():
         st = Student(
-            name=request.form["student_name"],
+            name=request.form["student_name"].upper(),
             student_code=request.form["student_code"],
             student_class=request.form["student_class"],
             parent_name=_empty_to_none(request.form.get("parent_name")),
@@ -267,7 +267,7 @@ def register(app):
             return redirect(url_for("manage_students"))
         
         if request.method == "POST":
-            s.name = request.form["student_name"]
+            s.name = request.form["student_name"].upper()
             s.student_code = request.form["student_code"]
             s.student_class = request.form["student_class"]
             s.parent_name = _empty_to_none(request.form.get("parent_name"))
@@ -407,7 +407,7 @@ def register(app):
                 # Lặp qua từng dòng trong Excel
                 for index, row in df.iterrows():
                     student_code = str(row[code_col]).strip()
-                    name = str(row[name_col]).strip()
+                    name = str(row[name_col]).strip().upper()
                     s_class = str(row[class_col]).strip()
                 
                     # Bỏ qua dòng trống
@@ -533,7 +533,7 @@ def register(app):
             skipped = 0
             for index, row in df.iterrows():
                 student_code = str(row[code_col]).strip()
-                name = str(row[name_col]).strip()
+                name = str(row[name_col]).strip().upper()
                 s_class = str(row[class_col]).strip()
             
                 if not name or name.lower() == 'nan': continue
