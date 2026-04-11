@@ -29,7 +29,7 @@
                     <i class="fas fa-file-excel text-xs"></i> Nhập từ Excel
                 </a>
             </div>
-            <form method="POST" action="{{ url_for('add_student') }}" enctype="multipart/form-data" class="space-y-4">
+            <form method="POST" action="{{ url_for('add_student', filter_class=filter_class) }}" enctype="multipart/form-data" class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-1.5">
                         <label class="text-sm font-medium text-foreground">Mã Số HS</label>
@@ -111,7 +111,7 @@
             <!-- Add Class -->
             <div class="bg-white border border-[hsl(240,5.9%,90%)] p-5 rounded-xl shadow-card">
                 <h2 class="text-base font-semibold text-foreground mb-4">Thêm Lớp Mới</h2>
-                <form method="POST" action="{{ url_for('add_class') }}" class="space-y-3">
+                <form method="POST" action="{{ url_for('add_class', filter_class=filter_class) }}" class="space-y-3">
                     <div class="space-y-1.5">
                         <label class="text-sm font-medium text-foreground">Tên Lớp</label>
                         <input type="text" name="class_name" placeholder="Ví dụ: 10A1" required
@@ -138,7 +138,7 @@
                                 class="btn-ghost p-1.5 text-xs" title="Đổi tên">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <form action="{{ url_for('delete_class', class_id=cls.id) }}" method="POST"
+                            <form action="{{ url_for('delete_class', class_id=cls.id, filter_class=filter_class) }}" method="POST"
                                 onsubmit="return confirm('⚠️ Bạn có chắc chắn muốn xóa lớp {{ cls.name }}?');">
                                 <button type="submit"
                                     class="btn-ghost p-1.5 text-xs text-destructive hover:text-destructive"
@@ -159,8 +159,22 @@
 
     <!-- Student Table -->
     <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl shadow-card overflow-hidden">
-        <h2 class="text-base font-semibold text-foreground p-5 border-b border-[hsl(240,5.9%,90%)]">Danh Sách Học Sinh
-            Hiện Tại</h2>
+        <div class="p-5 border-b border-[hsl(240,5.9%,90%)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <h2 class="text-base font-semibold text-foreground">Danh Sách Học Sinh Hiện Tại</h2>
+            <form method="GET" action="{{ url_for('manage_students') }}" class="flex items-center gap-2">
+                <select name="filter_class" onchange="this.form.submit()" class="input-shadcn py-2 text-sm cursor-pointer">
+                    <option value="">-- Tất cả lớp --</option>
+                    {% for cls in class_list %}
+                    <option value="{{ cls.name }}" {% if filter_class == cls.name %}selected{% endif %}>{{ cls.name }}</option>
+                    {% endfor %}
+                </select>
+                {% if filter_class %}
+                <a href="{{ url_for('manage_students') }}" class="btn-ghost text-xs py-2 px-3">
+                    <i class="fas fa-times"></i> Bỏ lọc
+                </a>
+                {% endif %}
+            </form>
+        </div>
         <div class="overflow-x-auto">
             <table class="table-shadcn">
                 <thead>
@@ -238,9 +252,9 @@
                             </div>
                         </td>
                         <td class="text-right space-x-1">
-                            <a href="{{ url_for('edit_student', student_id=student.id) }}"
+                            <a href="{{ url_for('edit_student', student_id=student.id, filter_class=filter_class) }}"
                                 class="btn-ghost text-xs px-2 py-1">Sửa</a>
-                            <form action="{{ url_for('delete_student', student_id=student.id) }}" method="POST"
+                            <form action="{{ url_for('delete_student', student_id=student.id, filter_class=filter_class) }}" method="POST"
                                 class="inline" onsubmit="return confirm('Xóa học sinh này?');">
                                 <button type="submit"
                                     class="btn-ghost text-xs px-2 py-1 text-destructive hover:text-destructive">Xóa</button>
@@ -251,6 +265,43 @@
                 </tbody>
             </table>
         </div>
+        <!-- Pagination -->
+        {% if total_pages > 1 %}
+        <div class="p-4 border-t border-[hsl(240,5.9%,90%)] flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="text-sm text-muted-foreground">
+                Hiển thị {{ ((page - 1) * per_page + 1) }} - {{ (page * per_page) if (page * per_page) < total else total }} của {{ total }} học sinh
+                {% if filter_class %}
+                (Lọc: {{ filter_class }})
+                {% endif %}
+            </div>
+            <div class="flex items-center gap-1">
+                {% if page > 1 %}
+                <a href="{{ url_for('manage_students', page=page-1, filter_class=filter_class) }}" 
+                   class="btn-ghost text-xs py-1.5 px-3">
+                    <i class="fas fa-chevron-left"></i> Trước
+                </a>
+                {% endif %}
+                
+                {% for p in range(1, total_pages + 1) %}
+                    {% if p == page %}
+                    <span class="btn-primary text-xs py-1.5 px-3 cursor-default">{{ p }}</span>
+                    {% elif p == 1 or p == total_pages or (p >= page - 1 and p <= page + 1) %}
+                    <a href="{{ url_for('manage_students', page=p, filter_class=filter_class) }}" 
+                       class="btn-ghost text-xs py-1.5 px-3">{{ p }}</a>
+                    {% elif p == page - 2 or p == page + 2 %}
+                    <span class="text-muted-foreground text-xs py-1.5 px-1">...</span>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page < total_pages %}
+                <a href="{{ url_for('manage_students', page=page+1, filter_class=filter_class) }}" 
+                   class="btn-ghost text-xs py-1.5 px-3">
+                    Tiếp <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 
@@ -281,7 +332,8 @@
         const modal = document.getElementById('editClassModal');
         const form = document.getElementById('editClassForm');
         const input = document.getElementById('newClassNameInput');
-        form.action = "/edit_class/" + id;
+        const filterClass = '{{ filter_class }}';
+        form.action = "/edit_class/" + id + (filterClass ? '?filter_class=' + filterClass : '');
         input.value = currentName;
         modal.classList.remove('hidden');
         input.focus();

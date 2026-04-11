@@ -211,10 +211,35 @@ def register(app):
     @login_required
     @permission_required('view_students')
     def manage_students():
+        # Lấy tham số lọc và phân trang
+        page = request.args.get('page', 1, type=int)
+        per_page = 20  # Số học sinh mỗi trang
+        filter_class = request.args.get('filter_class', '', type=str)
+        
         # Lấy danh sách học sinh (filtered by role)
-        students = get_accessible_students().order_by(Student.student_code.asc()).all()
+        query = get_accessible_students()
+        
+        # Lọc theo lớp nếu được chọn
+        if filter_class:
+            query = query.filter(Student.student_class == filter_class)
+        
+        # Phân trang
+        total = query.count()
+        students = query.order_by(Student.student_code.asc()).offset((page - 1) * per_page).limit(per_page).all()
+        
+        # Tính tổng số trang
+        total_pages = (total + per_page - 1) // per_page
+        
         class_list = ClassRoom.query.order_by(ClassRoom.name).all()
-        return render_template("manage_students.html", students=students, class_list=class_list)
+        
+        return render_template("manage_students.html", 
+                             students=students, 
+                             class_list=class_list,
+                             page=page,
+                             per_page=per_page,
+                             total=total,
+                             total_pages=total_pages,
+                             filter_class=filter_class)
 
     @app.route("/add_student", methods=["POST"])
     @login_required
@@ -290,7 +315,9 @@ def register(app):
                     flash("Ảnh chân dung không hợp lệ (JPG, PNG, WebP, GIF, tối đa 5MB).", "warning")
             db.session.commit()
             flash("Cập nhật thành công", "success")
-            return redirect(url_for("manage_students"))
+            # Preserve filter parameter
+            filter_class = request.args.get('filter_class', '')
+            return redirect(url_for("manage_students", filter_class=filter_class))
         
         class_list = ClassRoom.query.order_by(ClassRoom.name).all()
         return render_template("edit_student.html", student=s, class_list=class_list)
@@ -359,7 +386,9 @@ def register(app):
                     flash(f"Đã xóa lớp {cls.name}", "success")
         except Exception as e:
             flash(f"Lỗi: {str(e)}", "error")
-        return redirect(url_for("manage_students"))
+        # Preserve filter parameter
+        filter_class = request.args.get('filter_class', '')
+        return redirect(url_for("manage_students", filter_class=filter_class))
     @app.route("/import_students", methods=["GET", "POST"])
     @login_required
     @admin_required
@@ -581,5 +610,8 @@ def register(app):
         
         except Exception as e:
             db.session.rollback()
+            flash(f"Lỗi khi lưu: {str(e)}", "error")
+            return redirect(url_for('import_students'))
+            return redirect(url_for('import_students'))
             flash(f"Lỗi khi lưu: {str(e)}", "error")
             return redirect(url_for('import_students'))
