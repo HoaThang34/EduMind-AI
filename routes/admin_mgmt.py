@@ -13,7 +13,7 @@ from models import (
     db, Student, Violation, ViolationType, Teacher, SystemConfig, ClassRoom,
     WeeklyArchive, Subject, Grade, BonusType, BonusRecord, Notification,
     GroupChatMessage, PrivateMessage, ChangeLog, ConductSetting,
-    Permission, TeacherPermission,
+    Permission, TeacherPermission, TeacherClassAssignment,
 )
 from app_helpers import (
     admin_required, get_accessible_students, can_access_student, normalize_student_code,
@@ -182,29 +182,29 @@ def register(app):
             role = request.form.get("role", "homeroom_teacher")
             assigned_class = request.form.get("assigned_class", "").strip() or None
             assigned_subject_id = request.form.get("assigned_subject_id") or None
-        
+
             # Validation
             if not username or not password or not full_name:
                 flash("Vui lòng điền đầy đủ thông tin!", "error")
                 return redirect(url_for("add_teacher"))
-        
+
             # Check username exists
             if Teacher.query.filter_by(username=username).first():
                 flash(f"Username '{username}' đã tồn tại!", "error")
                 return redirect(url_for("add_teacher"))
-        
+
             # Create new teacher
             new_teacher = Teacher(
                 username=username,
                 full_name=full_name,
                 role=role,
-                assigned_class=assigned_class if role == "homeroom_teacher" else None,
-                assigned_subject_id=int(assigned_subject_id) if role == "subject_teacher" and assigned_subject_id else None,
+                assigned_class=assigned_class if role in ["homeroom_teacher", "both"] else None,
+                assigned_subject_id=int(assigned_subject_id) if role in ["subject_teacher", "both"] and assigned_subject_id else None,
                 created_by=current_user.id
             )
             new_teacher.set_password(password)
 
-        
+
             try:
                 db.session.add(new_teacher)
                 db.session.commit()
@@ -214,7 +214,7 @@ def register(app):
                 db.session.rollback()
                 flash(f"Lỗi tạo tài khoản: {str(e)}", "error")
                 return redirect(url_for("add_teacher"))
-    
+
         # GET: Render form
         subjects = Subject.query.order_by(Subject.name).all()
         classes = ClassRoom.query.order_by(ClassRoom.name).all()
@@ -226,20 +226,20 @@ def register(app):
     def edit_teacher(teacher_id):
         """Sửa thông tin giáo viên - Chỉ Admin"""
         teacher = Teacher.query.get_or_404(teacher_id)
-    
+
         # Không cho sửa chính mình
         if teacher.id == current_user.id:
             flash("Không thể sửa tài khoản của chính mình!", "error")
             return redirect(url_for("manage_teachers"))
-    
+
         if request.method == "POST":
             teacher.full_name = request.form.get("full_name", "").strip() or teacher.full_name
             teacher.role = request.form.get("role", teacher.role)
-        
+
             new_password = request.form.get("password", "").strip()
             if new_password:
                 teacher.set_password(new_password)
-        
+
             if teacher.role == "homeroom_teacher":
                 teacher.assigned_class = request.form.get("assigned_class", "").strip() or None
                 teacher.assigned_subject_id = None
@@ -248,10 +248,15 @@ def register(app):
                 if teacher.assigned_subject_id:
                     teacher.assigned_subject_id = int(teacher.assigned_subject_id)
                 teacher.assigned_class = None
+            elif teacher.role == "both":
+                teacher.assigned_class = request.form.get("assigned_class", "").strip() or None
+                teacher.assigned_subject_id = request.form.get("assigned_subject_id") or None
+                if teacher.assigned_subject_id:
+                    teacher.assigned_subject_id = int(teacher.assigned_subject_id)
             else:  # admin
                 teacher.assigned_class = None
                 teacher.assigned_subject_id = None
-        
+
             try:
                 db.session.commit()
                 flash(f"Đã cập nhật thông tin '{teacher.full_name}'!", "success")
@@ -259,7 +264,7 @@ def register(app):
             except Exception as e:
                 db.session.rollback()
                 flash(f"Lỗi cập nhật: {str(e)}", "error")
-    
+
         # GET: Render form
         subjects = Subject.query.order_by(Subject.name).all()
         classes = ClassRoom.query.order_by(ClassRoom.name).all()
@@ -465,6 +470,58 @@ def register(app):
                 'granted': p.code in teacher_perm_codes
             })
         
-        return render_template("edit_teacher_permissions.html", 
+        return render_template("edit_teacher_permissions.html",
                              teacher=teacher,
                              permission_groups=permission_groups)
+
+    @app.route("/admin/teachers/<int:teacher_id>/assignments", methods=["GET", "POST"])
+    @admin_required
+    def manage_teacher_assignments(teacher_id):
+        """Quản lý phân công giáo viên dạy các lớp"""
+        teacher = Teacher.query.get_or_404(teacher_id)
+
+        if teacher.role == 'admin':
+            flash("Không thể phân công cho Admin!", "error")
+            return redirect(url_for("manage_teachers"))
+
+        if request.method == "POST":
+            # Xóa tất cả phân công cũ
+            TeacherClassAssignment.query.filter_by(teacher_id=teacher_id).delete()
+
+            # Thêm phân công mới
+            assigned_classes = request.form.getlist('assigned_classes')
+            subject_id = request.form.get('subject_id')
+
+            if subject_id:
+                subject_id = int(subject_id)
+
+            for class_name in assigned_classes:
+                assignment = TeacherClassAssignment(
+                    teacher_id=teacher_id,
+                    class_name=class_name,
+                    subject_id=subject_id,
+                    school_year=request.form.get('school_year', '2025-2026'),
+                    created_by=current_user.id
+                )
+                db.session.add(assignment)
+
+            db.session.commit()
+            flash(f"Đã cập nhật phân công cho {teacher.full_name}!", "success")
+            return redirect(url_for("manage_teachers"))
+
+        # GET: Hiển thị form
+        all_classes = ClassRoom.query.order_by(ClassRoom.name).all()
+        all_subjects = Subject.query.order_by(Subject.name).all()
+        current_assignments = TeacherClassAssignment.query.filter_by(teacher_id=teacher_id).all()
+
+        assigned_class_names = {a.class_name for a in current_assignments}
+        current_subject_id = current_assignments[0].subject_id if current_assignments else None
+        current_school_year = current_assignments[0].school_year if current_assignments else '2025-2026'
+
+        return render_template("manage_teacher_assignments.html",
+                             teacher=teacher,
+                             all_classes=all_classes,
+                             all_subjects=all_subjects,
+                             assigned_class_names=assigned_class_names,
+                             current_subject_id=current_subject_id,
+                             current_school_year=current_school_year)

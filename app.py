@@ -280,6 +280,28 @@ def ensure_subject_is_pass_fail_column():
     db.session.commit()
 
 
+def ensure_teacher_class_assignment_table():
+    """Tạo bảng teacher_class_assignment (SQLite cũ chưa có)."""
+    insp = inspect(db.engine)
+    if not insp.has_table("teacher_class_assignment"):
+        db.session.execute(text("""
+            CREATE TABLE teacher_class_assignment (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                teacher_id INTEGER NOT NULL,
+                class_name VARCHAR(50) NOT NULL,
+                subject_id INTEGER,
+                school_year VARCHAR(20) NOT NULL DEFAULT '2025-2026',
+                created_at DATETIME,
+                created_by INTEGER,
+                FOREIGN KEY (teacher_id) REFERENCES teacher(id),
+                FOREIGN KEY (subject_id) REFERENCES subject(id),
+                FOREIGN KEY (created_by) REFERENCES teacher(id),
+                UNIQUE (teacher_id, class_name)
+            )
+        """))
+        db.session.commit()
+
+
 def create_database():
     db.create_all()
     insp = inspect(db.engine)
@@ -297,6 +319,7 @@ def create_database():
     ensure_lesson_book_week_and_slot_tables()
     ensure_lesson_book_slot_lesson_date_column()
     ensure_subject_is_pass_fail_column()
+    ensure_teacher_class_assignment_table()
     # AttendanceRecord table is auto-created by db.create_all()
     if not Teacher.query.first():
         hashed_pwd = generate_password_hash("admin")

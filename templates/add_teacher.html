@@ -58,6 +58,7 @@
                     class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 input-shadcn transition">
                     <option value="homeroom_teacher">Giáo viên chủ nhiệm</option>
                     <option value="subject_teacher">Giáo viên bộ môn</option>
+                    <option value="both">GVCN + GVBM (Cả hai)</option>
                     <option value="discipline_officer">Giáo viên nề nếp</option>
                 </select>
                 <p class="text-xs text-muted-foreground mt-1">
@@ -65,10 +66,10 @@
                 </p>
             </div>
 
-            <!-- Assigned Class (for Homeroom Teacher) -->
+            <!-- Assigned Class (for Homeroom Teacher or Both) -->
             <div id="class_assignment">
                 <label for="assigned_class" class="block text-sm font-medium text-foreground mb-1">
-                    Lớp phụ trách
+                    Lớp chủ nhiệm
                 </label>
                 <select id="assigned_class" name="assigned_class"
                     class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 input-shadcn transition">
@@ -79,7 +80,7 @@
                 </select>
             </div>
 
-            <!-- Assigned Subject (for Subject Teacher) -->
+            <!-- Assigned Subject (for Subject Teacher or Both) -->
             <div id="subject_assignment" class="hidden">
                 <label for="assigned_subject_id" class="block text-sm font-medium text-foreground mb-1">
                     Môn phụ trách
@@ -119,6 +120,9 @@
             subjectDiv.classList.add('hidden');
         } else if (role === 'subject_teacher') {
             classDiv.classList.add('hidden');
+            subjectDiv.classList.remove('hidden');
+        } else if (role === 'both') {
+            classDiv.classList.remove('hidden');
             subjectDiv.classList.remove('hidden');
         } else {
             classDiv.classList.add('hidden');

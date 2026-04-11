@@ -104,13 +104,14 @@ class Teacher(UserMixin, db.Model):
             'admin': 'Quản trị viên',
             'homeroom_teacher': 'Giáo viên chủ nhiệm',
             'subject_teacher': 'Giáo viên bộ môn',
+            'both': 'GVCN + GVBM',
             'discipline_officer': 'Giáo viên nề nếp',
             'parent_student': 'Phụ huynh/Học sinh'
         }
         return role_map.get(self.role, 'Giáo viên')
 
     # Hệ thống phân quyền mới
-    # role: admin, homeroom_teacher, subject_teacher, discipline_officer, parent_student
+    # role: admin, homeroom_teacher, subject_teacher, both (GVCN + GVBM), discipline_officer, parent_student
     role = db.Column(db.String(20), default="homeroom_teacher")
     assigned_class = db.Column(db.String(50))  # Lớp được phân công (cho GVCN)
     assigned_subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'))  # Môn được phân công (cho GVBM)
@@ -508,7 +509,7 @@ class SessionViolationRecord(db.Model):
     points_deducted = db.Column(db.Integer, nullable=False)
     # Trạng thái: 'pending' = chờ xác nhận, 'confirmed' = đã xác nhận (chuyển thành Violation)
     status = db.Column(db.String(20), default="pending")
-    # Thời điểm vi phạm được ghi nhận trong phi��n
+    # Thời điểm vi phạm được ghi nhận trong phiên
     recorded_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     # Ghi chú của giáo viên trong phiên
     notes = db.Column(db.Text, nullable=True)
@@ -518,3 +519,22 @@ class SessionViolationRecord(db.Model):
     session = db.relationship("AttendanceMonitoringSession", backref=db.backref("violation_records", lazy=True))
     student = db.relationship("Student", backref=db.backref("session_violation_records", lazy=True))
     official_violation = db.relationship("Violation")
+
+
+class TeacherClassAssignment(db.Model):
+    """Phân công giáo viên dạy lớp - một giáo viên có thể dạy nhiều lớp"""
+    __tablename__ = "teacher_class_assignment"
+    __table_args__ = (
+        db.UniqueConstraint("teacher_id", "class_name", name="uq_teacher_class"),
+    )
+    id = db.Column(db.Integer, primary_key=True)
+    teacher_id = db.Column(db.Integer, db.ForeignKey("teacher.id"), nullable=False, index=True)
+    class_name = db.Column(db.String(50), nullable=False, index=True)
+    subject_id = db.Column(db.Integer, db.ForeignKey("subject.id"), nullable=True)  # Môn dạy ở lớp này
+    school_year = db.Column(db.String(20), nullable=False, default="2025-2026")
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    created_by = db.Column(db.Integer, db.ForeignKey("teacher.id"))
+
+    teacher = db.relationship("Teacher", foreign_keys=[teacher_id], backref="class_assignments")
+    subject = db.relationship("Subject", backref="teacher_assignments")
+    creator = db.relationship("Teacher", foreign_keys=[created_by])
