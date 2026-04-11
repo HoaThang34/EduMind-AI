@@ -1002,7 +1002,7 @@
 
                         {% if current_user.has_permission('send_notifications') %}
                         <a href="{{ url_for('send_notification') }}"
-                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'send_notification' %}active{% endif %}">
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'send_notification' or request.endpoint == 'teacher_notifications_history' %}active{% endif %}">
                             <i class="fas fa-paper-plane w-6 text-center text-lg mr-3 text-emerald-500"></i>
                             <span class="text-sm">Gửi thông báo</span>
                         </a>

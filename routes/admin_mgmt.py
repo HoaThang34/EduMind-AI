@@ -338,12 +338,47 @@ def register(app):
             try:
                 create_notification(title, message, 'announcement', target_role)
                 flash("Đã gửi thông báo thành công!", "success")
+                return redirect(url_for('teacher_notifications_history'))
             except Exception as e:
                 flash(f"Lỗi gửi thông báo: {str(e)}", "error")
-        
-            return redirect(url_for("send_notification"))
+                return redirect(url_for("send_notification"))
     
         return render_template("send_notification.html")
+
+    @app.route("/admin/teacher_notifications/history")
+    @admin_required
+    def teacher_notifications_history():
+        """Lịch sử thông báo đã gửi cho giáo viên"""
+        # Lấy các thông báo do admin này gửi
+        sent_notifs = Notification.query.filter_by(created_by=current_user.id)\
+            .order_by(Notification.created_at.desc()).all()
+        
+        return render_template("messaging/teacher_notifications_history.html", notifications=sent_notifs)
+
+    @app.route("/admin/teacher_notifications/<int:nid>/recall", methods=["POST"])
+    @admin_required
+    def teacher_notification_recall(nid):
+        """Thu hồi (xoá) thông báo đã gửi tới giáo viên"""
+        notif = Notification.query.get_or_404(nid)
+        
+        # Chỉ người gửi mới có quyền thu hồi
+        if notif.created_by != current_user.id:
+            flash("Bạn không có quyền thu hồi thông báo này!", "error")
+            return redirect(url_for('teacher_notifications_history'))
+            
+        title = notif.title
+        recipient_name = notif.recipient.full_name if notif.recipient else "Nhiều người"
+        
+        db.session.delete(notif)
+        db.session.commit()
+        
+        log_change(
+            change_type="teacher_notification_recall",
+            description=f"Thu hồi thông báo: {title} đã gửi tới {recipient_name}"
+        )
+        
+        flash("Đã thu hồi thông báo thành công!", "success")
+        return redirect(url_for('teacher_notifications_history'))
 
     # === PERMISSION MANAGEMENT ROUTES ===
 

@@ -3,9 +3,15 @@
 
 {% block content %}
 <div class="max-w-3xl mx-auto">
-    <div class="mb-6">
-        <h1 class="text-2xl font-semibold tracking-tight text-foreground mb-2">Gửi Thông Báo</h1>
-        <p class="text-muted-foreground">Gửi thông báo chung cho giáo viên trong hệ thống</p>
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-semibold tracking-tight text-foreground mb-2">Gửi Thông Báo</h1>
+            <p class="text-muted-foreground">Gửi thông báo chung cho giáo viên trong hệ thống</p>
+        </div>
+        <a href="{{ url_for('teacher_notifications_history') }}" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200 transition flex items-center gap-2">
+            <i class="fas fa-history"></i>
+            Xem lịch sử
+        </a>
     </div>
 
     <div class="bg-white rounded-xl shadow-card p-8 border border-[hsl(240,5.9%,90%)]">
