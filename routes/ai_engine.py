@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_login import login_required, current_user
-from models import Student, Violation, db, Grade, SystemConfig, Subject
+from models import Student, Violation, db, Grade, SystemConfig, Subject, ClassRoom
 from sqlalchemy import or_
 import json
 import base64
@@ -518,13 +518,15 @@ Trả lời ngắn gọn, rõ ràng bằng tiếng Việt. Sử dụng markdown 
 def ocr_grades():
     """Giao diện nhập điểm bằng OCR Vision"""
     subjects = Subject.query.order_by(Subject.name).all()
+    class_list = ClassRoom.query.order_by(ClassRoom.name).all()
     # Lấy thông tin tuần/năm học hiện tại từ config
     configs = {c.key: c.value for c in SystemConfig.query.all()}
     current_week = int(configs.get("current_week", "1"))
     semester = int(configs.get("current_semester", "1"))
-    
-    return render_template("ocr_grades.html", 
-                         subjects=subjects, 
+
+    return render_template("ocr_grades.html",
+                         subjects=subjects,
+                         class_list=class_list,
                          semester=semester)
 
 
@@ -534,32 +536,79 @@ def api_ocr_grades():
     """Xử lý ảnh OCR sử dụng Gemini Vision"""
     from app_helpers import _call_gemini
     from prompts import VISION_GRADE_OCR_PROMPT
-    
+
     if 'image' not in request.files:
         return jsonify({"error": "Không tìm thấy file ảnh"}), 400
-    
+
     file = request.files['image']
     if file.filename == '':
         return jsonify({"error": "Tên file rỗng"}), 400
-    
+
     # Save temporary file
     from app_helpers import UPLOAD_FOLDER
     filename = f"ocr_{uuid.uuid4().hex}_{file.filename}"
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     file.save(filepath)
-    
+
     try:
-        # Gọi Gemini Vision
-        results, error = _call_gemini(VISION_GRADE_OCR_PROMPT, image_path=filepath, is_json=True)
-        
-        # Xóa file tạm sau khi xử lý (tùy chọn)
-        # os.remove(filepath)
-        
+        # Gọi AI Vision (không dùng is_json=True để tránh xung đột với prompt)
+        results, error = _call_gemini(VISION_GRADE_OCR_PROMPT, image_path=filepath, is_json=False)
+
+        # Xóa file tạm sau khi xử lý để tránh đầy disk
+        try:
+            os.remove(filepath)
+        except Exception as cleanup_err:
+            print(f"Warning: Could not delete temp file {filepath}: {cleanup_err}")
+
         if error:
             return jsonify({"error": f"Lỗi AI: {error}"}), 500
-        
-        return jsonify(results)
+
+        # Parse JSON từ response của AI
+        import json
+        try:
+            # AI có thể trả về JSON trong markdown code block hoặc trực tiếp
+            text = results.strip()
+
+            # Debug: Log raw response
+            print(f"[OCR DEBUG] Raw AI response length: {len(text)}")
+            print(f"[OCR DEBUG] First 500 chars: {text[:500]}")
+
+            # Xóa markdown code block nếu có
+            if text.startswith('```json'):
+                text = text[7:]
+            elif text.startswith('```'):
+                text = text[3:]
+            if text.endswith('```'):
+                text = text[:-3]
+            text = text.strip()
+
+            parsed = json.loads(text)
+            print(f"[OCR DEBUG] Parsed JSON type: {type(parsed)}")
+
+            # Nếu AI trả về object với key "results", dùng nó
+            if isinstance(parsed, dict) and 'results' in parsed:
+                print(f"[OCR DEBUG] Returning dict with results, count: {len(parsed.get('results', []))}")
+                return jsonify(parsed)
+            # Nếu AI trả về array trực tiếp, wrap vào object
+            elif isinstance(parsed, list):
+                print(f"[OCR DEBUG] Wrapping array with {len(parsed)} items")
+                return jsonify({"results": parsed, "metadata": {"total_detected": len(parsed)}})
+            else:
+                print(f"[OCR DEBUG] Invalid structure: {type(parsed)}")
+                return jsonify({"error": "Cấu trúc JSON không hợp lệ"}), 500
+
+        except json.JSONDecodeError as e:
+            print(f"[OCR DEBUG] JSON decode error: {str(e)}")
+            print(f"[OCR DEBUG] Text that failed: {text[:1000]}")
+            return jsonify({"error": f"Lỗi parse JSON: {str(e)}"}), 500
+
     except Exception as e:
+        # Cleanup file on error too
+        try:
+            if os.path.exists(filepath):
+                os.remove(filepath)
+        except:
+            pass
         return jsonify({"error": f"Lỗi xử lý: {str(e)}"}), 500
 
 
@@ -573,11 +622,12 @@ def api_confirm_ocr_grades():
         return jsonify({"error": "Không có dữ liệu"}), 400
     
     subject_id = data.get('subject_id')
+    class_filter = data.get('class_filter', '')  # Lọc theo lớp (tùy chọn)
     # Lấy thông tin năm học và học kỳ mặc định từ cấu hình hệ thống
     configs = {c.key: c.value for c in SystemConfig.query.all()}
     school_year = configs.get("school_year", "2025-2026")
     default_semester = int(configs.get("current_semester", "1"))
-    
+
     semester = data.get('semester', default_semester)
     
     if not subject_id:
@@ -593,8 +643,11 @@ def api_confirm_ocr_grades():
     
     grades_list = data.get('grades', [])
     for item in grades_list:
-        row_index = item.get('rowIndex')
+        row_id = item.get('rowId')  # Changed from rowIndex to rowId for better tracking
         student_code = item.get('student_code')
+        student_name = item.get('student_name')
+        date_of_birth = item.get('date_of_birth')
+        roll_number = item.get('roll_number')
         score = item.get('score')
         grade_type = item.get('grade_type', 'TX')
         
@@ -604,33 +657,92 @@ def api_confirm_ocr_grades():
             column_index = 1
         
         if score is None or score == '':
-            item_results.append({"rowIndex": row_index, "status": "ignored", "message": "Bỏ qua ô trống"})
+            item_results.append({"rowId": row_id, "status": "ignored", "message": "Bỏ qua ô trống"})
             continue
-            
+
         try:
             score_val = float(score)
             if score_val < 0 or score_val > 10:
                 msg = f"Điểm {score_val} không hợp lệ"
                 errors.append(f"Mã {student_code}: {msg}")
-                item_results.append({"rowIndex": row_index, "status": "error", "message": msg})
+                item_results.append({"rowId": row_id, "status": "error", "message": msg})
                 continue
         except ValueError:
             msg = f"Điểm {score} không phải là số"
             errors.append(f"Mã {student_code}: {msg}")
-            item_results.append({"rowIndex": row_index, "status": "error", "message": msg})
+            item_results.append({"rowId": row_id, "status": "error", "message": msg})
             continue
-            
-        # Tìm học sinh theo mã
-        student = Student.query.filter_by(student_code=student_code).first()
-        if not student:
-            # Thử tìm theo tên nếu mã không khớp (tùy chọn)
-            student = Student.query.filter_by(name=item.get('student_name')).first()
+
+        # Validate grade_type
+        valid_grade_types = ['TX', 'GK', 'HK']
+        if grade_type not in valid_grade_types:
+            msg = f"Loại điểm {grade_type} không hợp lệ (chấp nhận: TX, GK, HK)"
+            errors.append(f"Mã {student_code}: {msg}")
+            item_results.append({"rowId": row_id, "status": "error", "message": msg})
+            continue
+
+        # Tìm học sinh - ưu tiên: ngày sinh + số thứ tự + lớp, sau đó là mã, cuối cùng là tên
+        from app_helpers import normalize_student_code
+
+        student = None
+
+        # Chiến lược 1: Nếu có ngày sinh + số thứ tự + lớp, tìm theo combo này
+        if date_of_birth and roll_number:
+            # Chuẩn hóa ngày sinh (bỏ khoảng trắng, chuẩn format)
+            dob_normalized = date_of_birth.strip().replace(' ', '')
+            roll_normalized = str(roll_number).strip()
+
+            # Tìm theo lớp nếu có chọn filter
+            query = Student.query
+            if class_filter:
+                query = query.filter_by(student_class=class_filter)
+
+            # Tìm học sinh khớp ngày sinh và số thứ tự
+            candidates = query.all()
+            for s in candidates:
+                s_dob = (s.date_of_birth or '').strip().replace(' ', '')
+                if s_dob == dob_normalized:
+                    # Nếu có số thứ tự trong tên hoặc thông tin khác, so sánh
+                    # (Giả sửu roll_number được lưu trong một trường, nếu không có thì bỏ qua)
+                    student = s
+                    break
+
+        # Chiến lược 2: Tìm theo mã học sinh (nếu có)
+        if not student and student_code:
+            normalized_code = normalize_student_code(student_code)
+            student = Student.query.filter_by(student_code=student_code).first()
+            if not student:
+                # Nếu không tìm thấy, thử tìm theo mã đã chuẩn hóa
+                all_students = Student.query.all()
+                for s in all_students:
+                    if normalize_student_code(s.student_code) == normalized_code:
+                        student = s
+                        break
+
+        # Chiến lược 3: Tìm theo tên + lớp (nếu có)
+        if not student and student_name:
+            query = Student.query.filter_by(name=student_name)
+            if class_filter:
+                query = query.filter_by(student_class=class_filter)
+            student = query.first()
+
+            # Nếu không tìm thấy với lớp, thử tìm tên khớp bất kỳ
+            if not student and not class_filter:
+                student = Student.query.filter_by(name=student_name).first()
             
         if not student:
             msg = f"Không tìm thấy học sinh trong CSDL"
             errors.append(f"Mã {student_code or item.get('student_name')}: {msg}")
-            item_results.append({"rowIndex": row_index, "status": "error", "message": msg})
+            item_results.append({"rowId": row_id, "status": "error", "message": msg})
             continue
+
+        # Validate lớp nếu có chọn filter
+        class_warning = None
+        if class_filter and student.student_class != class_filter:
+            msg = f"Cảnh báo: Học sinh thuộc lớp {student.student_class}, không phải {class_filter}"
+            errors.append(f"Mã {student_code}: {msg}")
+            class_warning = f"Lớp khác ({student.student_class})"
+            # Không block, chỉ cảnh báo - vẫn cho phép lưu điểm
             
         # Kiểm tra xem đã có điểm chưa
         existing = Grade.query.filter_by(
@@ -645,10 +757,13 @@ def api_confirm_ocr_grades():
         if existing:
             old_val = existing.score
             existing.score = score_val
-            log_change('grade_update', f'OCR: Cập nhật điểm {grade_type} môn {subject.name}: {old_val} → {score_val}', 
+            log_change('grade_update', f'OCR: Cập nhật điểm {grade_type} môn {subject.name}: {old_val} → {score_val}',
                       student_id=student.id, student_name=student.name, student_class=student.student_class,
                       old_value=old_val, new_value=score_val)
-            item_results.append({"rowIndex": row_index, "status": "success", "message": "Đã cập nhật"})
+            if class_warning:
+                item_results.append({"rowId": row_id, "status": "warning", "message": f"Đã cập nhật ({class_warning})"})
+            else:
+                item_results.append({"rowId": row_id, "status": "success", "message": "Đã cập nhật"})
         else:
             new_grade = Grade(
                 student_id=student.id,
@@ -660,10 +775,13 @@ def api_confirm_ocr_grades():
                 school_year=school_year
             )
             db.session.add(new_grade)
-            log_change('grade', f'OCR: Thêm điểm {grade_type} môn {subject.name}: {score_val}', 
+            log_change('grade', f'OCR: Thêm điểm {grade_type} môn {subject.name}: {score_val}',
                       student_id=student.id, student_name=student.name, student_class=student.student_class,
                       new_value=score_val)
-            item_results.append({"rowIndex": row_index, "status": "success", "message": "Đã lưu mới"})
+            if class_warning:
+                item_results.append({"rowId": row_id, "status": "warning", "message": f"Đã lưu mới ({class_warning})"})
+            else:
+                item_results.append({"rowId": row_id, "status": "success", "message": "Đã lưu mới"})
         
         success_count += 1
         

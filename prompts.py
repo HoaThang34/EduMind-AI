@@ -833,59 +833,44 @@ Dựa vào **dữ liệu học tập – rèn luyện** của học sinh dưới
 
 # Prompt dành cho Gemini Vision OCR trích xuất điểm từ bảng điểm tay
 VISION_GRADE_OCR_PROMPT = """
-Bạn là một chuyên gia số hóa dữ liệu giáo dục. Nhiệm vụ của bạn là đọc ảnh chụp bảng điểm tay của giáo viên và chuyển thành cấu trúc dữ liệu JSON.
+Đọc ảnh bảng điểm tay và trả về JSON.
 
-**I. QUY TẮC ĐỌC DỮ LIỆU:**
-1. **Nhận diện Học sinh:** Tìm cột "Họ và tên" hoặc "Tên" và/hoặc "Mã số". Nếu có mã số, hãy ưu tiên mã số.
-2. **Nhận diện Điểm số và Loại điểm:** 
-   - Đọc tiêu đề các cột điểm để xác định Loại điểm (`grade_type`):
-     - Nếu tiêu đề chứa "TX", "Thường xuyên", "KT Miệng", "15p" -> `grade_type` là "TX".
-     - Nếu tiêu đề chứa "GK", "Giữa kỳ", "1 tiết" -> `grade_type` là "GK".
-     - Nếu tiêu đề chứa "HK", "Cuối kỳ", "Thi" -> `grade_type` là "HK".
-   - Xác định thứ tự cột (`column_index`): Cột điểm TX thứ nhất là 1, cột điểm TX thứ hai là 2... Tương tự cho GK và HK.
-3. **Xử lý ô trống:** Bỏ qua các ô trống không có điểm (không đưa vào JSON).
-4. **Độ chính xác:** Đọc kỹ các con số viết tay. Nếu không chắc chắn, hãy cố gắng đoán dựa trên ngữ cảnh (các nét viết).
+**CÁC CỘT CẦN ĐỌC:**
+1. Họ tên học sinh (BẮT BUỘC)
+2. Ngày sinh (nếu có)
+3. Số thứ tự/STT (nếu có)
+4. Mã số học sinh (nếu có)
+5. Các cột điểm số
 
-**II. ĐỊNH DẠNG ĐẦU RA (BẮT BUỘC):**
-Trả về một đối tượng JSON duy nhất. Mỗi học sinh sẽ có một mảng `grades` chứa danh sách các điểm.
-Cấu trúc JSON như sau:
+**LOẠI ĐIỂM:**
+- TX: Thường xuyên, 15 phút, KT miệng
+- GK: Giữa kỳ, 1 tiết
+- HK: Cuối kỳ, thi
+
+**ĐỊNH DẠNG JSON:**
 ```json
 {
   "results": [
     {
       "student_name": "Nguyễn Văn A",
       "student_code": "HS001",
+      "date_of_birth": "15/08/2008",
+      "roll_number": "1",
       "grades": [
-        {
-          "grade_type": "TX",
-          "column_index": 1,
-          "score": 8.5
-        },
-        {
-          "grade_type": "TX",
-          "column_index": 2,
-          "score": 9.0
-        },
-        {
-          "grade_type": "GK",
-          "column_index": 1,
-          "score": 7.5
-        }
+        {"grade_type": "TX", "column_index": 1, "score": 8.5},
+        {"grade_type": "TX", "column_index": 2, "score": 9.0},
+        {"grade_type": "GK", "column_index": 1, "score": 7.5}
       ]
-    },
-    ...
+    }
   ],
-  "metadata": {
-    "total_detected": 15,
-    "confidence_note": "Ghi chú về độ rõ nét của ảnh nếu cần"
-  }
+  "metadata": {"total_detected": 1}
 }
 ```
 
-**III. LƯU Ý QUAN TRỌNG:**
-- KHÔNG giải thích gì thêm.
-- CHỈ trả về JSON hợp lệ.
-- Nếu không tìm thấy bảng điểm nào, trả về `{"results": [], "metadata": {"error": "Không tìm thấy bảng điểm"}}`.
+**QUY TẮC:**
+- Chỉ trả về JSON, không text thêm
+- Bỏ qua ô trống
+- student_code, date_of_birth, roll_number: null nếu không có
 """
 
 # Prompt phân tích xu hướng học sinh (Predictive Analytics)
