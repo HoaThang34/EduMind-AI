@@ -5,163 +5,190 @@
 <style>
     /* ── Grid table ──────────────────────────────────────────────────────────── */
     .lb-grid {
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0;
         width: 100%;
-        font-size: 0.78rem;
+        font-size: 0.8rem;
         table-layout: fixed;
     }
     .lb-grid th {
-        background: #1e40af;
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
         color: #fff;
         font-weight: 600;
         text-align: center;
-        padding: 8px 6px;
-        border: 1px solid #1e3a8a;
+        padding: 12px 8px;
+        border: none;
         position: sticky;
         top: 0;
         z-index: 10;
-        font-size: 0.72rem;
+        font-size: 0.75rem;
         white-space: nowrap;
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
     }
     .lb-grid th.period-col {
-        background: #1d4ed8;
-        min-width: 44px;
-        width: 44px;
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        min-width: 50px;
+        width: 50px;
     }
     .lb-grid td {
-        border: 1px solid #d1d5db;
+        border: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
+        border-right: 1px solid #e2e8f0;
         vertical-align: top;
         padding: 0;
         background: #fff;
+        transition: all 0.2s ease;
     }
-    .lb-grid tr:hover td { background: #eff6ff; }
+    .lb-grid tr:hover td { background: #f8fafc; }
     .lb-grid .period-label {
-        background: #eff6ff;
-        color: #1d4ed8;
+        background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+        color: #4338ca;
         font-weight: 700;
-        font-size: 0.72rem;
+        font-size: 0.75rem;
         text-align: center;
-        padding: 6px 4px;
-        border: 1px solid #bfdbfe;
-        width: 44px;
-        min-width: 44px;
+        padding: 10px 6px;
+        border: 1px solid #c7d2fe;
+        width: 50px;
+        min-width: 50px;
         position: sticky;
         left: 0;
         z-index: 5;
+        box-shadow: 2px 0 8px rgba(99, 102, 241, 0.1);
     }
 
     /* ── Cell wrapper ─────────────────────────────────────────────────────────── */
     .cell-wrap {
         display: flex;
         flex-direction: column;
-        min-height: 80px;
+        min-height: 100px;
         height: 100%;
+        gap: 4px;
     }
 
     /* ── Subject row inside cell ────────────────────────────────────────────── */
     .cell-subject {
-        background: #f0f9ff;
-        padding: 3px 6px;
-        border-bottom: 1px dashed #93c5fd;
-        font-size: 0.7rem;
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        padding: 6px 8px;
+        border-bottom: 2px solid #bae6fd;
+        font-size: 0.72rem;
         font-weight: 600;
-        color: #1d4ed8;
+        color: #0369a1;
+        border-radius: 6px 6px 0 0;
     }
     .cell-subject input {
         background: transparent;
         border: none;
         outline: none;
         width: 100%;
-        font-size: 0.7rem;
+        font-size: 0.72rem;
         font-weight: 600;
-        color: #1d4ed8;
+        color: #0369a1;
         padding: 0;
+        transition: color 0.2s ease;
     }
-    .cell-subject input::placeholder { color: #93c5fd; font-weight: 400; }
+    .cell-subject input:focus { color: #0c4a6e; }
+    .cell-subject input::placeholder { color: #7dd3fc; font-weight: 400; }
 
-    /* ── Ngày dạy (tự điền) ───────────────────────────────────────────────────── */
     /* ── Lesson date input ──────────────────────────────────────────────────── */
     .cell-date-wrap {
         display: flex;
         align-items: center;
-        gap: 3px;
-        padding: 2px 6px 1px;
-        border-bottom: 1px dashed #cbd5e1;
+        gap: 4px;
+        padding: 4px 8px;
+        background: #f8fafc;
+        border-radius: 4px;
     }
     .cell-date-wrap label {
-        font-size: 0.6rem;
-        color: #94a3b8;
+        font-size: 0.65rem;
+        color: #64748b;
         white-space: nowrap;
     }
     .cell-date-wrap input {
-        border: none;
-        border-bottom: 1px solid #cbd5e1;
-        background: transparent;
-        font-size: 0.65rem;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+        font-size: 0.68rem;
         color: #334155;
-        padding: 1px 2px;
-        width: 82px;
+        padding: 3px 6px;
+        width: 85px;
         outline: none;
         font-family: inherit;
+        border-radius: 4px;
+        transition: all 0.2s ease;
     }
     .cell-date-wrap input:focus {
-        border-bottom-color: #1d4ed8;
-        color: #1d4ed8;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        color: #4338ca;
     }
     .cell-date-wrap input::placeholder { color: #cbd5e1; }
 
     /* ── Main textarea (topic) ───────────────────────────────────────────────── */
     .cell-content {
         flex: 1;
-        padding: 4px 6px;
+        padding: 6px 8px;
+        background: #fff;
     }
     .cell-content textarea {
         width: 100%;
         height: 100%;
-        min-height: 56px;
-        border: none;
+        min-height: 60px;
+        border: 1px solid #e2e8f0;
         outline: none;
         resize: none;
         font-family: 'Be Vietnam Pro', sans-serif;
-        font-size: 0.72rem;
-        line-height: 1.45;
+        font-size: 0.75rem;
+        line-height: 1.5;
         color: #1f2937;
-        background: transparent;
-        padding: 0;
+        background: #fafafa;
+        padding: 8px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
     }
-    .cell-content textarea::placeholder { color: #9ca3af; }
-    .cell-content textarea:focus { background: #fffbeb; }
+    .cell-content textarea::placeholder { color: #94a3b8; }
+    .cell-content textarea:focus {
+        background: #fff;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
 
     /* ── Highlight today column ──────────────────────────────────────────────── */
-    .col-today { background: #fffbeb !important; }
+    .col-today { background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%) !important; }
+    .col-today .cell-content textarea { background: #fffef0; }
 
     /* ── Attendance mini row ─────────────────────────────────────────────────── */
     .cell-attendance {
         display: flex;
-        gap: 4px;
-        padding: 3px 6px;
-        background: #fef9c3;
-        border-top: 1px dashed #fde047;
+        gap: 6px;
+        padding: 6px 8px;
+        background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
+        border-top: 2px solid #fde047;
         align-items: center;
+        border-radius: 0 0 6px 6px;
     }
     .cell-attendance span {
-        font-size: 0.65rem;
-        color: #854d0e;
-        font-weight: 500;
+        font-size: 0.68rem;
+        color: #713f12;
+        font-weight: 600;
         white-space: nowrap;
     }
     .cell-attendance input {
-        width: 32px;
-        border: 1px solid #facc15;
-        border-radius: 3px;
+        width: 36px;
+        border: 1px solid #fbbf24;
+        border-radius: 4px;
         text-align: center;
-        font-size: 0.68rem;
-        padding: 1px 2px;
+        font-size: 0.7rem;
+        padding: 3px 4px;
         background: #fff;
         outline: none;
-        color: #854d0e;
+        color: #713f12;
+        font-weight: 600;
+        transition: all 0.2s ease;
     }
-    .cell-attendance input:focus { border-color: #eab308; background: #fefce8; }
+    .cell-attendance input:focus { 
+        border-color: #f59e0b; 
+        background: #fffbeb; 
+        box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+    }
 
     /* ── Saved / dirty indicator ──────────────────────────────────────────────── */
     .cell-saved {
@@ -178,27 +205,35 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 7px 16px;
+        padding: 8px 16px;
         border-radius: 8px;
-        font-size: 0.82rem;
+        font-size: 0.85rem;
         font-weight: 500;
-        transition: all 0.15s;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
-    .week-nav-btn:hover { transform: translateY(-1px); }
+    .week-nav-btn:hover { 
+        transform: translateY(-2px); 
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
 
     /* ── Cell hover highlight ─────────────────────────────────────────────────── */
-    .lb-grid td:hover { background-color: #eff6ff !important; }
+    .lb-grid td:hover { 
+        background-color: #f1f5f9 !important;
+        box-shadow: inset 0 0 0 2px #6366f1;
+    }
 
     /* ── Print styles ─────────────────────────────────────────────────────────── */
     @media print {
-        .lb-grid { font-size: 0.7rem; }
-        .lb-grid th { background: #1e40af !important; -webkit-print-color-adjust: exact; }
+        .lb-grid { font-size: 0.75rem; }
+        .lb-grid th { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important; -webkit-print-color-adjust: exact; }
         .lb-grid td { border: 1px solid #666 !important; }
-        .cell-content textarea { border: none; }
-        .cell-subject { background: #dbeafe !important; -webkit-print-color-adjust: exact; }
-        .cell-attendance { background: #fef9c3 !important; -webkit-print-color-adjust: exact; }
+        .cell-content textarea { border: 1px solid #ddd; background: #fff !important; }
+        .cell-subject { background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important; -webkit-print-color-adjust: exact; }
+        .cell-attendance { background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%) !important; -webkit-print-color-adjust: exact; }
         .no-print { display: none !important; }
         .lb-grid { table-layout: auto; }
+        .cell-date-wrap { background: #f8fafc !important; }
     }
 
     /* ── Toast notification ───────────────────────────────────────────────────── */
@@ -206,17 +241,17 @@
         position: fixed;
         bottom: 24px;
         right: 24px;
-        background: #16a34a;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         color: #fff;
-        padding: 10px 18px;
-        border-radius: 10px;
-        font-size: 0.82rem;
-        font-weight: 500;
-        box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
+        padding: 12px 20px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
         z-index: 9999;
         opacity: 0;
-        transform: translateY(10px);
-        transition: all 0.3s;
+        transform: translateY(20px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         pointer-events: none;
     }
     .save-toast.show { opacity: 1; transform: translateY(0); }
@@ -271,11 +306,11 @@
                     {% if not prev_week %}opacity-40 pointer-events-none{% endif %}">
                     <i class="fas fa-chevron-left text-xs"></i> Tuần trước
                 </a>
-                <div class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-sm font-semibold text-blue-700">
-                    <i class="fas fa-calendar text-xs"></i>
+                <div class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl text-sm font-bold text-indigo-700 shadow-sm">
+                    <i class="fas fa-calendar-week text-indigo-500"></i>
                     Tuần {{ week_number }}
                     {% if current_school_week and week_number == current_school_week %}
-                    <span class="ml-1 px-1.5 py-0.5 bg-green-500 text-white text-[10px] rounded-full font-bold">Hiện tại</span>
+                    <span class="ml-1 px-2 py-0.5 bg-gradient-to-r from-emerald-500 to-green-500 text-white text-[10px] rounded-full font-bold shadow-sm">Hiện tại</span>
                     {% endif %}
                 </div>
                 <a href="{{ url_for('lesson_book_grid', class_name=class_name, week_number=next_week, school_year=school_year, semester=semester) if next_week else '#' }}"
@@ -301,40 +336,51 @@
     </form>
 
     {# ── Week notes ───────────────────────────────────────────────────────────── #}
-    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 no-print">
-        <div class="flex items-start gap-2">
-            <i class="fas fa-sticky-note text-amber-500 mt-0.5"></i>
+    <div class="bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-2xl p-4 no-print shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-400 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-sticky-note text-white text-lg"></i>
+            </div>
             <div class="flex-1">
-                <label class="block text-xs font-semibold text-amber-700 mb-1">Ghi chú tuần</label>
+                <label class="block text-sm font-bold text-amber-800 mb-2 flex items-center gap-2">
+                    <i class="fas fa-pen-fancy text-amber-600"></i> Ghi chú tuần
+                </label>
                 <textarea id="week_notes" rows="2"
                     placeholder="Nhận xét chung, kế hoạch tuần tới…"
-                    class="w-full px-3 py-1.5 border border-amber-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-300 resize-none"
+                    class="w-full px-4 py-2.5 border-2 border-amber-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 resize-none transition-all"
                     onblur="saveWeekNotes()">{{ week_record.teacher_notes or '' }}</textarea>
-                <div id="week_notes_saved" class="text-xs text-green-600 mt-1" style="display:none">
-                    <i class="fas fa-check-circle mr-1"></i> Đã lưu
+                <div id="week_notes_saved" class="text-xs font-semibold text-emerald-600 mt-2 flex items-center gap-1" style="display:none">
+                    <i class="fas fa-check-circle"></i> Đã lưu
                 </div>
             </div>
         </div>
     </div>
 
     {# ── GRID TABLE ───────────────────────────────────────────────────────────── #}
-    <div class="overflow-x-auto rounded-xl border border-slate-300 shadow-sm bg-white">
+    <div class="overflow-x-auto rounded-2xl border-2 border-slate-200 shadow-lg bg-white">
         <table class="lb-grid" id="lessonBookGrid">
             <colgroup>
-                <col style="width:48px; min-width:48px;"> {# Period label #}
-                <col style="width:100px; min-width:100px;"> {# Thứ 2 #}
-                <col style="width:100px; min-width:100px;"> {# Thứ 3 #}
-                <col style="width:100px; min-width:100px;"> {# Thứ 4 #}
-                <col style="width:100px; min-width:100px;"> {# Thứ 5 #}
-                <col style="width:100px; min-width:100px;"> {# Thứ 6 #}
-                <col style="width:100px; min-width:100px;"> {# Thứ 7 #}
-                <col style="width:100px; min-width:100px;"> {# CN #}
+                <col style="width:55px; min-width:55px;"> {# Period label #}
+                <col style="width:110px; min-width:110px;"> {# Thứ 2 #}
+                <col style="width:110px; min-width:110px;"> {# Thứ 3 #}
+                <col style="width:110px; min-width:110px;"> {# Thứ 4 #}
+                <col style="width:110px; min-width:110px;"> {# Thứ 5 #}
+                <col style="width:110px; min-width:110px;"> {# Thứ 6 #}
+                <col style="width:110px; min-width:110px;"> {# Thứ 7 #}
+                <col style="width:110px; min-width:110px;"> {# CN #}
             </colgroup>
             <thead>
                 <tr>
-                    <th class="period-col">Tiết</th>
+                    <th class="period-col">
+                        <i class="fas fa-clock mr-1"></i>Tiết
+                    </th>
                     {% for dm in day_meta %}
-                    <th class="{% if dm.iso == today_iso %}ring-2 ring-amber-300 ring-inset{% endif %}">{{ dm.label }}<br><span class="font-normal text-blue-200 text-[10px]">{{ dm.date }}</span></th>
+                    <th class="{% if dm.iso == today_iso %}ring-2 ring-amber-400 ring-inset shadow-lg{% endif %}">
+                        <div class="flex flex-col items-center gap-0.5">
+                            <span class="font-semibold">{{ dm.label }}</span>
+                            <span class="font-normal text-indigo-200 text-[10px] bg-white/10 px-2 py-0.5 rounded-full">{{ dm.date }}</span>
+                        </div>
+                    </th>
                     {% endfor %}
                 </tr>
             </thead>
@@ -352,7 +398,7 @@
 
 {# ── Save toast ─────────────────────────────────────────────────────────────── #}
 <div class="save-toast" id="saveToast">
-    <i class="fas fa-check-circle mr-1.5"></i> Đã lưu!
+    <i class="fas fa-check-circle mr-2"></i> Đã lưu thành công!
 </div>
 
 <script>
@@ -391,7 +437,7 @@ function initGrid() {
         // Period label cell
         const tdLabel = document.createElement('td');
         tdLabel.className = 'period-label';
-        tdLabel.textContent = 'Tiết ' + p;
+        tdLabel.innerHTML = '<i class="fas fa-clock mr-1"></i>Tiết ' + p;
         tr.appendChild(tdLabel);
         // Day cells
         for (const d of DAYS) {
