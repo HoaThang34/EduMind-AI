@@ -165,12 +165,12 @@
                     <span class="text-[10px] font-medium text-slate-700 text-center leading-tight">Cộng điểm</span>
                 </a>
 
-                <a href="{{ url_for('violation_history') }}"
-                    class="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-gradient-to-b from-red-50 to-white shadow-sm active:scale-95 transition-all ring-1 ring-red-200">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-md shadow-red-200">
-                        <i class="fas fa-shield-alt text-lg"></i>
+                <a href="{{ url_for('history') }}"
+                    class="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-gradient-to-b from-slate-50 to-white shadow-sm active:scale-95 transition-all ring-1 ring-slate-200">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-slate-500 to-slate-600 text-white shadow-md shadow-slate-200">
+                        <i class="fas fa-history text-lg"></i>
                     </span>
-                    <span class="text-[10px] font-bold text-red-600 text-center leading-tight">Lịch sử VP</span>
+                    <span class="text-[10px] font-bold text-slate-600 text-center leading-tight">Lịch sử tuần</span>
                 </a>
 
                 <a href="{{ url_for('weekly_report') }}"
@@ -189,21 +189,20 @@
             <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Tính năng nổi bật</h3>
             <div class="space-y-2">
 
-                <!-- Violation History Card - Nổi bật -->
-                <a href="{{ url_for('violation_history') }}"
-                    class="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 shadow-lg shadow-red-100 active:scale-[0.99] transition-all relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-red-200/30 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
-                    <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-lg shadow-red-200 relative z-10">
-                        <i class="fas fa-shield-alt text-xl"></i>
+                <!-- Lịch sử tuần Card - Nổi bật -->
+                <a href="{{ url_for('history') }}"
+                    class="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-slate-50 to-slate-100 border border-slate-200 shadow-lg shadow-slate-100 active:scale-[0.99] transition-all relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-slate-200/30 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+                    <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-500 to-slate-600 text-white shadow-lg shadow-slate-200 relative z-10">
+                        <i class="fas fa-history text-xl"></i>
                     </span>
                     <div class="flex-1 min-w-0 relative z-10">
                         <div class="flex items-center gap-2">
-                            <span class="text-sm font-bold text-slate-800">Lịch sử vi phạm</span>
-                            <span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-red-500 text-white">MỚI</span>
+                            <span class="text-sm font-bold text-slate-800">Lịch sử tuần</span>
                         </div>
-                        <span class="text-[11px] text-red-600/80 leading-relaxed">Theo tuần và lớp</span>
+                        <span class="text-[11px] text-slate-600/80 leading-relaxed">Xem lại dữ liệu tuần cũ</span>
                     </div>
-                    <i class="fas fa-chevron-right text-xs text-red-400 relative z-10"></i>
+                    <i class="fas fa-chevron-right text-xs text-slate-400 relative z-10"></i>
                 </a>
 
                 <!-- AI Assistant Card -->
@@ -302,15 +301,15 @@
                     <i class="fas fa-chevron-right text-xs text-slate-400"></i>
                 </a>
 
-                <a href="{{ url_for('violation_history') }}" class="flex items-center gap-3 p-3 active:bg-red-50 transition relative overflow-hidden">
-                    <span class="absolute inset-0 bg-gradient-to-r from-red-50 to-transparent opacity-50"></span>
-                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-md shadow-red-200 relative z-10">
-                        <i class="fas fa-shield-alt text-sm"></i>
+                <a href="{{ url_for('history') }}" class="flex items-center gap-3 p-3 active:bg-slate-50 transition relative overflow-hidden">
+                    <span class="absolute inset-0 bg-gradient-to-r from-slate-50 to-transparent opacity-50"></span>
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-slate-500 to-slate-600 text-white shadow-md shadow-slate-200 relative z-10">
+                        <i class="fas fa-history text-sm"></i>
                     </span>
                     <div class="flex-1 min-w-0 relative z-10">
-                        <span class="text-sm font-bold text-red-600">Lịch sử vi phạm</span>
+                        <span class="text-sm font-bold text-slate-600">Lịch sử tuần</span>
                     </div>
-                    <i class="fas fa-chevron-right text-xs text-red-400 relative z-10"></i>
+                    <i class="fas fa-chevron-right text-xs text-slate-400 relative z-10"></i>
                 </a>
 
                 <a href="{{ url_for('index') }}" class="flex items-center gap-3 p-3 active:bg-slate-50 transition">
@@ -489,16 +488,16 @@
                 </div>
             </a>
 
-            <!-- Lịch sử vi phạm - Nổi bật -->
-            <a href="{{ url_for('violation_history') }}" data-home-search="lịch sử vi phạm tuần lớp báo cáo"
-                class="group flex flex-col items-center justify-center gap-3 rounded-2xl border border-red-200 bg-gradient-to-br from-red-50 to-white p-6 shadow-lg shadow-red-100 transition-all duration-300 hover:border-red-400 hover:shadow-red-200 hover:translate-y-[-4px] relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-20 h-20 bg-red-200/30 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
-                <span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-lg shadow-red-200 group-hover:scale-110 transition-transform relative z-10" aria-hidden="true">
-                    <i class="fas fa-shield-alt text-2xl"></i>
+            <!-- Lịch sử tuần - Nổi bật -->
+            <a href="{{ url_for('history') }}" data-home-search="lịch sử tuần báo cáo dữ liệu cũ"
+                class="group flex flex-col items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-6 shadow-lg shadow-slate-100 transition-all duration-300 hover:border-slate-400 hover:shadow-slate-200 hover:translate-y-[-4px] relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-20 h-20 bg-slate-200/30 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+                <span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-500 to-slate-600 text-white shadow-lg shadow-slate-200 group-hover:scale-110 transition-transform relative z-10" aria-hidden="true">
+                    <i class="fas fa-history text-2xl"></i>
                 </span>
                 <div class="text-center relative z-10">
-                    <span class="block text-base font-bold text-red-600 group-hover:text-red-700 transition-colors">Lịch sử vi phạm</span>
-                    <span class="text-xs text-red-500">Theo tuần và lớp</span>
+                    <span class="block text-base font-bold text-slate-600 group-hover:text-slate-700 transition-colors">Lịch sử tuần</span>
+                    <span class="text-xs text-slate-500">Xem lại dữ liệu tuần cũ</span>
                 </div>
             </a>
 
