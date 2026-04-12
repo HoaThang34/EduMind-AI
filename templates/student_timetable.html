@@ -4,74 +4,120 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thời khóa biểu — {{ student.student_class }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Be Vietnam Pro"', 'Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f0f2f5 0%, #e8f0fe 100%);
+            min-height: 100vh;
+        }
+    </style>
 </head>
-<body class="bg-light">
-    <nav class="navbar navbar-expand-lg bg-white shadow-sm mb-4">
-        <div class="container">
-            <span class="navbar-brand fw-bold text-primary"><i class="fas fa-calendar-alt me-2"></i>Thời khóa biểu</span>
-            <div class="d-flex gap-2">
-                <a href="{{ url_for('student.student_dashboard') }}" class="btn btn-outline-primary btn-sm">Dashboard</a>
-                <a href="{{ url_for('student.student_logout') }}" class="btn btn-outline-danger btn-sm">Thoát</a>
+<body class="font-sans">
+    <!-- Navbar -->
+    <nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-slate-200/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg">
+                        <i class="fas fa-calendar-alt text-white text-lg"></i>
+                    </div>
+                    <span class="font-bold text-xl text-slate-800">Thời khóa biểu</span>
+                </div>
+                <div class="flex gap-2">
+                    <a href="{{ url_for('student.student_dashboard') }}" class="px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors">
+                        Dashboard
+                    </a>
+                    <a href="{{ url_for('student.student_logout') }}" class="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
+                        Thoát
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
-    <div class="container pb-5">
-        <p class="text-muted small mb-2">
-            Lớp <strong>{{ student.student_class }}</strong> — {{ school_year }}
-            {% if week_number == school_current_week %}
-            <span class="badge text-bg-primary ms-1" title="Theo cấu hình nhà trường (BGH)">Tuần hiện tại</span>
-            {% else %}
-            <span class="badge text-bg-secondary ms-1">Đang xem tuần khác</span>
-            {% endif %}
-        </p>
-        <form method="get" class="d-flex flex-wrap align-items-center gap-2 mb-3">
-            <a href="{{ url_for('student.student_timetable', week_number=prev_week) }}" class="btn btn-sm btn-outline-secondary" title="Tuần trước">
-                <i class="fas fa-chevron-left"></i> Tuần trước
-            </a>
-            <label class="small text-muted mb-0">Tuần ISO</label>
-            <select name="week_number" class="form-select form-select-sm" style="width:auto; min-width:7rem" onchange="this.form.submit()" aria-label="Chọn tuần">
-                {% for w in range(1, max_iso_week + 1) %}
-                <option value="{{ w }}" {% if w == week_number %}selected{% endif %}>Tuần {{ w }}</option>
-                {% endfor %}
-            </select>
-            <a href="{{ url_for('student.student_timetable', week_number=next_week) }}" class="btn btn-sm btn-outline-secondary" title="Tuần sau">
-                Tuần sau <i class="fas fa-chevron-right"></i>
-            </a>
-            {% if week_number != school_current_week %}
-            <a href="{{ url_for('student.student_timetable') }}" class="btn btn-sm btn-outline-primary" title="Về tuần đang áp dụng theo nhà trường">Về tuần này</a>
-            {% endif %}
-        </form>
-        <div class="table-responsive bg-white rounded-3 shadow-sm">
-            <table class="table table-bordered table-sm text-center mb-0 align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th class="text-muted" style="width:3rem">Tiết</th>
-                        {% for label in day_labels %}
-                        <th class="small">{{ label }}</th>
-                        {% endfor %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for p in range(1, max_periods + 1) %}
-                    <tr>
-                        <td class="fw-bold bg-light">{{ p }}</td>
-                        {% for d in range(1, 8) %}
-                        {% set slot = grid.get((d, p)) %}
-                        <td class="text-start small p-2">
-                            {% if slot %}
-                            <div class="fw-semibold">{{ slot.subject.name if slot.subject else (slot.subject_name_override or '—') }}</div>
-                            {% if slot.room %}<div class="text-muted" style="font-size:0.75rem">Phòng {{ slot.room }}</div>{% endif %}
-                            {% else %}
-                            <span class="text-muted">—</span>
-                            {% endif %}
-                        </td>
-                        {% endfor %}
-                    </tr>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-12">
+        <!-- Class Info -->
+        <div class="bg-white rounded-xl shadow-lg p-4 mb-6 border border-slate-200">
+            <p class="text-sm text-slate-600 mb-1">
+                Lớp <strong class="text-slate-800">{{ student.student_class }}</strong> — {{ school_year }}
+                {% if week_number == school_current_week %}
+                <span class="ml-2 px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold" title="Theo cấu hình nhà trường (BGH)">Tuần hiện tại</span>
+                {% else %}
+                <span class="ml-2 px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-xs font-semibold">Đang xem tuần khác</span>
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Week Navigation -->
+        <form method="get" class="bg-white rounded-xl shadow-lg p-4 mb-6 border border-slate-200">
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="{{ url_for('student.student_timetable', week_number=prev_week) }}" class="px-3 py-2 text-sm font-medium text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200" title="Tuần trước">
+                    <i class="fas fa-chevron-left mr-1"></i> Tuần trước
+                </a>
+                <label class="text-sm text-slate-600 font-medium">Tuần ISO</label>
+                <select name="week_number" class="px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white min-w-28" onchange="this.form.submit()" aria-label="Chọn tuần">
+                    {% for w in range(1, max_iso_week + 1) %}
+                    <option value="{{ w }}" {% if w == week_number %}selected{% endif %}>Tuần {{ w }}</option>
                     {% endfor %}
-                </tbody>
-            </table>
+                </select>
+                <a href="{{ url_for('student.student_timetable', week_number=next_week) }}" class="px-3 py-2 text-sm font-medium text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200" title="Tuần sau">
+                    Tuần sau <i class="fas fa-chevron-right ml-1"></i>
+                </a>
+                {% if week_number != school_current_week %}
+                <a href="{{ url_for('student.student_timetable') }}" class="px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors" title="Về tuần đang áp dụng theo nhà trường">
+                    Về tuần này
+                </a>
+                {% endif %}
+            </div>
+        </form>
+
+        <!-- Timetable -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200">
+            <div class="overflow-x-auto">
+                <table class="w-full text-center">
+                    <thead class="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider" style="width: 3rem;">Tiết</th>
+                            {% for label in day_labels %}
+                            <th class="px-4 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">{{ label }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for p in range(1, max_periods + 1) %}
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 font-bold text-slate-700 bg-slate-50 border-r border-slate-200">{{ p }}</td>
+                            {% for d in range(1, 8) %}
+                            {% set slot = grid.get((d, p)) %}
+                            <td class="px-3 py-2 text-sm text-left">
+                                {% if slot %}
+                                <div class="font-semibold text-slate-800">{{ slot.subject.name if slot.subject else (slot.subject_name_override or '—') }}</div>
+                                {% if slot.room %}<div class="text-slate-500 text-xs mt-0.5">Phòng {{ slot.room }}</div>{% endif %}
+                                {% else %}
+                                <span class="text-slate-400">—</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </body>

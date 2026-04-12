@@ -4,36 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thông báo</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Be Vietnam Pro"', 'Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f0f2f5 0%, #e8f0fe 100%);
+            min-height: 100vh;
+        }
+    </style>
 </head>
-<body class="bg-light">
-    <nav class="navbar navbar-expand-lg bg-white shadow-sm mb-4">
-        <div class="container">
-            <span class="navbar-brand fw-bold text-primary"><i class="fas fa-bell me-2"></i>Thông báo</span>
-            <a href="{{ url_for('student.student_dashboard') }}" class="btn btn-outline-primary btn-sm">Dashboard</a>
+<body class="font-sans">
+    <!-- Navbar -->
+    <nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-slate-200/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg">
+                        <i class="fas fa-bell text-white text-lg"></i>
+                    </div>
+                    <span class="font-bold text-xl text-slate-800">Thông báo</span>
+                </div>
+                <a href="{{ url_for('student.student_dashboard') }}" class="px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors">
+                    Dashboard
+                </a>
+            </div>
         </div>
     </nav>
-    <div class="container pb-5">
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-12">
         {% if notifications %}
-        <div class="list-group">
+        <div class="space-y-3">
             {% for n in notifications %}
-            <div class="list-group-item list-group-item-action flex-column align-items-start {% if not n.is_read %}border-warning border-start border-4{% endif %}">
-                <div class="d-flex w-100 justify-content-between">
-                    <h6 class="mb-1">{{ n.title }}</h6>
-                    <small class="text-muted">{{ n.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+            <div class="bg-white rounded-xl shadow-md p-4 border-l-4 {% if not n.is_read %}border-amber-500{% else %}border-slate-200{% endif %} hover:shadow-lg transition-shadow">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="font-semibold text-slate-800">{{ n.title }}</h3>
+                    <span class="text-xs text-slate-500">{{ n.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
                 </div>
-                <p class="mb-2 small">{{ n.message }}</p>
+                <p class="text-sm text-slate-600 mb-3">{{ n.message }}</p>
                 {% if not n.is_read %}
-                <form method="POST" action="{{ url_for('student.student_notification_read', nid=n.id) }}" class="d-inline">
-                    <button type="submit" class="btn btn-sm btn-outline-secondary">Đánh dấu đã đọc</button>
+                <form method="POST" action="{{ url_for('student.student_notification_read', nid=n.id) }}" class="inline">
+                    <button type="submit" class="px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+                        Đánh dấu đã đọc
+                    </button>
                 </form>
                 {% endif %}
             </div>
             {% endfor %}
         </div>
         {% else %}
-        <p class="text-muted">Chưa có thông báo.</p>
+        <div class="bg-white rounded-xl shadow-md p-8 text-center">
+            <i class="fas fa-bell-slash text-4xl text-slate-300 mb-3"></i>
+            <p class="text-slate-500">Chưa có thông báo.</p>
+        </div>
         {% endif %}
     </div>
 </body>
