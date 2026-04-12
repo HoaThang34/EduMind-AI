@@ -900,7 +900,7 @@
                         <a href="{{ url_for('grades.manage_grades') }}"
                             class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'grades.manage_grades' or request.endpoint == 'ai_engine.ocr_grades' %}active{% endif %}">
                             <i class="fas fa-pencil-alt w-6 text-center text-lg mr-3"></i>
-                            <span class="text-sm">Nhập thủ công và tự động</span>
+                            <span class="text-sm">Nhập điểm học sinh</span>
                         </a>
                         {% endif %}
                         {% if current_user.has_permission('view_students') %}
