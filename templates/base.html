@@ -898,18 +898,9 @@
                     <div class="space-y-1">
                         {% if current_user.has_permission('view_grades') %}
                         <a href="{{ url_for('grades.manage_grades') }}"
-                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'grades.manage_grades' %}active{% endif %}">
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'grades.manage_grades' or request.endpoint == 'ai_engine.ocr_grades' %}active{% endif %}">
                             <i class="fas fa-pencil-alt w-6 text-center text-lg mr-3"></i>
-                            <span class="text-sm">Nhập điểm số</span>
-                        </a>
-                        {% endif %}
-                        {% if current_user.has_permission('manage_grades') %}
-                        <a href="{{ url_for('ai_engine.ocr_grades') }}"
-                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'ai_engine.ocr_grades' %}active bg-indigo-50 text-indigo-600 font-semibold{% endif %}">
-                            <i class="fas fa-magic w-6 text-center text-lg mr-3"></i>
-                            <span class="text-sm">Nhập điểm OCR</span>
-                            <span
-                                class="ml-auto bg-indigo-100 text-indigo-600 text-[10px] font-bold px-1.5 py-0.5 rounded">AI</span>
+                            <span class="text-sm">Nhập thủ công và tự động</span>
                         </a>
                         {% endif %}
                         {% if current_user.has_permission('view_students') %}

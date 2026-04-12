@@ -1,108 +1,621 @@
 {% extends "base.html" %}
-{% block title %}Nhập Điểm{% endblock %}
+{% block title %}Nhập Điểm Học Sinh{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto">
-    <div class="mb-8">
-        <h1 class="text-2xl font-semibold tracking-tight text-foreground mb-2">
-            <i class="fas fa-pencil-alt text-indigo-600"></i> Nhập Điểm Học Sinh
+<div class="max-w-7xl mx-auto page-enter px-4 sm:px-6">
+    <div class="mb-6 sm:mb-8">
+        <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground mb-2">
+            <i class="fas fa-pencil-alt text-indigo-600 mr-2"></i> Nhập Điểm Học Sinh
         </h1>
-        <p class="text-muted-foreground">Chọn học sinh để nhập điểm các môn học</p>
+        <p class="text-muted-foreground text-sm sm:text-base">Nhập điểm thủ công hoặc tự động bằng AI Vision</p>
     </div>
 
-    <div class="bg-white rounded-xl shadow-card p-6 mb-6 border border-[hsl(240,5.9%,90%)]">
-        <form method="GET" class="flex flex-wrap gap-4">
-            <div class="flex-1 min-w-[250px]">
-                <label class="block text-sm font-medium text-foreground mb-2">Tìm kiếm</label>
-                <input type="text" name="search" value="{{ search_query }}"
-                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 input-shadcn"
-                    placeholder="Tên hoặc mã học sinh...">
-            </div>
-            <div class="w-full md:w-48">
-                <label class="block text-sm font-medium text-foreground mb-2">Lớp</label>
-                <select name="class_select"
-                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 input-shadcn">
-                    <option value="">Tất cả lớp</option>
-                    {% for cls in all_classes %}
-                    <option value="{{ cls }}" {% if cls==selected_class %}selected{% endif %}>{{ cls }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="flex items-end">
-                <button type="submit"
-                    class="px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 shadow-card shadow-indigo-200 transition">
-                    <i class="fas fa-search mr-2"></i> Tìm
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="border-b border-[hsl(240,5.9%,90%)]">
+            <nav class="flex space-x-8" aria-label="Tabs">
+                <button id="tab-manual" onclick="switchTab('manual')"
+                    class="tab-button border-b-2 border-indigo-500 py-4 px-1 text-sm font-medium text-indigo-600">
+                    <i class="fas fa-pencil-alt mr-2"></i> Nhập thủ công
                 </button>
-            </div>
-        </form>
+                <button id="tab-auto" onclick="switchTab('auto')"
+                    class="tab-button border-b-2 border-transparent py-4 px-1 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-slate-300">
+                    <i class="fas fa-magic mr-2"></i> Nhập tự động (AI Vision)
+                </button>
+            </nav>
+        </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-card border border-[hsl(240,5.9%,90%)] overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-[hsl(240,5.9%,90%)]">
-            <h2 class="text-xl font-bold text-foreground">
-                <i class="fas fa-list text-indigo-600"></i> Danh Sách Học Sinh ({{ students|length }})
-            </h2>
+    <!-- Manual Entry Content -->
+    <div id="content-manual" class="tab-content">
+        <div class="bg-white rounded-xl shadow-card p-6 mb-6 border border-[hsl(240,5.9%,90%)]">
+            <form method="GET" class="flex flex-wrap gap-4">
+                <div class="flex-1 min-w-[250px]">
+                    <label class="block text-sm font-medium text-foreground mb-2">Tìm kiếm</label>
+                    <input type="text" name="search" value="{{ search_query }}"
+                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 input-shadcn"
+                        placeholder="Tên hoặc mã học sinh...">
+                </div>
+                <div class="w-full md:w-48">
+                    <label class="block text-sm font-medium text-foreground mb-2">Lớp</label>
+                    <select name="class_select"
+                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 input-shadcn">
+                        <option value="">Tất cả lớp</option>
+                        {% for cls in all_classes %}
+                        <option value="{{ cls }}" {% if cls==selected_class %}selected{% endif %}>{{ cls }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button type="submit"
+                        class="px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 shadow-card shadow-indigo-200 transition">
+                        <i class="fas fa-search mr-2"></i> Tìm
+                    </button>
+                </div>
+            </form>
         </div>
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-accent border-b border-[hsl(240,5.9%,90%)]">
-                    <tr>
-                        <th
-                            class="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                            Mã
-                            SV</th>
-                        <th
-                            class="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                            Họ
-                            tên</th>
-                        <th
-                            class="px-6 py-3 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                            Lớp</th>
-                        <th
-                            class="px-6 py-3 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                            Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-[hsl(240,5.9%,90%)]">
-                    {% if students %}
-                    {% for student in students %}
-                    <tr class="hover:bg-accent transition">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-semibold">{{
-                                student.student_code }}</span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="font-medium text-foreground">{{ student.name }}</div>
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">{{
-                                student.student_class }}</span>
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            <div class="flex gap-2 justify-center">
-                                <a href="{{ url_for('grades.student_grades', student_id=student.id) }}"
-                                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-medium">
-                                    <i class="fas fa-pencil-alt mr-1"></i> Nhập điểm
-                                </a>
-                                <a href="{{ url_for('grades.student_transcript', student_id=student.id) }}"
-                                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium">
-                                    <i class="fas fa-file-alt mr-1"></i> Xem bảng điểm
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                    {% else %}
-                    <tr>
-                        <td colspan="4" class="px-6 py-12 text-center text-muted-foreground">
-                            <i class="fas fa-user-slash text-4xl mb-3 text-muted-foreground"></i>
-                            <p class="font-medium">Không tìm thấy học sinh nào</p>
-                        </td>
-                    </tr>
-                    {% endif %}
-                </tbody>
-            </table>
+
+        <div class="bg-white rounded-xl shadow-card border border-[hsl(240,5.9%,90%)] overflow-hidden">
+            <div class="px-6 py-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-[hsl(240,5.9%,90%)]">
+                <h2 class="text-xl font-bold text-foreground">
+                    <i class="fas fa-list text-indigo-600"></i> Danh Sách Học Sinh ({{ students|length }})
+                </h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-accent border-b border-[hsl(240,5.9%,90%)]">
+                        <tr>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                Mã
+                                SV</th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                Họ
+                                tên</th>
+                            <th
+                                class="px-6 py-3 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                Lớp</th>
+                            <th
+                                class="px-6 py-3 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[hsl(240,5.9%,90%)]">
+                        {% if students %}
+                        {% for student in students %}
+                        <tr class="hover:bg-accent transition">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-semibold">{{
+                                    student.student_code }}</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-foreground">{{ student.name }}</div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">{{
+                                    student.student_class }}</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex gap-2 justify-center">
+                                    <a href="{{ url_for('grades.student_grades', student_id=student.id) }}"
+                                        class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-medium">
+                                        <i class="fas fa-pencil-alt mr-1"></i> Nhập điểm
+                                    </a>
+                                    <a href="{{ url_for('grades.student_transcript', student_id=student.id) }}"
+                                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium">
+                                        <i class="fas fa-file-alt mr-1"></i> Xem bảng điểm
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-12 text-center text-muted-foreground">
+                                <i class="fas fa-user-slash text-4xl mb-3 text-muted-foreground"></i>
+                                <p class="font-medium">Không tìm thấy học sinh nào</p>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
+
+    <!-- Auto Entry Content -->
+    <div id="content-auto" class="tab-content hidden">
+        <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+            <!-- Cấu hình quét -->
+            <div class="xl:col-span-1 space-y-6">
+                <div class="bg-white rounded-xl shadow-card p-5 sm:p-6 border border-[hsl(240,5.9%,90%)]">
+                    <h3 class="text-base sm:text-lg font-semibold mb-4 pb-3 border-b border-slate-100 flex items-center gap-2">
+                        <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 text-xs font-bold">1</span>
+                        Cấu hình điểm
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-foreground mb-2">Môn học</label>
+                            <select id="subject_id"
+                                class="w-full px-3 py-2.5 sm:px-4 sm:py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 input-shadcn transition-all">
+                                <option value="">-- Chọn môn học --</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-1 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Lớp</label>
+                                <select id="class_filter"
+                                    class="w-full px-3 py-2.5 sm:px-4 sm:py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 input-shadcn transition-all">
+                                    <option value="">-- Tất cả lớp --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Học kỳ</label>
+                                <select id="semester"
+                                    class="w-full px-3 py-2.5 sm:px-4 sm:py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 input-shadcn transition-all">
+                                    <option value="1">Học kỳ 1</option>
+                                    <option value="2">Học kỳ 2</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-card p-5 sm:p-6 border border-[hsl(240,5.9%,90%)]"
+                    style="animation-delay: 0.1s;">
+                    <h3 class="text-base sm:text-lg font-semibold mb-4 pb-3 border-b border-slate-100 flex items-center gap-2">
+                        <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 text-xs font-bold">2</span>
+                        Chụp ảnh/Tải lên
+                    </h3>
+                    <div class="space-y-4">
+                        <div id="upload-area"
+                            class="border-2 border-dashed border-slate-300 rounded-xl p-6 sm:p-8 text-center hover:border-indigo-400 hover:bg-indigo-50/50 transition-all cursor-pointer group">
+                            <input type="file" id="image-upload" accept="image/*" capture="environment" class="hidden">
+                            <div class="w-12 h-12 sm:w-16 sm:h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-indigo-100 transition-colors">
+                                <i class="fas fa-camera text-xl sm:text-2xl text-slate-400 group-hover:text-indigo-600 transition-colors"></i>
+                            </div>
+                            <p class="text-sm font-medium text-slate-700 group-hover:text-indigo-700 transition-colors">Nhấp để chụp hoặc chọn ảnh</p>
+                            <p class="text-xs text-slate-400 mt-1">Hỗ trợ JPG, PNG (tối đa 10MB)</p>
+                        </div>
+
+                        <div id="image-preview-container" class="hidden relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                            <img id="image-preview" src="" class="w-full h-auto max-h-64 object-contain bg-slate-50">
+                            <button id="remove-image"
+                                class="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors">
+                                <i class="fas fa-times text-sm"></i>
+                            </button>
+                        </div>
+
+                        <button id="process-ocr-btn" disabled
+                            class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed shadow-lg shadow-indigo-200 transition-all flex items-center justify-center gap-2 text-sm sm:text-base">
+                            <i class="fas fa-brain"></i> Bắt đầu nhận diện
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kết quả nhận diện -->
+            <div class="xl:col-span-3 space-y-6">
+                <div id="ocr-results-card"
+                    class="bg-white rounded-xl shadow-card border border-[hsl(240,5.9%,90%)] overflow-hidden hidden"
+                    style="animation-delay: 0.2s;">
+                    <div
+                        class="px-4 sm:px-6 py-4 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border-b border-[hsl(240,5.9%,90%)] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <h2 class="text-lg font-bold text-foreground flex items-center gap-2">
+                            <i class="fas fa-clipboard-check text-indigo-600"></i> Kết quả nhận diện (AI)
+                        </h2>
+                        <span id="detected-count" class="badge badge-secondary text-xs sm:text-sm">0 học sinh</span>
+                    </div>
+
+                    <div class="p-3 sm:p-4 bg-amber-50 border-b border-amber-200 text-amber-800 text-xs sm:text-sm flex gap-2 sm:gap-3">
+                        <i class="fas fa-exclamation-triangle mt-0.5 flex-shrink-0"></i>
+                        <p class="flex-1"><strong>Lưu ý:</strong> Vui lòng soát lại dữ liệu bên dưới trước khi lưu. Những ô trống AI sẽ bỏ qua không thay đổi trong hệ thống.</p>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <div class="max-h-[400px] sm:max-h-[500px] overflow-y-auto">
+                            <table class="w-full table-shadcn min-w-[800px]">
+                                <thead class="bg-slate-50 sticky top-0 z-10">
+                                    <tr>
+                                        <th class="px-3 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider w-16">STT</th>
+                                        <th class="px-3 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider w-24">Mã Số</th>
+                                        <th class="px-3 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider w-28">Ngày sinh</th>
+                                        <th class="px-3 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider min-w-[140px]">Họ Tên</th>
+                                        <th class="px-3 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider w-24 text-center">Loại Điểm</th>
+                                        <th class="px-3 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider w-20 text-center">Cột Số</th>
+                                        <th class="px-3 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider w-24 text-center">Điểm</th>
+                                        <th class="px-3 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider w-12 text-center"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ocr-tbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="p-4 sm:p-6 bg-slate-50 border-t border-[hsl(240,5.9%,90%)] flex flex-col sm:flex-row justify-end gap-3">
+                        <button id="cancel-ocr" class="btn-outline w-full sm:w-auto order-2 sm:order-1">
+                            <i class="fas fa-times mr-2"></i> Hủy bỏ
+                        </button>
+                        <button id="save-ocr-btn" class="btn-primary w-full sm:w-auto px-6 sm:px-8 order-1 sm:order-2">
+                            <i class="fas fa-save mr-2"></i> Lưu vào hệ thống
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Trạng thái chờ -->
+                <div id="loading-state"
+                    class="hidden bg-white rounded-xl shadow-card border border-[hsl(240,5.9%,90%)] p-8 sm:p-12 text-center">
+                    <div
+                        class="inline-flex w-16 h-16 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 items-center justify-center animate-pulse mb-6">
+                        <i class="fas fa-brain text-indigo-600 text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-foreground">Đang xử lý dữ liệu...</h3>
+                    <p class="text-muted-foreground max-w-sm mx-auto mb-8 text-sm sm:text-base">Gemini AI đang đọc ảnh và trích xuất điểm số. Quá
+                        trình này có thể mất vài giây tuỳ thuộc vào độ phức tạp của ảnh.</p>
+                    <div class="space-y-3 max-w-md mx-auto">
+                        <div class="skeleton h-3 w-full rounded"></div>
+                        <div class="skeleton h-3 w-4/5 mx-auto rounded"></div>
+                        <div class="skeleton h-3 w-3/5 mx-auto rounded"></div>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-state"
+                    class="bg-white rounded-xl shadow-card border border-[hsl(240,5.9%,90%)] p-8 sm:p-12 text-center">
+                    <div class="w-20 h-20 bg-gradient-to-br from-slate-50 to-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-image text-3xl text-slate-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-foreground">Chưa có dữ liệu ảnh</h3>
+                    <p class="text-muted-foreground mb-8 text-sm sm:text-base max-w-md mx-auto">Hãy chọn hoặc chụp ảnh bảng điểm tay của bạn ở bên trái để bắt
+                        đầu.</p>
+                    <div
+                        class="inline-block p-4 sm:p-5 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl text-left text-sm text-blue-800 max-w-md border border-blue-100">
+                        <h4 class="font-bold mb-3 flex items-center gap-2"><i class="fas fa-lightbulb text-yellow-500"></i> Mẹo chụp ảnh tốt:</h4>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>Chụp ảnh vuông góc, đủ ánh sáng</li>
+                            <li>Đảm bảo rõ danh sách tên/mã số và cột điểm</li>
+                            <li>Tránh để ngón tay che khuất thông tin</li>
+                            <li>Ảnh nên sắc nét, không bị mờ hoặc nhòe</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            const tabManual = document.getElementById('tab-manual');
+            const tabAuto = document.getElementById('tab-auto');
+            const contentManual = document.getElementById('content-manual');
+            const contentAuto = document.getElementById('content-auto');
+
+            if (tab === 'manual') {
+                tabManual.classList.add('border-indigo-500', 'text-indigo-600');
+                tabManual.classList.remove('border-transparent', 'text-muted-foreground');
+                tabAuto.classList.remove('border-indigo-500', 'text-indigo-600');
+                tabAuto.classList.add('border-transparent', 'text-muted-foreground');
+                contentManual.classList.remove('hidden');
+                contentAuto.classList.add('hidden');
+            } else {
+                tabAuto.classList.add('border-indigo-500', 'text-indigo-600');
+                tabAuto.classList.remove('border-transparent', 'text-muted-foreground');
+                tabManual.classList.remove('border-indigo-500', 'text-indigo-600');
+                tabManual.classList.add('border-transparent', 'text-muted-foreground');
+                contentAuto.classList.remove('hidden');
+                contentManual.classList.add('hidden');
+                
+                // Load subjects and classes when switching to auto tab
+                loadSubjectsAndClasses();
+            }
+        }
+
+        function loadSubjectsAndClasses() {
+            // Load subjects
+            fetch('/api/subjects')
+                .then(response => response.json())
+                .then(data => {
+                    const subjectSelect = document.getElementById('subject_id');
+                    subjectSelect.innerHTML = '<option value="">-- Chọn môn học --</option>';
+                    data.forEach(subject => {
+                        const option = document.createElement('option');
+                        option.value = subject.id;
+                        option.textContent = subject.name;
+                        subjectSelect.appendChild(option);
+                    });
+                })
+                .catch(err => console.error('Error loading subjects:', err));
+
+            // Load classes
+            fetch('/api/classes')
+                .then(response => response.json())
+                .then(data => {
+                    const classSelect = document.getElementById('class_filter');
+                    classSelect.innerHTML = '<option value="">-- Tất cả lớp --</option>';
+                    data.forEach(cls => {
+                        const option = document.createElement('option');
+                        option.value = cls.name;
+                        option.textContent = cls.name;
+                        classSelect.appendChild(option);
+                    });
+                })
+                .catch(err => console.error('Error loading classes:', err));
+        }
+
+        // OCR functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const uploadArea = document.getElementById('upload-area');
+            const imageUpload = document.getElementById('image-upload');
+            const imagePreviewContainer = document.getElementById('image-preview-container');
+            const imagePreview = document.getElementById('image-preview');
+            const removeImageBtn = document.getElementById('remove-image');
+            const processOcrBtn = document.getElementById('process-ocr-btn');
+            const loadingState = document.getElementById('loading-state');
+            const resultsCard = document.getElementById('ocr-results-card');
+            const emptyState = document.getElementById('empty-state');
+            const ocrTbody = document.getElementById('ocr-tbody');
+            const detectedCount = document.getElementById('detected-count');
+            const saveOcrBtn = document.getElementById('save-ocr-btn');
+            const cancelOcrBtn = document.getElementById('cancel-ocr');
+
+            if (!uploadArea) return;
+
+            uploadArea.addEventListener('click', () => imageUpload.click());
+
+            imageUpload.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        imagePreview.src = e.target.result;
+                        imagePreviewContainer.classList.remove('hidden');
+                        uploadArea.classList.add('hidden');
+                        processOcrBtn.disabled = false;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            removeImageBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                imageUpload.value = '';
+                imagePreview.src = '';
+                imagePreviewContainer.classList.add('hidden');
+                uploadArea.classList.remove('hidden');
+                processOcrBtn.disabled = true;
+            });
+
+            processOcrBtn.addEventListener('click', async () => {
+                const formData = new FormData();
+                formData.append('image', imageUpload.files[0]);
+                formData.append('subject_id', document.getElementById('subject_id').value);
+                formData.append('semester', document.getElementById('semester').value);
+                formData.append('class_filter', document.getElementById('class_filter').value);
+
+                emptyState.classList.add('hidden');
+                resultsCard.classList.add('hidden');
+                loadingState.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                try {
+                    const response = await fetch('/api/ocr-grades', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    if (data.error) {
+                        alert('Lỗi: ' + data.error);
+                        loadingState.classList.add('hidden');
+                        emptyState.classList.remove('hidden');
+                        return;
+                    }
+
+                    renderResults(data.results);
+                    loadingState.classList.add('hidden');
+                    resultsCard.classList.remove('hidden');
+                } catch (err) {
+                    alert('Lỗi kết nối: ' + err.message);
+                    loadingState.classList.add('hidden');
+                    emptyState.classList.remove('hidden');
+                }
+            });
+
+            function renderResults(results) {
+                ocrTbody.innerHTML = '';
+                if (!results || results.length === 0) {
+                    ocrTbody.innerHTML = '<tr><td colspan="8" class="p-8 text-center text-muted-foreground text-sm">Không tìm thấy dữ liệu học sinh nào. Vui lòng thử lại với ảnh khác.</td></tr>';
+                    detectedCount.textContent = '0 học sinh';
+                    return;
+                }
+
+                let studentCount = 0;
+                let globalRowId = 0;
+
+                results.forEach((student, index) => {
+                    if (!student.grades || student.grades.length === 0) return;
+                    studentCount++;
+
+                    const normalizedStudentName = (student.student_name || '').toUpperCase();
+
+                    student.grades.forEach(grade => {
+                        const row = document.createElement('tr');
+                        const rowId = `row-${globalRowId++}`;
+                        row.dataset.rowId = rowId;
+                        row.dataset.studentName = normalizedStudentName;
+                        row.dataset.studentCode = student.student_code || '';
+                        row.dataset.dateOfBirth = student.date_of_birth || '';
+                        row.dataset.rollNumber = student.roll_number || '';
+                        row.innerHTML = `
+                        <td class="px-2 sm:px-3 py-3">
+                            <input type="text" value="${student.roll_number || ''}" class="roll-number-input w-full bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 rounded-md px-2 py-1.5 text-center text-sm transition-all" placeholder="STT">
+                        </td>
+                        <td class="px-2 sm:px-3 py-3">
+                            <input type="text" value="${student.student_code || ''}" class="student-code-input w-full bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 rounded-md px-2 py-1.5 font-mono text-xs sm:text-sm transition-all" placeholder="Mã số">
+                        </td>
+                        <td class="px-2 sm:px-3 py-3">
+                            <input type="text" value="${student.date_of_birth || ''}" class="date-of-birth-input w-full bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 rounded-md px-2 py-1.5 text-xs sm:text-sm transition-all" placeholder="Ngày sinh">
+                        </td>
+                        <td class="px-2 sm:px-3 py-3">
+                            <input type="text" value="${normalizedStudentName}" class="student-name-input w-full bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 rounded-md px-2 py-1.5 font-medium text-sm transition-all uppercase" placeholder="Họ và tên">
+                        </td>
+                        <td class="px-2 sm:px-3 py-3">
+                            <select class="grade-type-input w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 rounded-md px-2 py-1.5 text-xs sm:text-sm text-center transition-all">
+                                <option value="TX" ${grade.grade_type === 'TX' ? 'selected' : ''}>TX</option>
+                                <option value="GK" ${grade.grade_type === 'GK' ? 'selected' : ''}>GK</option>
+                                <option value="HK" ${grade.grade_type === 'HK' ? 'selected' : ''}>HK</option>
+                            </select>
+                        </td>
+                        <td class="px-2 sm:px-3 py-3">
+                            <input type="number" min="1" max="10" value="${grade.column_index || 1}" class="column-index-input w-full text-center bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 rounded-md px-2 py-1.5 text-sm transition-all">
+                        </td>
+                        <td class="px-2 sm:px-3 py-3">
+                            <input type="number" step="0.1" min="0" max="10" value="${grade.score !== null ? grade.score : ''}"
+                                   class="score-input w-20 sm:w-24 mx-auto block text-center bg-white border-2 border-indigo-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 rounded-md px-2 py-1.5 font-bold text-indigo-600 text-sm transition-all"
+                                   placeholder="-">
+                        </td>
+                        <td class="px-2 sm:px-3 py-3 text-center">
+                            <button class="remove-row-btn text-slate-400 hover:text-red-500 hover:bg-red-50 w-8 h-8 rounded-md transition-all flex items-center justify-center mx-auto" title="Xóa dòng">
+                                <i class="fas fa-trash-alt text-sm"></i>
+                            </button>
+                        </td>
+                    `;
+
+                        row.querySelector('.remove-row-btn').addEventListener('click', () => {
+                            row.remove();
+                        });
+
+                        ocrTbody.appendChild(row);
+                    });
+                });
+
+                detectedCount.textContent = studentCount + ' học sinh';
+            }
+
+            cancelOcrBtn.addEventListener('click', () => {
+                if (confirm('Bạn có chắc muốn hủy kết quả này?')) {
+                    resultsCard.classList.add('hidden');
+                    emptyState.classList.remove('hidden');
+                    removeImageBtn.click();
+                }
+            });
+
+            saveOcrBtn.addEventListener('click', async () => {
+                const grades = [];
+                const rows = document.querySelectorAll('#ocr-tbody tr');
+
+                rows.forEach((row) => {
+                    if (row.querySelector('.student-code-input').disabled) return;
+
+                    const rowId = row.dataset.rowId;
+                    const roll_number = row.querySelector('.roll-number-input').value;
+                    const student_code = row.querySelector('.student-code-input').value;
+                    const date_of_birth = row.querySelector('.date-of-birth-input').value;
+                    const student_name = row.querySelector('.student-name-input').value;
+                    const grade_type = row.querySelector('.grade-type-input').value;
+                    const column_index = row.querySelector('.column-index-input').value;
+                    const score = row.querySelector('.score-input').value;
+
+                    if ((student_code || student_name) && score) {
+                        grades.push({ rowId, roll_number, student_code, date_of_birth, student_name, grade_type, column_index, score });
+                    }
+                });
+
+                if (grades.length === 0) {
+                    alert('Không có dữ liệu điểm để lưu.');
+                    return;
+                }
+
+                const payload = {
+                    subject_id: document.getElementById('subject_id').value,
+                    semester: document.getElementById('semester').value,
+                    class_filter: document.getElementById('class_filter').value,
+                    grades: grades
+                };
+
+                saveOcrBtn.disabled = true;
+                saveOcrBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang lưu...';
+
+                try {
+                    const response = await fetch('/api/confirm-ocr-grades', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+
+                    document.querySelectorAll('.status-msg').forEach(el => el.remove());
+                    rows.forEach(r => {
+                        r.classList.remove('bg-red-50', 'bg-green-50', 'bg-amber-50');
+                    });
+
+                    if (result.item_results) {
+                        let hasErrors = false;
+                        let hasWarnings = false;
+                        result.item_results.forEach(res => {
+                            const row = document.querySelector(`#ocr-tbody tr[data-row-id="${res.rowId}"]`);
+                            if (row) {
+                                let msgDiv = document.createElement('div');
+                                msgDiv.className = 'status-msg text-xs mt-1 font-medium';
+                                if (res.status === 'success') {
+                                    row.classList.add('bg-green-50', 'border-l-4', 'border-l-green-500');
+                                    msgDiv.textContent = '✅ ' + res.message;
+                                    msgDiv.classList.add('text-green-700', 'font-semibold');
+                                    row.querySelectorAll('input, select').forEach(input => {
+                                        input.disabled = true;
+                                        input.classList.add('bg-slate-100', 'text-slate-500');
+                                    });
+                                    const removeBtn = row.querySelector('.remove-row-btn');
+                                    if (removeBtn) removeBtn.remove();
+                                } else if (res.status === 'error') {
+                                    row.classList.add('bg-red-50', 'border-l-4', 'border-l-red-500');
+                                    msgDiv.textContent = '❌ ' + res.message;
+                                    msgDiv.classList.add('text-red-700', 'font-semibold');
+                                    hasErrors = true;
+                                } else if (res.status === 'warning') {
+                                    row.classList.add('bg-amber-50', 'border-l-4', 'border-l-amber-500');
+                                    msgDiv.textContent = '⚠️ ' + res.message;
+                                    msgDiv.classList.add('text-amber-700', 'font-semibold');
+                                    hasWarnings = true;
+                                    row.querySelectorAll('input, select').forEach(input => {
+                                        input.disabled = true;
+                                        input.classList.add('bg-slate-100', 'text-slate-500');
+                                    });
+                                    const removeBtn = row.querySelector('.remove-row-btn');
+                                    if (removeBtn) removeBtn.remove();
+                                } else {
+                                    msgDiv.textContent = 'ℹ️ ' + res.message;
+                                    msgDiv.classList.add('text-slate-500');
+                                }
+                                row.querySelector('td:nth-child(4)').appendChild(msgDiv);
+                            }
+                        });
+
+                        if (!hasErrors) {
+                            alert(result.message + " Đang chuyển về Quản lý điểm...");
+                            window.location.href = "/manage_grades";
+                        } else {
+                            alert("Đã lưu các điểm hợp lệ. Tuy nhiên có một số học sinh bị lỗi (tô màu đỏ). Vui lòng sửa thông tin và nhấn Lưu tiếp các học sinh đó.");
+                            saveOcrBtn.disabled = false;
+                            saveOcrBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Lưu lại các lỗi';
+                        }
+                    } else if (result.success) {
+                        alert(result.message);
+                        window.location.href = "/manage_grades";
+                    } else {
+                        alert('Lỗi: ' + result.error);
+                        saveOcrBtn.disabled = false;
+                        saveOcrBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Lưu vào hệ thống';
+                    }
+                } catch (err) {
+                    alert('Lỗi kết nối: ' + err.message);
+                    saveOcrBtn.disabled = false;
+                    saveOcrBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Lưu vào hệ thống';
+                }
+            });
+        });
+    </script>
 {% endblock %}
