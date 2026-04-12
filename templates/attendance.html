@@ -394,13 +394,13 @@
                                 {% for r in violation_rules %}<option value="{{ r.name }}">{{ r.name }} (-{{
                                     r.points_deducted }}đ)</option>{% endfor %}
                             </select>
-                            <button onclick="openAddViolationModal()" id="btn-add-violation"
-                                class="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5">
+                            <button onclick="bulkAddViolation()" id="btn-bulk-add-violation"
+                                class="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5 hidden">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 4v16m8-8H4" />
                                 </svg>
-                                Thêm vi phạm
+                                Thêm cho đã chọn (<span id="selected-student-count">0</span>)
                             </button>
                         </div>
                     </div>
@@ -408,6 +408,9 @@
                         <table class="table-shadcn">
                             <thead>
                                 <tr>
+                                    <th class="w-6"><input type="checkbox" id="monitor-student-check-all"
+                                            onchange="toggleAllMonitorStudents(this)"
+                                            class="w-4 h-4 rounded accent-indigo-600 cursor-pointer"></th>
                                     <th>Học sinh</th>
                                     <th class="text-center w-24 monitor-col-class hidden">Lớp</th>
                                     <th class="text-center">Mã</th>
@@ -417,15 +420,13 @@
                             </thead>
                             <tbody id="monitor-students-body">
                                 <tr>
-                                    <td colspan="5" class="text-center py-8 text-muted-foreground">Đang tải...</td>
+                                    <td colspan="6" class="text-center py-8 text-muted-foreground">Đang tải...</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-
-            <!-- Violations List for Current Session -->
             <div id="monitoring-violations-panel" class="hidden mt-4">
                 <div class="glass-panel overflow-hidden">
                     <div class="p-4 border-b border-border flex items-center justify-between">
@@ -2170,7 +2171,7 @@
         const body = document.getElementById('monitor-students-body');
         const searchVal = document.getElementById('monitor-student-search').value.toLowerCase();
         const scopeAll = currentMonitoringSession && currentMonitoringSession.scope_all;
-        const colSpan = scopeAll ? 5 : 4;
+        const colSpan = scopeAll ? 6 : 5;
 
         const filtered = monitorStudents.filter(s =>
             (s.name || '').toLowerCase().includes(searchVal) ||
@@ -2206,6 +2207,8 @@
                 ? `<td class="text-center text-xs font-medium text-indigo-600 monitor-col-class">${s.student_class || '—'}</td>`
                 : '';
             return `<tr class="hover:bg-gray-50 transition-colors">
+            <td class="text-center"><input type="checkbox" class="monitor-student-checkbox w-4 h-4 rounded accent-indigo-600 cursor-pointer"
+                data-student-id="${s.id}" onchange="updateSelectedStudentCount()"></td>
             <td class="font-medium text-sm">${s.name}</td>
             ${classCell}
             <td class="text-center text-xs font-mono text-gray-500">${s.student_code || '—'}</td>
@@ -2228,6 +2231,9 @@
             </td>
         </tr>`;
         }).join('');
+        
+        // Update selected count after rendering
+        updateSelectedStudentCount();
     }
 
     async function updateStudentViolationType(selectEl, violationId) {
@@ -2491,18 +2497,83 @@
         } catch (e) { showToast('Lỗi: ' + e.message, 'error'); }
     }
 
-    // ===================== INIT =====================
+    // Bulk student selection functions
+    function toggleAllMonitorStudents(source) {
+        document.querySelectorAll('.monitor-student-checkbox').forEach(c => { c.checked = source.checked; });
+        updateSelectedStudentCount();
+    }
+
+    function updateSelectedStudentCount() {
+        const selected = document.querySelectorAll('.monitor-student-checkbox:checked');
+        const countEl = document.getElementById('selected-student-count');
+        const btn = document.getElementById('btn-bulk-add-violation');
+        
+        if (countEl) countEl.textContent = selected.length;
+        
+        if (btn) {
+            if (selected.length > 0) {
+                btn.classList.remove('hidden');
+            } else {
+                btn.classList.add('hidden');
+            }
+        }
+    }
+
+    async function bulkAddViolation() {
+        const type = document.getElementById('monitor-violation-type-select').value;
+        if (!type) { showToast('Vui lòng chọn loại vi phạm trước!', 'error'); return; }
+        if (!currentMonitoringSession) { showToast('Không có phiên theo dõi đang mở.', 'error'); return; }
+        if (currentMonitoringSession.status !== 'open') { showToast('Phiên đã đóng, không thể thêm vi phạm.', 'error'); return; }
+
+        const checks = document.querySelectorAll('.monitor-student-checkbox:checked');
+        if (checks.length === 0) return;
+
+        const studentIds = Array.from(checks).map(c => parseInt(c.dataset.studentId));
+        if (!confirm(`Thêm vi phạm "${type}" cho ${studentIds.length} học sinh đã chọn?`)) return;
+
+        let successCount = 0;
+        let skipCount = 0;
+
+        for (const studentId of studentIds) {
+            try {
+                const resp = await fetch('/api/attendance/monitoring/add-violation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: currentMonitoringSession.id,
+                        student_id: studentId,
+                        violation_type_name: type,
+                        notes: ''
+                    })
+                });
+                if (resp.ok) {
+                    successCount++;
+                } else if (resp.status === 409) {
+                    skipCount++;
+                }
+            } catch (e) { }
+        }
+
+        let message = `Đã thêm ${successCount} vi phạm.`;
+        if (skipCount > 0) {
+            message += ` Bỏ qua ${skipCount} trùng lặp.`;
+        }
+        showToast(message, successCount > 0 ? 'success' : 'info');
+        
+        document.querySelectorAll('.monitor-student-checkbox').forEach(c => { c.checked = false; });
+        document.getElementById('monitor-student-check-all').checked = false;
+        updateSelectedStudentCount();
+        await openSessionDetail(currentMonitoringSession.id);
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
-        // Set initial mode
         setAttendanceMode('face');
         loadStats();
         loadTodayCheckins();
-        // Đồng bộ ngày theo giờ máy người dùng (HTML đã có value từ server; ghi đè nếu múi giờ client khác server)
         const today = localTodayISO();
         document.getElementById('history-date-from').value = today;
         document.getElementById('history-date-to').value = today;
         document.getElementById('monitor-history-date').value = today;
-        // Load monitoring sessions
         loadMonitoringSessions();
     });
 </script>

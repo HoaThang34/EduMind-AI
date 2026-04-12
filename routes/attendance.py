@@ -545,21 +545,37 @@ def register(app):
             candidate_sessions, student.student_class, now_min)
         if open_session:
             record.monitoring_session_id = open_session.id
-            viol = SessionViolationRecord(
+            # Kiểm tra trùng: tránh tạo nhiều auto-violation cho cùng HS trong cùng phiên
+            existing_auto = SessionViolationRecord.query.filter_by(
                 session_id=open_session.id,
                 student_id=student_id,
                 violation_type_name="___auto___",
-                points_deducted=0,
                 status="pending",
-                notes="Tự động phát hiện khi điểm danh trong giờ theo dõi",
-            )
-            db.session.add(viol)
-            db.session.flush()
-            auto_detected = {
-                "violation_id": viol.id,
-                "session_id": open_session.id,
-                "recorded_at": viol.recorded_at.strftime("%H:%M"),
-            }
+            ).first()
+            if not existing_auto:
+                viol = SessionViolationRecord(
+                    session_id=open_session.id,
+                    student_id=student_id,
+                    violation_type_name="___auto___",
+                    points_deducted=0,
+                    status="pending",
+                    notes="Tự động phát hiện khi điểm danh trong giờ theo dõi",
+                )
+                db.session.add(viol)
+                db.session.flush()
+                auto_detected = {
+                    "violation_id": viol.id,
+                    "session_id": open_session.id,
+                    "recorded_at": viol.recorded_at.strftime("%H:%M"),
+                }
+            else:
+                # Đã có auto violation rồi, chỉ trả về thông tin existing
+                auto_detected = {
+                    "violation_id": existing_auto.id,
+                    "session_id": open_session.id,
+                    "recorded_at": existing_auto.recorded_at.strftime("%H:%M"),
+                    "duplicate_skipped": True,
+                }
 
         db.session.commit()
         return jsonify({
@@ -860,21 +876,37 @@ def register(app):
             candidate_sessions, student.student_class, now_min)
         if open_session:
             record.monitoring_session_id = open_session.id
-            viol = SessionViolationRecord(
+            # Kiểm tra trùng: tránh tạo nhiều auto-violation cho cùng HS trong cùng phiên
+            existing_auto = SessionViolationRecord.query.filter_by(
                 session_id=open_session.id,
                 student_id=sid,
                 violation_type_name="___auto___",
-                points_deducted=0,
                 status="pending",
-                notes="Tự động phát hiện khi điểm danh trong giờ theo dõi",
-            )
-            db.session.add(viol)
-            db.session.flush()
-            auto_detected = {
-                "violation_id": viol.id,
-                "session_id": open_session.id,
-                "recorded_at": viol.recorded_at.strftime("%H:%M"),
-            }
+            ).first()
+            if not existing_auto:
+                viol = SessionViolationRecord(
+                    session_id=open_session.id,
+                    student_id=sid,
+                    violation_type_name="___auto___",
+                    points_deducted=0,
+                    status="pending",
+                    notes="Tự động phát hiện khi điểm danh trong giờ theo dõi",
+                )
+                db.session.add(viol)
+                db.session.flush()
+                auto_detected = {
+                    "violation_id": viol.id,
+                    "session_id": open_session.id,
+                    "recorded_at": viol.recorded_at.strftime("%H:%M"),
+                }
+            else:
+                # Đã có auto violation rồi, chỉ trả về thông tin existing
+                auto_detected = {
+                    "violation_id": existing_auto.id,
+                    "session_id": open_session.id,
+                    "recorded_at": existing_auto.recorded_at.strftime("%H:%M"),
+                    "duplicate_skipped": True,
+                }
 
         db.session.commit()
         return jsonify({
@@ -1230,16 +1262,6 @@ def register(app):
         student = db.session.get(Student, student_id)
         if not student:
             return jsonify({"error": "Không tìm thấy học sinh."}), 404
-
-        # Kiểm tra trùng vi phạm cùng loại trong phiên (tránh đánh dấu 2 lần cùng 1 lỗi)
-        existing = SessionViolationRecord.query.filter_by(
-            session_id=session_id,
-            student_id=student_id,
-            violation_type_name=violation_type_name,
-            status="pending",
-        ).first()
-        if existing:
-            return jsonify({"error": f"{student.name} đã được đánh dấu vi phạm '{violation_type_name}' trong phiên này."}), 409
 
         # Tìm điểm trừ
         rule = ViolationType.query.filter_by(name=violation_type_name).first()
