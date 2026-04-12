@@ -149,9 +149,32 @@ def register(app):
         q = get_accessible_students()  # Already filtered by role
         if s_class: 
             q = q.filter_by(student_class=s_class)
+        
+        # KPI Cards data
+        total_students = q.count()
         c_tot = q.filter(Student.current_score >= 90).count()
         c_kha = q.filter(Student.current_score >= 70, Student.current_score < 90).count()
         c_tb = q.filter(Student.current_score < 70).count()
+        
+        # Điểm trung bình
+        avg_score = db.session.query(func.avg(Student.current_score)).filter(Student.id.in_([s.id for s in q.all()])).scalar()
+        avg_score = round(avg_score, 1) if avg_score else 100.0
+        
+        # Tổng số vi phạm trong tuần
+        vios_count = db.session.query(func.count(Violation.id)).join(Student).filter(
+            Violation.week_number == current_week
+        )
+        if s_class:
+            vios_count = vios_count.filter(Student.student_class == s_class)
+        total_violations = vios_count.scalar() or 0
+        
+        # Số lớp
+        if s_class:
+            total_classes = 1
+        else:
+            total_classes = db.session.query(func.count(func.distinct(Student.student_class))).filter(
+                Student.id.in_([s.id for s in q.all()])
+            ).scalar() or 0
     
         # 3. Thống kê lỗi (CHỈ LẤY CỦA TUẦN HIỆN TẠI)
         vios_q = db.session.query(Violation.violation_type_name, func.count(Violation.violation_type_name).label("c"))
@@ -163,10 +186,19 @@ def register(app):
             vios_q = vios_q.join(Student).filter(Student.student_class == s_class)
         
         top = vios_q.group_by(Violation.violation_type_name).order_by(desc("c")).limit(5).all()
+        
+        # Lấy danh sách tất cả các lớp cho dropdown
+        all_classes = sorted([c[0] for c in db.session.query(func.distinct(Student.student_class)).all()])
     
         return render_template("dashboard.html", 
                                show_reset_warning=show_reset_warning,
-                               selected_class=s_class, 
+                               selected_class=s_class,
+                               current_week_number=current_week,
+                               all_classes=all_classes,
+                               total_students=total_students,
+                               total_violations=total_violations,
+                               avg_score=avg_score,
+                               total_classes=total_classes,
                                pie_labels=json.dumps(["Tốt", "Khá", "Cần cố gắng"]), 
                                pie_data=json.dumps([c_tot, c_kha, c_tb]), 
                                bar_labels=json.dumps([n for n, _ in top]), 
