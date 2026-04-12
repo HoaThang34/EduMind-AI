@@ -301,14 +301,40 @@ def register(app):
     @login_required
     @permission_required('view_attendance')
     def api_attendance_students():
-        """API lấy danh sách học sinh kèm trạng thái training chi tiết."""
+        """API lấy danh sách học sinh kèm trạng thái training chi tiết với phân trang và sắp xếp."""
         class_name = request.args.get("class_name", "")
+        page = int(request.args.get("page", 1))
+        per_page = int(request.args.get("per_page", 20))
+        sort_by = request.args.get("sort_by", "student_class")
+        sort_order = request.args.get("sort_order", "asc")
 
         query = Student.query
         if class_name:
             query = query.filter_by(student_class=class_name)
 
-        students = query.order_by(Student.name).all()
+        # Count total
+        total = query.count()
+
+        # Apply sorting
+        if sort_by == "student_class":
+            query = query.order_by(
+                Student.student_class.asc() if sort_order == "asc" else Student.student_class.desc(),
+                Student.name.asc()
+            )
+        elif sort_by == "name":
+            query = query.order_by(
+                Student.name.asc() if sort_order == "asc" else Student.name.desc()
+            )
+        elif sort_by == "student_code":
+            query = query.order_by(
+                Student.student_code.asc() if sort_order == "asc" else Student.student_code.desc()
+            )
+        else:
+            # Default: sort by class then name
+            query = query.order_by(Student.student_class.asc(), Student.name.asc())
+
+        # Apply pagination
+        students = query.offset((page - 1) * per_page).limit(per_page).all()
         today = datetime.date.today()
 
         # Kiểm tra student nào đã có embedding
@@ -348,7 +374,13 @@ def register(app):
                 "status": today_records[-1].status if today_records else None,
             })
 
-        return jsonify({"students": result})
+        return jsonify({
+            "students": result,
+            "total": total,
+            "page": page,
+            "per_page": per_page,
+            "total_pages": (total + per_page - 1) // per_page
+        })
 
     @app.route("/api/attendance/train", methods=["POST"])
     @login_required
