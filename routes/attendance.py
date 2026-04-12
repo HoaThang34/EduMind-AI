@@ -275,9 +275,11 @@ def register(app):
 
     @app.route("/attendance")
     @login_required
-    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def attendance():
-        """Trang điểm danh chính."""
+        """Trang điểm danh chính - Chỉ dành cho admin hoặc giáo viên nề nếp."""
+        if current_user.role not in ['admin', 'discipline_officer']:
+            flash("Bạn không có quyền truy cập chức năng này!", "error")
+            return redirect(url_for('dashboard'))
         classes = [c.name for c in ClassRoom.query.order_by(ClassRoom.name).all()]
         selected_class = request.args.get("class_name", "")
         if not selected_class and current_user.role == "homeroom_teacher" and current_user.assigned_class:
@@ -384,8 +386,9 @@ def register(app):
 
     @app.route("/api/attendance/train", methods=["POST"])
     @login_required
-    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_attendance_train():
+        if current_user.role not in ['admin', 'discipline_officer']:
+            return jsonify({"error": "Bạn không có quyền thực hiện hành động này!"}), 403
         """Huấn luyện model ArcFace (Ưu tiên toàn trường)."""
         data = request.get_json() or {}
         class_name = data.get("class_name", "_GLOBAL_")
@@ -403,8 +406,9 @@ def register(app):
 
     @app.route("/api/attendance/enroll_camera", methods=["POST"])
     @login_required
-    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_attendance_enroll_camera():
+        if current_user.role not in ['admin', 'discipline_officer']:
+            return jsonify({"error": "Bạn không có quyền thực hiện hành động này!"}), 403
         """Lưu mẫu khuôn mặt của 1 học sinh trực tiếp từ camera."""
         data = request.get_json() or {}
         student_id = data.get("student_id")
@@ -444,8 +448,9 @@ def register(app):
 
     @app.route("/api/attendance/reset_enrollment", methods=["POST"])
     @login_required
-    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_attendance_reset_enrollment():
+        if current_user.role not in ['admin', 'discipline_officer']:
+            return jsonify({"error": "Bạn không có quyền thực hiện hành động này!"}), 403
         """Xóa toàn bộ mẫu camera của 1 học sinh."""
         data = request.get_json() or {}
         student_id = data.get("student_id")
@@ -780,8 +785,9 @@ def register(app):
 
     @app.route("/api/attendance/delete/<int:record_id>", methods=["DELETE"])
     @login_required
-    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_attendance_delete(record_id):
+        if current_user.role not in ['admin', 'discipline_officer']:
+            return jsonify({"error": "Bạn không có quyền thực hiện hành động này!"}), 403
         """Xóa một bản ghi điểm danh."""
         record = db.session.get(AttendanceRecord, record_id)
         if not record:
@@ -810,8 +816,9 @@ def register(app):
 
     @app.route("/api/attendance/delete/bulk", methods=["POST"])
     @login_required
-    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_attendance_delete_bulk():
+        if current_user.role not in ['admin', 'discipline_officer']:
+            return jsonify({"error": "Bạn không có quyền thực hiện hành động này!"}), 403
         """Xóa nhiều bản ghi điểm danh cùng lúc."""
         data = request.get_json() or {}
         record_ids = data.get("record_ids", [])
@@ -1152,8 +1159,9 @@ def register(app):
 
     @app.route("/api/attendance/monitoring/create-session", methods=["POST"])
     @login_required
-    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_create_monitoring_session():
+        if current_user.role not in ['admin', 'discipline_officer']:
+            return jsonify({"error": "Bạn không có quyền thực hiện hành động này!"}), 403
         """Tạo mới một phiên theo dõi điểm danh theo giờ."""
         data = request.get_json() or {}
         class_name = data.get("class_name", "")
@@ -1273,8 +1281,9 @@ def register(app):
 
     @app.route("/api/attendance/monitoring/add-violation", methods=["POST"])
     @login_required
-    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_add_session_violation():
+        if current_user.role not in ['admin', 'discipline_officer']:
+            return jsonify({"error": "Bạn không có quyền thực hiện hành động này!"}), 403
         """Đánh dấu một học sinh vi phạm trong phiên theo dõi (chưa xác nhận)."""
         data = request.get_json() or {}
         session_id = data.get("session_id")
@@ -1318,8 +1327,9 @@ def register(app):
 
     @app.route("/api/attendance/monitoring/remove-violation", methods=["POST"])
     @login_required
-    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_remove_session_violation():
+        if current_user.role not in ['admin', 'discipline_officer']:
+            return jsonify({"error": "Bạn không có quyền thực hiện hành động này!"}), 403
         """Xóa bỏ một bản ghi vi phạm trong phiên (chỉ pending)."""
         data = request.get_json() or {}
         record_id = data.get("record_id")
@@ -1342,8 +1352,9 @@ def register(app):
 
     @app.route("/api/attendance/monitoring/update-violation-type", methods=["POST"])
     @login_required
-    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_update_violation_type():
+        if current_user.role not in ['admin', 'discipline_officer']:
+            return jsonify({"error": "Bạn không có quyền thực hiện hành động này!"}), 403
         """
         Cập nhật loại vi phạm cho bản ghi trong phiên.
         - Nếu bản ghi đang là placeholder '___auto___': cập nhật trực tiếp.
@@ -1427,8 +1438,9 @@ def register(app):
 
     @app.route("/api/attendance/monitoring/confirm-violations", methods=["POST"])
     @login_required
-    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_confirm_session_violations():
+        if current_user.role not in ['admin', 'discipline_officer']:
+            return jsonify({"error": "Bạn không có quyền thực hiện hành động này!"}), 403
         """
         Xác nhận toàn bộ vi phạm trong phiên — chuyển thành Violation chính thức,
         trừ điểm học sinh, và đóng phiên theo dõi.
@@ -1523,8 +1535,9 @@ def register(app):
 
     @app.route("/api/attendance/monitoring/cancel-session", methods=["POST"])
     @login_required
-    @role_or_permission_required('discipline_officer', 'manage_attendance')
     def api_cancel_monitoring_session():
+        if current_user.role not in ['admin', 'discipline_officer']:
+            return jsonify({"error": "Bạn không có quyền thực hiện hành động này!"}), 403
         """Hủy phiên theo dõi (xóa toàn bộ bản ghi vi phạm pending, đóng phiên)."""
         data = request.get_json() or {}
         session_id = data.get("session_id")
