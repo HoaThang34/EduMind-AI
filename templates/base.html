@@ -718,6 +718,10 @@
                 width: 100%;
                 justify-content: center;
             }
+
+            body.sidebar-desktop-collapsed #sidebar .sidebar-user-block a span {
+                display: none;
+            }
         }
 
         #sidebar .icon-collapse-shut {
@@ -799,6 +803,9 @@
             font-weight: 500;
             text-align: center;
             line-height: 1.2;
+            overflow: visible;
+            white-space: normal;
+            word-wrap: break-word;
         }
 
         /* Adjust main content for bottom nav on mobile */
@@ -806,6 +813,15 @@
             main {
                 padding-bottom: 72px !important;
             }
+        }
+
+        /* Ensure sidebar app download button text is fully visible */
+        .sidebar-user-block a {
+            overflow: visible;
+        }
+        .sidebar-user-block a span {
+            overflow: visible;
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -844,7 +860,7 @@
         <!-- SIDEBAR -->
         {% if current_user.is_authenticated %}
         <aside id="sidebar"
-            class="glass-sidebar fixed lg:static inset-y-0 left-0 w-[260px] max-w-[85vw] z-50 flex flex-col overflow-x-hidden transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none shadow-[4px_0_24px_-8px_rgba(0,0,0,0.12)] lg:shadow-none"
+            class="glass-sidebar fixed lg:static inset-y-0 left-0 w-[260px] max-w-[85vw] z-50 flex flex-col overflow-hidden transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none shadow-[4px_0_24px_-8px_rgba(0,0,0,0.12)] lg:shadow-none"
             role="navigation"
             aria-label="Menu chính EduMind AI">
 
@@ -906,11 +922,6 @@
                             <span class="text-sm">Trợ lý AI</span>
                             <span
                                 class="ml-auto bg-white/20 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">NEW</span>
-                        </a>
-                        <a href="{{ url_for('ai_engine.chatbot') }}"
-                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'ai_engine.chatbot' %}active{% endif %}">
-                            <i class="fas fa-search w-6 text-center text-lg mr-3 transition-colors"></i>
-                            <span class="text-sm">Tra cứu học sinh</span>
                         </a>
                     </div>
                 </div>
