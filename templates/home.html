@@ -544,6 +544,8 @@
                 {{ sub_item(url_for('history'), 'fa-history', 'bg-slate-50 text-slate-600', 'Lịch sử các tuần', 'Xem lại dữ liệu tuần cũ') }}
                 {% if current_user.role in ['admin', 'homeroom_teacher'] %}
                 {{ sub_item(url_for('class_fund'), 'fa-piggy-bank', 'bg-teal-50 text-teal-600', 'Quỹ lớp & thu PH', 'Thu phụ huynh, chi tiêu, số dư') }}
+                {% endif %}
+                {% if current_user.role == 'admin' %}
                 {{ sub_item(url_for('changelog'), 'fa-database', 'bg-teal-50 text-teal-600', 'Nhật ký thay đổi', 'Theo dõi chỉnh sửa dữ liệu') }}
                 {% endif %}
             {% endset %}

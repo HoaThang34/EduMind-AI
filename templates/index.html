@@ -2,165 +2,266 @@
 {% block title %}Bảng Điểm{% endblock %}
 
 {% block content %}
-<div class="space-y-5 animate-fade-in-up">
+<div class="space-y-6 animate-fade-in-up">
 
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <h1 class="text-2xl font-semibold text-foreground tracking-tight">Bảng Điểm Tổng Hợp</h1>
+    <!-- Header Section -->
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-foreground tracking-tight">Bảng Điểm Tổng Hợp</h1>
+            <p class="text-sm text-muted-foreground mt-1">Theo dõi điểm rèn luyện và học tập của học sinh</p>
+        </div>
 
-        <div class="flex flex-wrap items-center gap-3 bg-white border border-border rounded-xl p-2 shadow-card">
-            <form method="GET" action="{{ url_for('index') }}" class="flex flex-wrap items-center gap-2">
-                <div class="input-group-shadcn-mini">
-                    <select name="class_select" onchange="this.form.submit()" class="select-shadcn text-xs py-1.5 min-w-[120px]">
-                        <option value="">Tất cả lớp</option>
-                        {% for class_name in all_classes %}
-                        <option value="{{ class_name }}" {% if class_name==selected_class %}selected{% endif %}>{{ class_name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div class="input-group-shadcn-mini">
-                    <select name="warning_level" onchange="this.form.submit()" class="select-shadcn text-xs py-1.5 min-w-[140px]">
-                        <option value="">Báo động H.Kiểm</option>
-                        <option value="Xanh" {% if selected_warning == 'Xanh' %}selected{% endif %}>🟢 Xanh</option>
-                        <option value="Vàng" {% if selected_warning == 'Vàng' %}selected{% endif %}>🟡 Vàng</option>
-                        <option value="Đỏ" {% if selected_warning == 'Đỏ' %}selected{% endif %}>🔴 Đỏ</option>
-                    </select>
-                </div>
-
-                <div class="input-group-shadcn-mini">
-                    <select name="academic_warning" onchange="this.form.submit()" class="select-shadcn text-xs py-1.5 min-w-[140px]">
-                        <option value="">Báo động H.Lực</option>
-                        <option value="Xanh" {% if selected_academic_warning == 'Xanh' %}selected{% endif %}>🟢 Xanh</option>
-                        <option value="Vàng" {% if selected_academic_warning == 'Vàng' %}selected{% endif %}>🟡 Vàng</option>
-                        <option value="Đỏ" {% if selected_academic_warning == 'Đỏ' %}selected{% endif %}>🔴 Đỏ</option>
-                    </select>
-                </div>
-
-                <div class="flex items-center gap-2 bg-accent/50 p-1 rounded-lg border border-border">
-                    <input type="text" name="search" value="{{ search_query }}" placeholder="Tìm tên, mã số..."
-                        class="bg-transparent border-none text-xs w-48 focus:ring-0 p-1">
-                    <button type="submit" class="p-1 px-2 hover:bg-accent rounded-md transition text-muted-foreground">
-                        <i class="fas fa-search text-xs"></i>
-                    </button>
-                </div>
-            </form>
+        <!-- Quick Actions -->
+        <div class="flex items-center gap-2">
+            <a href="{{ url_for('dashboard') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition shadow-sm text-sm font-medium">
+                <i class="fas fa-chart-line"></i>
+                Xem Dashboard
+            </a>
+            <button onclick="window.location.reload()" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-border rounded-lg hover:bg-accent transition shadow-sm text-sm font-medium text-foreground">
+                <i class="fas fa-sync-alt"></i>
+                Làm mới
+            </button>
         </div>
     </div>
 
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white shadow-lg shadow-blue-500/20">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-blue-100 text-xs font-medium uppercase tracking-wider">Tổng Học Sinh</p>
+                    <p class="text-2xl font-bold mt-1">{{ students|length }}</p>
+                </div>
+                <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-users text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 text-white shadow-lg shadow-emerald-500/20">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-emerald-100 text-xs font-medium uppercase tracking-wider">Điểm TB Rèn Luyện</p>
+                    {% set avg_conduct = (students|map(attribute='current_score')|sum / students|length)|round(1) if students else 0 %}
+                    <p class="text-2xl font-bold mt-1">{{ avg_conduct }}</p>
+                </div>
+                <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-star text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-4 text-white shadow-lg shadow-amber-500/20">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-amber-100 text-xs font-medium uppercase tracking-wider">Cần Nhắc Nhở</p>
+                    {% set warning_count = students|selectattr('warning_level', 'in', ['Vàng', 'Đỏ'])|list|length %}
+                    <p class="text-2xl font-bold mt-1">{{ warning_count }}</p>
+                </div>
+                <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 text-white shadow-lg shadow-purple-500/20">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-purple-100 text-xs font-medium uppercase tracking-wider">Xuất Sắc</p>
+                    {% set excellent_count = students|selectattr('warning_level', 'equalto', 'Xanh')|list|length %}
+                    <p class="text-2xl font-bold mt-1">{{ excellent_count }}</p>
+                </div>
+                <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-trophy text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="bg-white border border-border rounded-xl p-4 shadow-card">
+        <div class="flex items-center gap-2 mb-3">
+            <i class="fas fa-filter text-muted-foreground text-sm"></i>
+            <span class="text-sm font-medium text-foreground">Bộ lọc</span>
+        </div>
+        <form method="GET" action="{{ url_for('index') }}" class="flex flex-wrap items-center gap-3">
+            <div class="flex-1 min-w-[150px]">
+                <label class="block text-xs text-muted-foreground mb-1">Lớp</label>
+                <select name="class_select" onchange="this.form.submit()" class="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+                    <option value="">Tất cả lớp</option>
+                    {% for class_name in all_classes %}
+                    <option value="{{ class_name }}" {% if class_name==selected_class %}selected{% endif %}>{{ class_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="flex-1 min-w-[160px]">
+                <label class="block text-xs text-muted-foreground mb-1">Báo động Hạnh Kiểm</label>
+                <select name="warning_level" onchange="this.form.submit()" class="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+                    <option value="">Tất cả</option>
+                    <option value="Xanh" {% if selected_warning == 'Xanh' %}selected{% endif %}>🟢 Xanh</option>
+                    <option value="Vàng" {% if selected_warning == 'Vàng' %}selected{% endif %}>🟡 Vàng</option>
+                    <option value="Đỏ" {% if selected_warning == 'Đỏ' %}selected{% endif %}>🔴 Đỏ</option>
+                </select>
+            </div>
+
+            <div class="flex-1 min-w-[160px]">
+                <label class="block text-xs text-muted-foreground mb-1">Báo động Học Lực</label>
+                <select name="academic_warning" onchange="this.form.submit()" class="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+                    <option value="">Tất cả</option>
+                    <option value="Xanh" {% if selected_academic_warning == 'Xanh' %}selected{% endif %}>🟢 Xanh</option>
+                    <option value="Vàng" {% if selected_academic_warning == 'Vàng' %}selected{% endif %}>🟡 Vàng</option>
+                    <option value="Đỏ" {% if selected_academic_warning == 'Đỏ' %}selected{% endif %}>🔴 Đỏ</option>
+                </select>
+            </div>
+
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-xs text-muted-foreground mb-1">Tìm kiếm</label>
+                <div class="relative">
+                    <input type="text" name="search" value="{{ search_query }}" placeholder="Tên, mã số học sinh..."
+                        class="w-full pl-10 pr-4 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm"></i>
+                </div>
+            </div>
+
+            <div class="flex items-end gap-2">
+                <button type="submit" class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition text-sm font-medium">
+                    <i class="fas fa-search mr-1"></i> Tìm
+                </button>
+                <a href="{{ url_for('index') }}" class="px-4 py-2 bg-accent text-foreground rounded-lg hover:bg-accent/80 transition text-sm font-medium">
+                    <i class="fas fa-times mr-1"></i> Đặt lại
+                </a>
+            </div>
+        </form>
+    </div>
+
     {% if search_query %}
-    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-accent text-foreground rounded-md text-sm font-medium">
+    <div class="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-lg text-sm font-medium">
+        <i class="fas fa-search"></i>
         <span>Kết quả cho: "{{ search_query }}"</span>
         <a href="{{ url_for('index') }}"
-            class="w-4 h-4 flex items-center justify-center rounded bg-foreground/10 hover:bg-foreground/20 text-foreground transition">
-            <i class="fas fa-times text-[8px]"></i>
+            class="w-5 h-5 flex items-center justify-center rounded bg-primary/20 hover:bg-primary/30 text-primary transition ml-1">
+            <i class="fas fa-times text-xs"></i>
         </a>
     </div>
     {% endif %}
 
     <!-- Table -->
-    <div class="bg-white border border-[hsl(240,5.9%,90%)] rounded-xl shadow-card overflow-hidden">
+    <div class="bg-white border border-border rounded-xl shadow-card overflow-hidden">
+        <div class="p-4 border-b border-border bg-muted/30">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-foreground">Danh Sách Học Sinh</h3>
+                <span class="text-xs text-muted-foreground">{{ students|length }} học sinh</span>
+            </div>
+        </div>
         <div class="overflow-x-auto">
-            <table class="table-shadcn">
-                <thead>
+            <table class="w-full">
+                <thead class="bg-muted/50">
                     <tr>
-                        <th>Học Sinh</th>
-                        <th>Lớp</th>
-                        <th>Điểm Rèn Luyện</th>
-                        <th>GPA</th>
-                        <th>Lịch Sử Vi Phạm</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Học Sinh</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Lớp</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Điểm Rèn Luyện</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">GPA</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Lịch Sử Vi Phạm</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-border">
                     {% for student in students %}
-                    <tr>
-                        <td>
+                    <tr class="hover:bg-muted/30 transition-colors">
+                        <td class="px-4 py-3">
                             <div class="flex items-center gap-3">
                                 {% if student.portrait_filename %}
                                 <img src="{{ url_for('student_portrait_view', student_id=student.id) }}" alt=""
-                                    class="w-8 h-8 rounded-lg object-cover border border-[hsl(240,5.9%,90%)] flex-shrink-0">
+                                    class="w-10 h-10 rounded-lg object-cover border border-border flex-shrink-0 shadow-sm">
                                 {% else %}
-                                <div
-                                    class="w-8 h-8 rounded-lg bg-[hsl(240,5.9%,10%)] flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
+                                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0 shadow-sm">
                                     {{ student.name.split()[-1][0] }}
                                 </div>
                                 {% endif %}
                                 <div>
-                                    <div class="flex items-center gap-1.5">
+                                    <div class="flex items-center gap-2">
                                         <a href="{{ url_for('student_detail', student_id=student.id) }}"
-                                            class="text-sm font-medium text-foreground hover:underline">
+                                            class="text-sm font-semibold text-foreground hover:text-primary transition-colors">
                                             {{ student.name }}
                                         </a>
                                         {% if student.position %}
-                                        <span class="px-1.5 py-0.5 rounded-md bg-indigo-50 text-[10px] text-indigo-700 font-bold uppercase tracking-tight border border-indigo-100/50">
+                                        <span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-tight border border-primary/20">
                                             {{ student.position }}
                                         </span>
                                         {% endif %}
                                     </div>
-                                    <div class="text-xs text-muted-foreground font-mono">{{ student.student_code }}</div>
+                                    <div class="text-xs text-muted-foreground font-mono mt-0.5">{{ student.student_code }}</div>
                                 </div>
                             </div>
                         </td>
-                        <td><span class="badge badge-secondary">{{ student.student_class }}</span></td>
-                        <td>
-                            {% if student.warning_level == 'Đỏ' %}
-                            <span class="badge badge-destructive flex items-center gap-1">
-                                <i class="fas fa-exclamation-circle text-[10px]"></i>
-                                {{ student.current_score }} {{ student.conduct }}
+                        <td class="px-4 py-3">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-secondary text-secondary-foreground text-xs font-medium">
+                                {{ student.student_class }}
                             </span>
-                            {% elif student.warning_level == 'Vàng' %}
-                            <span class="badge flex items-center gap-1" style="background:hsl(45 93% 47%);color:white;">
-                                <i class="fas fa-exclamation-triangle text-[10px]"></i>
-                                {{ student.current_score }} {{ student.conduct }}
-                            </span>
-                            {% else %}
-                            <span class="badge badge-success flex items-center gap-1">
-                                <i class="fas fa-check-circle text-[10px]"></i>
-                                {{ student.current_score }} {{ student.conduct }}
-                            </span>
-                            {% endif %}
                         </td>
-                        <td>
+                        <td class="px-4 py-3">
+                            <div class="space-y-1.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-foreground">{{ student.current_score }}</span>
+                                    {% if student.warning_level == 'Đỏ' %}
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-red-100 text-red-700 font-medium">Đỏ</span>
+                                    {% elif student.warning_level == 'Vàng' %}
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-medium">Vàng</span>
+                                    {% else %}
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 font-medium">Xanh</span>
+                                    {% endif %}
+                                </div>
+                                <div class="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                                    <div class="h-full rounded-full transition-all duration-500 {% if student.warning_level == 'Đỏ' %}bg-red-500{% elif student.warning_level == 'Vàng' %}bg-amber-500{% else %}bg-emerald-500{% endif %}" style="width: {{ student.current_score }}%"></div>
+                                </div>
+                                <span class="text-xs text-muted-foreground">{{ student.conduct }}</span>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3">
                             {% set gpa = student_gpas.get(student.id) %}
                             {% if gpa %}
-                            <div class="flex items-center gap-2">
-                                <span class="badge {% if student.academic_warning_level == 'Đỏ' %}badge-destructive{% elif student.academic_warning_level == 'Vàng' %}bg-amber-500 text-white border-none{% else %}badge-success{% endif %}">
-                                    {{ gpa }} {{ student.academic_rank }}
-                                </span>
-                                {% if student.academic_warning_level != 'Xanh' %}
-                                <i class="fas fa-exclamation-triangle text-[10px] {% if student.academic_warning_level == 'Đỏ' %}text-red-500{% else %}text-amber-500{% endif %} animate-pulse"></i>
-                                {% endif %}
+                            <div class="space-y-1.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-semibold {% if student.academic_warning_level == 'Đỏ' %}text-red-600{% elif student.academic_warning_level == 'Vàng' %}text-amber-600{% else %}text-emerald-600{% endif %}">{{ gpa }}</span>
+                                    {% if student.academic_warning_level != 'Xanh' %}
+                                    <i class="fas fa-exclamation-triangle text-[10px] {% if student.academic_warning_level == 'Đỏ' %}text-red-500{% else %}text-amber-500{% endif %} animate-pulse"></i>
+                                    {% endif %}
+                                </div>
+                                <span class="text-xs text-muted-foreground">{{ student.academic_rank }}</span>
                             </div>
                             {% else %}
                             <span class="text-muted-foreground text-xs italic">Chưa có điểm</span>
                             {% endif %}
                         </td>
-                        <td>
+                        <td class="px-4 py-3">
                             {% if student.violations %}
                             <div class="flex flex-wrap gap-1">
                                 {% for vio in student.violations[-3:] %}
-                                <span class="badge badge-outline text-destructive border-destructive/20 text-[11px]"
+                                <span class="inline-flex items-center px-2 py-0.5 rounded bg-destructive/10 text-destructive text-[10px] font-medium border border-destructive/20"
                                     title="{{ vio.date_committed }}">
                                     {{ vio.violation_type_name }}
                                 </span>
                                 {% endfor %}
                                 {% if student.violations|length > 3 %}
-                                <span class="text-xs text-muted-foreground">+{{ student.violations|length - 3 }}</span>
+                                <span class="text-xs text-muted-foreground font-medium">+{{ student.violations|length - 3 }}</span>
                                 {% endif %}
                             </div>
                             {% else %}
-                            <span class="text-muted-foreground text-xs flex items-center gap-1">
-                                <i class="fas fa-check-circle text-emerald-500 text-[10px]"></i> Không vi phạm
+                            <span class="inline-flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
+                                <i class="fas fa-check-circle"></i> Không vi phạm
                             </span>
                             {% endif %}
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" class="text-center py-12">
+                        <td colspan="5" class="px-4 py-16 text-center">
                             <div class="flex flex-col items-center text-muted-foreground">
-                                <i class="fas fa-search text-2xl mb-2 opacity-40"></i>
-                                <p class="text-sm">Không tìm thấy học sinh nào phù hợp.</p>
+                                <div class="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-3">
+                                    <i class="fas fa-search text-2xl opacity-40"></i>
+                                </div>
+                                <p class="text-sm font-medium">Không tìm thấy học sinh nào phù hợp</p>
+                                <p class="text-xs mt-1">Thử thay đổi bộ lọc để tìm kiếm lại</p>
                             </div>
                         </td>
                     </tr>

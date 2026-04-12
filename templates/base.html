@@ -881,7 +881,7 @@
                             <span class="text-sm">Lịch sử tuần</span>
                         </a>
                         {% endif %}
-                        {% if current_user.has_permission('view_reports') %}
+                        {% if current_user.role == 'admin' %}
                         <a href="{{ url_for('changelog') }}"
                             class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'changelog' %}active{% endif %}">
                             <i class="fas fa-database w-6 text-center text-lg mr-3"></i>

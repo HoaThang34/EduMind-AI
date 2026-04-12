@@ -130,7 +130,10 @@ def register(app):
             gpa = calculate_student_gpa(student.id, semester, school_year)
             student_gpas[student.id] = gpa
     
-        return render_template('index.html', students=students, student_gpas=student_gpas, search_query=search, selected_class=selected_class, selected_warning=selected_warning, selected_academic_warning=selected_academic_warning)
+        # Get all classes for filter dropdown
+        all_classes = sorted([c[0] for c in db.session.query(func.distinct(Student.student_class)).all()])
+    
+        return render_template('index.html', students=students, student_gpas=student_gpas, search_query=search, selected_class=selected_class, selected_warning=selected_warning, selected_academic_warning=selected_academic_warning, all_classes=all_classes)
     @app.route("/dashboard")
     @login_required
     def dashboard():
@@ -729,8 +732,9 @@ def register(app):
 
     @app.route("/changelog")
     @login_required
+    @admin_required
     def changelog():
-        """Xem lịch sử thay đổi CSDL - Tất cả người dùng đều có thể xem"""
+        """Xem lịch sử thay đổi CSDL - Chỉ admin được xem"""
         page = request.args.get('page', 1, type=int)
         per_page = 30
         search = request.args.get('search', '').strip()
