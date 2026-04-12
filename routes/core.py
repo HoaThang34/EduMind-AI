@@ -446,7 +446,7 @@ def register(app):
     
         # Xuất file
         if data:
-            df = pd.read_json(json.dumps(data))
+            df = pd.DataFrame(data)
         else:
             df = pd.DataFrame([{"Thông báo": "Không có dữ liệu vi phạm"}])
 
@@ -534,7 +534,7 @@ def register(app):
         if not week: return "Vui lòng chọn tuần", 400
         violations = db.session.query(Violation, Student).join(Student).filter(Violation.week_number == week).all()
         data = [{"Tên": r.Student.name, "Lớp": r.Student.student_class, "Lỗi": r.Violation.violation_type_name} for r in violations]
-        df = pd.read_json(json.dumps(data)) if data else pd.DataFrame([{"Thông báo": "Trống"}])
+        df = pd.DataFrame(data) if data else pd.DataFrame([{"Thông báo": "Trống"}])
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer: df.to_excel(writer, index=False)
         output.seek(0)
