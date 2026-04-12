@@ -1,0 +1,461 @@
+{% extends "base.html" %}
+{% block title %}Quản Lý Kỷ Luật & Điểm Cộng{% endblock %}
+
+{% block content %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<style>
+    .select2-container .select2-selection--multiple {
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 0.5rem !important;
+        min-height: 45px;
+        padding: 6px;
+        background-color: white;
+    }
+
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #ffedd5;
+        border: 1px solid #fdba74;
+        color: #9a3412;
+        border-radius: 4px;
+        padding: 2px 8px;
+        font-weight: 600;
+        margin-top: 4px;
+        margin-right: 6px;
+    }
+
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        color: #9a3412;
+        border-right: 1px solid #fdba74;
+        margin-right: 6px;
+        padding-right: 6px;
+    }
+
+    .select2-container--default.select2-container--focus .select2-selection--multiple {
+        border-color: #f97316 !important;
+        box-shadow: 0 0 0 1px #f97316;
+        outline: none;
+    }
+
+    .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+        background-color: #f97316;
+        color: white;
+    }
+
+    .tab-btn.active {
+        background-color: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+</style>
+
+<div class="max-w-7xl mx-auto">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-foreground">📋 Quản Lý Kỷ Luật & Điểm Cộng</h1>
+        <p class="text-muted-foreground">Quản lý quy định, ghi nhận vi phạm và điểm cộng trong một trang</p>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="flex flex-wrap gap-2 mb-6 bg-white p-2 rounded-lg shadow-sm border border-[hsl(240,5.9%,90%)]">
+        <button onclick="switchTab('rules')" class="tab-btn active px-4 py-2 rounded-lg font-medium text-sm border-2 border-transparent hover:bg-gray-100 transition" id="tab-rules">
+            ⚙️ Quản Lý Quy Định
+        </button>
+        <button onclick="switchTab('record')" class="tab-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-transparent hover:bg-gray-100 transition" id="tab-record">
+            ✏️ Ghi Nhận
+        </button>
+        <button onclick="switchTab('history')" class="tab-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-transparent hover:bg-gray-100 transition" id="tab-history">
+            📊 Lịch Sử
+        </button>
+    </div>
+
+    <!-- Tab 1: Quản Lý Quy Định -->
+    <div id="content-rules" class="tab-content active">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Quản Lý Lỗi Vi Phạm -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-[hsl(240,5.9%,90%)]">
+                <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+                    <div class="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center mr-2">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    Quản Lý Lỗi Vi Phạm
+                </h2>
+
+                <form method="POST" action="{{ url_for('manage_rules') }}" class="space-y-4 mb-6">
+                    <div>
+                        <label for="rule_name" class="block text-sm font-medium text-gray-700 mb-1">Tên Vi Phạm:</label>
+                        <input type="text" name="rule_name" id="rule_name" placeholder="Ví dụ: Sử dụng điện thoại" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label for="points" class="block text-sm font-medium text-gray-700 mb-1">Điểm Trừ:</label>
+                        <input type="number" name="points" id="points" placeholder="Ví dụ: 10" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500">
+                    </div>
+                    <button type="submit"
+                        class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 font-medium transition">
+                        <i class="fas fa-plus mr-2"></i>Thêm Vi Phạm
+                    </button>
+                </form>
+
+                <div class="border-t pt-4">
+                    <h3 class="text-sm font-semibold text-gray-700 mb-3">Danh Sách Vi Phạm</h3>
+                    <div class="max-h-64 overflow-y-auto space-y-2">
+                        {% for rule in rules %}
+                        <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                            <div class="flex-1">
+                                <span class="text-sm font-medium text-gray-900">{{ rule.name }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-bold text-red-600">-{{ rule.points_deducted }}đ</span>
+                                <a href="{{ url_for('edit_rule', rule_id=rule.id) }}" class="text-indigo-600 hover:text-indigo-900 text-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form action="{{ url_for('delete_rule', rule_id=rule.id) }}" method="POST" class="inline"
+                                    onsubmit="return confirm('Bạn có chắc chắn muốn xóa lỗi {{ rule.name }}?');">
+                                    <button type="submit" class="text-red-600 hover:text-red-900 text-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% else %}
+                        <p class="text-center text-gray-400 text-sm py-4">Chưa có lỗi vi phạm nào</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quản Lý Loại Điểm Cộng -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-[hsl(240,5.9%,90%)]">
+                <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center mr-2">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    Quản Lý Loại Điểm Cộng
+                </h2>
+
+                <form method="POST" action="{{ url_for('manage_bonus_types') }}" class="space-y-4 mb-6">
+                    <div>
+                        <label for="bonus_name" class="block text-sm font-medium text-gray-700 mb-1">Tên Loại Điểm Cộng:</label>
+                        <input type="text" name="bonus_name" id="bonus_name" placeholder="VD: Giải Nhất HSG Toán" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label for="bonus_points" class="block text-sm font-medium text-gray-700 mb-1">Điểm Cộng:</label>
+                        <input type="number" name="points" id="bonus_points" placeholder="VD: 20" required min="1" max="100"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Mô Tả (Tùy chọn):</label>
+                        <input type="text" name="description" id="description"
+                            placeholder="VD: Học sinh đạt giải trong kỳ thi HSG Toán cấp Tỉnh"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+                    </div>
+                    <button type="submit"
+                        class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 font-medium transition">
+                        <i class="fas fa-plus mr-2"></i>Thêm Điểm Cộng
+                    </button>
+                </form>
+
+                <div class="border-t pt-4">
+                    <h3 class="text-sm font-semibold text-gray-700 mb-3">Danh Sách Điểm Cộng</h3>
+                    <div class="max-h-64 overflow-y-auto space-y-2">
+                        {% for bonus in bonus_types %}
+                        <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                            <div class="flex-1">
+                                <span class="text-sm font-medium text-gray-900">{{ bonus.name }}</span>
+                                {% if bonus.description %}
+                                <p class="text-xs text-gray-500">{{ bonus.description }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-bold text-emerald-600">+{{ bonus.points_added }}đ</span>
+                                <a href="{{ url_for('edit_bonus_type', bonus_id=bonus.id) }}" class="text-indigo-600 hover:text-indigo-900 text-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form action="{{ url_for('delete_bonus_type', bonus_id=bonus.id) }}" method="POST" class="inline"
+                                    onsubmit="return confirm('Bạn có chắc chắn muốn xóa loại điểm cộng {{ bonus.name }}?');">
+                                    <button type="submit" class="text-red-600 hover:text-red-900 text-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% else %}
+                        <p class="text-center text-gray-400 text-sm py-4">Chưa có loại điểm cộng nào</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 2: Ghi Nhận -->
+    <div id="content-record" class="tab-content">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Ghi Nhận Vi Phạm -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-[hsl(240,5.9%,90%)]">
+                <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+                    <div class="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center mr-2">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    Ghi Nhận Vi Phạm
+                </h2>
+
+                <form method="POST" action="{{ url_for('add_violation') }}" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-foreground mb-1">Chọn Học Sinh:</label>
+                        <select name="student_ids[]" multiple="multiple" id="student-select-violation" class="w-full"
+                            style="width: 100%" required>
+                            {% for s in students %}
+                            <option value="{{ s.id }}">
+                                {{ s.student_code }} - {{ s.name }} ({{ s.student_class }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <p class="text-xs text-muted-foreground mt-1">
+                            <i class="fas fa-info-circle"></i> Gõ tên, mã số hoặc lớp để lọc.
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-foreground mb-2">Loại Vi Phạm</label>
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4 max-h-48 overflow-y-auto space-y-2">
+                            {% for rule in rules %}
+                            <label class="flex items-center p-2 hover:bg-white rounded-lg cursor-pointer transition group">
+                                <input type="checkbox" name="rule_ids[]" value="{{ rule.id }}"
+                                    class="w-4 h-4 text-red-600 border-slate-300 rounded focus:ring-red-500 cursor-pointer">
+                                <span class="ml-3 text-sm font-medium text-foreground group-hover:text-red-600 flex-1">
+                                    {{ rule.name }}
+                                </span>
+                                <span class="text-xs font-bold text-red-600 bg-red-100 px-2 py-1 rounded">
+                                    -{{ rule.points_deducted }}đ
+                                </span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-foreground mb-1">Liên kết sổ đầu bài (tuỳ chọn)</label>
+                        <select name="lesson_book_entry_id" class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm">
+                            <option value="">— Không —</option>
+                            {% for e in lesson_entries %}
+                            <option value="{{ e.id }}">{{ e.lesson_date.strftime('%d/%m/%Y') }} · Tiết {{ e.period_number }} · {{ e.class_name }} — {{ (e.topic or '')[:50] }}{% if (e.topic or '')|length > 50 %}…{% endif %}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold shadow-md transition-all flex justify-center items-center gap-2">
+                        <i class="fas fa-check-circle"></i> Ghi Nhận Vi Phạm
+                    </button>
+                </form>
+            </div>
+
+            <!-- Thêm Điểm Cộng -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-[hsl(240,5.9%,90%)]">
+                <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center mr-2">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    Thêm Điểm Cộng
+                </h2>
+
+                <form method="POST" action="{{ url_for('add_bonus') }}" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-foreground mb-1">Chọn Học Sinh:</label>
+                        <select name="student_ids[]" multiple="multiple" id="student-select-bonus" class="w-full"
+                            style="width: 100%" required>
+                            {% for s in students %}
+                            <option value="{{ s.id }}">
+                                {{ s.student_code }} - {{ s.name }} ({{ s.student_class }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <p class="text-xs text-muted-foreground mt-1">
+                            <i class="fas fa-info-circle"></i> Gõ tên, mã số hoặc lớp để lọc.
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-foreground mb-2">Loại Điểm Cộng</label>
+                        <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4 max-h-48 overflow-y-auto space-y-2">
+                            {% for bonus in bonus_types %}
+                            <label class="flex items-center p-2 hover:bg-white rounded-lg cursor-pointer transition group">
+                                <input type="checkbox" name="bonus_ids[]" value="{{ bonus.id }}"
+                                    class="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500 cursor-pointer">
+                                <span class="ml-3 text-sm font-medium text-foreground group-hover:text-emerald-600 flex-1">
+                                    {{ bonus.name }}
+                                </span>
+                                <span class="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded">
+                                    +{{ bonus.points_added }}đ
+                                </span>
+                            </label>
+                            {% else %}
+                            <p class="text-center text-gray-400 py-4 text-sm">
+                                Chưa có loại điểm cộng.
+                            </p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="reason" class="block text-sm font-medium text-foreground mb-1">Lý Do Cụ Thể (Tùy chọn):</label>
+                        <input type="text" name="reason" id="reason" placeholder="VD: Giải Nhì HSG Toán cấp Tỉnh năm 2024"
+                            class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+                    </div>
+
+                    <button type="submit"
+                        class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-md transition-all flex justify-center items-center gap-2">
+                        <i class="fas fa-plus-circle"></i> Ghi Nhận Điểm Cộng
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 3: Lịch Sử -->
+    <div id="content-history" class="tab-content">
+        <div class="bg-white rounded-xl shadow-sm border border-[hsl(240,5.9%,90%)] p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-foreground flex items-center">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center mr-2">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    Lịch Sử Vi Phạm
+                </h2>
+                <a href="{{ url_for('violation_history') }}" class="text-sm text-indigo-600 hover:text-indigo-900 font-medium">
+                    Xem chi tiết <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+
+            <form method="GET" action="{{ url_for('discipline_management') }}" class="flex flex-wrap gap-3 mb-6">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Tuần</label>
+                    <select name="week" onchange="this.form.submit()"
+                        class="w-full px-3 py-2 bg-accent border border-slate-300 rounded-lg text-sm font-medium text-foreground cursor-pointer">
+                        {% for w in weeks %}
+                            <option value="{{ w }}" {% if w == selected_week %}selected{% endif %}>Tuần {{ w }}</option>
+                        {% else %}
+                            <option value="">Chưa có dữ liệu</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                    <label class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Lớp</label>
+                    <select name="class_select" onchange="this.form.submit()"
+                        class="w-full px-3 py-2 bg-accent border border-slate-300 rounded-lg text-sm font-medium text-foreground cursor-pointer">
+                        <option value="">Tất cả lớp</option>
+                        {% for c in all_classes %}
+                            <option value="{{ c }}" {% if c == selected_class %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+
+            {% if selected_week %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Học sinh</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Lớp</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Lỗi vi phạm</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Điểm trừ</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for v in violations.items[:20] %}
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                                {{ v.date_committed.strftime('%d/%m/%Y') }}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <div class="font-medium text-sm text-gray-900">{{ v.student.name }}</div>
+                                <div class="text-xs text-gray-500 font-mono">{{ v.student.student_code }}</div>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <span class="px-2 py-1 rounded bg-gray-100 text-gray-900 text-xs font-bold">
+                                    {{ v.student.student_class }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                {{ v.violation_type_name }}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-right">
+                                <span class="text-red-600 font-bold text-sm bg-red-50 px-2 py-1 rounded">
+                                    -{{ v.points_deducted }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="px-4 py-8 text-center text-gray-400">Không có vi phạm nào trong tuần này</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-8">
+                <p class="text-gray-400">Chưa chọn tuần để xem lịch sử</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchTab(tabName) {
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        
+        // Deactivate all tab buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Show selected tab content
+        document.getElementById('content-' + tabName).classList.add('active');
+        
+        // Activate selected tab button
+        document.getElementById('tab-' + tabName).classList.add('active');
+    }
+
+    $(document).ready(function () {
+        $('#student-select-violation').select2({
+            placeholder: "🔍 Nhập tên hoặc mã số để tìm...",
+            allowClear: true,
+            language: {
+                noResults: function () {
+                    return "Không tìm thấy học sinh nào";
+                }
+            }
+        });
+
+        $('#student-select-bonus').select2({
+            placeholder: "🔍 Nhập tên hoặc mã số để tìm...",
+            allowClear: true,
+            language: {
+                noResults: function () {
+                    return "Không tìm thấy học sinh nào";
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -474,3 +474,61 @@ def register(app):
         
         # Quay lại trang Timeline của học sinh đó
         return redirect(url_for('violations_timeline', student_id=student.id if student else 0))
+
+    @app.route("/discipline_management", methods=["GET"])
+    @login_required
+    def discipline_management():
+        """Trang quản lý kỷ luật và điểm cộng thống nhất"""
+        from routes.lesson_book import lesson_book_visible_query
+        
+        # Lấy tham số lọc
+        selected_week = request.args.get('week', type=int)
+        selected_class = request.args.get('class_select', '')
+        
+        # Dữ liệu cho tab Quản lý quy định
+        rules = ViolationType.query.order_by(ViolationType.points_deducted.desc()).all()
+        bonus_types = BonusType.query.order_by(BonusType.points_added.desc()).all()
+        
+        # Dữ liệu cho tab Ghi nhận
+        students = get_accessible_students().order_by(Student.student_class, Student.name).all()
+        lesson_entries = (
+            lesson_book_visible_query()
+            .order_by(desc(LessonBookEntry.lesson_date), desc(LessonBookEntry.id))
+            .limit(120)
+            .all()
+        )
+        
+        # Dữ liệu cho tab Lịch sử
+        weeks = db.session.query(Violation.week_number).distinct().order_by(Violation.week_number.desc()).all()
+        weeks = [w[0] for w in weeks if w[0]]
+        all_classes = db.session.query(Student.student_class).distinct().order_by(Student.student_class).all()
+        all_classes = [c[0] for c in all_classes if c[0]]
+        
+        # Mặc định chọn tuần hiện tại nếu chưa chọn
+        if not selected_week and weeks:
+            selected_week = weeks[0]
+        
+        # Lấy dữ liệu vi phạm theo tuần và lớp
+        violations = None
+        if selected_week:
+            query = Violation.query.filter_by(week_number=selected_week)
+            if selected_class:
+                query = query.join(Student).filter(Student.student_class == selected_class)
+            violations = query.order_by(Violation.date_committed.desc()).paginate(
+                page=request.args.get('page', 1, type=int),
+                per_page=20,
+                error_out=False
+            )
+        
+        return render_template(
+            "discipline_management.html",
+            rules=rules,
+            bonus_types=bonus_types,
+            students=students,
+            lesson_entries=lesson_entries,
+            weeks=weeks,
+            all_classes=all_classes,
+            selected_week=selected_week,
+            selected_class=selected_class,
+            violations=violations
+        )

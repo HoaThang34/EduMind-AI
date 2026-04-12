@@ -944,27 +944,10 @@
                         {% endif %}
 
                         {% if current_user.has_permission('manage_discipline') %}
-                        <a href="{{ url_for('manage_rules') }}"
-                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'manage_rules' %}active{% endif %}">
-                            <i class="fas fa-gavel w-6 text-center text-lg mr-3"></i>
-                            <span class="text-sm">Quy định & Điểm trừ</span>
-                        </a>
-                        <a href="{{ url_for('add_violation') }}"
-                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'add_violation' %}active{% endif %}">
-                            <i
-                                class="fas fa-bolt w-6 text-center text-lg mr-3 text-red-400 group-hover:text-red-500"></i>
-                            <span class="text-sm">Ghi nhận vi phạm</span>
-                        </a>
-                        <a href="{{ url_for('manage_bonus_types') }}"
-                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'manage_bonus_types' %}active{% endif %}">
-                            <i class="fas fa-award w-6 text-center text-lg mr-3"></i>
-                            <span class="text-sm">Loại điểm cộng</span>
-                        </a>
-                        <a href="{{ url_for('add_bonus') }}"
-                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'add_bonus' %}active{% endif %}">
-                            <i
-                                class="fas fa-star w-6 text-center text-lg mr-3 text-amber-400 group-hover:text-amber-500"></i>
-                            <span class="text-sm">Cộng điểm</span>
+                        <a href="{{ url_for('discipline_management') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'discipline_management' %}active{% endif %}">
+                            <i class="fas fa-clipboard-list w-6 text-center text-lg mr-3 text-indigo-500 group-hover:text-indigo-600"></i>
+                            <span class="text-sm">Quản lý kỷ luật & Điểm cộng</span>
                         </a>
                         {% endif %}
                     </div>
