@@ -256,6 +256,7 @@ def register(app):
             id_card=_empty_to_none(request.form.get("id_card")),
             ethnicity=_empty_to_none(request.form.get("ethnicity")),
         )
+        st.set_password("123456")  # Mật khẩu mặc định
         db.session.add(st)
         db.session.flush()
         pf = request.files.get("portrait")
@@ -266,7 +267,7 @@ def register(app):
             else:
                 flash("Ảnh chân dung không hợp lệ (JPG, PNG, WebP, GIF, tối đa 5MB).", "warning")
         db.session.commit()
-        flash("Thêm học sinh thành công", "success")
+        flash("Thêm học sinh thành công. Mật khẩu mặc định: 123456", "success")
         return redirect(url_for("manage_students"))
 
     @app.route("/delete_student/<int:student_id>", methods=["POST"])
@@ -595,6 +596,7 @@ def register(app):
                     id_card=idc,
                     ethnicity=eth,
                 )
+                new_student.set_password("123456")  # Mật khẩu mặc định
                 db.session.add(new_student)
             
                 count += 1

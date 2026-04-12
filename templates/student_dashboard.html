@@ -220,15 +220,18 @@
 
                 <!-- AI Advisor Box -->
                 <div class="card border-0 shadow-sm mb-4 animate__animated animate__fadeInUp">
-                    <div class="card-header bg-warning text-dark border-0">
-                        <i class="fas fa-robot me-2"></i><strong>AI Mentor Nhận xét</strong>
+                    <div class="card-header bg-warning text-dark border-0 d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-robot me-2"></i><strong>AI Mentor Nhận xét</strong></span>
+                        <button class="btn btn-sm btn-primary" onclick="generateAIAdvice()" id="generateAdviceBtn">
+                            <i class="fas fa-magic me-1"></i>Tạo nhận xét
+                        </button>
                     </div>
                     <div class="card-body">
-                        <div class="d-flex align-items-start">
+                        <div class="d-flex align-items-start" id="aiAdviceContainer">
                             <img src="https://ui-avatars.com/api/?name=AI&background=random" class="rounded-circle me-2"
                                 width="40">
-                            <div class="text-muted small">
-                                {{ ai_advice | markdown | safe }}
+                            <div class="text-muted small flex-grow-1" id="aiAdviceContent">
+                                <em class="text-secondary">Bấm "Tạo nhận xét" để nhận lời khuyên từ AI Mentor.</em>
                             </div>
                         </div>
                     </div>
@@ -407,6 +410,39 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <script>
+        async function generateAIAdvice() {
+            const btn = document.getElementById('generateAdviceBtn');
+            const content = document.getElementById('aiAdviceContent');
+
+            // Show loading state
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang tạo...';
+            content.innerHTML = '<em class="text-warning"><i class="fas fa-spinner fa-spin me-2"></i>Đang phân tích dữ liệu và tạo nhận xét...</em>';
+
+            try {
+                const response = await fetch('/student/api/generate_ai_advice', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Lỗi khi tạo nhận xét');
+                }
+
+                // Display the advice
+                content.innerHTML = marked.parse(data.advice || "Không thể tạo nhận xét.");
+            } catch (error) {
+                console.error('AI Advice Error:', error);
+                content.innerHTML = `<em class="text-danger"><i class="fas fa-exclamation-circle me-2"></i>${error.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.'}</em>`;
+            } finally {
+                // Reset button
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-magic me-1"></i>Tạo nhận xét';
+            }
+        }
+
         function onChatFileSelect(e) {
             const fileInput = document.getElementById('chatFileInput');
             const preview = document.getElementById('chatFilePreview');

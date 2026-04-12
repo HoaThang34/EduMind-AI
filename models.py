@@ -152,6 +152,19 @@ class Student(db.Model):
     academic_warning_level = db.Column(db.String(20), default="Xanh") # Xanh, Vàng, Đỏ
     id_card = db.Column(db.String(20), nullable=True)  # Số CCCD/CMND
     ethnicity = db.Column(db.String(50), nullable=True)  # Dân tộc
+    password = db.Column(db.String(100), nullable=True)  # Mật khẩu đăng nhập
+
+    def set_password(self, pwd):
+        self.password = generate_password_hash(pwd)
+
+    def check_password(self, pwd):
+        # Fallback cho password plain text (để tương thích ngược)
+        if self.password == pwd:
+            return True
+        try:
+            return check_password_hash(self.password, pwd)
+        except ValueError:
+            return False
 
 
 class ViolationType(db.Model):

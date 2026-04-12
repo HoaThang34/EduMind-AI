@@ -137,7 +137,7 @@ def _student_chat_call_ollama(system_prompt, history, user_message, image_base64
     else:
         messages.append({"role": "user", "content": context})
     try:
-        response = get_ollama_client().chat(model=model, messages=messages)
+        response = get_ollama_client().chat(model=model, messages=messages, timeout=120)
         return (response.get("message") or {}).get("content", "").strip(), None
     except Exception as e:
         return None, str(e)
@@ -163,20 +163,21 @@ def student_login():
         student = Student.query.filter_by(student_code=norm_code).first()
         if not student:
             flash("Mã học sinh không tồn tại! Vui lòng kiểm tra lại.", "error")
-        elif not (student.parent_phone or "").strip():
-            flash(
-                "Chưa có số điện thoại phụ huynh trong hệ thống. "
-                "Vui lòng liên hệ nhà trường để cập nhật trước khi đăng nhập.",
-                "error",
-            )
         elif not pwd:
-            flash("Vui lòng nhập mật khẩu (số điện thoại phụ huynh).", "error")
-        elif not parent_phone_login_match(student.parent_phone, pwd):
-            flash("Sai mật khẩu. Mật khẩu là số điện thoại phụ huynh đã đăng ký.", "error")
+            flash("Vui lòng nhập mật khẩu.", "error")
         else:
-            session["student_id"] = student.id
-            session["student_name"] = student.name
-            return redirect(url_for("student.student_dashboard"))
+            # Ưu tiên kiểm tra mật khẩu đã đặt
+            if student.password and student.check_password(pwd):
+                session["student_id"] = student.id
+                session["student_name"] = student.name
+                return redirect(url_for("student.student_dashboard"))
+            # Fallback: kiểm tra số điện thoại phụ huynh (cho tương thích ngược)
+            elif parent_phone_login_match(student.parent_phone, pwd):
+                session["student_id"] = student.id
+                session["student_name"] = student.name
+                return redirect(url_for("student.student_dashboard"))
+            else:
+                flash("Sai mật khẩu.", "error")
 
     return render_template("student_login.html")
 
@@ -188,6 +189,24 @@ def student_logout():
     session.pop('student_id', None)
     session.pop('student_name', None)
     return redirect(url_for('student.student_login'))
+
+
+@student_bp.route("/student/api/generate_ai_advice", methods=["POST"])
+@student_required
+def generate_ai_advice():
+    """API endpoint để tạo nhận xét AI thủ công khi học sinh bấm nút"""
+    from app_helpers import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa
+    student_id = session['student_id']
+    student = Student.query.get(student_id)
+    if not student:
+        return jsonify({"error": "Không tìm thấy học sinh"}), 404
+
+    try:
+        advice = get_student_ai_advice(student)
+        return jsonify({"advice": advice})
+    except Exception as e:
+        print(f"AI Advice Error: {e}")
+        return jsonify({"error": "Hệ thống đang bận, em quay lại sau nhé!"}), 500
 
 
 
@@ -243,15 +262,15 @@ def student_dashboard():
             avg = (sum(data['TX'])/len(data['TX']) + sum(data['GK'])/len(data['GK'])*2 + sum(data['HK'])/len(data['HK'])*3) / 6
             data['TB'] = round(avg, 2)
             
-    # 4. Lấy lời khuyên AI (Optional - có thể load async)
-    ai_advice = get_student_ai_advice(student)
+    # 4. Không tự động lấy lời khuyên AI - sẽ có nút để tạo nhận xét thủ công
+    ai_advice = None
 
     unread_notifications = StudentNotification.query.filter_by(
         student_id=student_id, is_read=False
     ).count()
-    
-    return render_template("student_dashboard.html", 
-                           student=student, 
+
+    return render_template("student_dashboard.html",
+                           student=student,
                            violations=current_violations,
                            bonuses=current_bonuses,
                            transcript=transcript,

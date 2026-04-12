@@ -54,20 +54,21 @@ def register(app):
                 student = Student.query.filter_by(student_code=norm_code).first()
                 if not student:
                     flash("Mã số học sinh không tồn tại trong hệ thống!", "error")
-                elif not (student.parent_phone or "").strip():
-                    flash(
-                        "Học sinh chưa có số điện thoại phụ huynh trong hệ thống. "
-                        "Vui lòng liên hệ nhà trường để cập nhật trước khi đăng nhập.",
-                        "error",
-                    )
                 elif not pwd:
-                    flash("Vui lòng nhập mật khẩu (số điện thoại phụ huynh).", "error")
-                elif not parent_phone_login_match(student.parent_phone, pwd):
-                    flash("Sai mật khẩu. Mật khẩu là số điện thoại phụ huynh đã đăng ký.", "error")
+                    flash("Vui lòng nhập mật khẩu.", "error")
                 else:
-                    session["student_id"] = student.id
-                    session["student_name"] = student.name
-                    return redirect(url_for("student.student_dashboard"))
+                    # Ưu tiên kiểm tra mật khẩu đã đặt
+                    if student.password and student.check_password(pwd):
+                        session["student_id"] = student.id
+                        session["student_name"] = student.name
+                        return redirect(url_for("student.student_dashboard"))
+                    # Fallback: kiểm tra số điện thoại phụ huynh (cho tương thích ngược)
+                    elif parent_phone_login_match(student.parent_phone, pwd):
+                        session["student_id"] = student.id
+                        session["student_name"] = student.name
+                        return redirect(url_for("student.student_dashboard"))
+                    else:
+                        flash("Sai mật khẩu.", "error")
             
         return render_template('welcome.html')
 

@@ -273,6 +273,7 @@ def generate_report(student_id):
         response = get_ollama_client().chat(
             model=model_name,
             messages=[{"role": "user", "content": prompt}],
+            timeout=120
         )
         
         ai_reply = response['message']['content']

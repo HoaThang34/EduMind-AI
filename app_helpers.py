@@ -211,13 +211,14 @@ def can_access_student(student_id):
     return False
 
 
-def call_ollama(prompt, model=None):
+def call_ollama(prompt, model=None, timeout=120):
     """
     Gọi Ollama API để chat với AI model local.
     Model mặc định: OLLAMA_MODEL trong file .env (hoặc llama3.2); host: OLLAMA_HOST.
     Args:
         prompt: Câu hỏi/prompt gửi cho AI
         model: Tên model Ollama (None = đọc từ .env qua get_ollama_model())
+        timeout: Thời gian chờ tối đa (giây), mặc định 120 giây
     Returns:
         (response_text, error)
     """
@@ -227,6 +228,7 @@ def call_ollama(prompt, model=None):
         response = client.chat(
             model=model,
             messages=[{"role": "user", "content": prompt}],
+            timeout=timeout
         )
         return response["message"]["content"], None
     except Exception as e:
