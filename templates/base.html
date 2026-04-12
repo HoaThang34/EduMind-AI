@@ -958,15 +958,10 @@
                     <h3 class="sidebar-group-title px-3 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
                         Tiện ích</h3>
                     <div class="space-y-1">
-                        <a href="{{ url_for('group_chat') }}"
-                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'group_chat' %}active{% endif %}">
+                        <a href="{{ url_for('unified_chat') }}"
+                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'unified_chat' %}active{% endif %}">
                             <i class="fas fa-comments w-6 text-center text-lg mr-3 text-blue-400"></i>
-                            <span class="text-sm">Phòng chat chung</span>
-                        </a>
-                        <a href="{{ url_for('private_chats') }}"
-                            class="nav-item flex items-center px-3 py-2 rounded-lg group text-muted-foreground font-medium text-sm {% if request.endpoint == 'private_chats' %}active{% endif %}">
-                            <i class="fas fa-envelope w-6 text-center text-lg mr-3 text-indigo-400"></i>
-                            <span class="text-sm">Tin nhắn riêng</span>
+                            <span class="text-sm">Chat</span>
                         </a>
 
                         {% if current_user.has_permission('send_notifications') %}

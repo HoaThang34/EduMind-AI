@@ -224,6 +224,195 @@ def register(app):
             ]
         })
 
+
+    # === UNIFIED CHAT ROUTES ===
+
+    @app.route("/chat")
+    @login_required
+    def unified_chat():
+        """Trang chat thống nhất (gộp group chat và private chat)"""
+        chat_type = request.args.get('type', 'group')  # 'group' or 'private'
+        chat_id = request.args.get('id', type=int)
+        
+        # Lấy danh sách conversations private
+        messages = PrivateMessage.query.filter(
+            or_(
+                PrivateMessage.sender_id == current_user.id,
+                PrivateMessage.receiver_id == current_user.id
+            )
+        ).all()
+    
+        conversations = {}
+        for msg in messages:
+            other_id = msg.receiver_id if msg.sender_id == current_user.id else msg.sender_id
+            if other_id not in conversations or msg.created_at > conversations[other_id]['last_time']:
+                unread_count = PrivateMessage.query.filter_by(
+                    sender_id=other_id,
+                    receiver_id=current_user.id,
+                    is_read=False
+                ).count()
+                conversations[other_id] = {
+                    'user': Teacher.query.get(other_id),
+                    'last_message': msg.message,
+                    'last_time': msg.created_at,
+                    'unread_count': unread_count
+                }
+    
+        sorted_convs = sorted(conversations.items(), key=lambda x: x[1]['last_time'], reverse=True)
+        
+        # Lấy tin nhắn cuối của group chat
+        group_last_msg = GroupChatMessage.query.order_by(GroupChatMessage.created_at.desc()).first()
+        group_last_message = group_last_msg.message if group_last_msg else "Chưa có tin nhắn"
+        
+        # Danh sách tất cả giáo viên để chọn chat mới
+        all_teachers = Teacher.query.filter(Teacher.id != current_user.id).order_by(Teacher.full_name).all()
+        
+        # Lấy tin nhắn hiển thị
+        current_messages = []
+        current_user_info = None
+        if chat_type == 'group':
+            current_messages = GroupChatMessage.query.order_by(GroupChatMessage.created_at.asc()).limit(100).all()
+        elif chat_type == 'private' and chat_id:
+            other = Teacher.query.get_or_404(chat_id)
+            current_user_info = other
+            if other.id == current_user.id:
+                flash("Không thể chat với chính mình!", "error")
+                return redirect(url_for('unified_chat', type='group'))
+            
+            current_messages = PrivateMessage.query.filter(
+                or_(
+                    and_(PrivateMessage.sender_id == current_user.id, PrivateMessage.receiver_id == chat_id),
+                    and_(PrivateMessage.sender_id == chat_id, PrivateMessage.receiver_id == current_user.id)
+                )
+            ).order_by(PrivateMessage.created_at.asc()).all()
+            
+            # Đánh dấu tin nhắn đã đọc
+            unread = PrivateMessage.query.filter_by(
+                receiver_id=current_user.id,
+                sender_id=chat_id,
+                is_read=False
+            ).all()
+            for msg in unread:
+                msg.is_read = True
+            if unread:
+                db.session.commit()
+        else:
+            # Mặc định hiển thị group chat
+            chat_type = 'group'
+            current_messages = GroupChatMessage.query.order_by(GroupChatMessage.created_at.asc()).limit(100).all()
+        
+        return render_template("unified_chat.html", 
+                              current_type=chat_type,
+                              current_id=chat_id,
+                              current_user_info=current_user_info,
+                              messages=current_messages,
+                              conversations=sorted_convs,
+                              group_last_message=group_last_message,
+                              all_teachers=all_teachers)
+
+    @app.route("/api/chat/send", methods=["POST"])
+    @login_required
+    def unified_send_message():
+        """API gửi tin nhắn thống nhất"""
+        data = request.json
+        chat_type = data.get("type")  # 'group' or 'private'
+        message_text = data.get("message", "").strip()
+        
+        if not message_text:
+            return jsonify({"success": False, "error": "Tin nhắn trống"}), 400
+        
+        if chat_type == 'group':
+            msg = GroupChatMessage(
+                sender_id=current_user.id,
+                message=message_text
+            )
+            db.session.add(msg)
+            db.session.commit()
+            
+            return jsonify({
+                "success": True,
+                "message": {
+                    "id": msg.id,
+                    "sender_id": msg.sender_id,
+                    "sender_name": current_user.full_name,
+                    "message": msg.message,
+                    "created_at": msg.created_at.strftime("%H:%M %d/%m")
+                }
+            })
+        elif chat_type == 'private':
+            receiver_id = data.get("receiver_id")
+            
+            if not receiver_id:
+                return jsonify({"success": False, "error": "Thiếu receiver_id"}), 400
+            
+            if int(receiver_id) == current_user.id:
+                return jsonify({"success": False, "error": "Không thể gửi cho chính mình"}), 400
+            
+            msg = PrivateMessage(
+                sender_id=current_user.id,
+                receiver_id=receiver_id,
+                message=message_text
+            )
+            db.session.add(msg)
+            db.session.commit()
+            
+            return jsonify({
+                "success": True,
+                "message": {
+                    "id": msg.id,
+                    "sender_id": msg.sender_id,
+                    "sender_name": current_user.full_name,
+                    "message": msg.message,
+                    "created_at": msg.created_at.strftime("%H:%M %d/%m")
+                }
+            })
+        else:
+            return jsonify({"success": False, "error": "Invalid chat type"}), 400
+
+    @app.route("/api/chat/messages")
+    @login_required
+    def unified_get_messages():
+        """API lấy tin nhắn thống nhất"""
+        chat_type = request.args.get('type')  # 'group' or 'private'
+        chat_id = request.args.get('id', type=int)
+        
+        if chat_type == 'group':
+            messages = GroupChatMessage.query.order_by(GroupChatMessage.created_at.asc()).limit(100).all()
+            return jsonify({
+                "messages": [
+                    {
+                        "id": m.id,
+                        "sender_id": m.sender_id,
+                        "sender_name": m.sender.full_name,
+                        "message": m.message,
+                        "created_at": m.created_at.strftime("%H:%M %d/%m")
+                    }
+                    for m in messages
+                ]
+            })
+        elif chat_type == 'private' and chat_id:
+            messages = PrivateMessage.query.filter(
+                or_(
+                    and_(PrivateMessage.sender_id == current_user.id, PrivateMessage.receiver_id == chat_id),
+                    and_(PrivateMessage.sender_id == chat_id, PrivateMessage.receiver_id == current_user.id)
+                )
+            ).order_by(PrivateMessage.created_at.asc()).all()
+            
+            return jsonify({
+                "messages": [
+                    {
+                        "id": m.id,
+                        "sender_id": m.sender_id,
+                        "sender_name": m.sender.full_name,
+                        "message": m.message,
+                        "created_at": m.created_at.strftime("%H:%M %d/%m")
+                    }
+                    for m in messages
+                ]
+            })
+        else:
+            return jsonify({"success": False, "error": "Invalid parameters"}), 400
+
     # === STUDENT NOTIFICATION ROUTES ===
 
     @app.route("/student_notifications/send", methods=["GET", "POST"])
