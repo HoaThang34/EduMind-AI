@@ -13,14 +13,21 @@
                     <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
                     <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
-                Quản Lý Học Sinh & Lớp Học
+                Quản Lý Học Sinh
+                {% if assigned_class and is_homeroom_teacher %}
+                <span class="text-sm font-normal text-muted-foreground">- Lớp {{ assigned_class }}</span>
+                {% endif %}
+                {% if is_subject_teacher %}
+                <span class="text-sm font-normal text-muted-foreground">- Các lớp được phân công</span>
+                {% endif %}
             </h1>
         </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-        <!-- Add Student Form -->
+        <!-- Add Student Form - Admin Only -->
+        {% if is_admin %}
         <div class="md:col-span-2 bg-white border border-[hsl(240,5.9%,90%)] p-6 rounded-xl shadow-card">
             <div class="flex justify-between items-center mb-5">
                 <h2 class="text-base font-semibold text-foreground">Thêm Học Sinh Mới</h2>
@@ -105,10 +112,12 @@
                 <button type="submit" class="btn-primary w-full py-2.5 text-sm">Thêm Học Sinh</button>
             </form>
         </div>
+        {% endif %}
 
         <!-- Right Column -->
         <div class="md:col-span-1 space-y-4">
-            <!-- Add Class -->
+            <!-- Add Class - Admin Only -->
+            {% if is_admin %}
             <div class="bg-white border border-[hsl(240,5.9%,90%)] p-5 rounded-xl shadow-card">
                 <h2 class="text-base font-semibold text-foreground mb-4">Thêm Lớp Mới</h2>
                 <form method="POST" action="{{ url_for('add_class', filter_class=filter_class) }}" class="space-y-3">
@@ -123,6 +132,7 @@
                     </button>
                 </form>
             </div>
+            {% endif %}
 
             <!-- Class List -->
             <div class="bg-white border border-[hsl(240,5.9%,90%)] p-5 rounded-xl shadow-card">
@@ -133,6 +143,7 @@
                     <div
                         class="flex items-center justify-between px-3 py-2 rounded-lg group hover:bg-accent transition">
                         <span class="text-sm font-medium text-foreground">{{ cls.name }}</span>
+                        {% if is_admin %}
                         <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition">
                             <button type="button" onclick="openEditClassModal('{{ cls.id }}', '{{ cls.name }}')"
                                 class="btn-ghost p-1.5 text-xs" title="Đổi tên">
@@ -147,6 +158,7 @@
                                 </button>
                             </form>
                         </div>
+                        {% endif %}
                     </div>
                     {% endfor %}
                     {% if not class_list %}
@@ -183,8 +195,10 @@
                         <th>Mã Số</th>
                         <th>Tên</th>
                         <th>Lớp</th>
+                        {% if not is_subject_teacher %}
                         <th>Hạnh kiểm</th>
                         <th>Học lực</th>
+                        {% endif %}
                         <th class="text-right">Hành Động</th>
                     </tr>
                 </thead>
@@ -217,6 +231,7 @@
                             {% endif %}
                         </td>
                         <td><span class="badge badge-secondary">{{ student.student_class }}</span></td>
+                        {% if not is_subject_teacher %}
                         <td>
                             <div class="flex flex-col gap-0.5">
                                 <div class="flex items-center gap-1.5">
@@ -251,7 +266,9 @@
                                 <span class="text-[10px] text-muted-foreground italic">Mức: {{ student.academic_warning_level }}</span>
                             </div>
                         </td>
+                        {% endif %}
                         <td class="text-right space-x-1">
+                            {% if is_admin %}
                             <a href="{{ url_for('edit_student', student_id=student.id, filter_class=filter_class) }}"
                                 class="btn-ghost text-xs px-2 py-1">Sửa</a>
                             <form action="{{ url_for('delete_student', student_id=student.id, filter_class=filter_class) }}" method="POST"
@@ -259,6 +276,7 @@
                                 <button type="submit"
                                     class="btn-ghost text-xs px-2 py-1 text-destructive hover:text-destructive">Xóa</button>
                             </form>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}

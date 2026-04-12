@@ -184,21 +184,30 @@ def get_accessible_students():
     Trả về query Student dựa trên role của current_user
     - Admin: Tất cả học sinh
     - GVCN: Chỉ học sinh lớp assigned_class
-    - GVBM: Tất cả học sinh (để chấm điểm)
+    - GVBM: Chỉ học sinh của các lớp được phân công qua TeacherClassAssignment
     """
+    from models import TeacherClassAssignment
+
     if not current_user.is_authenticated:
         return Student.query.filter(Student.id == -1)  # Empty query
-    
+
     if current_user.role == 'admin':
         return Student.query
     elif current_user.role == 'homeroom_teacher' and current_user.assigned_class:
         return Student.query.filter_by(student_class=current_user.assigned_class)
-    elif current_user.role == 'subject_teacher':
-        return Student.query  # GVBM có thể xem tất cả HS để chấm điểm
+    elif current_user.role == 'subject_teacher' or current_user.role == 'both':
+        # Lấy danh sách lớp được phân công cho GVBM
+        assignments = TeacherClassAssignment.query.filter_by(teacher_id=current_user.id).all()
+        if not assignments:
+            return Student.query.filter(Student.id == -1)  # Empty query nếu không có lớp nào
+        class_names = [a.class_name for a in assignments]
+        return Student.query.filter(Student.student_class.in_(class_names))
     return Student.query.filter(Student.id == -1)  # Empty query
 
 def can_access_student(student_id):
     """Kiểm tra quyền truy cập học sinh cụ thể"""
+    from models import TeacherClassAssignment
+
     if not current_user.is_authenticated:
         return False
     if current_user.role == 'admin':
@@ -208,8 +217,13 @@ def can_access_student(student_id):
         return False
     if current_user.role == 'homeroom_teacher':
         return student.student_class == current_user.assigned_class
-    if current_user.role == 'subject_teacher':
-        return True  # GVBM có thể truy cập tất cả HS để chấm điểm
+    if current_user.role == 'subject_teacher' or current_user.role == 'both':
+        # Kiểm tra xem giáo viên có được phân công dạy lớp của học sinh này không
+        assignment = TeacherClassAssignment.query.filter_by(
+            teacher_id=current_user.id,
+            class_name=student.student_class
+        ).first()
+        return assignment is not None
     return False
 
 
@@ -1025,13 +1039,22 @@ def register_template_extensions(app):
         # Inject role info cho templates
         role_display = ''
         is_admin = False
+        is_homeroom_teacher = False
+        is_subject_teacher = False
+        assigned_class = None
         if current_user.is_authenticated:
             role_display = get_role_display(getattr(current_user, 'role', 'homeroom_teacher'))
             is_admin = getattr(current_user, 'role', None) == 'admin'
-        
+            is_homeroom_teacher = getattr(current_user, 'role', None) == 'homeroom_teacher'
+            is_subject_teacher = getattr(current_user, 'role', None) in ['subject_teacher', 'both']
+            assigned_class = getattr(current_user, 'assigned_class', None)
+
         return dict(
-            current_week_number=current_week, 
+            current_week_number=current_week,
             all_classes=classes,
             role_display=role_display,
-            is_admin=is_admin
+            is_admin=is_admin,
+            is_homeroom_teacher=is_homeroom_teacher,
+            is_subject_teacher=is_subject_teacher,
+            assigned_class=assigned_class
         )

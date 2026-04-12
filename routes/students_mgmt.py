@@ -243,7 +243,7 @@ def register(app):
 
     @app.route("/add_student", methods=["POST"])
     @login_required
-    @role_or_permission_required('homeroom_teacher', 'manage_students')
+    @admin_required
     def add_student():
         st = Student(
             name=request.form["student_name"].upper(),
@@ -272,7 +272,7 @@ def register(app):
 
     @app.route("/delete_student/<int:student_id>", methods=["POST"])
     @login_required
-    @role_or_permission_required('homeroom_teacher', 'manage_students')
+    @admin_required
     def delete_student(student_id):
         s = db.session.get(Student, student_id)
         if s:
@@ -285,7 +285,7 @@ def register(app):
 
     @app.route("/edit_student/<int:student_id>", methods=["GET", "POST"])
     @login_required
-    @role_or_permission_required('homeroom_teacher', 'manage_students')
+    @admin_required
     def edit_student(student_id):
         s = db.session.get(Student, student_id)
         if not s:
