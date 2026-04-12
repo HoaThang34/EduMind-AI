@@ -40,9 +40,11 @@ def get_ollama_host():
 
 
 def get_ollama_model():
-    """OLLAMA_MODEL trong .env — phải trùng `ollama list` (vd: llama3.2, llava)."""
+    """OLLAMA_MODEL trong .env — phải trùng `ollama list`."""
     m = (os.environ.get("OLLAMA_MODEL") or "").strip()
-    return m or "llama3.2"
+    if not m:
+        raise ValueError("OLLAMA_MODEL không được cấu hình trong file .env")
+    return m
 
 
 def get_ollama_fallback_model():
@@ -214,7 +216,7 @@ def can_access_student(student_id):
 def call_ollama(prompt, model=None, timeout=120):
     """
     Gọi Ollama API để chat với AI model local.
-    Model mặc định: OLLAMA_MODEL trong file .env (hoặc llama3.2); host: OLLAMA_HOST.
+    Model mặc định: OLLAMA_MODEL trong file .env; host: OLLAMA_HOST.
     Args:
         prompt: Câu hỏi/prompt gửi cho AI
         model: Tên model Ollama (None = đọc từ .env qua get_ollama_model())
@@ -227,8 +229,7 @@ def call_ollama(prompt, model=None, timeout=120):
     try:
         response = client.chat(
             model=model,
-            messages=[{"role": "user", "content": prompt}],
-            timeout=timeout
+            messages=[{"role": "user", "content": prompt}]
         )
         return response["message"]["content"], None
     except Exception as e:
@@ -795,7 +796,7 @@ def _call_gemini(prompt, image_path=None, image_paths=None, is_json=False):
 
     hint = (
         " Kiểm tra Ollama đang chạy, chạy `ollama list`, và đặt OLLAMA_MODEL trùng tên model đã pull "
-        "(vd: llama3.2). Biến OLLAMA_FALLBACK_MODEL có thể đặt model dự phòng."
+        "trong file .env. Biến OLLAMA_FALLBACK_MODEL có thể đặt model dự phòng."
     )
     return None, (last_err or "Lỗi Ollama không xác định") + hint
 

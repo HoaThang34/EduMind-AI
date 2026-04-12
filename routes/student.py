@@ -55,7 +55,7 @@ def student_required(f):
 
 
 def get_student_ai_advice(student):
-    from app_helpers import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa, call_ollama
+    from app_helpers import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa, call_ollama, get_ollama_model
     """
     Phân tích dữ liệu học sinh và đưa ra lời khuyên từ AI
     """
@@ -99,11 +99,16 @@ def get_student_ai_advice(student):
         
         # 3. Gọi AI
         advice, err = call_ollama(prompt)
-        return advice if not err else "Hệ thống đang bận, em quay lại sau nhé!"
+        if err:
+            print(f"AI Advice Ollama Error: {err}")
+            return f"Lỗi kết nối AI: {err}\n\nVui lòng kiểm tra:\n• Ollama đã được cài đặt và chạy chưa?\n• Model đã được pull chưa? (`ollama pull {get_ollama_model()}`)"
+        return advice
         
     except Exception as e:
         print(f"AI Advice Error: {e}")
-        return "Chào em, chúc em một ngày học tập thật tốt! (Hệ thống tư vấn đang bảo trì)"
+        import traceback
+        traceback.print_exc()
+        return f"Lỗi hệ thống: {str(e)}\n\nVui lòng liên hệ quản trị viên."
 
 
 
@@ -137,7 +142,7 @@ def _student_chat_call_ollama(system_prompt, history, user_message, image_base64
     else:
         messages.append({"role": "user", "content": context})
     try:
-        response = get_ollama_client().chat(model=model, messages=messages, timeout=120)
+        response = get_ollama_client().chat(model=model, messages=messages)
         return (response.get("message") or {}).get("content", "").strip(), None
     except Exception as e:
         return None, str(e)
@@ -205,8 +210,10 @@ def generate_ai_advice():
         advice = get_student_ai_advice(student)
         return jsonify({"advice": advice})
     except Exception as e:
-        print(f"AI Advice Error: {e}")
-        return jsonify({"error": "Hệ thống đang bận, em quay lại sau nhé!"}), 500
+        print(f"AI Advice API Error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Lỗi hệ thống: {str(e)}"}), 500
 
 
 
