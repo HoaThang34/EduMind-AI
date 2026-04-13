@@ -46,7 +46,7 @@ def register(app):
         
             if not selected_rule_ids:
                 flash("Vui lòng chọn ít nhất một lỗi vi phạm!", "error")
-                return redirect(url_for("add_violation"))
+                return redirect(url_for("discipline_management"))
 
             w_cfg = SystemConfig.query.filter_by(key="current_week").first()
             current_week = int(w_cfg.value) if w_cfg else 1
@@ -135,7 +135,7 @@ def register(app):
 
             if count > 0:
                 db.session.commit()
-            
+
                 # Tạo thông báo cho GVCN các lớp bị ảnh hưởng
                 affected_classes = set()
                 if selected_student_ids:
@@ -143,7 +143,7 @@ def register(app):
                         student = db.session.get(Student, int(s_id))
                         if student and student.student_class:
                             affected_classes.add(student.student_class)
-            
+
                 for class_name in affected_classes:
                     try:
                         create_notification(
@@ -154,12 +154,12 @@ def register(app):
                         )
                     except:
                         pass  # Không để lỗi notification làm gián đoạn chức năng chính
-            
+
                 flash(f"Đã ghi nhận {count} vi phạm (cho {len(selected_student_ids) if selected_student_ids else 'nhiều'} học sinh x {len(selected_rule_ids)} lỗi).", "success")
             else:
                 flash("Chưa chọn học sinh nào hoặc xảy ra lỗi.", "error")
-        
-            return redirect(url_for("add_violation"))
+
+            return redirect(url_for("discipline_management"))
 
         # GET: Truyền thêm danh sách học sinh để hiển thị trong Dropdown (filtered by role)
         students = get_accessible_students().order_by(Student.student_class, Student.name).all()

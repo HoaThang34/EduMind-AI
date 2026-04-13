@@ -160,11 +160,11 @@ def register(app):
         
             if not selected_student_ids:
                 flash("Vui lòng chọn ít nhất một học sinh!", "error")
-                return redirect(url_for("add_bonus"))
+                return redirect(url_for("discipline_management"))
         
             if not selected_bonus_ids:
                 flash("Vui lòng chọn ít nhất một loại điểm cộng!", "error")
-                return redirect(url_for("add_bonus"))
+                return redirect(url_for("discipline_management"))
         
             # Lấy tuần hiện tại
             w_cfg = SystemConfig.query.filter_by(key="current_week").first()
@@ -201,8 +201,8 @@ def register(app):
                 flash(f"Đã ghi nhận điểm cộng cho {len(selected_student_ids)} học sinh x {len(selected_bonus_ids)} loại!", "success")
             else:
                 flash("Có lỗi xảy ra, không ghi nhận được điểm cộng!", "error")
-        
-            return redirect(url_for("add_bonus"))
+
+            return redirect(url_for("discipline_management"))
     
         # GET: Render form (filtered by role)
         students = get_accessible_students().order_by(Student.student_class, Student.name).all()
