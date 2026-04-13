@@ -26,7 +26,12 @@ def manage_grades():
         ))
     
     students = q.order_by(Student.student_code.asc()).all()
-    return render_template("manage_grades.html", students=students, search_query=search, selected_class=selected_class)
+    
+    # Get all classes for the dropdown filter
+    from sqlalchemy import func
+    all_classes = sorted([c[0] for c in db.session.query(func.distinct(Student.student_class)).all()])
+    
+    return render_template("manage_grades.html", students=students, search_query=search, selected_class=selected_class, all_classes=all_classes)
 
 
 

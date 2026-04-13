@@ -780,3 +780,17 @@ def register(app):
 
     @app.route("/api/check_duplicate_student", methods=["POST"])
     def check_duplicate_student(): return jsonify([])
+
+    @app.route("/api/subjects")
+    @login_required
+    def api_subjects():
+        """API endpoint to get all subjects for dropdowns"""
+        subjects = Subject.query.order_by(Subject.name).all()
+        return jsonify([{"id": s.id, "name": s.name} for s in subjects])
+
+    @app.route("/api/classes")
+    @login_required
+    def api_classes():
+        """API endpoint to get all classes for dropdowns"""
+        classes = ClassRoom.query.order_by(ClassRoom.name).all()
+        return jsonify([{"name": c.name} for c in classes])
