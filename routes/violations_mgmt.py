@@ -317,11 +317,14 @@ def register(app):
                 os.remove(p)
 
             if data:
+                # Xử lý trường hợp AI trả về array hoặc object
+                if isinstance(data, list) and len(data) > 0:
+                    data = data[0]
                 # Lấy mã học sinh từ response (GIỮ NGUYÊN format gốc)
                 ocr_code_raw = str(data.get("student_code", "")).strip()
             
                 if ocr_code_raw:
-                    # ⚡ TÌM KIẾM 2 LẦN: Exact match → Normalized match
+                    # ⚡ TÌM KIẾM 3 LẦN: Exact match → Normalized match → Super normalized match
                     student = None
                     match_method = ""
                 
@@ -339,6 +342,19 @@ def register(app):
                             if normalize_student_code(s.student_code) == ocr_code_normalized:
                                 student = s
                                 match_method = f"Normalized match (chuẩn hóa: '{ocr_code_normalized}')"
+                                break
+                    
+                    # Lần 3: Super normalized (bỏ tất cả space và hyphen)
+                    if not student:
+                        import re
+                        ocr_super = re.sub(r'[\s\-]', '', ocr_code_raw.upper())
+                        all_students = Student.query.all()
+                        
+                        for s in all_students:
+                            db_super = re.sub(r'[\s\-]', '', normalize_student_code(s.student_code))
+                            if db_super == ocr_super:
+                                student = s
+                                match_method = f"Super normalized match ('{ocr_super}')"
                                 break
                 
                     if student:

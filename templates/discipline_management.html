@@ -73,6 +73,9 @@
         <button onclick="switchTab('record')" class="tab-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-transparent hover:bg-gray-100 transition" id="tab-record">
             ✏️ Ghi Nhận
         </button>
+        <button onclick="switchTab('scan')" class="tab-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-transparent hover:bg-gray-100 transition" id="tab-scan">
+            📷 Quét Thẻ OCR
+        </button>
         <button onclick="switchTab('history')" class="tab-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-transparent hover:bg-gray-100 transition" id="tab-history">
             📊 Lịch Sử
         </button>
@@ -325,7 +328,103 @@
         </div>
     </div>
 
-    <!-- Tab 3: Lịch Sử -->
+    <!-- Tab 3: Quét Thẻ OCR -->
+    <div id="content-scan" class="tab-content">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- OCR Upload Section -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-[hsl(240,5.9%,90%)]">
+                <h2 class="text-lg font-bold text-foreground mb-4 flex items-center">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center mr-2">
+                        <i class="fas fa-images"></i>
+                    </div>
+                    Quét Thẻ Hàng Loạt (OCR)
+                </h2>
+
+                <form id="ocr-form" class="space-y-4">
+                    <div class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:bg-accent transition cursor-pointer relative group">
+                        <input type="file" id="ocr_files" name="files[]" multiple accept="image/*"
+                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            onchange="updateFileCount(this)">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-muted-foreground mb-3 group-hover:text-indigo-500 transition"></i>
+                        <p class="text-sm text-muted-foreground font-medium">Kéo thả hoặc chọn nhiều ảnh thẻ</p>
+                        <p class="text-xs text-muted-foreground mt-1" id="file-count-display">Chưa có ảnh nào được chọn</p>
+                    </div>
+
+                    <button type="submit" id="ocr-button"
+                        class="w-full py-3 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition shadow-md flex items-center justify-center gap-2">
+                        <i class="fas fa-magic"></i> Phân Tích Tất Cả
+                    </button>
+                </form>
+
+                <div id="ocr-results-area" class="mt-6 space-y-3 hidden">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 class="text-sm font-bold text-foreground">Kết quả phân tích:</h3>
+                        <div class="text-xs text-muted-foreground">Đã chọn: <span id="selected-count" class="font-bold text-indigo-600">0</span></div>
+                    </div>
+
+                    <div id="results-list" class="max-h-60 overflow-y-auto space-y-2 pr-1 custom-scrollbar bg-accent p-2 rounded-lg"></div>
+                </div>
+            </div>
+
+            <!-- Violation Entry from OCR -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-[hsl(240,5.9%,90%)]">
+                <h2 class="text-lg font-bold text-foreground mb-4 flex items-center">
+                    <div class="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center mr-2">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    Ghi Nhận Vi Phạm (OCR)
+                </h2>
+
+                <form method="POST" action="{{ url_for('add_violation') }}" onsubmit="prepareBatchSubmit(event)" id="batch-violation-form">
+                    <input type="hidden" name="students_list" id="students_json_input">
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-foreground mb-2">Áp dụng lỗi vi phạm:</label>
+                            <div class="bg-red-50 border border-red-200 rounded-lg p-4 max-h-64 overflow-y-auto space-y-2">
+                                {% for rule in rules %}
+                                <label class="flex items-center p-2 hover:bg-white rounded-lg cursor-pointer transition group">
+                                    <input type="checkbox" name="rule_ids[]" value="{{ rule.id }}"
+                                        class="w-4 h-4 text-red-600 border-slate-300 rounded focus:ring-red-500 cursor-pointer">
+                                    <span class="ml-3 text-sm font-medium text-foreground group-hover:text-red-600 flex-1">
+                                        {{ rule.name }}
+                                    </span>
+                                    <span class="text-xs font-bold text-red-600 bg-red-100 px-2 py-1 rounded">
+                                        -{{ rule.points_deducted }}đ
+                                    </span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-foreground mb-1">Liên kết sổ đầu bài (tuỳ chọn)</label>
+                            <select name="lesson_book_entry_id" class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm">
+                                <option value="">— Không —</option>
+                                {% for e in lesson_entries %}
+                                <option value="{{ e.id }}">{{ e.lesson_date.strftime('%d/%m/%Y') }} · Tiết {{ e.period_number }} · {{ e.class_name }} — {{ (e.topic or '')[:50] }}{% if (e.topic or '')|length > 50 %}…{% endif %}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div id="batch-actions" class="hidden pt-2">
+                            <button type="submit"
+                                class="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold shadow-md transition-all flex justify-center items-center gap-2">
+                                <i class="fas fa-check-circle"></i> Xác Nhận & Lưu Vào CSDL
+                            </button>
+                        </div>
+
+                        <div id="no-selection-message" class="text-center py-8 text-gray-400">
+                            <i class="fas fa-id-card text-4xl mb-3"></i>
+                            <p>Vui lòng quét thẻ học sinh bên trái trước</p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 4: Lịch Sử -->
     <div id="content-history" class="tab-content">
         <div class="bg-white rounded-xl shadow-sm border border-[hsl(240,5.9%,90%)] p-6">
             <div class="flex justify-between items-center mb-4">
@@ -435,6 +534,112 @@
         // Activate selected tab button
         document.getElementById('tab-' + tabName).classList.add('active');
     }
+
+    // --- OCR Functions (from add_violation.html) ---
+    function updateFileCount(input) {
+        const count = input.files.length;
+        const text = count > 0 ? `Đã chọn ${count} ảnh` : "Chưa có ảnh nào được chọn";
+        document.getElementById('file-count-display').innerText = text;
+        document.getElementById('file-count-display').className = count > 0 ? "text-sm text-indigo-600 font-bold mt-1" : "text-xs text-muted-foreground mt-1";
+    }
+
+    function updateSelectionCount() {
+        const checkedCount = $('.ocr-checkbox:checked').length;
+        $('#selected-count').text(checkedCount);
+        if (checkedCount > 0) {
+            $('#batch-actions').removeClass('hidden');
+            $('#no-selection-message').addClass('hidden');
+        } else {
+            $('#batch-actions').addClass('hidden');
+            $('#no-selection-message').removeClass('hidden');
+        }
+    }
+
+    function prepareBatchSubmit(e) {
+        let selectedCodes = [];
+        $('.ocr-checkbox:checked').each(function () { selectedCodes.push($(this).val()); });
+
+        if (selectedCodes.length === 0) {
+            e.preventDefault();
+            alert("Vui lòng chọn ít nhất 1 học sinh!");
+            return false;
+        }
+        $('#students_json_input').val(JSON.stringify(selectedCodes));
+        return true;
+    }
+
+    // OCR Form Handler
+    $(document).ready(function () {
+        $('#ocr-form').on('submit', function (e) {
+            e.preventDefault();
+            var ocrButton = $('#ocr-button');
+            var files = $('#ocr_files')[0].files;
+
+            if (files.length === 0) { alert("Vui lòng chọn ít nhất 1 ảnh!"); return; }
+
+            var formData = new FormData();
+            for (var i = 0; i < files.length; i++) { formData.append('files[]', files[i]); }
+
+            ocrButton.prop('disabled', true).html('<i class="fas fa-circle-notch fa-spin"></i> Đang xử lý...');
+            $('#ocr-results-area').removeClass('hidden');
+            $('#results-list').html('<div class="text-center text-muted-foreground py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Đang gửi ảnh lên server AI...</div>');
+            $('#batch-actions').addClass('hidden');
+            $('#no-selection-message').removeClass('hidden');
+
+            $.ajax({
+                url: '/upload_ocr',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    $('#results-list').empty();
+
+                    if (response.results && response.results.length > 0) {
+                        let hasValid = false;
+                        response.results.forEach((item) => {
+                            let itemHtml = '';
+                            if (item.found) {
+                                hasValid = true;
+                                let info = item.db_info;
+                                itemHtml = `
+                                    <label class="flex items-center p-3 bg-white border border-[hsl(240,5.9%,90%)] rounded-lg hover:bg-indigo-50 transition cursor-pointer group select-none">
+                                        <input type="checkbox" value="${info.code}" class="w-5 h-5 rounded border-gray-300 focus:ring-indigo-500 text-indigo-600 cursor-pointer ocr-checkbox" checked onchange="updateSelectionCount()">
+                                        <div class="ml-3 flex-1">
+                                            <p class="text-sm font-bold text-foreground group-hover:text-indigo-700">${info.name}</p>
+                                            <p class="text-xs text-muted-foreground">Lớp: ${info.class} • Mã: ${info.code}</p>
+                                        </div>
+                                        <div class="text-emerald-600 text-xs font-bold bg-emerald-50 px-2 py-1 rounded">Hợp lệ</div>
+                                    </label>`;
+                            } else {
+                                let errorText = item.error ? item.error : 'Không khớp CSDL';
+                                itemHtml = `
+                                    <div class="flex items-center p-3 bg-red-50 border border-red-100 rounded-lg opacity-70">
+                                        <input type="checkbox" disabled class="w-5 h-5 rounded border-gray-300 bg-accent cursor-not-allowed">
+                                        <div class="ml-3 flex-1">
+                                            <p class="text-sm font-medium text-red-800 italic">${errorText}</p>
+                                            <p class="text-xs text-red-500">File: ${item.file_name}</p>
+                                        </div>
+                                        <div class="text-red-500 text-xs font-bold"><i class="fas fa-times"></i></div>
+                                    </div>`;
+                            }
+                            $('#results-list').append(itemHtml);
+                        });
+                        updateSelectionCount();
+                        if (!hasValid) $('#results-list').append('<div class="text-center text-red-500 text-sm mt-2">Không tìm thấy học sinh nào hợp lệ.</div>');
+                    } else {
+                        $('#results-list').html('<div class="text-red-500 text-center">Lỗi không có kết quả.</div>');
+                    }
+                },
+                error: function () {
+                    $('#results-list').html('<div class="text-red-500 text-center font-bold">❌ Lỗi kết nối server.</div>');
+                },
+                complete: function () {
+                    ocrButton.prop('disabled', false).html('<i class="fas fa-magic"></i> Phân Tích Tất Cả');
+                }
+            });
+        });
+    });
 
     $(document).ready(function () {
         $('#student-select-violation').select2({
