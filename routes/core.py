@@ -133,7 +133,7 @@ def register(app):
         # Get all classes for filter dropdown
         all_classes = sorted([c[0] for c in db.session.query(func.distinct(Student.student_class)).all()])
     
-        return render_template('index.html', students=students, student_gpas=student_gpas, search_query=search, selected_class=selected_class, selected_warning=selected_warning, selected_academic_warning=selected_academic_warning, all_classes=all_classes)
+        return render_template('index.html', students=students, student_gpas=student_gpas, search_query=search, selected_class=selected_class, selected_warning=selected_warning, selected_academic_warning=selected_academic_warning, all_classes=all_classes, current_user=current_user)
     @app.route("/dashboard")
     @login_required
     def dashboard():

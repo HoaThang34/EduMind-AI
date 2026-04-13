@@ -413,7 +413,7 @@ def register(app):
     def batch_violation(): return redirect(url_for('add_violation'))
     @app.route("/student/<int:student_id>/violations_timeline")
     @login_required
-    @permission_required('view_discipline')
+    @role_or_permission_required('discipline_officer', 'view_discipline')
     def violations_timeline(student_id):
         """Timeline lịch sử vi phạm của học sinh"""
         student = db.session.get(Student, student_id)

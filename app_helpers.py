@@ -185,6 +185,7 @@ def get_accessible_students():
     - Admin: Tất cả học sinh
     - GVCN: Chỉ học sinh lớp assigned_class
     - GVBM: Chỉ học sinh của các lớp được phân công qua TeacherClassAssignment
+    - discipline_officer (Giáo viên nền nếp): Tất cả học sinh (để quản lý kỷ luật)
     """
     from models import TeacherClassAssignment
 
@@ -202,6 +203,9 @@ def get_accessible_students():
             return Student.query.filter(Student.id == -1)  # Empty query nếu không có lớp nào
         class_names = [a.class_name for a in assignments]
         return Student.query.filter(Student.student_class.in_(class_names))
+    elif current_user.role == 'discipline_officer':
+        # Giáo viên nền nếp được xem tất cả học sinh để quản lý kỷ luật
+        return Student.query
     return Student.query.filter(Student.id == -1)  # Empty query
 
 def can_access_student(student_id):
@@ -224,6 +228,9 @@ def can_access_student(student_id):
             class_name=student.student_class
         ).first()
         return assignment is not None
+    if current_user.role == 'discipline_officer':
+        # Giáo viên nền nếp được truy cập tất cả học sinh
+        return True
     return False
 
 

@@ -105,6 +105,7 @@
                 </select>
             </div>
 
+            {% if current_user.role != 'discipline_officer' %}
             <div class="flex-1 min-w-[160px]">
                 <label class="block text-xs text-muted-foreground mb-1">Báo động Học Lực</label>
                 <select name="academic_warning" onchange="this.form.submit()" class="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring">
@@ -114,6 +115,7 @@
                     <option value="Đỏ" {% if selected_academic_warning == 'Đỏ' %}selected{% endif %}>🔴 Đỏ</option>
                 </select>
             </div>
+            {% endif %}
 
             <div class="flex-1 min-w-[200px]">
                 <label class="block text-xs text-muted-foreground mb-1">Tìm kiếm</label>
@@ -161,7 +163,9 @@
                         <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Học Sinh</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Lớp</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Điểm Rèn Luyện</th>
+                        {% if current_user.role != 'discipline_officer' %}
                         <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">GPA</th>
+                        {% endif %}
                         <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Lịch Sử Vi Phạm</th>
                     </tr>
                 </thead>
@@ -217,6 +221,7 @@
                                 <span class="text-xs text-muted-foreground">{{ student.conduct }}</span>
                             </div>
                         </td>
+                        {% if current_user.role != 'discipline_officer' %}
                         <td class="px-4 py-3">
                             {% set gpa = student_gpas.get(student.id) %}
                             {% if gpa %}
@@ -233,6 +238,7 @@
                             <span class="text-muted-foreground text-xs italic">Chưa có điểm</span>
                             {% endif %}
                         </td>
+                        {% endif %}
                         <td class="px-4 py-3">
                             {% if student.violations %}
                             <div class="flex flex-wrap gap-1">
@@ -255,7 +261,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" class="px-4 py-16 text-center">
+                        <td colspan="{% if current_user.role == 'discipline_officer' %}4{% else %}5{% endif %}" class="px-4 py-16 text-center">
                             <div class="flex flex-col items-center text-muted-foreground">
                                 <div class="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-3">
                                     <i class="fas fa-search text-2xl opacity-40"></i>
