@@ -1,14 +1,1099 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_login import login_required, current_user
-from models import Student, Violation, db, Grade, SystemConfig, Subject, ClassRoom
-from sqlalchemy import or_
+from models import Student, Violation, db, Grade, SystemConfig, Subject, ClassRoom, Teacher, TeacherClassAssignment, StudentNotification
+from sqlalchemy import or_, func
 import json
 import base64
 import os
 import uuid
+import re
+import unicodedata
 from datetime import datetime
+from difflib import SequenceMatcher
 
 ai_engine_bp = Blueprint('ai_engine', __name__)
+
+
+def _extract_class_name(message: str):
+    """Tách tên lớp từ câu hỏi tự nhiên, ví dụ: 'lớp 10 Hóa'."""
+    match = re.search(r"\blớp\s+([^\?,\.;!\n]+)", message, re.IGNORECASE)
+    if not match:
+        return None
+    class_name = re.sub(r"\s+", " ", match.group(1)).strip()
+    return class_name or None
+
+
+def _try_answer_school_stats_query(message: str):
+    """Xử lý các câu hỏi thống kê học sinh/giáo viên trực tiếp từ DB."""
+    msg = (message or "").strip()
+    if not msg:
+        return None
+
+    msg_lower = msg.lower()
+    has_count_intent = any(kw in msg_lower for kw in ["bao nhiêu", "số lượng", "thống kê", "tổng số"])
+    if not has_count_intent:
+        return None
+
+    class_name = _extract_class_name(msg)
+    school_name_cfg = SystemConfig.query.filter_by(key="school_name").first()
+    school_name = school_name_cfg.value if school_name_cfg else "trường"
+
+    # 1) Thống kê học sinh theo lớp
+    if "học sinh" in msg_lower and class_name and any(kw in msg_lower for kw in ["lớp", "sĩ số"]):
+        total_in_class = Student.query.filter(Student.student_class.ilike(f"%{class_name}%")).count()
+        response = (
+            f"📘 **Thống kê lớp {class_name}**\n\n"
+            f"- Số học sinh hiện có: **{total_in_class}** em."
+        )
+        return _append_stats_advice(msg_lower, response, class_name=class_name)
+
+    # 2) Thống kê học sinh học lực yếu/trung bình (toàn trường hoặc theo lớp)
+    asks_weak_or_avg = (
+        "học lực" in msg_lower
+        and ("yếu" in msg_lower or "trung bình" in msg_lower or "trung binh" in msg_lower)
+    )
+    if "học sinh" in msg_lower and asks_weak_or_avg:
+        weak_or_avg_filter = or_(
+            Student.academic_rank.ilike("%yếu%"),
+            Student.academic_rank.ilike("%trung bình%"),
+            Student.academic_rank.ilike("%trung binh%")
+        )
+        query = Student.query.filter(weak_or_avg_filter)
+        if class_name:
+            query = query.filter(Student.student_class.ilike(f"%{class_name}%"))
+        weak_or_avg_count = query.count()
+        scope_label = f"lớp {class_name}" if class_name else school_name
+        response = (
+            f"📉 **Thống kê học lực ({scope_label})**\n\n"
+            f"- Số học sinh mức **Yếu/Trung bình**: **{weak_or_avg_count}** em."
+        )
+        return _append_stats_advice(msg_lower, response, class_name=class_name)
+
+    # 3) Thống kê giáo viên và giáo viên Tin học
+    asks_teacher_count = "giáo viên" in msg_lower
+    asks_it_teacher = "tin học" in msg_lower or "gv tin" in msg_lower or "giáo viên tin" in msg_lower
+    if asks_teacher_count:
+        total_teachers = Teacher.query.filter(Teacher.role != "parent_student").count()
+
+        if asks_it_teacher:
+            it_subject_ids = [
+                sid for (sid,) in db.session.query(Subject.id).filter(Subject.name.ilike("%tin%")).all()
+            ]
+            it_teacher_ids = set()
+            if it_subject_ids:
+                direct_ids = db.session.query(Teacher.id).filter(
+                    Teacher.assigned_subject_id.in_(it_subject_ids)
+                ).all()
+                assign_ids = db.session.query(TeacherClassAssignment.teacher_id).filter(
+                    TeacherClassAssignment.subject_id.in_(it_subject_ids)
+                ).all()
+                it_teacher_ids.update(tid for (tid,) in direct_ids)
+                it_teacher_ids.update(tid for (tid,) in assign_ids)
+
+            response = (
+                f"👩‍🏫 **Thống kê giáo viên ({school_name})**\n\n"
+                f"- Tổng số giáo viên: **{total_teachers}** người.\n"
+                f"- Giáo viên Tin học: **{len(it_teacher_ids)}** người."
+            )
+            return _append_stats_advice(msg_lower, response)
+
+        response = (
+            f"👩‍🏫 **Thống kê giáo viên ({school_name})**\n\n"
+            f"- Tổng số giáo viên: **{total_teachers}** người."
+        )
+        return _append_stats_advice(msg_lower, response)
+
+    # 4) Tổng học sinh toàn trường
+    if "học sinh" in msg_lower and any(kw in msg_lower for kw in ["toàn trường", "toan truong", "trường", "truong"]):
+        total_students = db.session.query(func.count(Student.id)).scalar() or 0
+        response = (
+            f"🎓 **Thống kê học sinh ({school_name})**\n\n"
+            f"- Tổng số học sinh hiện có: **{total_students}** em."
+        )
+        return _append_stats_advice(msg_lower, response)
+
+    return None
+
+
+def _conduct_level(score):
+    if score is None:
+        return "Chưa rõ"
+    if score >= 80:
+        return "Tốt"
+    if score >= 65:
+        return "Khá"
+    if score >= 50:
+        return "Trung bình"
+    return "Yếu"
+
+
+def _student_learning_snapshot(student: Student):
+    semester_cfg = SystemConfig.query.filter_by(key="current_semester").first()
+    year_cfg = SystemConfig.query.filter_by(key="school_year").first()
+    semester = int(semester_cfg.value) if semester_cfg and str(semester_cfg.value).isdigit() else 1
+    school_year = year_cfg.value if year_cfg else "2025-2026"
+
+    grades = Grade.query.filter_by(student_id=student.id, semester=semester, school_year=school_year).all()
+    subject_scores = {}
+    for g in grades:
+        subject_name = g.subject.name if g.subject else "N/A"
+        if subject_name not in subject_scores:
+            subject_scores[subject_name] = {"TX": [], "GK": [], "HK": []}
+        if g.grade_type in subject_scores[subject_name]:
+            subject_scores[subject_name][g.grade_type].append(float(g.score))
+
+    final_subject_avgs = {}
+    for subject_name, data in subject_scores.items():
+        if data["TX"] and data["GK"] and data["HK"]:
+            avg_tx = sum(data["TX"]) / len(data["TX"])
+            avg_gk = sum(data["GK"]) / len(data["GK"])
+            avg_hk = sum(data["HK"]) / len(data["HK"])
+            final_subject_avgs[subject_name] = round((avg_tx + avg_gk * 2 + avg_hk * 3) / 6, 2)
+
+    gpa = round(sum(final_subject_avgs.values()) / len(final_subject_avgs), 2) if final_subject_avgs else None
+    strong_subjects = [s for s, v in final_subject_avgs.items() if v >= 8.0]
+    weak_subjects = [s for s, v in final_subject_avgs.items() if v < 6.0]
+    conduct_level = _conduct_level(student.current_score)
+
+    risk_flags = []
+    if gpa is not None and gpa < 6.0:
+        risk_flags.append("Học lực dưới ngưỡng an toàn")
+    if conduct_level in ["Trung bình", "Yếu"]:
+        risk_flags.append("Nề nếp cần theo dõi sát")
+    if len(weak_subjects) >= 2:
+        risk_flags.append("Có nhiều môn cần phụ đạo")
+
+    suggestions = []
+    if weak_subjects:
+        suggestions.append(f"Ưu tiên phụ đạo các môn: {', '.join(weak_subjects[:3])}.")
+    if not weak_subjects and strong_subjects:
+        suggestions.append(f"Duy trì thế mạnh ở: {', '.join(strong_subjects[:3])}.")
+    if conduct_level in ["Trung bình", "Yếu"]:
+        suggestions.append("Thiết lập mục tiêu nề nếp theo tuần và phối hợp phụ huynh.")
+    if not suggestions:
+        suggestions.append("Duy trì nhịp học ổn định, theo dõi tiến độ mỗi tuần.")
+
+    return {
+        "gpa": gpa,
+        "conduct_level": conduct_level,
+        "strong_subjects": strong_subjects,
+        "weak_subjects": weak_subjects,
+        "risk_flags": risk_flags,
+        "suggestions": suggestions,
+        "subject_count": len(final_subject_avgs),
+    }
+
+
+def _append_stats_advice(msg_lower: str, response_text: str, class_name: str = None):
+    if "học lực" in msg_lower:
+        scope = f"lớp {class_name}" if class_name else "toàn trường"
+        return (
+            response_text
+            + "\n\n💡 **Khuyến nghị tự động**\n"
+            + f"- Ưu tiên lập danh sách can thiệp nhóm học lực Yếu/Trung bình theo {scope}.\n"
+            + "- Tổ chức phụ đạo theo cụm môn yếu và theo dõi lại sau 2 tuần.\n"
+            + "- Kết hợp nhắc nề nếp để cải thiện đồng thời học tập."
+        )
+    if "giáo viên" in msg_lower:
+        return (
+            response_text
+            + "\n\n💡 **Khuyến nghị tự động**\n"
+            + "- Đối chiếu tỷ lệ giáo viên/môn với nhu cầu phân công lớp hiện tại.\n"
+            + "- Nếu thiếu giáo viên Tin học, ưu tiên điều chỉnh thời khóa biểu hoặc phân công chéo ngắn hạn."
+        )
+    if "học sinh" in msg_lower:
+        return (
+            response_text
+            + "\n\n💡 **Khuyến nghị tự động**\n"
+            + "- Theo dõi biến động sĩ số theo tháng để chủ động kế hoạch chủ nhiệm.\n"
+            + "- Kết hợp thống kê học lực và nề nếp để xác định nhóm cần hỗ trợ sớm."
+        )
+    return response_text
+
+
+def _get_accessible_student_query():
+    """Lấy query học sinh theo quyền user hiện tại."""
+    if current_user.role == "admin" or current_user.role == "discipline_officer":
+        return Student.query
+    if current_user.role == "homeroom_teacher" and current_user.assigned_class:
+        return Student.query.filter_by(student_class=current_user.assigned_class)
+    if current_user.role in ["subject_teacher", "both"]:
+        assignments = TeacherClassAssignment.query.filter_by(teacher_id=current_user.id).all()
+        class_names = [a.class_name for a in assignments if a.class_name]
+        if not class_names:
+            return Student.query.filter(Student.id == -1)
+        return Student.query.filter(Student.student_class.in_(class_names))
+    return Student.query.filter(Student.id == -1)
+
+
+def _score_candidate(query_norm: str, candidate_norm: str) -> float:
+    """Tính điểm tương đồng đơn giản cho RAG (token overlap + fuzzy ratio)."""
+    if not query_norm or not candidate_norm:
+        return 0.0
+    q_tokens = set(query_norm.split())
+    c_tokens = set(candidate_norm.split())
+    overlap = len(q_tokens & c_tokens) / max(len(q_tokens), 1)
+    fuzzy = SequenceMatcher(None, query_norm, candidate_norm).ratio()
+    return round(overlap * 0.7 + fuzzy * 0.3, 4)
+
+
+def _build_student_rag_context(message: str, top_k: int = 5):
+    """Truy xuất ngữ cảnh học sinh liên quan nhất để chatbot tra cứu trực tiếp."""
+    query_norm = _normalize_text(message or "")
+    if not query_norm:
+        return [], None
+
+    code_match = re.search(r"\b([A-Za-z]{1,5}\d{2,})\b", message or "", re.IGNORECASE)
+    code_hint = code_match.group(1).strip() if code_match else None
+
+    candidates = _get_accessible_student_query().limit(120).all()
+    scored = []
+    for st in candidates:
+        merged = f"{st.name or ''} {st.student_code or ''} {st.student_class or ''} {st.parent_name or ''}"
+        merged_norm = _normalize_text(merged)
+        score = _score_candidate(query_norm, merged_norm)
+        if code_hint and st.student_code and code_hint.lower() in st.student_code.lower():
+            score += 0.5
+        if score >= 0.2:
+            scored.append((score, st))
+
+    scored.sort(key=lambda x: x[0], reverse=True)
+    top_students = [item[1] for item in scored[:top_k]]
+    best_student = top_students[0] if top_students and scored[0][0] >= 0.45 else None
+    return top_students, best_student
+
+
+def _format_student_rag_block(students):
+    if not students:
+        return "Không tìm thấy học sinh khớp rõ ràng trong phạm vi quyền hiện tại."
+    lines = []
+    for st in students:
+        snapshot = _student_learning_snapshot(st)
+        gpa = f"{snapshot['gpa']}/10" if snapshot["gpa"] is not None else "Chưa đủ dữ liệu"
+        risk_text = ", ".join(snapshot["risk_flags"][:2]) if snapshot["risk_flags"] else "Ổn định"
+        lines.append(
+            f"- {st.name} | Mã: {st.student_code} | Lớp: {st.student_class} | "
+            f"Học lực: {st.academic_rank or 'Chưa cập nhật'} | Nề nếp: {st.current_score}/100 | GPA: {gpa} | Rủi ro: {risk_text}"
+        )
+    return "\n".join(lines)
+
+
+def _top_scored_lines(query_norm: str, items, top_k: int = 6):
+    """Chấm điểm và lấy top dòng phù hợp nhất cho RAG."""
+    scored = []
+    for line in items:
+        if not line:
+            continue
+        score = _score_candidate(query_norm, _normalize_text(line))
+        if score >= 0.18:
+            scored.append((score, line))
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return [line for _, line in scored[:top_k]]
+
+
+def _build_global_rag_context(message: str):
+    """
+    Tạo RAG context toàn cục từ nhiều bảng dữ liệu để hỗ trợ hỏi đáp linh hoạt.
+    Có giới hạn top-k theo câu hỏi để tránh prompt quá dài.
+    """
+    query_norm = _normalize_text(message or "")
+    if not query_norm:
+        query_norm = "thong tin tong quan"
+
+    # Tổng quan nhanh để model có "bản đồ" dữ liệu.
+    accessible_students_query = _get_accessible_student_query()
+    total_students = accessible_students_query.count()
+    total_subjects = Subject.query.count()
+    total_classes = ClassRoom.query.count()
+    total_teachers = Teacher.query.filter(Teacher.role != "parent_student").count()
+
+    overview_lines = [
+        f"Tổng học sinh trong phạm vi quyền: {total_students}",
+        f"Tổng giáo viên: {total_teachers}",
+        f"Tổng lớp: {total_classes}",
+        f"Tổng môn học: {total_subjects}",
+        f"Vai trò hiện tại: {current_user.role}",
+        f"Lớp phụ trách: {getattr(current_user, 'assigned_class', '') or 'N/A'}",
+    ]
+
+    # 1) Học sinh (ưu tiên quyền truy cập)
+    students = accessible_students_query.limit(220).all()
+    student_lines = []
+    for st in students:
+        student_lines.append(
+            f"Học sinh: {st.name} | Mã: {st.student_code} | Lớp: {st.student_class} | "
+            f"Học lực: {st.academic_rank or 'Chưa cập nhật'} | Hạnh kiểm: {st.conduct or 'Chưa cập nhật'} | "
+            f"Nề nếp: {st.current_score}/100 | PH: {st.parent_name or 'N/A'} | SĐT PH: {st.parent_phone or 'N/A'}"
+        )
+    top_student_lines = _top_scored_lines(query_norm, student_lines, top_k=8)
+
+    # 2) Giáo viên
+    teacher_query = Teacher.query.filter(Teacher.role != "parent_student")
+    if current_user.role != "admin":
+        # Non-admin chỉ xem thông tin giáo viên tối thiểu để hỗ trợ vận hành.
+        teachers = teacher_query.limit(120).all()
+        teacher_lines = [f"Giáo viên: {t.full_name} | Vai trò: {t.role} | Lớp: {t.assigned_class or 'N/A'}" for t in teachers]
+    else:
+        teachers = teacher_query.limit(220).all()
+        teacher_lines = [
+            f"Giáo viên: {t.full_name} | Username: {t.username} | Vai trò: {t.role} | "
+            f"Lớp: {t.assigned_class or 'N/A'} | Môn ID: {t.assigned_subject_id or 'N/A'}"
+            for t in teachers
+        ]
+    top_teacher_lines = _top_scored_lines(query_norm, teacher_lines, top_k=6)
+
+    # 3) Môn học và lớp
+    subject_lines = [f"Môn học: {s.name} | Mã môn: {s.code or 'N/A'}" for s in Subject.query.limit(120).all()]
+    class_lines = [f"Lớp: {c.name}" for c in ClassRoom.query.limit(150).all()]
+    top_subject_lines = _top_scored_lines(query_norm, subject_lines, top_k=5)
+    top_class_lines = _top_scored_lines(query_norm, class_lines, top_k=5)
+
+    # 4) Dữ liệu nề nếp/vi phạm gần đây trong phạm vi học sinh được phép xem.
+    student_ids = [st.id for st in students]
+    violation_lines = []
+    if student_ids:
+        recent_violations = Violation.query.filter(Violation.student_id.in_(student_ids)).order_by(Violation.date_committed.desc()).limit(120).all()
+        student_map = {st.id: st for st in students}
+        for v in recent_violations:
+            st = student_map.get(v.student_id)
+            if not st:
+                continue
+            date_text = v.date_committed.strftime("%d/%m/%Y") if v.date_committed else "N/A"
+            violation_lines.append(
+                f"Vi phạm: {v.violation_type_name} | Điểm trừ: {v.points_deducted} | Ngày: {date_text} | "
+                f"Học sinh: {st.name} | Lớp: {st.student_class}"
+            )
+    top_violation_lines = _top_scored_lines(query_norm, violation_lines, top_k=6)
+
+    # 5) Cấu hình hệ thống cốt lõi
+    config_keys = ["school_name", "school_year", "current_semester", "current_week"]
+    cfg_lines = []
+    for key in config_keys:
+        cfg = SystemConfig.query.filter_by(key=key).first()
+        if cfg:
+            cfg_lines.append(f"Cấu hình: {cfg.key} = {cfg.value}")
+
+    return {
+        "overview": overview_lines,
+        "students": top_student_lines,
+        "teachers": top_teacher_lines,
+        "subjects": top_subject_lines,
+        "classes": top_class_lines,
+        "violations": top_violation_lines,
+        "configs": cfg_lines,
+    }
+
+
+def _format_global_rag_context(payload: dict):
+    """Định dạng context toàn cục theo từng khối để model đọc dễ hơn."""
+    sections = []
+    sections.append("## Tổng quan\n" + "\n".join([f"- {line}" for line in payload.get("overview", [])]))
+    sections.append("## Cấu hình hệ thống\n" + "\n".join([f"- {line}" for line in payload.get("configs", [])] or ["- Chưa có dữ liệu"]))
+    sections.append("## Học sinh liên quan\n" + "\n".join([f"- {line}" for line in payload.get("students", [])] or ["- Không có mẫu khớp"]))
+    sections.append("## Giáo viên liên quan\n" + "\n".join([f"- {line}" for line in payload.get("teachers", [])] or ["- Không có mẫu khớp"]))
+    sections.append("## Môn học liên quan\n" + "\n".join([f"- {line}" for line in payload.get("subjects", [])] or ["- Không có mẫu khớp"]))
+    sections.append("## Lớp liên quan\n" + "\n".join([f"- {line}" for line in payload.get("classes", [])] or ["- Không có mẫu khớp"]))
+    sections.append("## Vi phạm liên quan\n" + "\n".join([f"- {line}" for line in payload.get("violations", [])] or ["- Không có mẫu khớp"]))
+    return "\n\n".join(sections)
+
+
+def _build_assistant_system_prompt():
+    """System prompt thống nhất cho assistant chatbot (RAG-first)."""
+    return (
+        "Bạn là Trợ lý giáo dục nội bộ cho trường học.\n"
+        "Nguyên tắc bắt buộc:\n"
+        "1) Ưu tiên dữ liệu trong [RAG_CONTEXT], không tự suy diễn ngoài dữ liệu.\n"
+        "2) Nếu có đúng 1 học sinh khớp cao, trả lời trực tiếp thông tin học sinh đó.\n"
+        "3) Nếu có nhiều học sinh gần giống, yêu cầu người dùng xác nhận bằng mã học sinh/lớp.\n"
+        "4) Nếu không có dữ liệu khớp, nói rõ không tìm thấy và hướng dẫn cách nhập lại.\n"
+        "5) Có thể trả lời câu hỏi tổng quát từ nhiều bảng (học sinh, giáo viên, lớp, môn, vi phạm, cấu hình) nếu có dữ liệu trong context.\n"
+        "6) Trả lời ngắn gọn, có cấu trúc markdown, tiếng Việt lịch sự.\n"
+        "7) Không tiết lộ dữ liệu ngoài phạm vi quyền truy cập hiện tại."
+    )
+
+
+def _find_student_for_command(message: str):
+    """Tìm học sinh theo mã hoặc tên trong câu lệnh."""
+    msg = (message or "").strip()
+    if not msg:
+        return None
+
+    code_match = re.search(r"(?:mã học sinh|mã hs|mã)\s*[:\-]?\s*([A-Za-z0-9\-_/ ]{3,30})", msg, re.IGNORECASE)
+    if code_match:
+        code = code_match.group(1).strip()
+        student = Student.query.filter(Student.student_code.ilike(code)).first()
+        if student:
+            return student
+        student = Student.query.filter(Student.student_code.ilike(f"%{code}%")).first()
+        if student:
+            return student
+
+    name_match = re.search(r"(?:học sinh|hs|em)\s*(?:[:\-]|\bvề\b|\bla\b)?\s*([A-Za-zÀ-ỹĐđ0-9\s]{4,100})", msg, re.IGNORECASE)
+    if name_match:
+        raw_name = re.sub(r"\s+", " ", name_match.group(1)).strip(" .,:;!?")
+        if raw_name:
+            student = Student.query.filter(Student.name.ilike(raw_name)).first()
+            if student:
+                return student
+            return Student.query.filter(Student.name.ilike(f"%{raw_name}%")).first()
+
+    # Fallback: câu dạng "thông tin về ...", không có từ "học sinh/hs/em" sát tên
+    fallback_name_match = re.search(r"(?:thông tin|thong tin)\s*(?:về|ve)?\s*([A-Za-zÀ-ỹĐđ\s]{5,100})", msg, re.IGNORECASE)
+    if fallback_name_match:
+        candidate = re.sub(r"\s+", " ", fallback_name_match.group(1)).strip(" .,:;!?")
+        candidate = re.sub(r"^(học sinh|hoc sinh|hs)\s+", "", candidate, flags=re.IGNORECASE).strip()
+        if candidate and len(candidate) >= 4:
+            student = Student.query.filter(Student.name.ilike(candidate)).first()
+            if student:
+                return student
+            return Student.query.filter(Student.name.ilike(f"%{candidate}%")).first()
+
+    return None
+
+
+def _extract_field(message: str, field_names):
+    """Lấy giá trị field theo cú pháp 'field: value' hoặc 'field=value'."""
+    for name in field_names:
+        pattern = rf"{name}\s*[:=]\s*([^;,\n]+)"
+        match = re.search(pattern, message, re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+    return None
+
+
+def _normalize_text(value: str) -> str:
+    """Chuẩn hóa text không dấu, lowercase để match intent linh hoạt."""
+    if not value:
+        return ""
+    text = unicodedata.normalize("NFD", value)
+    text = "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
+    return re.sub(r"\s+", " ", text).strip().lower()
+
+
+def _contains_any(message: str, keywords):
+    """So khớp từ khóa trên cả bản gốc và bản không dấu."""
+    raw = (message or "").lower()
+    norm = _normalize_text(message or "")
+    for kw in keywords:
+        k = kw.lower()
+        k_norm = _normalize_text(kw)
+        if k in raw or k_norm in norm:
+            return True
+    return False
+
+
+def _has_capability(permission_code: str, allowed_roles=None):
+    """Kiểm tra quyền: admin luôn pass, sau đó permission code, rồi fallback role."""
+    if current_user.role == "admin":
+        return True
+    try:
+        if hasattr(current_user, "has_permission") and current_user.has_permission(permission_code):
+            return True
+    except Exception:
+        pass
+    if allowed_roles and current_user.role in allowed_roles:
+        return True
+    return False
+
+
+def _queue_confirmation(action_type: str, payload: dict, summary: str):
+    """Lưu tác vụ nhạy cảm vào session để xác nhận 2 bước."""
+    token = uuid.uuid4().hex[:8]
+    session["assistant_pending_action"] = {
+        "token": token,
+        "action_type": action_type,
+        "payload": payload,
+        "summary": summary,
+    }
+    session.modified = True
+    return token
+
+
+def _apply_confirmed_action():
+    """Thực thi tác vụ đã chờ xác nhận."""
+    from app_helpers import log_change
+
+    pending = session.get("assistant_pending_action")
+    if not pending:
+        return {"response": "Không có thao tác nào đang chờ xác nhận.", "category": "quản trị_ai"}
+
+    action_type = pending.get("action_type")
+    payload = pending.get("payload", {})
+
+    try:
+        if action_type == "delete_student":
+            student = db.session.get(Student, int(payload["student_id"]))
+            if not student:
+                session.pop("assistant_pending_action", None)
+                return {"response": "Học sinh không còn tồn tại.", "category": "quản trị_ai"}
+            if current_user.role != "admin":
+                return {"response": "Chỉ Admin mới có quyền xóa học sinh.", "category": "quản trị_ai"}
+
+            name = student.name
+            Violation.query.filter_by(student_id=student.id).delete()
+            db.session.delete(student)
+            log_change("student_delete_by_ai", f"AI xóa học sinh {name}", student_name=name)
+            db.session.commit()
+            session.pop("assistant_pending_action", None)
+            return {"response": f"🗑️ Đã xóa học sinh **{name}**.", "category": "quản trị_ai"}
+
+        if action_type == "delete_teacher":
+            teacher = db.session.get(Teacher, int(payload["teacher_id"]))
+            if not teacher:
+                session.pop("assistant_pending_action", None)
+                return {"response": "Giáo viên không còn tồn tại.", "category": "quản trị_ai"}
+            if current_user.role != "admin":
+                return {"response": "Chỉ Admin mới có quyền xóa giáo viên.", "category": "quản trị_ai"}
+            if teacher.role == "admin":
+                return {"response": "Không thể xóa tài khoản Admin.", "category": "quản trị_ai"}
+            if teacher.id == current_user.id:
+                return {"response": "Không thể xóa chính tài khoản đang đăng nhập.", "category": "quản trị_ai"}
+
+            name = teacher.full_name
+            db.session.delete(teacher)
+            log_change("teacher_delete_by_ai", f"AI xóa giáo viên {name}")
+            db.session.commit()
+            session.pop("assistant_pending_action", None)
+            return {"response": f"🗑️ Đã xóa giáo viên **{name}**.", "category": "quản trị_ai"}
+
+        if action_type == "broadcast_students":
+            title = payload.get("title", "").strip()
+            content = payload.get("content", "").strip()
+            if not title or not content:
+                return {"response": "Dữ liệu thông báo không hợp lệ.", "category": "quản trị_ai"}
+            if current_user.role != "admin":
+                return {"response": "Chỉ Admin mới có quyền gửi toàn trường.", "category": "quản trị_ai"}
+
+            students = Student.query.all()
+            for st in students:
+                db.session.add(
+                    StudentNotification(
+                        student_id=st.id,
+                        title=title,
+                        message=content,
+                        notification_type="announcement",
+                        sender_id=current_user.id,
+                    )
+                )
+            log_change("student_notification_by_ai", f"AI broadcast thông báo '{title}' tới {len(students)} học sinh")
+            db.session.commit()
+            session.pop("assistant_pending_action", None)
+            return {
+                "response": f"📣 Đã gửi thông báo toàn trường tới **{len(students)}** học sinh.",
+                "category": "quản trị_ai",
+            }
+    except Exception as err:
+        db.session.rollback()
+        return {"response": f"Lỗi khi thực thi thao tác xác nhận: {err}", "category": "quản trị_ai"}
+
+    return {"response": "Không xác định được tác vụ xác nhận.", "category": "quản trị_ai"}
+
+
+def _try_handle_management_command(message: str):
+    """Thực thi lệnh quản trị qua ngôn ngữ tự nhiên (có kiểm soát quyền)."""
+    from app_helpers import can_access_student, log_change, create_notification
+
+    msg = (message or "").strip()
+    if not msg:
+        return None
+    msg_lower = msg.lower()
+    dry_run = _contains_any(msg, ["xem trước", "xem truoc", "dry-run", "dry run", "nháp", "nhap"])
+
+    # 0) Luồng xác nhận 2 bước cho thao tác nhạy cảm
+    if msg_lower in ["xác nhận", "xac nhan", "confirm", "đồng ý", "dong y"]:
+        return _apply_confirmed_action()
+    if msg_lower in ["hủy", "huy", "cancel"]:
+        if session.get("assistant_pending_action"):
+            session.pop("assistant_pending_action", None)
+            session.modified = True
+            return {"response": "Đã hủy thao tác đang chờ xác nhận.", "category": "quản trị_ai"}
+        return {"response": "Không có thao tác nào để hủy.", "category": "quản trị_ai"}
+
+    # 1) Xem thông tin học sinh
+    asks_student_info = (
+        _contains_any(msg, ["thông tin học sinh", "xem học sinh", "xem thông tin em", "xem hs", "thông tin về hs", "thong tin ve hs"])
+        or (_contains_any(msg, ["thông tin", "thong tin"]) and _contains_any(msg, ["học sinh", "hoc sinh", "hs", "em"]))
+    )
+    if asks_student_info:
+        student = _find_student_for_command(msg)
+        if not student:
+            return {
+                "response": "Mình chưa xác định được học sinh. Bạn thử ghi rõ: `xem thông tin học sinh mã HS123` hoặc `xem thông tin học sinh Nguyễn Văn A`.",
+                "category": "quản trị_ai"
+            }
+        if not can_access_student(student.id):
+            return {"response": "Bạn không có quyền xem thông tin học sinh này.", "category": "quản trị_ai"}
+
+        snapshot = _student_learning_snapshot(student)
+        gpa_text = f"{snapshot['gpa']}/10" if snapshot["gpa"] is not None else "Chưa đủ dữ liệu"
+        risk_text = ", ".join(snapshot["risk_flags"]) if snapshot["risk_flags"] else "Chưa có cảnh báo lớn"
+        advice_text = "\n".join([f"- {s}" for s in snapshot["suggestions"][:3]])
+
+        return {
+            "response": (
+                f"👤 **Thông tin học sinh**\n\n"
+                f"- Họ tên: **{student.name}**\n"
+                f"- Mã HS: **{student.student_code}**\n"
+                f"- Lớp: **{student.student_class}**\n"
+                f"- Học lực: **{student.academic_rank or 'Chưa cập nhật'}**\n"
+                f"- Hạnh kiểm: **{student.conduct or 'Chưa cập nhật'}**\n"
+                f"- Điểm nề nếp: **{student.current_score}/100**\n"
+                f"- PH: **{student.parent_name or 'Chưa có'}**\n"
+                f"- SĐT PH: **{student.parent_phone or 'Chưa có'}**\n\n"
+                f"📊 **Phân tích tự động**\n"
+                f"- GPA hiện tại: **{gpa_text}** ({snapshot['subject_count']} môn đủ dữ liệu)\n"
+                f"- Môn mạnh: **{', '.join(snapshot['strong_subjects'][:4]) if snapshot['strong_subjects'] else 'Chưa rõ'}**\n"
+                f"- Môn cần hỗ trợ: **{', '.join(snapshot['weak_subjects'][:4]) if snapshot['weak_subjects'] else 'Ít rủi ro'}**\n"
+                f"- Rủi ro: **{risk_text}**\n\n"
+                f"💡 **Khuyến nghị hữu ích**\n{advice_text}"
+            ),
+            "category": "quản trị_ai"
+        }
+
+    # 1.1) Thêm học sinh (admin)
+    create_student_intent = _contains_any(msg, ["thêm học sinh", "tạo học sinh"])
+    if create_student_intent:
+        if not _has_capability("manage_students", allowed_roles=["admin"]):
+            return {"response": "Bạn không có quyền thêm học sinh.", "category": "quản trị_ai"}
+
+        name = _extract_field(msg, ["tên", "ten", "họ tên", "ho ten"])
+        student_code = _extract_field(msg, ["mã hs", "ma hs", "mã học sinh", "ma hoc sinh", "mã", "ma"])
+        class_name = _extract_field(msg, ["lớp", "lop"])
+        parent_phone = _extract_field(msg, ["sđt", "so dien thoai", "điện thoại", "dien thoai"])
+        parent_name = _extract_field(msg, ["phụ huynh", "phu huynh", "ten phu huynh"])
+        if not name or not student_code or not class_name:
+            return {
+                "response": "Thiếu dữ liệu. Mẫu: `thêm học sinh; tên: ...; mã HS: ...; lớp: ...; sđt: ...`",
+                "category": "quản trị_ai",
+            }
+        if Student.query.filter_by(student_code=student_code).first():
+            return {"response": f"Mã học sinh `{student_code}` đã tồn tại.", "category": "quản trị_ai"}
+
+        if dry_run:
+            return {
+                "response": (
+                    "🧪 Chế độ xem trước (chưa ghi dữ liệu)\n"
+                    f"- Sẽ tạo học sinh: **{name.upper()}**\n"
+                    f"- Mã: `{student_code}` | Lớp: `{class_name}`\n"
+                    f"- SĐT PH: `{parent_phone or 'chưa có'}`"
+                ),
+                "category": "quản trị_ai",
+            }
+        try:
+            st = Student(
+                name=name.upper(),
+                student_code=student_code,
+                student_class=class_name,
+                parent_name=parent_name,
+                parent_phone=parent_phone,
+            )
+            st.set_password("123456")
+            db.session.add(st)
+            db.session.commit()
+            return {"response": f"✅ Đã thêm học sinh **{st.name}** ({st.student_code}) lớp **{st.student_class}**.", "category": "quản trị_ai"}
+        except Exception as err:
+            db.session.rollback()
+            return {"response": f"Lỗi khi thêm học sinh: {err}", "category": "quản trị_ai"}
+
+    # 1.2) Sửa thông tin học sinh
+    update_student_intent = _contains_any(msg, ["sửa học sinh", "cập nhật học sinh"])
+    if update_student_intent:
+        if not _has_capability("manage_students", allowed_roles=["homeroom_teacher"]):
+            return {"response": "Bạn không có quyền chỉnh sửa học sinh.", "category": "quản trị_ai"}
+        student = _find_student_for_command(msg)
+        if not student:
+            return {"response": "Không tìm thấy học sinh cần cập nhật.", "category": "quản trị_ai"}
+        from app_helpers import can_access_student, log_change
+        if not can_access_student(student.id):
+            return {"response": "Bạn không có quyền chỉnh sửa học sinh này.", "category": "quản trị_ai"}
+
+        new_name = _extract_field(msg, ["tên mới", "ten moi", "tên", "ten"])
+        new_class = _extract_field(msg, ["lớp mới", "lop moi", "lớp", "lop"])
+        new_parent = _extract_field(msg, ["phụ huynh", "phu huynh"])
+        new_phone = _extract_field(msg, ["sđt", "so dien thoai", "điện thoại", "dien thoai"])
+        changes = []
+        if new_name:
+            changes.append(("name", student.name, new_name.upper()))
+        if new_class:
+            changes.append(("student_class", student.student_class, new_class))
+        if new_parent:
+            changes.append(("parent_name", student.parent_name, new_parent))
+        if new_phone:
+            changes.append(("parent_phone", student.parent_phone, new_phone))
+        if not changes:
+            return {"response": "Không có trường nào để cập nhật.", "category": "quản trị_ai"}
+        if dry_run:
+            change_text = "\n".join([f"- {f}: `{o}` -> `{n}`" for f, o, n in changes])
+            return {
+                "response": f"🧪 Chế độ xem trước (chưa ghi dữ liệu)\nSẽ cập nhật học sinh **{student.name}**:\n{change_text}",
+                "category": "quản trị_ai",
+            }
+        try:
+            for field, old_val, new_val in changes:
+                setattr(student, field, new_val)
+                log_change(
+                    "student_update_by_ai",
+                    f"AI cập nhật {field} cho {student.name}",
+                    student_id=student.id,
+                    student_name=student.name,
+                    student_class=student.student_class,
+                    old_value=old_val,
+                    new_value=new_val,
+                )
+            db.session.commit()
+            return {"response": f"✅ Đã cập nhật {len(changes)} trường cho học sinh **{student.name}**.", "category": "quản trị_ai"}
+        except Exception as err:
+            db.session.rollback()
+            return {"response": f"Lỗi khi cập nhật học sinh: {err}", "category": "quản trị_ai"}
+
+    # 1.3) Xóa học sinh (2 bước)
+    delete_student_intent = _contains_any(msg, ["xóa học sinh", "xoa hoc sinh"])
+    if delete_student_intent:
+        if not _has_capability("manage_students", allowed_roles=["admin"]):
+            return {"response": "Bạn không có quyền xóa học sinh.", "category": "quản trị_ai"}
+        student = _find_student_for_command(msg)
+        if not student:
+            return {"response": "Không tìm thấy học sinh cần xóa.", "category": "quản trị_ai"}
+        token = _queue_confirmation(
+            "delete_student",
+            {"student_id": student.id},
+            f"Xóa học sinh {student.name} ({student.student_code})",
+        )
+        return {
+            "response": (
+                f"⚠️ Bạn sắp xóa học sinh **{student.name}** ({student.student_code}).\n"
+                f"Nhập **xác nhận** để tiếp tục hoặc **hủy** để dừng. Mã xác nhận: `{token}`"
+            ),
+            "category": "quản trị_ai",
+        }
+
+    # 2) Cập nhật SĐT phụ huynh học sinh
+    update_phone_intent = (
+        _contains_any(msg, ["cập nhật", "sửa", "đổi"])
+        and _contains_any(msg, ["sđt", "điện thoại", "phụ huynh"])
+        and _contains_any(msg, ["học sinh", "hs"])
+    )
+    if update_phone_intent:
+        student = _find_student_for_command(msg)
+        phone_match = re.search(r"(?:là|thành|=|:)\s*(0\d{8,10})", msg)
+        if not student or not phone_match:
+            return {
+                "response": (
+                    "Mình cần đủ thông tin để cập nhật. Ví dụ:\n"
+                    "`Cập nhật số điện thoại phụ huynh học sinh mã HS001 là 0912345678`"
+                ),
+                "category": "quản trị_ai"
+            }
+        if not _has_capability("manage_students", allowed_roles=["homeroom_teacher"]):
+            return {"response": "Bạn không có quyền chỉnh sửa thông tin học sinh.", "category": "quản trị_ai"}
+        if not can_access_student(student.id):
+            return {"response": "Bạn không có quyền chỉnh sửa học sinh này.", "category": "quản trị_ai"}
+
+        old_phone = student.parent_phone
+        student.parent_phone = phone_match.group(1)
+        if dry_run:
+            return {
+                "response": (
+                    "🧪 Chế độ xem trước (chưa ghi dữ liệu)\n"
+                    f"- Học sinh: **{student.name}**\n"
+                    f"- SĐT cũ: `{old_phone or 'Chưa có'}`\n"
+                    f"- SĐT mới: `{phone_match.group(1)}`"
+                ),
+                "category": "quản trị_ai",
+            }
+        try:
+            log_change(
+                change_type="student_update_by_ai",
+                description=f"AI cập nhật SĐT phụ huynh cho {student.name}",
+                student_id=student.id,
+                student_name=student.name,
+                student_class=student.student_class,
+                old_value=old_phone,
+                new_value=student.parent_phone,
+            )
+            db.session.commit()
+            return {
+                "response": (
+                    f"✅ Đã cập nhật SĐT phụ huynh cho **{student.name}**\n\n"
+                    f"- Trước: `{old_phone or 'Chưa có'}`\n"
+                    f"- Sau: `{student.parent_phone}`"
+                ),
+                "category": "quản trị_ai"
+            }
+        except Exception as err:
+            db.session.rollback()
+            return {"response": f"Không thể cập nhật dữ liệu: {err}", "category": "quản trị_ai"}
+
+    # 2.1) Thêm giáo viên
+    create_teacher_intent = _contains_any(msg, ["thêm giáo viên", "tạo giáo viên"])
+    if create_teacher_intent:
+        if not _has_capability("manage_students", allowed_roles=["admin"]):
+            return {"response": "Bạn không có quyền thêm giáo viên.", "category": "quản trị_ai"}
+        full_name = _extract_field(msg, ["tên", "ten", "họ tên", "ho ten"])
+        username = _extract_field(msg, ["username", "tài khoản", "tai khoan"])
+        password = _extract_field(msg, ["mật khẩu", "mat khau"]) or "123456"
+        role = _extract_field(msg, ["role", "vai trò", "vai tro"]) or "homeroom_teacher"
+        assigned_class = _extract_field(msg, ["lớp", "lop"])
+        subject_name = _extract_field(msg, ["môn", "mon", "môn dạy", "mon day"])
+        if not full_name or not username:
+            return {"response": "Thiếu dữ liệu. Mẫu: `thêm giáo viên; tên: ...; username: ...; role: homeroom_teacher`", "category": "quản trị_ai"}
+        if Teacher.query.filter_by(username=username).first():
+            return {"response": f"Username `{username}` đã tồn tại.", "category": "quản trị_ai"}
+
+        assigned_subject_id = None
+        if subject_name:
+            subject = Subject.query.filter(Subject.name.ilike(f"%{subject_name}%")).first()
+            if subject:
+                assigned_subject_id = subject.id
+        if dry_run:
+            return {
+                "response": (
+                    "🧪 Chế độ xem trước (chưa ghi dữ liệu)\n"
+                    f"- Sẽ tạo giáo viên: **{full_name}**\n"
+                    f"- Username: `{username}` | Role: `{role}`\n"
+                    f"- Lớp: `{assigned_class or 'không'}` | Môn: `{subject_name or 'không'}`"
+                ),
+                "category": "quản trị_ai",
+            }
+        try:
+            t = Teacher(
+                username=username,
+                full_name=full_name,
+                role=role,
+                assigned_class=assigned_class if role in ["homeroom_teacher", "both"] else None,
+                assigned_subject_id=assigned_subject_id if role in ["subject_teacher", "both"] else None,
+                created_by=current_user.id,
+            )
+            t.set_password(password)
+            db.session.add(t)
+            db.session.commit()
+            return {"response": f"✅ Đã thêm giáo viên **{full_name}** (username: `{username}`).", "category": "quản trị_ai"}
+        except Exception as err:
+            db.session.rollback()
+            return {"response": f"Lỗi khi thêm giáo viên: {err}", "category": "quản trị_ai"}
+
+    # 2.2) Sửa giáo viên
+    update_teacher_intent = _contains_any(msg, ["sửa giáo viên", "cập nhật giáo viên"])
+    if update_teacher_intent:
+        if not _has_capability("manage_students", allowed_roles=["admin"]):
+            return {"response": "Bạn không có quyền sửa giáo viên.", "category": "quản trị_ai"}
+        teacher_ident = _extract_field(msg, ["username", "tài khoản", "tai khoan"]) or _extract_field(msg, ["id"])
+        teacher = None
+        if teacher_ident:
+            if teacher_ident.isdigit():
+                teacher = db.session.get(Teacher, int(teacher_ident))
+            if not teacher:
+                teacher = Teacher.query.filter_by(username=teacher_ident).first()
+        if not teacher:
+            return {"response": "Không tìm thấy giáo viên cần cập nhật (theo username/id).", "category": "quản trị_ai"}
+        if teacher.id == current_user.id:
+            return {"response": "Không thể chỉnh sửa chính tài khoản đang đăng nhập qua lệnh này.", "category": "quản trị_ai"}
+
+        new_name = _extract_field(msg, ["tên mới", "ten moi", "tên", "ten"])
+        new_role = _extract_field(msg, ["role", "vai trò", "vai tro"])
+        new_class = _extract_field(msg, ["lớp", "lop"])
+        new_password = _extract_field(msg, ["mật khẩu", "mat khau"])
+        subject_name = _extract_field(msg, ["môn", "mon", "môn dạy", "mon day"])
+        if dry_run:
+            return {
+                "response": (
+                    "🧪 Chế độ xem trước (chưa ghi dữ liệu)\n"
+                    f"- Giáo viên: **{teacher.full_name}**\n"
+                    f"- Tên mới: `{new_name or teacher.full_name}` | Role mới: `{new_role or teacher.role}`\n"
+                    f"- Lớp: `{new_class if new_class is not None else (teacher.assigned_class or '')}` | Môn: `{subject_name or ''}`"
+                ),
+                "category": "quản trị_ai",
+            }
+        try:
+            if new_name:
+                teacher.full_name = new_name
+            if new_role:
+                teacher.role = new_role
+            if new_password:
+                teacher.set_password(new_password)
+            if new_class is not None:
+                teacher.assigned_class = new_class
+            if subject_name:
+                subject = Subject.query.filter(Subject.name.ilike(f"%{subject_name}%")).first()
+                if subject:
+                    teacher.assigned_subject_id = subject.id
+            db.session.commit()
+            return {"response": f"✅ Đã cập nhật thông tin giáo viên **{teacher.full_name}**.", "category": "quản trị_ai"}
+        except Exception as err:
+            db.session.rollback()
+            return {"response": f"Lỗi khi cập nhật giáo viên: {err}", "category": "quản trị_ai"}
+
+    # 2.3) Xóa giáo viên (2 bước)
+    delete_teacher_intent = _contains_any(msg, ["xóa giáo viên", "xoa giao vien"])
+    if delete_teacher_intent:
+        if not _has_capability("manage_students", allowed_roles=["admin"]):
+            return {"response": "Bạn không có quyền xóa giáo viên.", "category": "quản trị_ai"}
+        teacher_ident = _extract_field(msg, ["username", "tài khoản", "tai khoan"]) or _extract_field(msg, ["id"])
+        teacher = None
+        if teacher_ident:
+            if teacher_ident.isdigit():
+                teacher = db.session.get(Teacher, int(teacher_ident))
+            if not teacher:
+                teacher = Teacher.query.filter_by(username=teacher_ident).first()
+        if not teacher:
+            return {"response": "Không tìm thấy giáo viên cần xóa (theo username/id).", "category": "quản trị_ai"}
+        if teacher.id == current_user.id:
+            return {"response": "Không thể xóa chính tài khoản đang đăng nhập.", "category": "quản trị_ai"}
+        token = _queue_confirmation(
+            "delete_teacher",
+            {"teacher_id": teacher.id},
+            f"Xóa giáo viên {teacher.full_name} ({teacher.username})",
+        )
+        return {
+            "response": (
+                f"⚠️ Bạn sắp xóa giáo viên **{teacher.full_name}** ({teacher.username}).\n"
+                f"Nhập **xác nhận** để tiếp tục hoặc **hủy** để dừng. Mã xác nhận: `{token}`"
+            ),
+            "category": "quản trị_ai",
+        }
+
+    # 3) Thống kê danh sách giáo viên theo vai trò
+    if _contains_any(msg, ["danh sách giáo viên", "quan ly giao vien", "quản lý giáo viên"]):
+        if not _has_capability("manage_students", allowed_roles=["admin"]):
+            return {"response": "Bạn không có quyền quản lý danh sách giáo viên.", "category": "quản trị_ai"}
+        teachers = Teacher.query.order_by(Teacher.full_name.asc()).all()
+        if not teachers:
+            return {"response": "Hiện chưa có dữ liệu giáo viên.", "category": "quản trị_ai"}
+
+        role_counts = {}
+        for t in teachers:
+            role_counts[t.role] = role_counts.get(t.role, 0) + 1
+        overview = " | ".join([f"{role}: {count}" for role, count in sorted(role_counts.items())])
+        preview = "\n".join([f"- {t.full_name} ({t.username}) - {t.role}" for t in teachers[:15]])
+        extra = f"\n- ... và {len(teachers) - 15} giáo viên khác" if len(teachers) > 15 else ""
+        return {
+            "response": (
+                f"👩‍🏫 **Danh sách giáo viên**\n\n"
+                f"- Tổng số: **{len(teachers)}**\n"
+                f"- Cơ cấu: {overview}\n\n"
+                f"**Một số giáo viên:**\n{preview}{extra}"
+            ),
+            "category": "quản trị_ai"
+        }
+
+    # 4) Gửi thông báo cho học sinh qua chatbot
+    wants_send = _contains_any(msg, ["gửi thông báo", "gui thong bao"]) and _contains_any(msg, ["học sinh", "hs"])
+    if wants_send:
+        if not _has_capability("send_notifications", allowed_roles=["homeroom_teacher"]):
+            return {"response": "Bạn không có quyền gửi thông báo cho học sinh.", "category": "quản trị_ai"}
+
+        title_match = re.search(r"tiêu đề\s*[:\-]\s*(.+?)(?:;|$)", msg, re.IGNORECASE)
+        content_match = re.search(r"(?:nội dung|message)\s*[:\-]\s*(.+?)(?:;|$)", msg, re.IGNORECASE)
+        class_match = re.search(r"lớp\s*[:\-]?\s*([A-Za-z0-9À-ỹĐđ\s]+?)(?:;|$)", msg, re.IGNORECASE)
+        target_student = _find_student_for_command(msg) if ("mã" in msg_lower or "học sinh" in msg_lower) else None
+
+        if not title_match or not content_match:
+            return {
+                "response": (
+                    "Để gửi thông báo, dùng mẫu:\n"
+                    "`Gửi thông báo học sinh; tiêu đề: ...; nội dung: ...; lớp: 10A1`\n"
+                    "hoặc\n"
+                    "`Gửi thông báo học sinh; tiêu đề: ...; nội dung: ...; mã HS: ...`"
+                ),
+                "category": "quản trị_ai"
+            }
+
+        title = title_match.group(1).strip()
+        content = content_match.group(1).strip()
+
+        targets = []
+        if target_student:
+            if current_user.role == "homeroom_teacher" and target_student.student_class != current_user.assigned_class:
+                return {"response": "Bạn chỉ có thể gửi cho học sinh lớp mình chủ nhiệm.", "category": "quản trị_ai"}
+            targets = [target_student]
+        elif class_match:
+            class_name = class_match.group(1).strip()
+            if current_user.role == "homeroom_teacher" and class_name != current_user.assigned_class:
+                return {"response": "Bạn chỉ có thể gửi cho lớp mình chủ nhiệm.", "category": "quản trị_ai"}
+            targets = Student.query.filter_by(student_class=class_name).all()
+        elif current_user.role == "admin":
+            # Gửi toàn trường là thao tác nhạy cảm -> xác nhận 2 bước
+            token = _queue_confirmation(
+                "broadcast_students",
+                {"title": title, "content": content},
+                f"Broadcast thông báo '{title}' cho toàn bộ học sinh",
+            )
+            return {
+                "response": (
+                    f"⚠️ Bạn sắp gửi thông báo toàn trường.\n"
+                    f"- Tiêu đề: **{title}**\n"
+                    f"Nhập **xác nhận** để gửi hoặc **hủy** để dừng. Mã: `{token}`"
+                ),
+                "category": "quản trị_ai",
+            }
+        else:
+            targets = Student.query.filter_by(student_class=current_user.assigned_class).all()
+
+        if not targets:
+            return {"response": "Không tìm thấy học sinh phù hợp để gửi thông báo.", "category": "quản trị_ai"}
+
+        if dry_run:
+            return {
+                "response": (
+                    "🧪 Chế độ xem trước (chưa ghi dữ liệu)\n"
+                    f"- Tiêu đề: **{title}**\n"
+                    f"- Dự kiến gửi tới: **{len(targets)}** học sinh"
+                ),
+                "category": "quản trị_ai",
+            }
+        try:
+            for st in targets:
+                db.session.add(
+                    StudentNotification(
+                        student_id=st.id,
+                        title=title,
+                        message=content,
+                        notification_type="announcement",
+                        sender_id=current_user.id
+                    )
+                )
+            log_change(
+                change_type="student_notification_by_ai",
+                description=f"AI gửi thông báo '{title}' tới {len(targets)} học sinh"
+            )
+            db.session.commit()
+            return {
+                "response": f"📨 Đã gửi thông báo **{title}** tới **{len(targets)}** học sinh.",
+                "category": "quản trị_ai"
+            }
+        except Exception as err:
+            db.session.rollback()
+            return {"response": f"Lỗi khi gửi thông báo: {err}", "category": "quản trị_ai"}
+
+    # 5) Gửi thông báo cho giáo viên qua chatbot
+    teacher_notify = _contains_any(msg, ["gửi thông báo", "gui thong bao"]) and _contains_any(msg, ["giáo viên", "giao vien"])
+    if teacher_notify:
+        if not _has_capability("send_notifications", allowed_roles=["admin"]):
+            return {"response": "Chỉ Admin mới có quyền gửi thông báo cho giáo viên.", "category": "quản trị_ai"}
+        title_match = re.search(r"tiêu đề\s*[:\-]\s*(.+?)(?:;|$)", msg, re.IGNORECASE)
+        content_match = re.search(r"(?:nội dung|message)\s*[:\-]\s*(.+?)(?:;|$)", msg, re.IGNORECASE)
+        target_match = re.search(r"(?:nhóm|đối tượng|target)\s*[:\-]\s*(all|homeroom_teacher|subject_teacher)", msg, re.IGNORECASE)
+        if not title_match or not content_match:
+            return {
+                "response": (
+                    "Mẫu gợi ý:\n"
+                    "`Gửi thông báo giáo viên; tiêu đề: ...; nội dung: ...; nhóm: all`"
+                ),
+                "category": "quản trị_ai"
+            }
+        try:
+            create_notification(
+                title_match.group(1).strip(),
+                content_match.group(1).strip(),
+                "announcement",
+                (target_match.group(1).strip() if target_match else "all")
+            )
+            return {"response": "📣 Đã gửi thông báo cho giáo viên thành công.", "category": "quản trị_ai"}
+        except Exception as err:
+            db.session.rollback()
+            return {"response": f"Lỗi gửi thông báo giáo viên: {err}", "category": "quản trị_ai"}
+
+    return None
 
 @ai_engine_bp.route("/chatbot")
 @login_required
@@ -453,6 +1538,19 @@ def api_assistant_chatbot():
     
     if not msg:
         return jsonify({"response": "Vui lòng nhập câu hỏi."})
+
+    # Ưu tiên xử lý các tác vụ vận hành/quản trị trực tiếp từ chatbot.
+    management_result = _try_handle_management_command(msg)
+    if management_result:
+        return jsonify(management_result)
+
+    # Ưu tiên xử lý các câu hỏi thống kê dữ liệu trực tiếp từ CSDL.
+    stats_response = _try_answer_school_stats_query(msg)
+    if stats_response:
+        return jsonify({
+            "response": stats_response,
+            "category": "thống kê"
+        })
     
     # Import prompts từ file riêng
     try:
@@ -489,13 +1587,32 @@ def api_assistant_chatbot():
         system_prompt = DEFAULT_ASSISTANT_PROMPT
         category = "general"
     
-    # Tạo full prompt
-    full_prompt = f"""{system_prompt}
+    rag_students, best_student = _build_student_rag_context(msg)
+    global_rag_payload = _build_global_rag_context(msg)
+    rag_context_parts = [f"Người dùng: role={current_user.role}, lớp phụ trách={getattr(current_user, 'assigned_class', '') or 'N/A'}"]
+    if best_student:
+        rag_context_parts.append(
+            f"Ứng viên học sinh khớp cao nhất: {best_student.name} ({best_student.student_code}) - lớp {best_student.student_class}"
+        )
+    rag_context_parts.append("Học sinh khớp theo truy vấn trực tiếp:\n" + _format_student_rag_block(rag_students))
+    rag_context_parts.append("Ngữ cảnh toàn cục nhiều bảng:\n" + _format_global_rag_context(global_rag_payload))
+    rag_context = "\n\n".join(rag_context_parts)
 
-===== CÂU HỎI =====
+    assistant_system_prompt = _build_assistant_system_prompt()
+
+    # Tạo full prompt theo mô hình System + RAG + Domain Prompt
+    full_prompt = f"""{assistant_system_prompt}
+
+[DOMAIN_PROMPT]
+{system_prompt}
+
+[RAG_CONTEXT]
+{rag_context}
+
+[USER_QUESTION]
 {msg}
 
-===== YÊU CẦU =====
+[RESPONSE_STYLE]
 Trả lời ngắn gọn, rõ ràng bằng tiếng Việt. Sử dụng markdown và emoji phù hợp."""
     
     # Gọi Ollama
