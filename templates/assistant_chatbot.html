@@ -2,98 +2,99 @@
 {% block title %}Trợ Lý Đa Năng{% endblock %}
 
 {% block content %}
-<div class="max-w-[1600px] mx-auto">
-    <div class="relative overflow-hidden rounded-3xl border border-slate-200 bg-white text-slate-900 shadow-2xl">
-        <div class="pointer-events-none absolute -top-24 left-20 h-64 w-64 rounded-full bg-cyan-200/60 blur-3xl"></div>
-        <div class="pointer-events-none absolute -bottom-32 right-20 h-72 w-72 rounded-full bg-fuchsia-200/50 blur-3xl"></div>
-
-        <div class="relative h-[85vh] min-h-[700px] grid lg:grid-cols-[340px_1fr]">
-            <aside class="border-r border-slate-200 bg-slate-50/90 backdrop-blur-sm p-4 flex flex-col min-h-0">
+<div class="max-w-6xl mx-auto">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-lg">
+        <div class="h-[85vh] min-h-[680px] grid lg:grid-cols-[320px_1fr]">
+            <aside class="border-r border-slate-200 bg-slate-50 p-4 flex flex-col min-h-0">
                 <div class="flex items-center gap-3 mb-4">
-                    <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-cyan-400 to-indigo-500 flex items-center justify-center text-slate-950">
+                    <div class="h-10 w-10 rounded-xl bg-cyan-100 flex items-center justify-center text-cyan-700">
                         <i class="fas fa-robot"></i>
                     </div>
                     <div class="min-w-0">
-                        <h2 class="font-semibold truncate">Assistant Workspace</h2>
-                        <p class="text-xs text-slate-500">Trợ lý AI phiên bản giao diện mới</p>
+                        <h2 class="font-semibold truncate">Trợ lý AI EduMind</h2>
+                        <p class="text-xs text-slate-500">Đơn giản, dễ dùng cho giáo viên</p>
                     </div>
+                </div>
+
+                <div class="mb-4 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-700">
+                    <p class="font-medium mb-1">Dùng nhanh trong 3 bước:</p>
+                    <p>1) Chọn hoặc tạo cuộc trò chuyện</p>
+                    <p>2) Nhập câu hỏi vào ô bên dưới</p>
+                    <p>3) Bấm nút gửi để nhận trả lời</p>
                 </div>
 
                 <div class="space-y-3 mb-4">
                     <button id="new-session-btn" type="button"
-                        class="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-500 text-slate-950 font-semibold py-2.5 hover:opacity-90 transition">
-                        <i class="fas fa-plus"></i> Tạo phiên mới
+                        class="w-full flex items-center justify-center gap-2 rounded-xl bg-cyan-600 text-white font-semibold py-2.5 hover:bg-cyan-700 transition">
+                        <i class="fas fa-plus"></i> Cuộc trò chuyện mới
                     </button>
                     <div class="flex items-center gap-2">
                         <button id="rename-session-btn" type="button"
-                            class="flex-1 rounded-xl border border-slate-300 hover:border-slate-400 py-2 text-sm bg-white">Đổi tên</button>
+                            class="flex-1 rounded-xl border border-slate-300 hover:border-slate-400 py-2 text-sm bg-white">Đổi tên cuộc trò chuyện</button>
                         <button id="clear-chat-btn" type="button"
-                            class="flex-1 rounded-xl border border-slate-300 hover:border-red-400 py-2 text-sm bg-white">Xóa chat</button>
+                            class="flex-1 rounded-xl border border-slate-300 hover:border-red-400 py-2 text-sm bg-white">Xóa nội dung</button>
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <label class="text-xs text-slate-500">Tìm kiếm lịch sử trong phiên hiện tại</label>
+                    <label class="text-xs text-slate-500">Tìm trong cuộc trò chuyện đang mở</label>
                     <div class="mt-1 flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2">
                         <i class="fas fa-search text-xs text-slate-400"></i>
-                        <input id="history-search-input" type="text" placeholder="Nhập từ khóa..."
+                        <input id="history-search-input" type="text" placeholder="Ví dụ: phụ huynh, nội quy..."
                             class="w-full bg-transparent outline-none text-sm placeholder:text-slate-400">
                     </div>
                 </div>
 
                 <div class="mb-4 min-h-0">
                     <div class="flex items-center justify-between mb-2">
-                        <h3 class="text-sm font-semibold">Danh sách phiên</h3>
+                        <h3 class="text-sm font-semibold">Danh sách cuộc trò chuyện</h3>
                         <span id="session-count" class="text-xs text-slate-500">0</span>
                     </div>
                     <div id="session-list" class="space-y-2 overflow-y-auto max-h-[240px] pr-1"></div>
                 </div>
 
                 <div class="min-h-0">
-                    <h3 class="text-sm font-semibold mb-2 text-amber-700">Phản hồi đã pin</h3>
+                    <h3 class="text-sm font-semibold mb-2 text-amber-700">Câu trả lời đã đánh dấu</h3>
                     <div id="pinned-list" class="space-y-2 overflow-y-auto max-h-[220px] pr-1"></div>
                 </div>
             </aside>
 
             <section class="flex flex-col min-w-0 min-h-0 bg-white">
-                <header class="border-b border-slate-200 px-5 py-4 bg-white/90 backdrop-blur">
+                <header class="border-b border-slate-200 px-5 py-4 bg-white">
                     <div class="flex items-start justify-between gap-3">
                         <div class="min-w-0">
                             <h1 id="active-session-title" class="text-lg font-semibold truncate"></h1>
                             <p id="active-session-meta" class="text-xs text-slate-500"></p>
-                            <div id="workspace-stats" class="mt-2 flex flex-wrap gap-2 text-[11px]"></div>
                         </div>
                         <button id="export-chat-btn" type="button"
                             class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs hover:border-cyan-400 transition">
-                            <i class="fas fa-file-export mr-1"></i> Export TXT
+                            <i class="fas fa-file-export mr-1"></i> Tải cuộc trò chuyện
                         </button>
                     </div>
                     <div id="quick-prompts" class="mt-3 flex flex-wrap gap-2">
                         <button type="button" class="quick-prompt rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs hover:border-cyan-400 transition"
-                            data-prompt="Tạo checklist xử lý học sinh vi phạm lần đầu trong 1 tiết học.">Checklist xử lý nhanh</button>
+                            data-prompt="Giúp tôi viết tin nhắn ngắn, lịch sự gửi phụ huynh khi học sinh chưa tập trung trong giờ học.">Mẫu tin nhắn phụ huynh</button>
                         <button type="button" class="quick-prompt rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs hover:border-cyan-400 transition"
-                            data-prompt="Soạn mẫu phản hồi cho phụ huynh về việc con hay mất tập trung trong lớp.">Mẫu phản hồi phụ huynh</button>
-                        <button type="button" class="quick-prompt rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs hover:border-cyan-400 transition"
-                            data-prompt="Gợi ý kế hoạch 15 phút ổn định lớp khi học sinh ồn ào.">Ổn định lớp học</button>
+                            data-prompt="Cho tôi checklist từng bước để ổn định lớp khi học sinh ồn ào trong 10 phút đầu giờ.">Checklist ổn định lớp</button>
                     </div>
                 </header>
 
-                <div id="chat-log" class="flex-1 min-h-0 overflow-y-auto px-5 py-4 space-y-4 bg-gradient-to-b from-slate-50 to-white"></div>
+                <div id="chat-log" class="flex-1 min-h-0 overflow-y-auto px-5 py-4 space-y-4 bg-slate-50"></div>
 
                 <footer class="border-t border-slate-200 bg-white px-5 py-4">
                     <form id="chat-form" class="space-y-2">
                         <div class="rounded-2xl border border-slate-300 bg-slate-50 p-3 flex items-end gap-2">
                             <textarea id="chat-input" rows="1"
                                 class="flex-1 resize-none max-h-44 bg-transparent outline-none text-sm leading-relaxed placeholder:text-slate-400"
-                                placeholder="Nhập câu hỏi chi tiết để nhận phản hồi tốt hơn..." autocomplete="off"></textarea>
+                                placeholder="Nhập câu hỏi của bạn ở đây..." autocomplete="off"></textarea>
                             <button id="send-button" type="submit"
-                                class="h-11 w-11 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-500 text-slate-950 font-bold disabled:opacity-40 disabled:cursor-not-allowed">
+                                class="h-11 w-11 rounded-xl bg-cyan-600 text-white font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-cyan-700">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                         </div>
                         <div class="flex items-center justify-between text-xs text-slate-500">
                             <span id="stream-status">Sẵn sàng</span>
-                            <span id="input-counter">0 ký tự</span>
+                            <span id="input-counter">0 ký tự · Enter để gửi</span>
                         </div>
                     </form>
                 </footer>
@@ -102,16 +103,18 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
     const STORAGE_KEY = 'edumind_assistant_workspace_v1';
     const OLD_STORAGE_KEY = 'edumind_assistant_chat_history_v2';
-    const defaultWelcomeMessage = `Chào cô/thầy! Em có thể hỗ trợ:
+    const defaultWelcomeMessage = `Chào cô/thầy, em là trợ lý AI của EduMind.
 
-📚 **Nội quy nhà trường**: tra cứu quy định, vi phạm, mức xử lý.
-💬 **Cách ứng xử**: tư vấn xử lý tình huống với học sinh.
-✍️ **Trợ giúp công việc**: soạn nhận xét, gợi ý phương pháp giáo dục.
+Em có thể giúp:
+- Tra cứu nội quy và cách xử lý tình huống trong lớp.
+- Gợi ý lời nhắn cho phụ huynh, nhận xét học sinh.
+- Soạn checklist công việc nhanh, dễ áp dụng.
 
-Cô/thầy có thể dùng nhiều phiên chat để tách theo chủ đề, tìm kiếm lịch sử, pin phản hồi quan trọng và export khi cần.`;
+Cô/thầy chỉ cần nhập câu hỏi ngắn gọn, em sẽ trả lời theo từng bước rõ ràng.`;
 
     const chatLog = document.getElementById('chat-log');
     const chatForm = document.getElementById('chat-form');
@@ -126,7 +129,6 @@ Cô/thầy có thể dùng nhiều phiên chat để tách theo chủ đề, tì
     const sessionCount = document.getElementById('session-count');
     const activeSessionTitle = document.getElementById('active-session-title');
     const activeSessionMeta = document.getElementById('active-session-meta');
-    const workspaceStats = document.getElementById('workspace-stats');
     const newSessionBtn = document.getElementById('new-session-btn');
     const renameSessionBtn = document.getElementById('rename-session-btn');
     const clearChatBtn = document.getElementById('clear-chat-btn');
@@ -162,157 +164,19 @@ Cô/thầy có thể dùng nhiều phiên chat để tách theo chủ đề, tì
         return text.replace(new RegExp(`(${safe})`, 'gi'), '<mark class="bg-yellow-200 px-0.5 rounded">$1</mark>');
     }
 
-    function formatInlineMarkdown(text, query = '') {
-        let content = escapeHtml(text);
-        content = content.replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-[12px]">$1</code>');
-        content = content.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold">$1</strong>');
-        content = content.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-        content = content.replace(/~~([^~]+)~~/g, '<del>$1</del>');
-        content = content.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-cyan-700 underline">$1</a>');
-        return applyHighlight(content, query);
-    }
-
-    function isTableLine(line) {
-        return line.includes('|');
-    }
-
-    function isTableSeparator(line) {
-        const compact = line.replace(/\s+/g, '');
-        return /^\|?[:\-|]+\|?$/.test(compact) && compact.includes('-');
-    }
-
-    function splitTableRow(line) {
-        return line
-            .trim()
-            .replace(/^\|/, '')
-            .replace(/\|$/, '')
-            .split('|')
-            .map((cell) => cell.trim());
-    }
+    marked.setOptions({
+        gfm: true,
+        breaks: true
+    });
 
     function formatMessage(text, query = '') {
-        const lines = (text || '').replace(/\r/g, '').split('\n');
-        const html = [];
-        let i = 0;
-
-        while (i < lines.length) {
-            const rawLine = lines[i];
-            const line = rawLine.trim();
-
-            if (!line) {
-                i += 1;
-                continue;
-            }
-
-            if (line.startsWith('```')) {
-                const language = line.slice(3).trim();
-                const codeLines = [];
-                i += 1;
-                while (i < lines.length && !lines[i].trim().startsWith('```')) {
-                    codeLines.push(lines[i]);
-                    i += 1;
-                }
-                if (i < lines.length) i += 1;
-                const escapedCode = escapeHtml(codeLines.join('\n'));
-                html.push(`
-                    <div class="my-3 overflow-hidden rounded-xl border border-slate-300">
-                        <div class="px-3 py-1.5 text-[11px] bg-slate-100 text-slate-500">${language || 'code'}</div>
-                        <pre class="bg-slate-900 text-slate-100 p-3 overflow-auto text-xs"><code>${escapedCode}</code></pre>
-                    </div>
-                `);
-                continue;
-            }
-
-            if (isTableLine(line) && i + 1 < lines.length && isTableSeparator(lines[i + 1])) {
-                const header = splitTableRow(lines[i]);
-                i += 2;
-                const bodyRows = [];
-                while (i < lines.length && isTableLine(lines[i].trim()) && lines[i].trim() !== '') {
-                    bodyRows.push(splitTableRow(lines[i]));
-                    i += 1;
-                }
-
-                const headerHtml = header.map((cell) =>
-                    `<th class="px-2.5 py-2 border border-slate-300 bg-slate-100 text-left font-semibold">${formatInlineMarkdown(cell, query)}</th>`).join('');
-                const bodyHtml = bodyRows.map((row) => {
-                    const cells = row.map((cell) =>
-                        `<td class="px-2.5 py-2 border border-slate-300 align-top">${formatInlineMarkdown(cell, query)}</td>`).join('');
-                    return `<tr>${cells}</tr>`;
-                }).join('');
-
-                html.push(`
-                    <div class="my-3 overflow-auto rounded-xl border border-slate-300">
-                        <table class="min-w-full border-collapse text-xs">
-                            <thead><tr>${headerHtml}</tr></thead>
-                            <tbody>${bodyHtml}</tbody>
-                        </table>
-                    </div>
-                `);
-                continue;
-            }
-
-            const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
-            if (headingMatch) {
-                const level = headingMatch[1].length;
-                const heading = formatInlineMarkdown(headingMatch[2], query);
-                const size = ['text-xl', 'text-lg', 'text-base', 'text-sm', 'text-sm', 'text-sm'][level - 1];
-                html.push(`<h${level} class="${size} font-semibold mt-3 mb-1">${heading}</h${level}>`);
-                i += 1;
-                continue;
-            }
-
-            if (/^[-*_]{3,}$/.test(line)) {
-                html.push('<hr class="my-3 border-slate-300">');
-                i += 1;
-                continue;
-            }
-
-            if (/^>\s?/.test(line)) {
-                const quoteLines = [];
-                while (i < lines.length && /^>\s?/.test(lines[i].trim())) {
-                    quoteLines.push(lines[i].trim().replace(/^>\s?/, ''));
-                    i += 1;
-                }
-                html.push(`<blockquote class="my-3 border-l-4 border-cyan-300 bg-cyan-50 text-slate-700 px-3 py-2 rounded-r-lg">${formatInlineMarkdown(quoteLines.join('<br>'), query)}</blockquote>`);
-                continue;
-            }
-
-            if (/^[-*]\s+/.test(line)) {
-                const items = [];
-                while (i < lines.length && /^[-*]\s+/.test(lines[i].trim())) {
-                    items.push(lines[i].trim().replace(/^[-*]\s+/, ''));
-                    i += 1;
-                }
-                const itemHtml = items.map((item) => `<li>${formatInlineMarkdown(item, query)}</li>`).join('');
-                html.push(`<ul class="list-disc ml-5 my-2 space-y-1">${itemHtml}</ul>`);
-                continue;
-            }
-
-            if (/^\d+\.\s+/.test(line)) {
-                const items = [];
-                while (i < lines.length && /^\d+\.\s+/.test(lines[i].trim())) {
-                    items.push(lines[i].trim().replace(/^\d+\.\s+/, ''));
-                    i += 1;
-                }
-                const itemHtml = items.map((item) => `<li>${formatInlineMarkdown(item, query)}</li>`).join('');
-                html.push(`<ol class="list-decimal ml-5 my-2 space-y-1">${itemHtml}</ol>`);
-                continue;
-            }
-
-            const paragraphLines = [rawLine];
-            i += 1;
-            while (i < lines.length && lines[i].trim() !== '') {
-                if (/^(#{1,6})\s+/.test(lines[i].trim()) || lines[i].trim().startsWith('```')) break;
-                if (/^[-*]\s+/.test(lines[i].trim()) || /^\d+\.\s+/.test(lines[i].trim())) break;
-                if (/^>\s?/.test(lines[i].trim())) break;
-                if (isTableLine(lines[i].trim()) && i + 1 < lines.length && isTableSeparator(lines[i + 1])) break;
-                paragraphLines.push(lines[i]);
-                i += 1;
-            }
-            html.push(`<p class="my-2">${formatInlineMarkdown(paragraphLines.join('<br>'), query)}</p>`);
-        }
-
-        return html.join('');
+        const normalized = (text || '')
+            .replace(/\r/g, '')
+            .replace(/<br\s*\/?>/gi, '\n');
+        const safeMarkdown = escapeHtml(normalized);
+        const highlightedMarkdown = applyHighlight(safeMarkdown, query);
+        const html = marked.parse(highlightedMarkdown);
+        return `<div class="prose prose-sm max-w-none prose-slate prose-p:my-1 prose-headings:my-2 prose-ul:my-2 prose-ol:my-2 prose-pre:my-2">${html}</div>`;
     }
 
     function getActiveSession() {
@@ -363,7 +227,7 @@ Cô/thầy có thể dùng nhiều phiên chat để tách theo chủ đề, tì
         const sessionNumber = workspace.sessions.length + 1;
         const session = {
             id: uid(),
-            name: name || `Phiên chat ${sessionNumber}`,
+            name: name || `Cuộc trò chuyện ${sessionNumber}`,
             createdAt: getNowIso(),
             updatedAt: getNowIso(),
             messages: [{
@@ -392,7 +256,7 @@ Cô/thầy có thể dùng nhiều phiên chat để tách theo chủ đề, tì
             workspace = { activeSessionId: migratedSession.id, sessions: [migratedSession] };
         } else {
             workspace = { activeSessionId: null, sessions: [] };
-            createSession('Phiên chat mặc định');
+            createSession('Cuộc trò chuyện mặc định');
         }
         saveWorkspace();
     }
@@ -400,7 +264,7 @@ Cô/thầy có thể dùng nhiều phiên chat để tách theo chủ đề, tì
     function updateInputUi() {
         const text = chatInput.value.trim();
         sendButton.disabled = text.length === 0 || isStreaming;
-        inputCounter.textContent = `${chatInput.value.length} ký tự`;
+        inputCounter.textContent = `${chatInput.value.length} ký tự · Enter để gửi`;
         chatInput.style.height = 'auto';
         chatInput.style.height = `${Math.min(chatInput.scrollHeight, 160)}px`;
     }
@@ -416,13 +280,13 @@ Cô/thầy có thể dùng nhiều phiên chat để tách theo chủ đề, tì
     function messageHtml(msg, query) {
         const isUser = msg.sender === 'user';
         const bubbleClass = isUser
-            ? 'bg-gradient-to-r from-cyan-500 to-indigo-500 text-slate-950 rounded-2xl rounded-br-md shadow-lg'
-            : 'bg-white border border-slate-300 text-slate-800 rounded-2xl rounded-tl-md shadow-md';
+            ? 'bg-cyan-600 text-white rounded-2xl rounded-br-md shadow-sm'
+            : 'bg-white border border-slate-300 text-slate-800 rounded-2xl rounded-tl-md shadow-sm';
         const avatar = isUser ? '' : `<div class="w-9 h-9 rounded-xl bg-cyan-100 flex-shrink-0 flex items-center justify-center text-cyan-700 text-sm font-bold">AI</div>`;
         const actions = isUser
             ? ''
             : `<button data-action="copy" data-id="${msg.id}" class="px-1 text-[11px] text-slate-500 hover:text-slate-700 transition" title="Sao chép"><i class="fas fa-copy"></i></button>
-               <button data-action="pin" data-id="${msg.id}" class="px-1 text-[11px] ${msg.pinned ? 'text-amber-500' : 'text-slate-500'} hover:text-amber-500 transition" title="Pin phản hồi"><i class="fas fa-star"></i></button>`;
+               <button data-action="pin" data-id="${msg.id}" class="px-1 text-[11px] ${msg.pinned ? 'text-amber-500' : 'text-slate-500'} hover:text-amber-500 transition" title="Đánh dấu câu trả lời"><i class="fas fa-star"></i></button>`;
         const wrapperClass = isUser ? 'flex items-end justify-end gap-2 animate-fade-in-up' : 'flex items-start gap-3 animate-fade-in-up';
         return `
             <div class="${wrapperClass}" data-message-id="${msg.id}">
@@ -458,7 +322,7 @@ Cô/thầy có thể dùng nhiều phiên chat để tách theo chủ đề, tì
                 <div class="text-[11px] text-slate-500 mt-1">${s.messages.length} tin nhắn</div>
             </button>
         `).join('');
-        sessionCount.textContent = `${workspace.sessions.length} phiên`;
+        sessionCount.textContent = `${workspace.sessions.length} cuộc trò chuyện`;
     }
 
     function renderPinned() {
@@ -472,7 +336,7 @@ Cô/thầy có thể dùng nhiều phiên chat để tách theo chủ đề, tì
                     <div class="text-xs text-slate-700 line-clamp-3">${escapeHtml(p.message.slice(0, 180))}</div>
                 </button>
             `).join('')
-            : `<div class="text-xs text-slate-500 bg-white rounded-lg border border-dashed border-slate-300 p-3">Chưa có phản hồi nào được pin.</div>`;
+            : `<div class="text-xs text-slate-500 bg-white rounded-lg border border-dashed border-slate-300 p-3">Chưa có câu trả lời nào được đánh dấu.</div>`;
     }
 
     function renderHeaderInfo() {
@@ -480,13 +344,7 @@ Cô/thầy có thể dùng nhiều phiên chat để tách theo chủ đề, tì
         if (!session) return;
         const pins = session.messages.filter((m) => m.sender === 'bot' && m.pinned).length;
         activeSessionTitle.textContent = session.name;
-        activeSessionMeta.textContent = `${session.messages.length} tin nhắn · ${pins} phản hồi đã pin · ${workspace.sessions.length} phiên`;
-        workspaceStats.innerHTML = `
-            <span class="px-2 py-1 rounded-full border border-slate-300 bg-white text-slate-600">Phiên: ${workspace.sessions.length}</span>
-            <span class="px-2 py-1 rounded-full border border-slate-300 bg-white text-slate-600">Tin nhắn: ${session.messages.length}</span>
-            <span class="px-2 py-1 rounded-full border border-amber-300 bg-amber-50 text-amber-700">Pin: ${pins}</span>
-            <span class="px-2 py-1 rounded-full border border-cyan-300 bg-cyan-50 text-cyan-700">Streaming realtime</span>
-        `;
+        activeSessionMeta.textContent = `${session.messages.length} tin nhắn · ${pins} mục đã đánh dấu`;
     }
 
     function rerenderAll() {
@@ -633,7 +491,7 @@ Cô/thầy có thể dùng nhiều phiên chat để tách theo chủ đề, tì
     renameSessionBtn.addEventListener('click', () => {
         const session = getActiveSession();
         if (!session) return;
-        const nextName = prompt('Nhập tên mới cho phiên chat:', session.name);
+        const nextName = prompt('Nhập tên mới cho cuộc trò chuyện:', session.name);
         if (!nextName || !nextName.trim()) return;
         session.name = nextName.trim();
         session.updatedAt = getNowIso();
@@ -644,7 +502,7 @@ Cô/thầy có thể dùng nhiều phiên chat để tách theo chủ đề, tì
     clearChatBtn.addEventListener('click', () => {
         const session = getActiveSession();
         if (!session) return;
-        if (!confirm('Xóa toàn bộ tin nhắn trong phiên hiện tại?')) return;
+        if (!confirm('Xóa toàn bộ tin nhắn trong cuộc trò chuyện hiện tại?')) return;
         session.messages = [{
             id: uid(),
             sender: 'bot',
