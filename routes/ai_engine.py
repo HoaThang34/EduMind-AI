@@ -278,6 +278,37 @@ def _format_student_rag_block(students):
     return "\n".join(lines)
 
 
+def _build_student_feedback(student: Student):
+    """Sinh nhận xét ngắn và gợi ý hành động cho học sinh."""
+    snapshot = _student_learning_snapshot(student)
+    gpa = snapshot["gpa"]
+    conduct = snapshot["conduct_level"]
+    weak_subjects = snapshot["weak_subjects"][:3]
+    strong_subjects = snapshot["strong_subjects"][:3]
+
+    if gpa is None:
+        review = "Chưa đủ dữ liệu điểm để đánh giá toàn diện, cần bổ sung thêm đầu điểm."
+    elif gpa >= 8.0 and conduct in ["Tốt", "Khá"]:
+        review = "Kết quả học tập và nề nếp đang ổn định tốt, có thể giao mục tiêu nâng cao."
+    elif gpa >= 6.5:
+        review = "Nền tảng học tập khá, cần tập trung đều các môn để tránh lệch kết quả."
+    elif gpa >= 5.0:
+        review = "Mức học tập trung bình, cần kế hoạch ôn tập theo tuần và theo dõi sát tiến độ."
+    else:
+        review = "Kết quả học tập dưới ngưỡng an toàn, cần phối hợp gia đình - giáo viên để can thiệp sớm."
+
+    tips = []
+    if weak_subjects:
+        tips.append(f"Ưu tiên cải thiện các môn: {', '.join(weak_subjects)}.")
+    if strong_subjects:
+        tips.append(f"Duy trì và phát huy các môn thế mạnh: {', '.join(strong_subjects)}.")
+    if conduct in ["Trung bình", "Yếu"]:
+        tips.append("Thiết lập mục tiêu nề nếp theo tuần, kiểm tra lại sau mỗi 7 ngày.")
+    tips.append("Chia mục tiêu học theo ngày (30-45 phút/môn) và tự đánh giá cuối tuần.")
+
+    return {"review": review, "tips": tips[:4]}
+
+
 def _top_scored_lines(query_norm: str, items, top_k: int = 6):
     """Chấm điểm và lấy top dòng phù hợp nhất cho RAG."""
     scored = []
@@ -407,8 +438,9 @@ def _build_assistant_system_prompt():
         "3) Nếu có nhiều học sinh gần giống, yêu cầu người dùng xác nhận bằng mã học sinh/lớp.\n"
         "4) Nếu không có dữ liệu khớp, nói rõ không tìm thấy và hướng dẫn cách nhập lại.\n"
         "5) Có thể trả lời câu hỏi tổng quát từ nhiều bảng (học sinh, giáo viên, lớp, môn, vi phạm, cấu hình) nếu có dữ liệu trong context.\n"
-        "6) Trả lời ngắn gọn, có cấu trúc markdown, tiếng Việt lịch sự.\n"
-        "7) Không tiết lộ dữ liệu ngoài phạm vi quyền truy cập hiện tại."
+        "6) Khi trả thông tin chi tiết 1 học sinh, luôn thêm mục 'Nhận xét' và 'Gợi ý cho học sinh' (2-4 ý ngắn).\n"
+        "7) Trả lời ngắn gọn, có cấu trúc markdown, tiếng Việt lịch sự.\n"
+        "8) Không tiết lộ dữ liệu ngoài phạm vi quyền truy cập hiện tại."
     )
 
 
@@ -1591,8 +1623,14 @@ def api_assistant_chatbot():
     global_rag_payload = _build_global_rag_context(msg)
     rag_context_parts = [f"Người dùng: role={current_user.role}, lớp phụ trách={getattr(current_user, 'assigned_class', '') or 'N/A'}"]
     if best_student:
+        feedback = _build_student_feedback(best_student)
         rag_context_parts.append(
             f"Ứng viên học sinh khớp cao nhất: {best_student.name} ({best_student.student_code}) - lớp {best_student.student_class}"
+        )
+        rag_context_parts.append(
+            "Nhận xét gợi ý cho học sinh khớp cao nhất:\n"
+            f"- Nhận xét: {feedback['review']}\n"
+            + "\n".join([f"- Gợi ý: {tip}" for tip in feedback["tips"]])
         )
     rag_context_parts.append("Học sinh khớp theo truy vấn trực tiếp:\n" + _format_student_rag_block(rag_students))
     rag_context_parts.append("Ngữ cảnh toàn cục nhiều bảng:\n" + _format_global_rag_context(global_rag_payload))
