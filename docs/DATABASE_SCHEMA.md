@@ -1,688 +1,640 @@
 # Database Schema Documentation - EduMind-AI
 
-## Overview
-EduMind-AI uses SQLAlchemy ORM with SQLite database. All models are defined in `models.py`.
+## Tổng Quan
 
-## Core Models
+EduMind-AI sử dụng SQLAlchemy ORM với SQLite database. Tất cả 31 models được định nghĩa trong `models.py`.
+
+## Danh Sách Models
+
+| # | Model | Mô tả |
+|---|-------|--------|
+| 1 | ClassRoom | Lớp học |
+| 2 | SystemConfig | Cấu hình hệ thống |
+| 3 | Permission | Định nghĩa quyền |
+| 4 | TeacherPermission | Gán quyền cho giáo viên |
+| 5 | Teacher | Tài khoản giáo viên |
+| 6 | ConductSetting | Cấu hình ngưỡng hạnh kiểm |
+| 7 | Student | Hồ sơ học sinh |
+| 8 | ViolationType | Loại vi phạm |
+| 9 | Violation | Bản ghi vi phạm |
+| 10 | WeeklyArchive | Lưu trữ tuần |
+| 11 | TimetableSlot | Ô thời khóa biểu |
+| 12 | Subject | Môn học |
+| 13 | ClassSubject | Phân công môn cho lớp |
+| 14 | Grade | Điểm số |
+| 15 | ChatConversation | Lịch sử chatbot |
+| 16 | BonusType | Loại điểm cộng |
+| 17 | BonusRecord | Bản ghi điểm cộng |
+| 18 | Notification | Thông báo giáo viên |
+| 19 | GroupChatMessage | Tin nhắn nhóm |
+| 20 | PrivateMessage | Tin nhắn riêng |
+| 21 | ChangeLog | Lịch sử thay đổi |
+| 22 | LessonBookEntry | Sổ đầu bài (entry) |
+| 23 | LessonBookWeek | Meta tuần sổ đầu bài |
+| 24 | LessonBookSlot | Ô slot trong grid tuần |
+| 25 | StudentNotification | Thông báo học sinh |
+| 26 | ClassFundCollection | Thu tiền quỹ lớp |
+| 27 | ClassFundExpense | Chi tiêu quỹ lớp |
+| 28 | AttendanceRecord | Bản ghi điểm danh |
+| 29 | AttendanceMonitoringSession | Phiên theo dõi điểm danh |
+| 30 | SessionViolationRecord | Vi phạm trong phiên |
+| 31 | TeacherClassAssignment | Phân công giáo viên dạy lớp |
+
+---
+
+## Chi Tiết Từng Model
 
 ### 1. ClassRoom
-**Description:** Represents a class in the school
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `name` (String(50), Unique, Not Null) - Class name (e.g., "12 Tin")
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `name` | String(50), Unique, Not Null | Tên lớp (VD: "12 Tin") |
 
 ---
 
 ### 2. SystemConfig
-**Description:** System-wide configuration settings
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `key` (String(50), Unique, Not Null) - Configuration key
-- `value` (String(255), Not Null) - Configuration value
-- `last_updated` (DateTime) - Last update timestamp
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `key` | String(50), Unique, Not Null | Key cấu hình |
+| `value` | String(255), Not Null | Giá trị |
+| `last_updated` | DateTime | Thời gian cập nhật cuối |
 
 **Common Keys:**
-- `school_name` - School name
-- `school_year` - Current school year (e.g., "2025-2026")
-- `current_week` - Current week number (ISO week)
-- `current_semester` - Current semester (1 or 2)
-- `last_reset_week_id` - Last week when scores were reset
+- `school_name` - Tên trường
+- `school_year` - Năm học hiện tại
+- `current_week` - Số tuần hiện tại
+- `current_semester` - Học kỳ hiện tại
+- `last_reset_week_id` - Tuần cuối reset điểm
 
 ---
 
 ### 3. Permission
-**Description:** Defines system permissions for granular access control
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `code` (String(50), Unique, Not Null) - Permission code
-- `name` (String(100), Not Null) - Display name
-- `description` (String(255)) - Description
-- `category` (String(50)) - Category (grades, discipline, students, attendance, etc.)
-- `created_at` (DateTime) - Creation timestamp
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `code` | String(50), Unique, Not Null | Mã quyền |
+| `name` | String(100), Not Null | Tên hiển thị |
+| `description` | String(255) | Mô tả |
+| `category` | String(50) | Phân loại |
+| `created_at` | DateTime | Thời gian tạo |
 
 ---
 
 ### 4. TeacherPermission
-**Description:** Assigns specific permissions to teachers
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `teacher_id` (Integer, Foreign Key → Teacher, Not Null, Indexed)
-- `permission_id` (Integer, Foreign Key → Permission, Not Null)
-- `granted_by` (Integer, Foreign Key → Teacher) - Admin who granted permission
-- `granted_at` (DateTime) - When permission was granted
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `teacher_id` | Integer, FK → Teacher, Not Null, Indexed | Giáo viên |
+| `permission_id` | Integer, FK → Permission, Not Null | Quyền |
+| `granted_by` | Integer, FK → Teacher | Admin cấp quyền |
+| `granted_at` | DateTime | Thời gian cấp |
 
-**Constraints:**
-- Unique constraint on (teacher_id, permission_id)
-
-**Relationships:**
-- `teacher` → Teacher (foreign key: teacher_id)
-- `permission` → Permission
-- `grantor` → Teacher (foreign key: granted_by)
+**Constraint:** Unique trên (teacher_id, permission_id)
 
 ---
 
 ### 5. Teacher
-**Description:** Teacher accounts with role-based access control
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `username` (String(50), Unique, Not Null)
-- `password` (String(100), Not Null) - Hashed password
-- `full_name` (String(100), Not Null)
-- `school_name` (String(150), Default: get_default_school_name())
-- `main_class` (String(20)) - Main class assigned
-- `dob` (String(20)) - Date of birth
-- `role` (String(20), Default: "homeroom_teacher") - Role: admin, homeroom_teacher, subject_teacher, both, discipline_officer, parent_student
-- `assigned_class` (String(50)) - Class assigned (for homeroom teachers)
-- `assigned_subject_id` (Integer, Foreign Key → Subject) - Subject assigned (for subject teachers)
-- `created_by` (Integer, Foreign Key → Teacher) - Admin who created this account
-- `created_at` (DateTime) - Creation timestamp
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `username` | String(50), Unique, Not Null | Tên đăng nhập |
+| `password` | String(100), Not Null | Password (hashed) |
+| `full_name` | String(100), Not Null | Họ tên đầy đủ |
+| `school_name` | String(150), Default: "THPT Chuyên Nguyễn Tất Thành" | Tên trường |
+| `main_class` | String(20) | Lớp chủ nhiệm chính |
+| `dob` | String(20) | Ngày sinh |
+| `role` | String(20), Default: "homeroom_teacher" | Vai trò |
+| `assigned_class` | String(50) | Lớp được phân công (GVCN) |
+| `assigned_subject_id` | Integer, FK → Subject | Môn được phân công (GVBM) |
+| `created_by` | Integer, FK → Teacher | Admin tạo tài khoản |
+| `created_at` | DateTime | Thời gian tạo |
+
+**Role Values:**
+- `admin` - Quản trị viên
+- `homeroom_teacher` - Giáo viên chủ nhiệm
+- `subject_teacher` - Giáo viên bộ môn
+- `both` - GVCN + GVBM
+- `discipline_officer` - Giáo viên nền nếp
+- `parent_student` - Phụ huynh/Học sinh
 
 **Methods:**
-- `set_password(pwd)` - Hash and set password
-- `check_password(pwd)` - Verify password (supports both hashed and legacy plain text)
-- `has_permission(permission_code)` - Check if teacher has specific permission
-- `get_all_permissions()` - Get list of all permission codes
-- `get_role_display()` - Get Vietnamese display name for role
+- `set_password(pwd)` - Hash và set password
+- `check_password(pwd)` - Verify password
+- `has_permission(permission_code)` - Kiểm tra quyền
+- `get_all_permissions()` - Lấy danh sách quyền
+- `get_role_display()` - Tên hiển thị vai trò
 
 **Relationships:**
-- `assigned_subject` → Subject (foreign key: assigned_subject_id)
-- `teacher_permissions` → TeacherPermission (backref)
+- `assigned_subject` → Subject
+- `teacher_permissions` → TeacherPermission
 - `class_assignments` → TeacherClassAssignment
 
 ---
 
 ### 6. ConductSetting
-**Description:** Configuration for conduct score thresholds
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `good_threshold` (Integer, Default: 80) - Good conduct >= 80
-- `fair_threshold` (Integer, Default: 65) - Fair conduct >= 65
-- `average_threshold` (Integer, Default: 50) - Average conduct >= 50
-- `warning_yellow_threshold` (Integer, Default: 70) - Yellow warning level
-- `warning_red_threshold` (Integer, Default: 55) - Red warning level
-- `academic_yellow_threshold` (Float, Default: 6.5) - Academic warning yellow
-- `academic_red_threshold` (Float, Default: 5.0) - Academic warning red
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `good_threshold` | Integer, Default: 80 | Ngưỡng Tốt (>=80) |
+| `fair_threshold` | Integer, Default: 65 | Ngưỡng Khá (>=65) |
+| `average_threshold` | Integer, Default: 50 | Ngưỡng Trung bình (>=50) |
+| `warning_yellow_threshold` | Integer, Default: 70 | Ngưỡng cảnh báo Vàng |
+| `warning_red_threshold` | Integer, Default: 55 | Ngưỡng cảnh báo Đỏ |
+| `academic_yellow_threshold` | Float, Default: 6.5 | Ngưỡng học lực Vàng |
+| `academic_red_threshold` | Float, Default: 5.0 | Ngưỡng học lực Đỏ |
 
 ---
 
 ### 7. Student
-**Description:** Student records
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `student_code` (String(50), Unique, Not Null) - Student code
-- `name` (String(100), Not Null) - Full name
-- `student_class` (String(20), Not Null) - Class name
-- `current_score` (Integer, Default: 100) - Current conduct score (100-based)
-- `parent_name` (String(150)) - Parent/guardian name
-- `parent_phone` (String(20)) - Parent phone number
-- `portrait_filename` (String(255)) - Portrait photo filename
-- `date_of_birth` (String(30)) - Date of birth (format: DD/MM/YYYY)
-- `position` (String(50)) - Class position (Class monitor, Secretary, etc.)
-- `conduct` (String(20), Default: "Tốt") - Conduct rating
-- `warning_level` (String(20), Default: "Xanh") - Warning level (Xanh, Vàng, Đỏ)
-- `academic_rank` (String(20), Default: "Khá") - Academic ranking
-- `academic_warning_level` (String(20), Default: "Xanh") - Academic warning level
-- `id_card` (String(20)) - ID card number
-- `ethnicity` (String(50)) - Ethnicity
-- `password` (String(100)) - Password for student portal login
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `student_code` | String(50), Unique, Not Null | Mã học sinh |
+| `name` | String(100), Not Null | Họ tên |
+| `student_class` | String(20), Not Null | Lớp |
+| `current_score` | Integer, Default: 100 | Điểm nề nếp hiện tại |
+| `parent_name` | String(150) | Tên phụ huynh |
+| `parent_phone` | String(20) | SĐT phụ huynh |
+| `portrait_filename` | String(255) | File ảnh chân dung |
+| `date_of_birth` | String(30) | Ngày sinh (DD/MM/YYYY) |
+| `position` | String(50) | Chức vụ (Lớp trưởng, Bí thư...) |
+| `conduct` | String(20), Default: "Tốt" | Hạnh kiểm |
+| `warning_level` | String(20), Default: "Xanh" | Mức cảnh báo |
+| `academic_rank` | String(20), Default: "Khá" | Học lực |
+| `academic_warning_level` | String(20), Default: "Xanh" | Cảnh báo học tập |
+| `id_card` | String(20) | Số CCCD/CMND |
+| `ethnicity` | String(50) | Dân tộc |
+| `password` | String(100) | Password đăng nhập |
+
+**Conduct Values:** Tốt, Khá, Trung bình, Yếu
+**Warning Levels:** Xanh, Vàng, Đỏ
+**Academic Ranks:** Giỏi, Khá, Trung bình, Yếu
 
 **Methods:**
-- `set_password(pwd)` - Hash and set password
+- `set_password(pwd)` - Hash và set password
 - `check_password(pwd)` - Verify password
-
-**Relationships:**
-- `grades` → Grade (backref, cascade delete)
-- `violations` → Violation (backref)
-- `bonuses` → BonusRecord (backref)
-- `chat_history` → ChatConversation (backref)
-- `student_notifications` → StudentNotification (backref)
 
 ---
 
 ### 8. ViolationType
-**Description:** Types of violations with point deductions
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `name` (String(200), Unique, Not Null) - Violation name
-- `points_deducted` (Integer, Not Null) - Points to deduct
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `name` | String(200), Unique, Not Null | Tên loại vi phạm |
+| `points_deducted` | Integer, Not Null | Điểm trừ |
 
 ---
 
 ### 9. Violation
-**Description:** Student violation records
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `student_id` (Integer, Foreign Key → Student, Not Null)
-- `violation_type_name` (String(200), Not Null) - Type of violation
-- `points_deducted` (Integer, Not Null) - Points deducted
-- `date_committed` (DateTime, Default: datetime.utcnow) - When violation occurred
-- `week_number` (Integer, Default: 1) - Week number (ISO week)
-- `lesson_book_entry_id` (Integer, Foreign Key → LessonBookEntry, Nullable) - Linked lesson
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `student_id` | Integer, FK → Student, Not Null | Học sinh |
+| `violation_type_name` | String(200), Not Null | Tên loại vi phạm |
+| `points_deducted` | Integer, Not Null | Điểm trừ |
+| `date_committed` | DateTime, Default: utcnow | Ngày vi phạm |
+| `week_number` | Integer, Default: 1 | Số tuần |
+| `lesson_book_entry_id` | Integer, FK → LessonBookEntry, Nullable | Liên kết sổ đầu bài |
 
 **Relationships:**
-- `student` → Student (backref)
-- `linked_lesson` → LessonBookEntry (backref)
+- `student` → Student
+- `linked_lesson` → LessonBookEntry
 
 ---
 
 ### 10. WeeklyArchive
-**Description:** Weekly archived student data
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `week_number` (Integer, Not Null) - Week number
-- `student_id` (Integer, Nullable) - Student ID
-- `student_name` (String(100)) - Student name
-- `student_code` (String(50)) - Student code
-- `student_class` (String(20)) - Class name
-- `final_score` (Integer) - Final score for the week
-- `total_deductions` (Integer) - Total points deducted
-- `created_at` (DateTime) - Creation timestamp
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `week_number` | Integer, Not Null | Số tuần |
+| `student_id` | Integer, Nullable | ID học sinh |
+| `student_name` | String(100) | Tên học sinh |
+| `student_code` | String(50) | Mã học sinh |
+| `student_class` | String(20) | Lớp |
+| `final_score` | Integer | Điểm cuối tuần |
+| `total_deductions` | Integer | Tổng điểm trừ |
+| `created_at` | DateTime | Thời gian tạo |
 
 ---
 
 ### 11. TimetableSlot
-**Description:** Timetable slot for a class, day, period
 
-**Table:** `timetable_slot`
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `class_name` | String(50), Not Null, Indexed | Tên lớp |
+| `day_of_week` | Integer, Not Null | Thứ (1=Thứ Hai...7=Chủ nhật) |
+| `period_number` | Integer, Not Null | Số tiết |
+| `subject_id` | Integer, FK → Subject, Nullable | Môn học |
+| `subject_name_override` | String(120) | Ghi đè tên môn |
+| `teacher_id` | Integer, FK → Teacher, Nullable | Giáo viên |
+| `room` | String(50) | Phòng học |
+| `school_year` | String(20), Not Null, Indexed | Năm học |
+| `week_number` | Integer, Not Null, Default: 1 | Tuần ISO |
+| `created_at` | DateTime | Thời gian tạo |
+| `updated_at` | DateTime | Thời gian cập nhật |
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `class_name` (String(50), Not Null, Indexed) - Class name
-- `day_of_week` (Integer, Not Null) - Day (1=Monday, 7=Sunday)
-- `period_number` (Integer, Not Null) - Period number
-- `subject_id` (Integer, Foreign Key → Subject, Nullable) - Subject
-- `subject_name_override` (String(120)) - Override subject name
-- `teacher_id` (Integer, Foreign Key → Teacher, Nullable) - Teacher
-- `room` (String(50)) - Room number
-- `school_year` (String(20), Not Null, Indexed) - School year
-- `week_number` (Integer, Not Null, Default: 1) - ISO week number
-- `created_at` (DateTime) - Creation timestamp
-- `updated_at` (DateTime, onupdate) - Last update timestamp
-
-**Constraints:**
-- Unique constraint on (class_name, day_of_week, period_number, school_year, week_number)
-
-**Relationships:**
-- `subject` → Subject (backref)
-- `teacher` → Teacher (backref)
+**Constraint:** Unique trên (class_name, day_of_week, period_number, school_year, week_number)
 
 ---
 
 ### 12. Subject
-**Description:** School subjects
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `name` (String(100), Unique, Not Null) - Subject name
-- `code` (String(20), Unique, Not Null) - Subject code
-- `description` (String(200)) - Description
-- `num_tx_columns` (Integer, Default: 3) - Number of TX (regular test) columns
-- `num_gk_columns` (Integer, Default: 1) - Number of GK (midterm) columns
-- `num_hk_columns` (Integer, Default: 1) - Number of HK (final) columns
-- `is_pass_fail` (Boolean, Default: False) - Pass/fail grading (for PE, civic education, etc.)
-- `created_at` (DateTime) - Creation timestamp
-
-**Relationships:**
-- `grades` → Grade (backref, cascade delete)
-- `timetable_slots` → TimetableSlot (backref)
-- `class_assignments` → ClassSubject
-- `teacher_assignments` → TeacherClassAssignment
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `name` | String(100), Unique, Not Null | Tên môn học |
+| `code` | String(20), Unique, Not Null | Mã môn |
+| `description` | String(200) | Mô tả |
+| `num_tx_columns` | Integer, Default: 3 | Số cột TX (điểm thường xuyên) |
+| `num_gk_columns` | Integer, Default: 1 | Số cột GK (giữa kỳ) |
+| `num_hk_columns` | Integer, Default: 1 | Số cột HK (cuối kỳ) |
+| `is_pass_fail` | Boolean, Default: False | Môn đạt/không đạt (Thể dục...) |
+| `created_at` | DateTime | Thời gian tạo |
 
 ---
 
 ### 13. ClassSubject
-**Description:** Subject assignments for each class
 
-**Table:** `class_subject`
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `class_name` | String(50), Not Null, Indexed | Tên lớp |
+| `subject_id` | Integer, FK → Subject, Not Null, Indexed | Môn học |
+| `school_year` | String(20), Not Null, Default: "2025-2026" | Năm học |
+| `is_compulsory` | Boolean, Default: True | Bắt buộc |
+| `periods_per_week` | Integer, Default: 3 | Số tiết/tuần |
+| `created_at` | DateTime | Thời gian tạo |
+| `created_by` | Integer, FK → Teacher | Người tạo |
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `class_name` (String(50), Not Null, Indexed) - Class name
-- `subject_id` (Integer, Foreign Key → Subject, Not Null, Indexed) - Subject
-- `school_year` (String(20), Not Null, Default: "2025-2026") - School year
-- `is_compulsory` (Boolean, Default: True) - Is compulsory subject
-- `periods_per_week` (Integer, Default: 3) - Periods per week
-- `created_at` (DateTime) - Creation timestamp
-- `created_by` (Integer, Foreign Key → Teacher) - Creator
-
-**Constraints:**
-- Unique constraint on (class_name, subject_id, school_year)
-
-**Relationships:**
-- `subject` → Subject (backref)
-- `creator` → Teacher (foreign key: created_by)
+**Constraint:** Unique trên (class_name, subject_id, school_year)
 
 ---
 
 ### 14. Grade
-**Description:** Student grades
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `student_id` (Integer, Foreign Key → Student, Not Null)
-- `subject_id` (Integer, Foreign Key → Subject, Not Null)
-- `grade_type` (String(10), Not Null) - Type: TX (regular), GK (midterm), HK (final)
-- `column_index` (Integer, Default: 1) - Column index for multiple grades of same type
-- `score` (Float, Not Null) - Score (0-10)
-- `semester` (Integer, Not Null) - Semester (1 or 2)
-- `school_year` (String(20)) - School year
-- `date_recorded` (DateTime, Default: datetime.utcnow) - When recorded
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `student_id` | Integer, FK → Student, Not Null | Học sinh |
+| `subject_id` | Integer, FK → Subject, Not Null | Môn học |
+| `grade_type` | String(10), Not Null | Loại điểm: TX, GK, HK |
+| `column_index` | Integer, Default: 1 | Cột điểm (nhiều điểm cùng loại) |
+| `score` | Float, Not Null | Điểm (0-10) |
+| `semester` | Integer, Not Null | Học kỳ (1 hoặc 2) |
+| `school_year` | String(20) | Năm học |
+| `date_recorded` | DateTime, Default: utcnow | Ngày nhập |
 
 **Relationships:**
-- `student` → Student (backref, cascade delete)
-- `subject` → Subject (backref, cascade delete)
+- `student` → Student (cascade delete)
+- `subject` → Subject (cascade delete)
 
 ---
 
 ### 15. ChatConversation
-**Description:** Chatbot conversation history with context
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `session_id` (String(100), Not Null, Indexed) - Session identifier
-- `teacher_id` (Integer, Foreign Key → Teacher, Nullable) - Teacher ID
-- `student_id` (Integer, Foreign Key → Student, Nullable) - Student ID
-- `role` (String(20), Not Null) - Role: 'user' or 'assistant'
-- `message` (Text, Not Null) - Message content
-- `context_data` (Text, Nullable) - JSON metadata
-- `created_at` (DateTime, Indexed) - Creation timestamp
-
-**Relationships:**
-- `teacher` → Teacher (backref)
-- `student` → Student (backref)
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `session_id` | String(100), Not Null, Indexed | Session ID |
+| `teacher_id` | Integer, FK → Teacher, Nullable | ID giáo viên |
+| `student_id` | Integer, FK → Student, Nullable | ID học sinh |
+| `role` | String(20), Not Null | 'user' hoặc 'assistant' |
+| `message` | Text, Not Null | Nội dung tin nhắn |
+| `context_data` | Text, Nullable | JSON metadata |
+| `created_at` | DateTime, Indexed | Thời gian tạo |
 
 ---
 
 ### 16. BonusType
-**Description:** Types of bonus points
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `name` (String(200), Unique, Not Null) - Bonus type name
-- `points_added` (Integer, Not Null) - Points to add
-- `description` (String(500)) - Description
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `name` | String(200), Unique, Not Null | Tên loại điểm cộng |
+| `points_added` | Integer, Not Null | Điểm cộng |
+| `description` | String(500) | Mô tả |
 
 ---
 
 ### 17. BonusRecord
-**Description:** Student bonus point records
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `student_id` (Integer, Foreign Key → Student, Not Null)
-- `bonus_type_name` (String(200), Not Null) - Bonus type
-- `points_added` (Integer, Not Null) - Points added
-- `reason` (String(500)) - Specific reason
-- `date_awarded` (DateTime, Default: datetime.utcnow) - When awarded
-- `week_number` (Integer, Default: 1) - Week number
-
-**Relationships:**
-- `student` → Student (backref)
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `student_id` | Integer, FK → Student, Not Null | Học sinh |
+| `bonus_type_name` | String(200), Not Null | Tên loại điểm cộng |
+| `points_added` | Integer, Not Null | Điểm cộng |
+| `reason` | String(500) | Lý do cụ thể |
+| `date_awarded` | DateTime, Default: utcnow | Ngày thưởng |
+| `week_number` | Integer, Default: 1 | Số tuần |
 
 ---
 
 ### 18. Notification
-**Description:** System notifications for teachers
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `title` (String(200), Not Null) - Notification title
-- `message` (Text, Not Null) - Notification message
-- `created_at` (DateTime) - Creation timestamp
-- `created_by` (Integer, Foreign Key → Teacher) - Creator
-- `notification_type` (String(50)) - Type: violation, grade, bonus, announcement
-- `target_role` (String(50)) - Target: all, homeroom_teacher, subject_teacher, or class name
-- `is_read` (Boolean, Default: False) - Read status
-- `recipient_id` (Integer, Foreign Key → Teacher) - Recipient
-
-**Relationships:**
-- `creator` → Teacher (foreign key: created_by, backref: sent_notifications)
-- `recipient` → Teacher (foreign key: recipient_id, backref: notifications)
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `title` | String(200), Not Null | Tiêu đề |
+| `message` | Text, Not Null | Nội dung |
+| `created_at` | DateTime | Thời gian tạo |
+| `created_by` | Integer, FK → Teacher | Người tạo |
+| `notification_type` | String(50) | Loại: violation, grade, bonus, announcement |
+| `target_role` | String(50) | 'all', 'homeroom_teacher', 'subject_teacher', hoặc class name |
+| `is_read` | Boolean, Default: False | Đã đọc |
+| `recipient_id` | Integer, FK → Teacher | Người nhận |
 
 ---
 
 ### 19. GroupChatMessage
-**Description:** Messages in group chat
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `sender_id` (Integer, Foreign Key → Teacher, Not Null) - Sender
-- `message` (Text, Not Null) - Message content
-- `created_at` (DateTime) - Creation timestamp
-
-**Relationships:**
-- `sender` → Teacher (backref)
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `sender_id` | Integer, FK → Teacher, Not Null | Người gửi |
+| `message` | Text, Not Null | Nội dung tin nhắn |
+| `created_at` | DateTime | Thời gian gửi |
 
 ---
 
 ### 20. PrivateMessage
-**Description:** Private messages between teachers
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `sender_id` (Integer, Foreign Key → Teacher, Not Null) - Sender
-- `receiver_id` (Integer, Foreign Key → Teacher, Not Null) - Receiver
-- `message` (Text, Not Null) - Message content
-- `created_at` (DateTime) - Creation timestamp
-- `is_read` (Boolean, Default: False) - Read status
-
-**Relationships:**
-- `sender` → Teacher (backref: sent_private_messages)
-- `receiver` → Teacher (backref: received_private_messages)
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `sender_id` | Integer, FK → Teacher, Not Null | Người gửi |
+| `receiver_id` | Integer, FK → Teacher, Not Null | Người nhận |
+| `message` | Text, Not Null | Nội dung tin nhắn |
+| `created_at` | DateTime | Thời gian gửi |
+| `is_read` | Boolean, Default: False | Đã đọc |
 
 ---
 
 ### 21. ChangeLog
-**Description:** Audit log for database changes
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `changed_by_id` (Integer, Foreign Key → Teacher, Nullable) - Who made change
-- `change_type` (String(50), Not Null) - Type: violation, bonus, grade, grade_update, grade_delete, violation_delete, score_reset, bulk_violation
-- `student_id` (Integer, Foreign Key → Student, Nullable) - Student affected
-- `student_name` (String(100)) - Student name
-- `student_class` (String(20)) - Student class
-- `description` (Text, Not Null) - Change description
-- `old_value` (String(200)) - Old value
-- `new_value` (String(200)) - New value
-- `created_at` (DateTime) - Creation timestamp
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `changed_by_id` | Integer, FK → Teacher, Nullable | Người thay đổi |
+| `change_type` | String(50), Not Null | Loại thay đổi |
+| `student_id` | Integer, FK → Student, Nullable | Học sinh bị ảnh hưởng |
+| `student_name` | String(100) | Tên học sinh |
+| `student_class` | String(20) | Lớp học sinh |
+| `description` | Text, Not Null | Mô tả thay đổi |
+| `old_value` | String(200) | Giá trị cũ |
+| `new_value` | String(200) | Giá trị mới |
+| `created_at` | DateTime | Thời gian thay đổi |
 
-**Relationships:**
-- `changed_by` → Teacher (backref)
-- `student` → Student (backref)
+**Change Types:** violation, bonus, grade, grade_update, grade_delete, violation_delete, score_reset, bulk_violation
 
 ---
 
 ### 22. LessonBookEntry
-**Description:** Electronic lesson book entries
 
-**Table:** `lesson_book_entry`
-
-**Fields:**
-- `id` (Integer, Primary Key)
-- `teacher_id` (Integer, Foreign Key → Teacher, Not Null, Indexed) - Teacher
-- `class_name` (String(50), Not Null, Indexed) - Class name
-- `timetable_slot_id` (Integer, Foreign Key → TimetableSlot, Nullable, Indexed) - Linked timetable slot
-- `subject_id` (Integer, Foreign Key → Subject, Nullable, Indexed) - Subject
-- `lesson_date` (Date, Not Null, Indexed) - Lesson date
-- `period_number` (Integer, Not Null, Default: 1) - Period number
-- `topic` (Text, Not Null) - Lesson topic
-- `objectives` (Text) - Learning objectives
-- `teaching_method` (Text) - Teaching method
-- `evaluation` (Text) - Evaluation
-- `homework` (Text) - Homework
-- `notes` (Text) - Notes
-- `attendance_present` (Integer) - Present count
-- `attendance_absent` (Integer) - Absent count
-- `school_year` (String(20)) - School year
-- `semester` (Integer, Default: 1) - Semester
-- `created_at` (DateTime) - Creation timestamp
-- `updated_at` (DateTime, onupdate) - Last update timestamp
-
-**Relationships:**
-- `teacher` → Teacher (backref)
-- `subject` → Subject (backref)
-- `timetable_slot` → TimetableSlot (backref)
-- `violations` → Violation (backref)
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `teacher_id` | Integer, FK → Teacher, Not Null, Indexed | Giáo viên |
+| `class_name` | String(50), Not Null, Indexed | Tên lớp |
+| `timetable_slot_id` | Integer, FK → TimetableSlot, Nullable, Indexed | Liên kết TKB |
+| `subject_id` | Integer, FK → Subject, Nullable, Indexed | Môn học |
+| `lesson_date` | Date, Not Null, Indexed | Ngày dạy |
+| `period_number` | Integer, Not Null, Default: 1 | Tiết thứ |
+| `topic` | Text, Not Null | Bài dạy |
+| `objectives` | Text | Mục tiêu |
+| `teaching_method` | Text | Phương pháp dạy học |
+| `evaluation` | Text | Đánh giá |
+| `homework` | Text | Bài tập |
+| `notes` | Text | Ghi chú |
+| `attendance_present` | Integer | Số có mặt |
+| `attendance_absent` | Integer | Số vắng |
+| `school_year` | String(20) | Năm học |
+| `semester` | Integer, Default: 1 | Học kỳ |
+| `created_at` | DateTime | Thời gian tạo |
+| `updated_at` | DateTime | Thời gian cập nhật |
 
 ---
 
 ### 23. LessonBookWeek
-**Description:** Weekly lesson book metadata
 
-**Table:** `lesson_book_week`
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `teacher_id` | Integer, FK → Teacher, Not Null, Indexed | Giáo viên |
+| `class_name` | String(50), Not Null, Indexed | Tên lớp |
+| `week_number` | Integer, Not Null, Indexed | Số tuần ISO (1-53) |
+| `school_year` | String(20), Not Null | Năm học |
+| `semester` | Integer, Default: 1 | Học kỳ |
+| `teacher_notes` | Text | Ghi chú tuần |
+| `created_at` | DateTime | Thời gian tạo |
+| `updated_at` | DateTime | Thời gian cập nhật |
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `teacher_id` (Integer, Foreign Key → Teacher, Not Null, Indexed) - Teacher
-- `class_name` (String(50), Not Null, Indexed) - Class name
-- `week_number` (Integer, Not Null, Indexed) - ISO week (1-53)
-- `school_year` (String(20), Not Null) - School year
-- `semester` (Integer, Default: 1) - Semester
-- `teacher_notes` (Text) - Teacher's weekly notes
-- `created_at` (DateTime) - Creation timestamp
-- `updated_at` (DateTime, onupdate) - Last update timestamp
-
-**Constraints:**
-- Unique constraint on (teacher_id, class_name, week_number)
-
-**Relationships:**
-- `teacher` → Teacher (backref)
-- `slots` → LessonBookSlot (backref, cascade delete)
+**Constraint:** Unique trên (teacher_id, class_name, week_number)
 
 ---
 
 ### 24. LessonBookSlot
-**Description:** Individual lesson book slot (cell in weekly grid)
 
-**Table:** `lesson_book_slot`
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `week_id` | Integer, FK → LessonBookWeek, Not Null, Indexed | Tuần reference |
+| `day_of_week` | Integer, Not Null | Thứ (1=Thứ 2...7=Chủ nhật) |
+| `period_number` | Integer, Not Null, Default: 1 | Tiết thứ |
+| `lesson_date` | Date, Nullable, Indexed | Ngày dạy |
+| `subject_name` | String(100) | Tên môn (ghi nhanh) |
+| `topic` | Text | Bài dạy |
+| `objectives` | Text | Mục tiêu |
+| `teaching_method` | Text | Phương pháp dạy học |
+| `evaluation` | Text | Đánh giá |
+| `homework` | Text | Bài tập |
+| `notes` | Text | Ghi chú |
+| `attendance_present` | Integer | Số có mặt |
+| `attendance_absent` | Integer | Số vắng |
+| `created_at` | DateTime | Thời gian tạo |
+| `updated_at` | DateTime | Thời gian cập nhật |
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `week_id` (Integer, Foreign Key → LessonBookWeek, Not Null, Indexed) - Week reference
-- `day_of_week` (Integer, Not Null) - Day (1=Monday, 7=Sunday)
-- `period_number` (Integer, Not Null, Default: 1) - Period number
-- `lesson_date` (Date, Nullable, Indexed) - Lesson date
-- `subject_name` (String(100)) - Subject name (quick entry)
-- `topic` (Text) - Lesson topic
-- `objectives` (Text) - Learning objectives
-- `teaching_method` (Text) - Teaching method
-- `evaluation` (Text) - Evaluation
-- `homework` (Text) - Homework
-- `notes` (Text) - Notes
-- `attendance_present` (Integer) - Present count
-- `attendance_absent` (Integer) - Absent count
-- `created_at` (DateTime) - Creation timestamp
-- `updated_at` (DateTime, onupdate) - Last update timestamp
-
-**Constraints:**
-- Unique constraint on (week_id, day_of_week, period_number)
-
-**Relationships:**
-- `week` → LessonBookWeek (backref, cascade delete)
+**Constraint:** Unique trên (week_id, day_of_week, period_number)
 
 ---
 
 ### 25. StudentNotification
-**Description:** Notifications for students (separate from teacher notifications)
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `student_id` (Integer, Foreign Key → Student, Not Null, Indexed) - Student
-- `title` (String(200), Not Null) - Title
-- `message` (Text, Not Null) - Message
-- `notification_type` (String(50)) - Type
-- `is_read` (Boolean, Default: False) - Read status
-- `created_at` (DateTime) - Creation timestamp
-- `sender_id` (Integer, Foreign Key → Teacher, Nullable) - Sender (teacher)
-
-**Relationships:**
-- `student` → Student (backref)
-- `sender` → Teacher (backref)
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `student_id` | Integer, FK → Student, Not Null, Indexed | Học sinh |
+| `title` | String(200), Not Null | Tiêu đề |
+| `message` | Text, Not Null | Nội dung |
+| `notification_type` | String(50) | Loại thông báo |
+| `is_read` | Boolean, Default: False | Đã đọc |
+| `created_at` | DateTime | Thời gian tạo |
+| `sender_id` | Integer, FK → Teacher, Nullable | Người gửi |
 
 ---
 
 ### 26. ClassFundCollection
-**Description:** Class fund collection records
 
-**Table:** `class_fund_collection`
-
-**Fields:**
-- `id` (Integer, Primary Key)
-- `class_name` (String(50), Not Null, Indexed) - Class name
-- `school_year` (String(20), Not Null, Indexed) - School year
-- `amount_vnd` (Integer, Not Null) - Amount in VND
-- `purpose` (String(200), Not Null) - Purpose of collection
-- `student_id` (Integer, Foreign Key → Student, Nullable, Indexed) - Student (if specific)
-- `payer_name` (String(150)) - Payer name
-- `collection_date` (Date, Not Null) - Collection date
-- `notes` (Text) - Notes
-- `created_by_id` (Integer, Foreign Key → Teacher, Nullable) - Creator
-- `created_at` (DateTime) - Creation timestamp
-
-**Relationships:**
-- `student` → Student (backref)
-- `created_by` → Teacher (backref)
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `class_name` | String(50), Not Null, Indexed | Tên lớp |
+| `school_year` | String(20), Not Null, Indexed | Năm học |
+| `amount_vnd` | Integer, Not Null | Số tiền (VND) |
+| `purpose` | String(200), Not Null | Mục đích thu |
+| `student_id` | Integer, FK → Student, Nullable, Indexed | Học sinh cụ thể |
+| `payer_name` | String(150) | Tên người nộp |
+| `collection_date` | Date, Not Null | Ngày thu |
+| `notes` | Text | Ghi chú |
+| `created_by_id` | Integer, FK → Teacher, Nullable | Người tạo |
+| `created_at` | DateTime | Thời gian tạo |
 
 ---
 
 ### 27. ClassFundExpense
-**Description:** Class fund expense records
 
-**Table:** `class_fund_expense`
-
-**Fields:**
-- `id` (Integer, Primary Key)
-- `class_name` (String(50), Not Null, Indexed) - Class name
-- `school_year` (String(20), Not Null, Indexed) - School year
-- `amount_vnd` (Integer, Not Null) - Amount in VND
-- `title` (String(200), Not Null) - Expense title
-- `expense_date` (Date, Not Null) - Expense date
-- `notes` (Text) - Notes
-- `created_by_id` (Integer, Foreign Key → Teacher, Nullable) - Creator
-- `created_at` (DateTime) - Creation timestamp
-
-**Relationships:**
-- `created_by` → Teacher (backref)
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `class_name` | String(50), Not Null, Indexed | Tên lớp |
+| `school_year` | String(20), Not Null, Indexed | Năm học |
+| `amount_vnd` | Integer, Not Null | Số tiền (VND) |
+| `title` | String(200), Not Null | Nội dung chi |
+| `expense_date` | Date, Not Null | Ngày chi |
+| `notes` | Text | Ghi chú |
+| `created_by_id` | Integer, FK → Teacher, Nullable | Người tạo |
+| `created_at` | DateTime | Thời gian tạo |
 
 ---
 
 ### 28. AttendanceRecord
-**Description:** Attendance records via face recognition or QR code
 
-**Table:** `attendance_record`
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `student_id` | Integer, FK → Student, Not Null, Indexed | Học sinh |
+| `class_name` | String(50), Not Null, Indexed | Tên lớp |
+| `check_in_time` | DateTime, Not Null, Default: utcnow | Giờ check-in |
+| `captured_photo` | String(255), Nullable | Đường dẫn ảnh chụp |
+| `confidence` | Float, Default: 0.0 | Độ tin cậy nhận diện (0-1) |
+| `status` | String(20), Default: "Có mặt" | Trạng thái |
+| `notes` | Text, Nullable | Ghi chú |
+| `recorded_by_id` | Integer, FK → Teacher, Nullable | Người ghi |
+| `attendance_date` | Date, Not Null, Indexed | Ngày điểm danh |
+| `attendance_mode` | String(20), Default: "face" | Mode: 'face' hoặc 'qr' |
+| `qr_scan_method` | String(30), Nullable | 'camera' hoặc 'direct' |
+| `monitoring_session_id` | Integer, FK → AttendanceMonitoringSession, Nullable | Phiên theo dõi |
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `student_id` (Integer, Foreign Key → Student, Not Null, Indexed) - Student
-- `class_name` (String(50), Not Null, Indexed) - Class name
-- `check_in_time` (DateTime, Not Null, Default: datetime.utcnow) - Check-in time
-- `captured_photo` (String(255), Nullable) - Captured photo path
-- `confidence` (Float, Default: 0.0) - Face recognition confidence (0-1)
-- `status` (String(20), Default: "Có mặt") - Status: Có mặt, Trễ, Vắng
-- `notes` (Text, Nullable) - Notes
-- `recorded_by_id` (Integer, Foreign Key → Teacher, Nullable) - Recorder
-- `attendance_date` (Date, Not Null, Indexed) - Attendance date
-- `attendance_mode` (String(20), Default: "face") - Mode: face or qr
-- `qr_scan_method` (String(30), Nullable) - QR scan method: camera or direct
-- `monitoring_session_id` (Integer, Foreign Key → AttendanceMonitoringSession, Nullable) - Monitoring session
-
-**Relationships:**
-- `student` → Student (backref)
-- `recorded_by` → Teacher (backref)
-- `monitoring_session` → AttendanceMonitoringSession (backref)
+**Status Values:** Có mặt, Trễ, Vắng
 
 ---
 
 ### 29. AttendanceMonitoringSession
-**Description:** Hourly attendance monitoring session
 
-**Table:** `attendance_monitoring_session`
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `teacher_id` | Integer, FK → Teacher, Not Null, Indexed | Giáo viên |
+| `class_name` | String(50), Not Null, Indexed | Tên lớp |
+| `start_time` | DateTime, Not Null | Giờ bắt đầu |
+| `end_time` | DateTime, Nullable | Giờ kết thúc |
+| `session_date` | Date, Not Null, Indexed | Ngày phiên |
+| `status` | String(20), Default: "open" | Trạng thái |
+| `notes` | Text, Nullable | Ghi chú |
+| `created_at` | DateTime | Thời gian tạo |
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `teacher_id` (Integer, Foreign Key → Teacher, Not Null, Indexed) - Teacher
-- `class_name` (String(50), Not Null, Indexed) - Class name
-- `start_time` (DateTime, Not Null) - Session start time
-- `end_time` (DateTime, Nullable) - Session end time (null = open)
-- `session_date` (Date, Not Null, Indexed) - Session date
-- `status` (String(20), Default: "open") - Status: open, confirmed, cancelled
-- `notes` (Text, Nullable) - Notes
-- `created_at` (DateTime) - Creation timestamp
-
-**Relationships:**
-- `teacher` → Teacher (backref)
-- `violation_records` → SessionViolationRecord (backref)
-- `attendance_records` → AttendanceRecord (backref)
+**Status Values:** 'open', 'confirmed', 'cancelled'
 
 ---
 
 ### 30. SessionViolationRecord
-**Description:** Violation records within monitoring session (pending confirmation)
 
-**Table:** `session_violation_record`
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `session_id` | Integer, FK → AttendanceMonitoringSession, Not Null, Indexed | Phiên |
+| `student_id` | Integer, FK → Student, Not Null, Indexed | Học sinh |
+| `violation_type_name` | String(200), Not Null | Tên loại vi phạm |
+| `points_deducted` | Integer, Not Null | Điểm trừ |
+| `status` | String(20), Default: "pending" | Trạng thái |
+| `recorded_at` | DateTime, Default: utcnow | Thời điểm ghi |
+| `notes` | Text, Nullable | Ghi chú |
+| `official_violation_id` | Integer, FK → Violation, Nullable | Violation chính thức |
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `session_id` (Integer, Foreign Key → AttendanceMonitoringSession, Not Null, Indexed) - Session
-- `student_id` (Integer, Foreign Key → Student, Not Null, Indexed) - Student
-- `violation_type_name` (String(200), Not Null) - Violation type
-- `points_deducted` (Integer, Not Null) - Points to deduct
-- `status` (String(20), Default: "pending") - Status: pending or confirmed
-- `recorded_at` (DateTime, Default: datetime.utcnow) - When recorded
-- `notes` (Text, Nullable) - Teacher's notes
-- `official_violation_id` (Integer, Foreign Key → Violation, Nullable) - Official violation after confirmation
-
-**Relationships:**
-- `session` → AttendanceMonitoringSession (backref)
-- `student` → Student (backref)
-- `official_violation` → Violation
+**Status Values:** 'pending', 'confirmed'
 
 ---
 
 ### 31. TeacherClassAssignment
-**Description:** Teacher-to-class assignments
 
-**Table:** `teacher_class_assignment`
+| Trường | Kiểu | Mô tả |
+|---------|------|--------|
+| `id` | Integer, PK | Primary key |
+| `teacher_id` | Integer, FK → Teacher, Not Null, Indexed | Giáo viên |
+| `class_name` | String(50), Not Null, Indexed | Lớp được phân công |
+| `subject_id` | Integer, FK → Subject, Nullable | Môn dạy ở lớp này |
+| `school_year` | String(20), Not Null, Default: "2025-2026" | Năm học |
+| `created_at` | DateTime | Thời gian tạo |
+| `created_by` | Integer, FK → Teacher | Người tạo |
 
-**Fields:**
-- `id` (Integer, Primary Key)
-- `teacher_id` (Integer, Foreign Key → Teacher, Not Null, Indexed) - Teacher
-- `class_name` (String(50), Not Null, Indexed) - Class name
-- `subject_id` (Integer, Foreign Key → Subject, Nullable) - Subject teaching
-- `school_year` (String(20), Not Null, Default: "2025-2026") - School year
-- `created_at` (DateTime) - Creation timestamp
-- `created_by` (Integer, Foreign Key → Teacher) - Creator
-
-**Constraints:**
-- Unique constraint on (teacher_id, class_name)
-
-**Relationships:**
-- `teacher` → Teacher (foreign key: teacher_id, backref)
-- `subject` → Subject (backref)
-- `creator` → Teacher (foreign key: created_by)
+**Constraint:** Unique trên (teacher_id, class_name)
 
 ---
 
 ## Indexes
 
-### Common Indexed Fields
-- `student_code` (Student)
-- `student_class` (Student, TimetableSlot, AttendanceRecord, ClassFundCollection, ClassFundExpense)
-- `teacher_id` (TeacherPermission, LessonBookEntry, LessonBookWeek, AttendanceMonitoringSession)
-- `subject_id` (ClassSubject, Grade, LessonBookEntry)
-- `week_number` (Violation, TimetableSlot, LessonBookWeek)
-- `created_at` (ChatConversation)
-- `session_id` (ChatConversation)
+### Indexed Fields
+
+| Bảng | Fields |
+|------|--------|
+| Student | student_code, student_class |
+| TeacherPermission | teacher_id |
+| TeacherClassAssignment | teacher_id, class_name |
+| ClassSubject | class_name, subject_id |
+| Violation | student_id, week_number |
+| Grade | student_id, subject_id |
+| TimetableSlot | class_name, school_year |
+| LessonBookEntry | teacher_id, class_name, subject_id, lesson_date |
+| LessonBookWeek | teacher_id, class_name, week_number |
+| LessonBookSlot | week_id |
+| AttendanceRecord | student_id, class_name, attendance_date |
+| AttendanceMonitoringSession | teacher_id, class_name, session_date |
+| SessionViolationRecord | session_id, student_id |
+| ChatConversation | session_id, created_at |
+| Notification | recipient_id |
+| StudentNotification | student_id |
+| ClassFundCollection | class_name, school_year, student_id |
+| ClassFundExpense | class_name, school_year |
 
 ---
 
-## Relationships Summary
+## Quan Hệ Giữa Các Bảng
 
 ### One-to-Many
 - ClassRoom → Students (via student_class)
 - Subject → Grades
 - Subject → TimetableSlots
 - Teacher → TeacherPermissions
-- Teacher → Violations (via changed_by_id)
-- Teacher → ChangeLogs
-- Student → Grades
+- Teacher → LessonBookEntries
+- Student → Grades (cascade delete)
 - Student → Violations
 - Student → BonusRecords
 - Student → ChatConversations
 - Student → StudentNotifications
 - Student → AttendanceRecords
-- LessonBookWeek → LessonBookSlots
+- LessonBookWeek → LessonBookSlots (cascade delete)
 - AttendanceMonitoringSession → SessionViolationRecords
 - AttendanceMonitoringSession → AttendanceRecords
 
@@ -707,29 +659,32 @@ EduMind-AI uses SQLAlchemy ORM with SQLite database. All models are defined in `
 
 ---
 
-## Database Migration Notes
+## Database Migrations
 
-The application includes automatic migration functions in `app.py` to handle schema updates:
-- `ensure_student_parent_columns()` - Add parent_name, parent_phone
-- `ensure_student_portrait_column()` - Add portrait_filename
-- `ensure_student_date_of_birth_column()` - Add date_of_birth
-- `ensure_student_position_column()` - Add position
-- `ensure_lesson_book_timetable_column()` - Add timetable_slot_id
-- `ensure_violation_lesson_book_column()` - Add lesson_book_entry_id
-- `ensure_timetable_slot_week_number_column()` - Change semester to week_number
-- `ensure_student_notification_sender_column()` - Add sender_id
-- `ensure_student_conduct_columns()` - Add conduct, warning_level, academic_rank, academic_warning_level
-- `ensure_attendance_qr_columns()` - Add attendance_mode, qr_scan_method
-- `ensure_attendance_monitoring_session_column()` - Add monitoring_session_id
-- `ensure_lesson_book_week_and_slot_tables()` - Create lesson_book_week and lesson_book_slot tables
-- `ensure_lesson_book_slot_lesson_date_column()` - Add lesson_date
-- `ensure_subject_is_pass_fail_column()` - Add is_pass_fail
-- `ensure_teacher_class_assignment_table()` - Create teacher_class_assignment table
-- `ensure_class_subject_table()` - Create class_subject table
+Hệ thống bao gồm 16 migration functions trong `app.py`:
+
+| # | Function | Mô tả |
+|---|----------|--------|
+| 1 | ensure_student_parent_columns | Thêm parent_name, parent_phone |
+| 2 | ensure_student_portrait_column | Thêm portrait_filename |
+| 3 | ensure_student_date_of_birth_column | Thêm date_of_birth |
+| 4 | ensure_student_position_column | Thêm position |
+| 5 | ensure_lesson_book_timetable_column | Thêm timetable_slot_id |
+| 6 | ensure_violation_lesson_book_column | Thêm lesson_book_entry_id |
+| 7 | ensure_timetable_slot_week_number_column | Đổi semester → week_number |
+| 8 | ensure_student_notification_sender_column | Thêm sender_id |
+| 9 | ensure_student_conduct_columns | Thêm conduct, warning_level, academic_rank, academic_warning_level |
+| 10 | ensure_attendance_qr_columns | Thêm attendance_mode, qr_scan_method |
+| 11 | ensure_attendance_monitoring_session_column | Thêm monitoring_session_id |
+| 12 | ensure_lesson_book_week_and_slot_tables | Tạo bảng lesson_book_week và lesson_book_slot |
+| 13 | ensure_lesson_book_slot_lesson_date_column | Thêm lesson_date |
+| 14 | ensure_subject_is_pass_fail_column | Thêm is_pass_fail |
+| 15 | ensure_teacher_class_assignment_table | Tạo bảng teacher_class_assignment |
+| 16 | ensure_class_subject_table | Tạo bảng class_subject |
 
 ---
 
-## Default Data
+## Dữ Liệu Mặc Định
 
 ### Default Admin User
 - Username: `admin`
@@ -737,9 +692,10 @@ The application includes automatic migration functions in `app.py` to handle sch
 
 ### Default SystemConfig
 - `current_week`: "1"
+- `school_name`: "THPT Chuyên Nguyễn Tất Thành"
 
 ### Default ViolationType
-- "Đi muộn": 2 points
+- "Đi muộn": 2 điểm
 
 ### Default ConductSetting
 - good_threshold: 80

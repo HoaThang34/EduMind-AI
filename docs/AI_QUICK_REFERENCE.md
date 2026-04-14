@@ -1,19 +1,19 @@
 # AI Quick Reference - EduMind-AI
 
-This document provides quick reference information for AI assistants working on the EduMind-AI codebase.
+Tài liệu hướng dẫn nhanh cho AI assistant làm việc với codebase EduMind-AI.
 
 ---
 
-## Common Tasks for AI Assistant
+## Common Tasks
 
 ### 1. Adding a New Route
 
 **Steps:**
-1. Choose appropriate route file in `routes/`
-2. Define route with decorators
+1. Chọn file route phù hợp trong `routes/`
+2. Định nghĩa route với decorators
 3. Implement logic
-4. Return response (HTML or JSON)
-5. Update `API_ROUTES.md`
+4. Trả về response (HTML hoặc JSON)
+5. Update `docs/API_ROUTES.md`
 
 **Example:**
 ```python
@@ -21,16 +21,16 @@ from flask import Blueprint, render_template, request, jsonify
 from flask_login import login_required, current_user
 from app_helpers import permission_required
 
-my_bp = Blueprint('my_feature', __name__)
+bp = Blueprint('my_feature', __name__)
 
-@my_bp.route("/my-feature")
+@bp.route("/my-feature")
 @login_required
 @permission_required('view_my_feature')
 def my_feature():
     data = MyModel.query.all()
     return render_template("my_feature.html", data=data)
 
-@my_bp.route("/api/my-action", methods=["POST"])
+@bp.route("/api/my-action", methods=["POST"])
 @login_required
 def my_api_action():
     data = request.get_json()
@@ -40,8 +40,9 @@ def my_api_action():
 
 **Register in `routes/__init__.py`:**
 ```python
-from .my_feature import register as register_my_feature
-register_my_feature(app)
+from .my_feature import bp as my_feature_bp
+# In register_all_routes(app):
+app.register_blueprint(my_feature_bp)
 ```
 
 ---
@@ -49,10 +50,10 @@ register_my_feature(app)
 ### 2. Adding a New Database Model
 
 **Steps:**
-1. Add model class to `models.py`
-2. Define fields and relationships
-3. Add migration function to `app.py`
-4. Update `DATABASE_SCHEMA.md`
+1. Thêm model class vào `models.py`
+2. Định nghĩa fields và relationships
+3. Thêm migration function vào `app.py`
+4. Update `docs/DATABASE_SCHEMA.md`
 
 **Example:**
 ```python
@@ -61,8 +62,6 @@ class MyModel(db.Model):
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-    
-    # Relationships
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'))
     student = db.relationship('Student', backref='my_models')
 ```
@@ -85,25 +84,17 @@ def ensure_my_model_table():
         db.session.commit()
 ```
 
-**Call in `create_database()`:**
-```python
-ensure_my_model_table()
-```
-
 ---
 
 ### 3. Adding a New Permission
 
 **Steps:**
-1. Add permission to database (seed data)
+1. Thêm permission vào database (seed data)
 2. Apply decorator to routes
 3. Update documentation
 
 **Example:**
 ```python
-# In rebuild_db.py or seed script
-from models import Permission
-
 permission = Permission(
     code='my_feature',
     name='My Feature',
@@ -112,15 +103,6 @@ permission = Permission(
 )
 db.session.add(permission)
 db.session.commit()
-```
-
-**Use in route:**
-```python
-@my_bp.route("/my-feature")
-@login_required
-@permission_required('my_feature')
-def my_feature():
-    # Route logic
 ```
 
 ---
@@ -196,7 +178,6 @@ db.session.commit()
 
 **Delete cascade:**
 ```python
-# Delete student (will cascade to grades, violations, etc.)
 db.session.delete(student)
 db.session.commit()
 ```
@@ -211,9 +192,6 @@ from app_helpers import can_access_student, can_access_subject
 
 if can_access_student(student_id):
     # Allow access
-
-if can_access_subject(subject_id):
-    # Allow subject access
 ```
 
 **Get accessible students:**
@@ -269,7 +247,6 @@ from app_helpers import call_ollama
 
 response, error = call_ollama("Your prompt here")
 if error:
-    # Handle error
     return error_message
 return response
 ```
@@ -279,27 +256,79 @@ return response
 from app_helpers import _call_gemini
 
 results, error = _call_gemini(
-    prompt="Describe this image",
+    prompt="Extract grades from this image",
     image_path="/path/to/image.jpg",
-    is_json=True  # If expecting JSON response
+    is_json=True
+)
+```
+
+**Vision with multiple images:**
+```python
+results, error = _call_gemini(
+    prompt="Extract timetable data",
+    image_paths=["/path/img1.jpg", "/path/img2.jpg"],
+    is_json=True
 )
 ```
 
 **Chatbot with memory:**
 ```python
-from app_helpers import get_or_create_chat_session, get_conversation_history, save_message
+from app_helpers import (
+    get_or_create_chat_session,
+    get_conversation_history,
+    save_message,
+    call_ollama
+)
 
 session_id = get_or_create_chat_session()
 history = get_conversation_history(session_id, limit=10)
 
-save_message(session_id, teacher_id, "user", user_message)
+save_message(session_id, current_user.id, "user", user_message)
 response, error = call_ollama(prompt)
-save_message(session_id, teacher_id, "assistant", response)
+save_message(session_id, current_user.id, "assistant", response)
 ```
 
 ---
 
-### 8. Form Handling
+### 8. Face Recognition Integration
+
+**Get FaceEngine singleton:**
+```python
+from routes.face_engine import get_engine
+
+engine = get_engine()
+```
+
+**Detect faces:**
+```python
+faces = engine.detect_faces(img_bgr)
+for face in faces:
+    box = face['box']  # (x, y, w, h)
+    crop = face['face']  # cropped BGR image
+```
+
+**Extract embedding:**
+```python
+embedding, box = engine.extract_embedding(img_bgr)
+if embedding is not None:
+    # 512-dim vector
+```
+
+**Find in database:**
+```python
+results, box = engine.find(
+    img_bgr,
+    db_embeddings=[e1, e2, ...],
+    db_ids=[1, 2, ...],
+    top_n=1
+)
+for (student_id, similarity, box) in results:
+    print(f"Matched: {student_id}, similarity: {similarity}")
+```
+
+---
+
+### 9. Form Handling
 
 **GET with query parameters:**
 ```python
@@ -326,14 +355,13 @@ score = data.get('score', 0)
 if 'file' in request.files:
     file = request.files['file']
     if file.filename:
-        # Save file
         filename = secure_filename(file.filename)
         file.save(os.path.join(UPLOAD_FOLDER, filename))
 ```
 
 ---
 
-### 9. Response Patterns
+### 10. Response Patterns
 
 **HTML response:**
 ```python
@@ -371,7 +399,7 @@ return redirect(url_for('dashboard'))
 
 ---
 
-### 10. Error Handling
+### 11. Error Handling
 
 **Try-catch for database:**
 ```python
@@ -397,94 +425,11 @@ if error:
 if not all([field1, field2, field3]):
     flash("Vui lòng điền đầy đủ thông tin!", "error")
     return redirect(url_for('some_route'))
-
-try:
-    value = float(input_value)
-    if value < 0 or value > 10:
-        flash("Giá trị phải từ 0 đến 10!", "error")
-        return redirect(url_for('some_route'))
-except ValueError:
-    flash("Giá trị không hợp lệ!", "error")
-    return redirect(url_for('some_route'))
 ```
 
 ---
 
-### 11. Date/Time Operations
-
-**Current datetime:**
-```python
-import datetime
-now = datetime.datetime.utcnow()
-```
-
-**Parse date string:**
-```python
-from datetime import datetime
-date_obj = datetime.strptime(date_string, '%d/%m/%Y')
-```
-
-**Format date:**
-```python
-formatted = date_obj.strftime('%d/%m/%Y')
-```
-
-**Get ISO week:**
-```python
-_, week_num, _ = datetime.now().isocalendar()
-```
-
----
-
-### 12. File Operations
-
-**Upload folder:**
-```python
-from app_helpers import UPLOAD_FOLDER
-import os
-
-filename = f"prefix_{uuid.uuid4().hex}_{original_filename}"
-filepath = os.path.join(UPLOAD_FOLDER, filename)
-file.save(filepath)
-```
-
-**Delete file:**
-```python
-try:
-    os.remove(filepath)
-except Exception as e:
-    print(f"Error deleting file: {e}")
-```
-
-**Check file exists:**
-```python
-if os.path.exists(filepath):
-    # Process file
-```
-
----
-
-### 13. Student Code Normalization
-
-**Normalize for matching:**
-```python
-from app_helpers import normalize_student_code
-
-normalized = normalize_student_code("34 TOÁN - 001035")
-# Returns: "34 TOAN - 001035"
-```
-
-**Parent phone for login:**
-```python
-from app_helpers import parent_phone_login_match
-
-if parent_phone_login_match(stored_phone, entered_password):
-    # Valid login
-```
-
----
-
-### 14. Updating Student Status
+### 12. Student Status Updates
 
 **Update conduct status:**
 ```python
@@ -498,6 +443,53 @@ update_student_conduct(student_id)
 from app_helpers import update_student_academic_status
 
 update_student_academic_status(student_id)
+```
+
+---
+
+### 13. Timetable Helpers
+
+**Resolve class name:**
+```python
+from app_helpers import resolve_class_name_for_timetable
+
+resolved = resolve_class_name_for_timetable("12TIN")
+# Returns "12 Tin" if that's the canonical name
+```
+
+**Get class variants:**
+```python
+from app_helpers import timetable_class_variants_for_filter
+
+variants = timetable_class_variants_for_filter("12 Tin")
+# Returns all matching class_name values in DB
+```
+
+**Resolve subject:**
+```python
+from app_helpers import resolve_subject_for_timetable
+
+subject_id, override = resolve_subject_for_timetable("Toán")
+```
+
+---
+
+### 14. Bulk Import
+
+**Parse Excel violations:**
+```python
+from app_helpers import parse_excel_file, import_violations_to_db
+
+violations = parse_excel_file(file)
+errors, count = import_violations_to_db(violations)
+```
+
+**Normalize student code:**
+```python
+from app_helpers import normalize_student_code
+
+normalized = normalize_student_code("34 TOÁN - 001035")
+# Returns: "34 TOAN - 001035"
 ```
 
 ---
@@ -519,8 +511,6 @@ return render_template("template.html",
 {% for student in students %}
     <p>{{ student.name }} - {{ student.student_class }}</p>
 {% endfor %}
-
-<p>Search: {{ search_query }}</p>
 ```
 
 **Use current_user:**
@@ -530,43 +520,9 @@ return render_template("template.html",
 {% endif %}
 ```
 
-**Display flash messages:**
-```html
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
-{% endwith %}
-```
-
 ---
 
-### 16. Mobile-Specific Code
-
-**Check mobile viewport:**
-```python
-# In template, use CSS media queries
-# max-width: 1023px for mobile
-```
-
-**Mobile navigation:**
-```html
-<!-- Bottom navigation (mobile only) -->
-<nav class="mobile-bottom-nav">
-    <!-- Navigation items -->
-</nav>
-```
-
-**Touch events in JavaScript:**
-```javascript
-// See FRONTEND_API_ROUTES.md for examples
-```
-
----
-
-### 17. Common Import Patterns
+### 16. Common Import Patterns
 
 **Standard imports:**
 ```python
@@ -583,98 +539,53 @@ import os
 from app_helpers import (
     admin_required, permission_required, role_or_permission_required,
     get_accessible_students, can_access_student, can_access_subject,
-    log_change, create_notification, call_ollama
+    log_change, create_notification, call_ollama, _call_gemini,
+    calculate_student_gpa, update_student_conduct, update_student_academic_status,
+    get_or_create_chat_session, save_message, get_conversation_history,
+    normalize_student_code, UPLOAD_FOLDER
 )
 ```
 
----
-
-### 18. Debugging Tips
-
-**Print to console:**
+**Face engine imports:**
 ```python
-print(f"Debug: variable = {variable}")
-```
-
-**Log database queries:**
-```python
-# In app.py, add for development:
-app.config['SQLALCHEMY_ECHO'] = True
-```
-
-**Check current user:**
-```python
-print(f"Current user: {current_user.username}, Role: {current_user.role}")
-```
-
-**Inspect query:**
-```python
-query = Student.query.filter_by(student_class="12 Tin")
-print(str(query))  # Print SQL
+from routes.face_engine import get_engine, cosine_similarity
 ```
 
 ---
 
-### 19. Testing Routes
-
-**Manual testing:**
-```python
-# In Python shell
-from app import app
-with app.test_client() as client:
-    response = client.get('/dashboard')
-    print(response.status_code)
-    print(response.data)
-```
-
-**Test with authentication:**
-```python
-with app.test_client() as client:
-    with client.session_transaction() as sess:
-        sess['user_id'] = 1  # Set user ID
-    response = client.get('/dashboard')
-```
-
----
-
-### 20. Common Mistakes to Avoid
+### 17. Common Mistakes to Avoid
 
 1. **Forgot to commit:**
    ```python
    db.session.add(record)
-   db.session.commit()  # Don't forget this!
+   db.session.commit()  # Don't forget!
    ```
 
 2. **Not handling exceptions:**
    ```python
    try:
-       # Database operation
        db.session.commit()
    except Exception as e:
-       db.session.rollback()  # Always rollback on error
+       db.session.rollback()
    ```
 
 3. **Missing imports:**
    ```python
-   # Always import models and helpers you use
    from models import Student, Grade
    from app_helpers import log_change
    ```
 
 4. **Not checking permissions:**
    ```python
-   # Always add authentication and authorization
    @login_required
    @permission_required('required_permission')
    def my_route():
-       # Route logic
    ```
 
 5. **SQL injection risk:**
    ```python
    # BAD:
    query = f"SELECT * FROM student WHERE name = '{name}'"
-   
    # GOOD:
    student = Student.query.filter_by(name=name).first()
    ```
@@ -683,7 +594,6 @@ with app.test_client() as client:
    ```python
    # BAD:
    school_year = "2025-2026"
-   
    # GOOD:
    configs = {c.key: c.value for c in SystemConfig.query.all()}
    school_year = configs.get("school_year", "2025-2026")
@@ -722,7 +632,7 @@ ollama pull llama3.2
 
 ## Environment Variables
 
-Required in `.env`:
+**Required in `.env`:**
 ```env
 SECRET_KEY=your-secret-key-here
 OLLAMA_HOST=http://localhost:11434
@@ -730,7 +640,7 @@ OLLAMA_MODEL=llama3.2
 OLLAMA_FALLBACK_MODEL=llama3.2
 ```
 
-Optional:
+**Optional:**
 ```env
 GEMINI_API_KEY=your-gemini-api-key
 ```
@@ -741,16 +651,18 @@ GEMINI_API_KEY=your-gemini-api-key
 
 **Key files:**
 - `app.py` - Main application
-- `models.py` - Database models
-- `app_helpers.py` - Helper functions
+- `models.py` - Database models (31 models)
+- `app_helpers.py` - Helper functions, decorators
 - `prompts.py` - AI prompts
 - `routes/` - Route blueprints
+- `routes/face_engine.py` - Face recognition engine
 - `templates/` - HTML templates
 - `uploads/` - User uploads
 - `database.db` - SQLite database
 
 **Documentation:**
-- `docs/DATABASE_SCHEMA.md` - Database documentation
+- `docs/README.md` - Project overview
+- `docs/DATABASE_SCHEMA.md` - Database documentation (31 models)
 - `docs/API_ROUTES.md` - API documentation
 - `docs/FRONTEND_API_ROUTES.md` - Frontend API documentation
 - `docs/ARCHITECTURE.md` - System architecture

@@ -1,145 +1,127 @@
 # API Routes Documentation - EduMind-AI
 
-## Overview
-EduMind-AI uses Flask with Blueprint pattern for route organization. Routes are split across multiple files in the `routes/` directory.
+## Tổng Quan
+
+EduMind-AI sử dụng Flask với Blueprint pattern cho route organization. Routes được chia thành nhiều files trong `routes/`.
 
 ## Route Files Structure
 
-- `routes/__init__.py` - Registers all blueprints
-- `routes/auth.py` - Authentication routes (Blueprint: `auth_bp`)
-- `routes/grades.py` - Grade management routes (Blueprint: `grades_bp`)
-- `routes/student.py` - Student portal routes (Blueprint: `student_bp`)
-- `routes/ai_engine.py` - AI/Chatbot routes (Blueprint: `ai_engine_bp`)
-- `routes/core.py` - Core routes registered directly on app
-- `routes/admin_mgmt.py` - Admin management routes
-- `routes/violations_mgmt.py` - Violation management routes
-- `routes/students_mgmt.py` - Student management routes
-- `routes/subjects_mgmt.py` - Subject management routes
-- `routes/rules_bonus.py` - Rules and bonus point routes
-- `routes/messaging.py` - Messaging routes
-- `routes/lesson_book.py` - Lesson book routes
-- `routes/timetable.py` - Timetable routes
-- `routes/class_fund.py` - Class fund routes
-- `routes/attendance.py` - Attendance routes
-- `routes/class_subjects.py` - Class-subject routes
+| File | Blueprint | Mô tả |
+|------|-----------|--------|
+| `routes/__init__.py` | - | Đăng ký tất cả blueprints |
+| `routes/auth.py` | `auth_bp` | Đăng nhập/đăng xuất |
+| `routes/grades.py` | `grades_bp` | Quản lý điểm |
+| `routes/student.py` | `student_bp` | Cổng học sinh |
+| `routes/ai_engine.py` | `ai_engine_bp` | AI/Chatbot/OCR |
+| `routes/core.py` | (app) | Core routes đăng ký trực tiếp |
+| `routes/admin_mgmt.py` | (app) | Quản lý admin |
+| `routes/violations_mgmt.py` | (app) | Quản lý vi phạm |
+| `routes/students_mgmt.py` | (app) | CRUD học sinh |
+| `routes/subjects_mgmt.py` | (app) | CRUD môn học |
+| `routes/rules_bonus.py` | (app) | Rules và bonus |
+| `routes/messaging.py` | (app) | Nhắn tin, thông báo |
+| `routes/lesson_book.py` | (app) | Sổ đầu bài |
+| `routes/timetable.py` | (app) | Thời khóa biểu |
+| `routes/class_fund.py` | (app) | Quỹ lớp |
+| `routes/attendance.py` | (app) | Điểm danh (face/QR) |
+| `routes/class_subjects.py` | (app) | Phân công môn học |
 
 ---
 
 ## Authentication Routes (`auth_bp`)
 
-### POST `/login`
-**Description:** Teacher login
+### `GET|POST /login`
+**Description:** Đăng nhập giáo viên
 
-**Request Body:**
-- `username` (string) - Teacher username
-- `password` (string) - Password
+**POST Request Body:**
+- `username` (string) - Tên đăng nhập
+- `password` (string) - Mật khẩu
 
 **Response:** Redirects to home on success, flashes error on failure
 
 ---
 
-### GET `/logout`
-**Description:** Teacher logout (requires login)
+### `GET /logout`
+**Description:** Đăng xuất giáo viên (requires login)
 
 **Response:** Redirects to login page
 
 ---
 
-## Grade Management Routes (`grades_bp`)
-
-### GET `/manage_grades`
-**Description:** List students for grade entry (requires login, permission: view_grades)
-
-**Query Parameters:**
-- `search` (string) - Search by name or student code
-- `class_select` (string) - Filter by class
-
-**Response:** Renders `manage_grades.html`
-
----
-
-### GET|POST `/student_grades/<int:student_id>`
-**Description:** View and enter grades for a student (requires login, role: subject_teacher or permission: manage_grades)
-
-**POST Request Body:**
-- `subject_id` (integer) - Subject ID
-- `grade_type` (string) - TX, GK, or HK
-- `column_index` (integer) - Column index (default: 1)
-- `score` (float) - Score (0-10)
-- `semester` (integer) - Semester (default from config)
-- `school_year` (string) - School year (default from config)
-
-**Response:** Renders `student_grades.html`
-
----
-
-### POST `/delete_grade/<int:grade_id>`
-**Description:** Delete a grade (requires login, role: subject_teacher or permission: manage_grades)
-
-**Response:** Redirects to student grades page
-
----
-
-### POST `/api/update_grade/<int:grade_id>`
-**Description:** API endpoint to update grade inline (requires login, role: subject_teacher or permission: manage_grades)
-
-**Request Body (JSON):**
-- `score` (float) - New score (0-10)
-
-**Response (JSON):**
-```json
-{
-  "success": true,
-  "score": 8.5
-}
-```
-
----
-
-### GET `/student/<int:student_id>/transcript`
-**Description:** View student transcript/grade report (requires login, permission: view_grades)
-
-**Query Parameters:**
-- `semester` (integer) - Semester (default from config)
-- `school_year` (string) - School year (default from config)
-
-**Response:** Renders `student_transcript.html`
-
----
-
-### GET `/student/<int:student_id>/parent_report`
-**Description:** Generate parent report (requires login, permission: view_grades)
-
-**Query Parameters:**
-- `semester` (integer) - Semester (default from config)
-- `school_year` (string) - School year (default from config)
-
-**Response:** Renders `parent_report.html`
-
----
-
 ## Student Portal Routes (`student_bp`)
 
-### GET|POST `/student/login`
-**Description:** Student login
+### `GET|POST /student/login`
+**Description:** Đăng nhập học sinh
 
 **POST Request Body:**
-- `student_code` (string) - Student code
-- `student_password` (string) - Password or parent phone (fallback)
+- `student_code` (string) - Mã học sinh
+- `student_password` (string) - Password hoặc SĐT phụ huynh
 
 **Response:** Redirects to student dashboard on success
 
 ---
 
-### GET `/student/logout`
-**Description:** Student logout
+### `GET /student/logout`
+**Description:** Đăng xuất học sinh
 
 **Response:** Redirects to student login
 
 ---
 
-### POST `/student/api/generate_ai_advice`
-**Description:** API to generate AI advice for student (requires student login)
+### `GET /student/dashboard`
+**Description:** Dashboard học sinh (requires student login)
+
+**Response:** Renders `student_dashboard.html` với violations, bonuses, grades, notifications
+
+---
+
+### `GET /student/thoi-khoa-bieu`
+**Description:** Thời khóa biểu học sinh (requires student login)
+
+**Query Parameters:**
+- `week_number` (integer) - ISO week (default: current week)
+
+**Response:** Renders `student_timetable.html`
+
+---
+
+### `GET /student/thong-bao`
+**Description:** Danh sách thông báo học sinh (requires student login)
+
+**Response:** Renders `student_notifications.html`
+
+---
+
+### `POST /student/thong-bao/<int:nid>/doc`
+**Description:** Đánh dấu thông báo đã đọc (requires student login)
+
+**Response:** Redirects to notifications list
+
+---
+
+### `GET /student/the-hoc-sinh`
+**Description:** Thẻ học sinh với QR codes (requires student login)
+
+**Response:** Renders `student_id_card.html` với verification QR (90-day expiry) và attendance QR
+
+---
+
+### `GET /student/the-hoc-sinh/xac-minh/<token>`
+**Description:** Route công khai xác minh thẻ học sinh qua QR
+
+**Response:** Renders `student_id_card_verify.html`
+
+---
+
+### `GET /student/qr-diem-danh/<int:student_id>`
+**Description:** Trang QR điểm danh học sinh (công khai)
+
+**Response:** Renders `student_qr_attendance.html`
+
+---
+
+### `POST /student/api/generate_ai_advice`
+**Description:** API tạo lời khuyên AI cho học sinh (requires student login)
 
 **Response (JSON):**
 ```json
@@ -150,184 +132,125 @@ EduMind-AI uses Flask with Blueprint pattern for route organization. Routes are 
 
 ---
 
-### GET `/student/dashboard`
-**Description:** Student dashboard (requires student login)
+## Grade Management Routes (`grades_bp`)
 
-**Response:** Renders `student_dashboard.html` with:
-- Current week violations
-- Current week bonuses
-- Grade transcript
-- Unread notifications count
-
----
-
-### GET `/student/thoi-khoa-bieu`
-**Description:** Student timetable (requires student login)
+### `GET /manage_grades`
+**Description:** Danh sách học sinh để nhập điểm (requires login, permission: view_grades)
 
 **Query Parameters:**
-- `week_number` (integer) - ISO week (default: current week)
+- `search` (string) - Tìm kiếm theo tên/mã
+- `class_select` (string) - Lọc theo lớp
 
-**Response:** Renders `student_timetable.html`
-
----
-
-### GET `/student/thong-bao`
-**Description:** Student notifications list (requires student login)
-
-**Response:** Renders `student_notifications.html`
+**Response:** Renders `manage_grades.html`
 
 ---
 
-### POST `/student/thong-bao/<int:nid>/doc`
-**Description:** Mark notification as read (requires student login)
+### `GET|POST /student_grades/<int:student_id>`
+**Description:** Xem và nhập điểm học sinh (requires login, role: subject_teacher hoặc permission: manage_grades)
 
-**Response:** Redirects to notifications list
+**POST Request Body:**
+- `subject_id` (integer) - Môn học
+- `grade_type` (string) - TX, GK, hoặc HK
+- `column_index` (integer) - Cột điểm (default: 1)
+- `score` (float) - Điểm (0-10)
+- `semester` (integer) - Học kỳ
+- `school_year` (string) - Năm học
 
----
-
-### GET `/student/the-hoc-sinh`
-**Description:** Student ID card with QR codes (requires student login)
-
-**Response:** Renders `student_id_card.html` with:
-- Verification QR (90-day expiry)
-- Attendance QR (no expiry)
-
----
-
-### GET `/student/the-hoc-sinh/xac-minh/<token>`
-**Description:** Public route to verify student ID card via QR
-
-**Response:** Renders `student_id_card_verify.html`
+**Response:** Renders `student_grades.html`
 
 ---
 
-### GET `/student/qr-diem-danh/<int:student_id>`
-**Description:** Attendance QR page for student (public)
+### `POST /delete_grade/<int:grade_id>`
+**Description:** Xóa điểm (requires login)
 
-**Response:** Renders `student_qr_attendance.html`
+**Response:** Redirects to student grades page
 
 ---
 
-### GET `/student/diem-danh-qr`
-**Description:** Quick attendance QR from dashboard (requires student login)
+### `POST /api/update_grade/<int:grade_id>`
+**Description:** API cập nhật điểm inline (requires login)
 
-**Response:** Renders `student_qr_attendance.html`
+**Request Body (JSON):**
+```json
+{ "score": 8.5 }
+```
+
+**Response (JSON):**
+```json
+{ "success": true, "score": 8.5 }
+```
+
+---
+
+### `GET /student/<int:student_id>/transcript`
+**Description:** Bảng điểm học sinh (requires login, permission: view_grades)
+
+**Query Parameters:**
+- `semester` (integer) - Học kỳ
+- `school_year` (string) - Năm học
+
+**Response:** Renders `student_transcript.html`
+
+---
+
+### `GET /student/<int:student_id>/parent_report`
+**Description:** Báo cáo phụ huynh (requires login, permission: view_grades)
+
+**Response:** Renders `parent_report.html`
 
 ---
 
 ## AI Engine Routes (`ai_engine_bp`)
 
-### GET `/chatbot`
-**Description:** Chatbot interface (requires login)
+### `GET /chatbot`
+**Description:** Giao diện chatbot (requires login)
 
 **Response:** Renders `chatbot.html`
 
 ---
 
-### POST `/api/chatbot`
-**Description:** Context-aware chatbot API (requires login)
-
-**Request Body (JSON):**
-- `message` (string) - User message
-
-**Response (JSON):**
-```json
-{
-  "response": "AI response",
-  "buttons": [
-    {"label": "Button text", "payload": "payload"}
-  ]
-}
-```
-
-**Features:**
-- Student search by name/code
-- Class detection from message
-- Grade and violation data retrieval
-- Action buttons for quick navigation
-
----
-
-### POST `/api/chatbot/clear`
-**Description:** Clear chat session (requires login)
-
-**Response (JSON):**
-```json
-{
-  "status": "success",
-  "message": "Chat đã được làm mới"
-}
-```
-
----
-
-### GET `/assistant_chatbot`
-**Description:** Multi-purpose assistant chatbot (requires login)
+### `GET /assistant_chatbot`
+**Description:** Chatbot đa năng (requires login)
 
 **Response:** Renders `assistant_chatbot.html`
 
 ---
 
-### POST `/api/generate_report/<int:student_id>`
-**Description:** Generate AI report for student (requires login)
+### `POST /api/chatbot`
+**Description:** Chatbot context-aware API (requires login)
 
 **Request Body (JSON):**
-- `week` (integer, optional) - Specific week
+```json
+{ "message": "Tìm học sinh Nguyễn Văn A" }
+```
 
 **Response (JSON):**
 ```json
 {
-  "report": "AI-generated report text"
+  "response": "AI response",
+  "buttons": [{ "label": "Button text", "payload": "payload" }]
 }
 ```
 
 ---
 
-### POST `/api/generate_parent_report/<int:student_id>`
-**Description:** Generate parent report with AI (requires login)
-
-**Request Body (JSON):**
-- `semester` (integer) - Semester
-- `school_year` (string) - School year
+### `POST /api/chatbot/clear`
+**Description:** Xóa session chat (requires login)
 
 **Response (JSON):**
 ```json
-{
-  "report": "AI-generated parent report"
-}
+{ "status": "success", "message": "Chat đã được làm mới" }
 ```
 
 ---
 
-### POST `/api/generate_chart_comments/<int:student_id>`
-**Description:** Generate AI comments for charts (requires login)
+### `POST /api/assistant_chatbot`
+**Description:** API chatbot đa năng với intent detection (requires login)
 
 **Request Body (JSON):**
-- `gpa` (float) - GPA
-- `avg_score` (float) - Average score
-- `highest_score` (float) - Highest score
-- `lowest_score` (float) - Lowest score
-- `strong_subjects` (array) - Strong subjects
-- `weak_subjects` (array) - Weak subjects
-- `total_subjects` (integer) - Total subjects
-- `conduct_score` (float) - Conduct score
-- `total_violations` (integer) - Total violations
-- `semester` (integer) - Semester
-
-**Response (JSON):**
 ```json
-{
-  "comments": "AI-generated chart comments"
-}
+{ "message": "Quy định về đi muộn là gì?" }
 ```
-
----
-
-### POST `/api/assistant_chatbot`
-**Description:** Multi-purpose assistant API with intent detection (requires login)
-
-**Request Body (JSON):**
-- `message` (string) - User message
 
 **Response (JSON):**
 ```json
@@ -337,65 +260,85 @@ EduMind-AI uses Flask with Blueprint pattern for route organization. Routes are 
 }
 ```
 
-**Intent Categories:**
-- Nội quy: school rules, violations, discipline
-- Ứng xử: behavior, situations, skills
-- Trợ giúp GV: teacher assistance, comments, methods
-- General: fallback
+---
+
+### `POST /api/generate_report/<int:student_id>`
+**Description:** Tạo báo cáo AI cho học sinh (requires login)
+
+**Request Body (JSON):**
+```json
+{ "week": 5 }
+```
+
+**Response (JSON):**
+```json
+{ "report": "AI-generated report text" }
+```
 
 ---
 
-### GET `/ocr-grades`
-**Description:** OCR grade entry interface (requires login)
+### `POST /api/generate_parent_report/<int:student_id>`
+**Description:** Tạo báo cáo phụ huynh bằng AI (requires login)
 
-**Response:** Renders `ocr_grades.html`
+**Request Body (JSON):**
+```json
+{ "semester": 1, "school_year": "2025-2026" }
+```
 
 ---
 
-### POST `/api/ocr-grades`
-**Description:** Process grade image with OCR (requires login)
+### `POST /api/generate_chart_comments/<int:student_id>`
+**Description:** Tạo bình luận AI cho biểu đồ (requires login)
+
+**Request Body (JSON):**
+```json
+{
+  "gpa": 7.5, "avg_score": 7.2, "highest_score": 9.0,
+  "lowest_score": 6.0, "strong_subjects": ["Toán"],
+  "weak_subjects": ["Hóa"], "total_subjects": 8,
+  "conduct_score": 85, "total_violations": 2, "semester": 1
+}
+```
+
+---
+
+### `POST /api/ocr-grades`
+**Description:** Xử lý ảnh điểm bằng OCR (requires login)
 
 **Request Body (multipart/form-data):**
-- `image` (file) - Image file
+- `image` (file) - File ảnh bảng điểm
 
 **Response (JSON):**
 ```json
 {
   "results": [
     {
-      "rowId": "1",
-      "student_code": "12345",
-      "student_name": "Nguyễn Văn A",
-      "date_of_birth": "15/08/2008",
-      "roll_number": "1",
-      "score": "8.5",
-      "grade_type": "TX"
+      "rowId": "1", "student_code": "12345",
+      "student_name": "Nguyễn Văn A", "score": "8.5", "grade_type": "TX"
     }
   ],
-  "metadata": {
-    "total_detected": 10
-  }
+  "metadata": { "total_detected": 10 }
 }
 ```
 
 ---
 
-### POST `/api/confirm-ocr-grades`
-**Description:** Save OCR-confirmed grades to database (requires login)
+### `POST /api/confirm-ocr-grades`
+**Description:** Lưu điểm OCR đã xác nhận vào database (requires login)
 
 **Request Body (JSON):**
-- `subject_id` (integer) - Subject ID
-- `class_filter` (string, optional) - Class filter
-- `semester` (integer) - Semester
-- `grades` (array) - Array of grade objects
+```json
+{
+  "subject_id": 1, "class_filter": "12 Tin",
+  "semester": 1,
+  "grades": [{ "rowId": "1", "student_code": "12345", "score": "8.5", "grade_type": "TX" }]
+}
+```
 
 **Response (JSON):**
 ```json
 {
-  "success": true,
-  "success_count": 10,
-  "errors": [],
-  "item_results": []
+  "success": true, "success_count": 10, "errors": [], "item_results": []
 }
 ```
 
@@ -403,202 +346,710 @@ EduMind-AI uses Flask with Blueprint pattern for route organization. Routes are 
 
 ## Core Routes (registered on app)
 
-### GET `/`
-**Description:** Welcome page with login form
+### `GET|POST /`
+**Description:** Trang welcome với form đăng nhập
 
 **POST Request Body:**
-- `login_type` (string) - "staff" or "student"
-- `username` (string) - Staff username (if staff)
-- `password` (string) - Password (if staff)
-- `student_code` (string) - Student code (if student)
-- `student_password` (string) - Student password (if student)
+- `login_type` (string) - "staff" hoặc "student"
+- `username` (string) - Staff username
+- `password` (string) - Password
+- `student_code` (string) - Student code
+- `student_password` (string) - Student password
 
-**Response:** Renders `welcome.html` or redirects to home/dashboard
-
----
-
-### GET `/admin`
-**Description:** Redirect to login
-
-**Response:** Redirects to `/login`
+**Response:** Renders `welcome.html` hoặc redirects
 
 ---
 
-### GET `/home`
-**Description:** Home page (requires login)
+### `GET /home`
+**Description:** Trang chủ (requires login)
 
 **Response:** Renders `home.html`
 
 ---
 
-### GET `/docs`
-**Description:** Documentation page
-
-**Response:** Renders `docs.html`
-
----
-
-### GET `/terms`
-**Description:** Terms of service
-
-**Response:** Renders `terms.html`
-
----
-
-### GET `/privacy`
-**Description:** Privacy policy
-
-**Response:** Renders `privacy.html`
-
----
-
-### GET `/scoreboard`
-**Description:** Student scoreboard (requires login)
+### `GET /dashboard`
+**Description:** Dashboard chính (requires login)
 
 **Query Parameters:**
-- `search` (string) - Search by name/code
-- `class_select` (string) - Filter by class
-- `warning_level` (string) - Filter by warning level
-- `academic_warning` (string) - Filter by academic warning
+- `class_select` (string) - Lọc theo lớp
+
+**Response:** Renders `dashboard.html` với stats, charts
+
+---
+
+### `GET /scoreboard`
+**Description:** Bảng xếp hạng học sinh (requires login)
+
+**Query Parameters:**
+- `search`, `class_select`, `warning_level`, `academic_warning`
 
 **Response:** Renders `index.html`
 
 ---
 
-### GET `/dashboard`
-**Description:** Main dashboard (requires login)
+### `GET /student/<int:student_id>`
+**Description:** Trang chi tiết học sinh (requires login, access control)
 
 **Query Parameters:**
-- `class_select` (string) - Filter by class
+- `week` (integer) - Số tuần (default: current week)
 
-**Response:** Renders `dashboard.html` with:
-- Total students count
-- Score distribution (Good/Fair/Average)
-- Average score
-- Total violations (current week)
-- Total classes
-- Top violations chart
-- Pie chart data
+**Response:** Renders `student_detail.html`
 
 ---
 
-### GET `/profile`
-**Description:** User profile (requires login)
-
-**Response:** Renders `profile.html`
-
----
-
-### GET|POST `/edit_profile`
-**Description:** Edit profile (requires login, admin only)
-
-**Response:** Renders `edit_profile.html`
-
----
-
-### GET `/history`
-**Description:** Violation history by week (requires login)
+### `GET /history`
+**Description:** Lịch sử vi phạm theo tuần (requires login)
 
 **Query Parameters:**
-- `week` (integer) - Week number
-- `class_select` (string) - Filter by class
+- `week`, `class_select`
 
-**Response:** Renders `history.html` with:
-- Violation list
-- Class rankings
-- Pie chart data
-- Bar chart data
+**Response:** Renders `history.html`
 
 ---
 
-### GET `/export_history`
-**Description:** Export history to Excel (requires login)
-
-**Query Parameters:**
-- `week` (integer) - Week number
-- `class_select` (string) - Filter by class
-
-**Response:** Excel file download
-
----
-
-### GET `/weekly_report`
-**Description:** Weekly violation report (requires login)
-
-**Query Parameters:**
-- `week` (integer) - Week number
+### `GET /weekly_report`
+**Description:** Báo cáo tuần vi phạm (requires login)
 
 **Response:** Renders `weekly_report.html`
 
 ---
 
-### GET `/export_report`
-**Description:** Export weekly report to Excel (requires login)
+### `GET /violation_history`
+**Description:** Lịch sử vi phạm phân trang (requires login)
 
 **Query Parameters:**
-- `week` (integer) - Week number
-
-**Response:** Excel file download
-
----
-
-### GET `/student/<int:student_id>`
-**Description:** Student detail page (requires login, access control)
-
-**Query Parameters:**
-- `week` (integer) - Week number (default: current week)
-
-**Response:** Renders `student_detail.html` with:
-- Student info
-- Week violations
-- Week bonuses
-- Score chart
-- Warning if score low
-
----
-
-### GET `/violation_history`
-**Description:** Paginated violation history (requires login)
-
-**Query Parameters:**
-- `page` (integer) - Page number (default: 1)
-- `per_page` (integer) - Items per page (default: 20)
-- `week` (integer) - Filter by week
-- `class_select` (string) - Filter by class
+- `page`, `per_page`, `week`, `class_select`
 
 **Response:** Renders `violation_history.html`
 
 ---
 
-### POST `/api/analyze_class_stats`
-**Description:** API to analyze class statistics with AI (requires login)
+### `POST /api/analyze_class_stats`
+**Description:** API phân tích thống kê lớp bằng AI (requires login)
 
 **Request Body (JSON):**
-- `class_name` (string) - Class name
-- `weeks` (array) - Array of week numbers
+```json
+{ "class_name": "12 Tin", "weeks": [1, 2, 3] }
+```
 
 **Response (JSON):**
 ```json
+{ "analysis": "AI-generated analysis text" }
+```
+
+---
+
+## Violations Management Routes
+
+### `GET|POST /add_violation`
+**Description:** Thêm vi phạm mới (requires login, role: discipline_officer hoặc permission: manage_discipline)
+
+**Features:** Hỗ trợ chọn nhiều HS, nhiều loại vi phạm, OCR
+
+---
+
+### `GET /bulk_import_violations`
+**Description:** Giao diện nhập vi phạm hàng loạt từ Excel (requires login)
+
+**Response:** Renders `bulk_import_violations.html`
+
+---
+
+### `POST /api/import_violations`
+**Description:** API nhập vi phạm từ Excel (requires login)
+
+**Request Body (multipart/form-data):**
+- `file` (file) - File Excel
+
+**Response (JSON):**
+```json
+{ "success": true, "imported": 50, "errors": [] }
+```
+
+---
+
+### `POST /api/add_violation_bulk`
+**Description:** API thêm vi phạm hàng loạt (requires login)
+
+**Request Body (JSON):**
+```json
 {
-  "analysis": "AI-generated analysis text"
+  "student_ids": [1, 2, 3],
+  "violation_type_id": 1,
+  "week_number": 5,
+  "lesson_book_entry_id": null
 }
 ```
 
 ---
 
-## Static File Routes
-
-### GET `/logo/<path:filename>`
-**Description:** Serve logo files
-
-**Response:** File from `logo/` directory
+### `POST /delete_violation/<int:violation_id>`
+**Description:** Xóa vi phạm (requires login)
 
 ---
 
-### GET `/musics/<path:filename>`
-**Description:** Serve music files
+### `GET /discipline_management`
+**Description:** Trang quản lý kỷ luật (requires login)
 
-**Response:** File from `musics/` directory
+**Response:** Renders `discipline_management.html`
+
+---
+
+## Attendance Routes
+
+### `GET /attendance`
+**Description:** Trang quản lý điểm danh (requires login)
+
+**Response:** Renders `attendance.html`
+
+---
+
+### `POST /api/attendance/face_checkin`
+**Description:** Điểm danh bằng nhận diện khuôn mặt (requires login)
+
+**Request Body (multipart/form-data):**
+- `image` (file) - Ảnh chụp từ camera
+- `class_name` (string) - Tên lớp
+- `attendance_date` (string) - Ngày điểm danh
+
+**Response (JSON):**
+```json
+{
+  "success": true, "student_id": 123, "student_name": "Nguyễn Văn A",
+  "confidence": 0.95, "status": "Có mặt"
+}
+```
+
+---
+
+### `POST /api/attendance/qr_checkin`
+**Description:** Điểm danh bằng QR code (requires login)
+
+**Request Body (JSON):**
+```json
+{
+  "qr_data": "EDUATT:123", "class_name": "12 Tin",
+  "attendance_date": "2025-04-12", "scan_method": "camera"
+}
+```
+
+---
+
+### `GET /attendance/enroll/<int:student_id>`
+**Description:** Trang đăng ký khuôn mặt học sinh (requires login)
+
+**Response:** Renders `enroll_face.html`
+
+---
+
+### `POST /api/attendance/enroll/<int:student_id>`
+**Description:** API đăng ký khuôn mặt học sinh (requires login)
+
+**Request Body (multipart/form-data):**
+- `images` (files) - Nhiều ảnh khuôn mặt
+
+**Response (JSON):**
+```json
+{ "success": true, "enrolled": 5, "errors": [] }
+```
+
+---
+
+### `POST /api/attendance/start_session`
+**Description:** Bắt đầu phiên theo dõi điểm danh (requires login)
+
+**Request Body (JSON):**
+```json
+{ "class_name": "12 Tin", "session_date": "2025-04-12" }
+```
+
+---
+
+### `POST /api/attendance/confirm_session/<int:session_id>`
+**Description:** Xác nhận phiên theo dõi và chuyển vi phạm (requires login)
+
+---
+
+### `GET /api/attendance/sessions`
+**Description:** API lấy danh sách phiên điểm danh (requires login)
+
+**Response (JSON):**
+```json
+{ "sessions": [{ "id": 1, "class_name": "12 Tin", "status": "open" }] }
+```
+
+---
+
+### `GET /api/attendance/records`
+**Description:** API lấy bản ghi điểm danh (requires login)
+
+**Query Parameters:**
+- `class_name`, `attendance_date`
+
+---
+
+## Timetable Routes
+
+### `GET /timetable`
+**Description:** Xem thời khóa biểu (requires login)
+
+**Query Parameters:**
+- `class_name`, `school_year`, `week_number`
+
+**Response:** Renders `timetable.html`
+
+---
+
+### `GET /timetable_manage`
+**Description:** Quản lý thời khóa biểu (requires login, admin)
+
+**Query Parameters:**
+- `class_name`, `school_year`, `week_number`
+
+**Response:** Renders `timetable_manage.html`
+
+---
+
+### `POST /api/timetable/generate`
+**Description:** Sinh thời khóa biểu bằng AI từ ảnh (requires login)
+
+**Request Body (multipart/form-data):**
+- `image` (file) - Ảnh thời khóa biểu
+- `class_name` (string) - Tên lớp
+- `school_year` (string) - Năm học
+- `week_number` (integer) - Số tuần
+
+---
+
+### `POST /api/timetable/confirm`
+**Description:** Lưu thời khóa biểu AI vào database (requires login)
+
+**Request Body (JSON):**
+```json
+{
+  "class_name": "12 Tin", "school_year": "2025-2026",
+  "week_number": 15,
+  "slots": [{ "day_of_week": 2, "period_number": 1, "subject_id": 1, "room": "A101" }]
+}
+```
+
+---
+
+### `POST /api/timetable/cell/save`
+**Description:** Lưu một ô thời khóa biểu (requires login)
+
+**Request Body (JSON):**
+```json
+{
+  "class_name": "12 Tin", "school_year": "2025-2026",
+  "week_number": 1, "day_of_week": 2, "period_number": 1,
+  "subject_id": 1, "room": "A101"
+}
+```
+
+---
+
+### `GET /api/timetable/cell`
+**Description:** API lấy thông tin một ô TKB (requires login)
+
+**Query Parameters:**
+- `class_name`, `day_of_week`, `period_number`, `school_year`, `week_number`
+
+---
+
+## Lesson Book Routes
+
+### `GET /lesson_book`
+**Description:** Trang chính sổ đầu bài (requires login)
+
+**Response:** Renders `lesson_book.html`
+
+---
+
+### `GET /lesson_book/grid`
+**Description:** Giao diện grid sổ đầu bài theo tuần (requires login)
+
+**Query Parameters:**
+- `class_name`, `school_year`, `semester`, `week_number`
+
+**Response:** Renders `lesson_book_grid.html`
+
+---
+
+### `POST /api/lesson_book/week/save`
+**Description:** Lưu thông tin tuần sổ đầu bài (requires login)
+
+**Request Body (JSON):**
+```json
+{
+  "class_name": "12 Tin", "school_year": "2025-2026",
+  "week_number": 1, "semester": 1,
+  "teacher_notes": "Ghi chú tuần"
+}
+```
+
+---
+
+### `POST /api/lesson_book/slot/save`
+**Description:** Lưu một slot sổ đầu bài (requires login)
+
+**Request Body (JSON):**
+```json
+{
+  "week_id": 1, "day_of_week": 2, "period_number": 1,
+  "subject_name": "Toán", "topic": "Đạo hàm",
+  "objectives": "Hiểu khái niệm", "teaching_method": "Thuyết trình",
+  "evaluation": "Trắc nghiệm", "homework": "Bài 1-10",
+  "attendance_present": 40, "attendance_absent": 0
+}
+```
+
+---
+
+### `GET /api/lesson_book/slots/<int:week_id>`
+**Description:** API lấy danh sách slots của một tuần (requires login)
+
+---
+
+### `GET /api/lesson_book/week`
+**Description:** API lấy thông tin tuần (requires login)
+
+**Query Parameters:**
+- `class_name`, `week_number`, `school_year`
+
+---
+
+### `POST /api/lesson_book/entry`
+**Description:** Tạo entry sổ đầu bài truyền thống (requires login)
+
+---
+
+## Messaging Routes
+
+### `GET /group_chat`
+**Description:** Chat nhóm (requires login)
+
+**Response:** Renders `group_chat.html`
+
+---
+
+### `GET /private_chats`
+**Description:** Chat riêng (requires login)
+
+**Response:** Renders `private_chats.html`
+
+---
+
+### `GET /notifications`
+**Description:** Thông báo (requires login)
+
+**Response:** Renders `notifications.html`
+
+---
+
+### `POST /api/messaging/group/send`
+**Description:** Gửi tin nhắn nhóm (requires login)
+
+**Request Body (JSON):**
+```json
+{ "message": "Hello everyone" }
+```
+
+---
+
+### `POST /api/messaging/private/send`
+**Description:** Gửi tin nhắn riêng (requires login)
+
+**Request Body (JSON):**
+```json
+{ "receiver_id": 5, "message": "Hello" }
+```
+
+---
+
+### `POST /api/messaging/mark_read/<int:message_id>`
+**Description:** Đánh dấu tin nhắn đã đọc (requires login)
+
+---
+
+### `POST /api/notifications/send`
+**Description:** Gửi thông báo (requires login)
+
+**Request Body (JSON):**
+```json
+{
+  "title": "Thông báo", "message": "Nội dung",
+  "target_role": "all", "notification_type": "announcement"
+}
+```
+
+---
+
+### `POST /api/notifications/<int:notif_id>/read`
+**Description:** Đánh dấu thông báo đã đọc (requires login)
+
+---
+
+### `GET /api/notifications/unread_count`
+**Description:** API đếm thông báo chưa đọc (requires login)
+
+**Response (JSON):**
+```json
+{ "count": 5 }
+```
+
+---
+
+## Student Management Routes
+
+### `GET /manage_students`
+**Description:** Danh sách học sinh (requires login)
+
+**Query Parameters:**
+- `search`, `class_select`
+
+**Response:** Renders `manage_students.html`
+
+---
+
+### `GET|POST /add_student`
+**Description:** Thêm học sinh mới (requires login, admin)
+
+**POST:** Xử lý form thêm học sinh
+
+---
+
+### `GET|POST /edit_student/<int:student_id>`
+**Description:** Sửa thông tin học sinh (requires login)
+
+---
+
+### `GET /student_detail/<int:student_id>`
+**Description:** Trang chi tiết học sinh (requires login)
+
+---
+
+### `POST /delete_student/<int:student_id>`
+**Description:** Xóa học sinh (requires login, admin)
+
+---
+
+### `GET /import_students`
+**Description:** Giao diện nhập học sinh từ Excel (requires login, admin)
+
+**Response:** Renders `import_students.html`
+
+---
+
+### `POST /api/import_students`
+**Description:** API nhập học sinh từ Excel (requires login, admin)
+
+**Request Body (multipart/form-data):**
+- `file` (file) - File Excel
+
+---
+
+### `POST /upload_student_photo/<int:student_id>`
+**Description:** Upload ảnh học sinh (requires login)
+
+**Request Body (multipart/form-data):**
+- `photo` (file) - File ảnh
+
+---
+
+### `POST /api/student/notification/send`
+**Description:** Gửi thông báo cho học sinh (requires login)
+
+**Request Body (JSON):**
+```json
+{
+  "target_type": "class", "target_value": "12 Tin",
+  "title": "Thông báo", "message": "Nội dung"
+}
+```
+
+---
+
+## Class Fund Routes
+
+### `GET /class_fund`
+**Description:** Quản lý quỹ lớp (requires login)
+
+**Response:** Renders `class_fund.html`
+
+---
+
+### `POST /api/class_fund/collection`
+**Description:** Ghi nhận thu tiền (requires login)
+
+**Request Body (JSON):**
+```json
+{
+  "class_name": "12 Tin", "school_year": "2025-2026",
+  "amount_vnd": 500000, "purpose": "Quỹ lớp tháng 4",
+  "payer_name": "Nguyễn Văn B", "collection_date": "2025-04-12"
+}
+```
+
+---
+
+### `POST /api/class_fund/expense`
+**Description:** Ghi nhận chi tiêu (requires login)
+
+**Request Body (JSON):**
+```json
+{
+  "class_name": "12 Tin", "school_year": "2025-2026",
+  "amount_vnd": 300000, "title": "Mua nước uống",
+  "expense_date": "2025-04-12"
+}
+```
+
+---
+
+## Admin Management Routes
+
+### `GET /admin/settings`
+**Description:** Quản lý cài đặt hệ thống (requires admin)
+
+**Response:** Renders `manage_settings.html`
+
+---
+
+### `POST /admin/reset_week`
+**Description:** Reset tuần - lưu archive và reset điểm (requires admin)
+
+---
+
+### `POST /admin/update_week`
+**Description:** Cập nhật số tuần hiện tại (requires admin)
+
+---
+
+### `GET /admin/fix_scores`
+**Description:** Sửa điểm cho tất cả học sinh (requires admin)
+
+---
+
+### `GET /admin/teachers`
+**Description:** Danh sách giáo viên (requires admin)
+
+**Response:** Renders `manage_teachers.html`
+
+---
+
+### `GET|POST /admin/teachers/add`
+**Description:** Thêm giáo viên mới (requires admin)
+
+---
+
+### `POST /admin/teachers/delete/<int:teacher_id>`
+**Description:** Xóa giáo viên (requires admin)
+
+---
+
+### `POST /admin/teachers/<int:teacher_id>/permissions`
+**Description:** Cập nhật quyền giáo viên (requires admin)
+
+---
+
+### `GET /admin/classes`
+**Description:** Quản lý lớp học (requires admin)
+
+**Response:** Renders `manage_classes.html`
+
+---
+
+### `POST /admin/classes/add`
+**Description:** Thêm lớp mới (requires admin)
+
+---
+
+## Subjects Management Routes
+
+### `GET /subjects_mgmt`
+**Description:** Quản lý môn học (requires admin)
+
+**Response:** Renders `subjects_mgmt.html`
+
+---
+
+### `POST /add_subject`
+**Description:** Thêm môn học mới (requires admin)
+
+---
+
+### `POST /delete_subject/<int:subject_id>`
+**Description:** Xóa môn học (requires admin)
+
+---
+
+## Class Subjects Routes
+
+### `GET /class_subjects`
+**Description:** Phân công môn học cho lớp (requires login)
+
+**Query Parameters:**
+- `class_name`, `school_year`
+
+**Response:** Renders `class_subjects.html`
+
+---
+
+### `POST /api/class_subjects/save`
+**Description:** Lưu phân công môn học (requires login)
+
+**Request Body (JSON):**
+```json
+{
+  "class_name": "12 Tin", "school_year": "2025-2026",
+  "subjects": [{ "subject_id": 1, "is_compulsory": true, "periods_per_week": 5 }]
+}
+```
+
+---
+
+## Rules & Bonus Routes
+
+### `GET /rules`
+**Description:** Quản lý loại vi phạm (requires login)
+
+**Response:** Renders `rules.html`
+
+---
+
+### `POST /add_rule`
+**Description:** Thêm loại vi phạm (requires admin)
+
+---
+
+### `POST /delete_rule/<int:rule_id>`
+**Description:** Xóa loại vi phạm (requires admin)
+
+---
+
+### `GET /bonuses`
+**Description:** Quản lý loại điểm cộng (requires login)
+
+**Response:** Renders `bonuses.html`
+
+---
+
+### `POST /add_bonus`
+**Description:** Thêm loại điểm cộng (requires admin)
+
+---
+
+### `POST /delete_bonus/<int:bonus_id>`
+**Description:** Xóa loại điểm cộng (requires admin)
+
+---
+
+### `POST /add_bonus_record`
+**Description:** Thêm điểm cộng cho học sinh (requires login)
+
+**Request Body (form):**
+- `bonus_type_id`, `student_id`, `reason`
 
 ---
 
@@ -616,72 +1067,28 @@ Requires user to have specific permission code
 ### `@role_or_permission_required(role, permission_code)`
 Allows access if user has specific role OR permission
 
-### `@student_required`
-Requires student session (student portal)
-
 ---
 
 ## Access Control
 
 ### Role-Based Access
-- **admin**: Full access to all features
-- **homeroom_teacher**: Access to assigned class students
-- **subject_teacher**: Access to assigned subject grades and assigned classes
-- **both**: Both homeroom and subject teacher privileges
-- **discipline_officer**: Access to violation management
-- **parent_student**: Student/parent portal access
+| Role | Access |
+|------|--------|
+| admin | Full access |
+| homeroom_teacher | Assigned class students |
+| subject_teacher | Assigned subject grades, assigned classes |
+| both | Homeroom + subject teacher privileges |
+| discipline_officer | All students for discipline management |
+| parent_student | Student/parent portal access |
 
 ### Permission-Based Access
-Granular permissions defined in `Permission` table:
+Granular permissions in `Permission` table:
 - `view_grades` - View student grades
 - `manage_grades` - Enter/edit grades
 - `manage_students` - Manage student records
-- `manage_violations` - Manage violations
+- `manage_discipline` - Manage violations
 - `manage_subjects` - Manage subjects
 - etc.
-
-### Student Access Control
-- `can_access_student(student_id)` - Check if current user can access specific student
-- `get_accessible_students()` - Get query of accessible students based on role
-
----
-
-## Response Formats
-
-### HTML Responses
-Most GET routes return HTML templates
-
-### JSON Responses
-API endpoints return JSON with standard format:
-```json
-{
-  "success": true/false,
-  "data": {},
-  "error": "Error message if any"
-}
-```
-
-### File Downloads
-Export routes return file downloads (Excel, etc.)
-
----
-
-## Error Handling
-
-### Flash Messages
-Success/error messages stored in Flask flash:
-- `flash("Message", "success")`
-- `flash("Message", "error")`
-
-### Redirect on Error
-Unauthorized access redirects to dashboard or login
-
-### JSON Error Responses
-```json
-{
-  "error": "Error description"
-}
-```
 
 ---
 
@@ -699,89 +1106,8 @@ Unauthorized access redirects to dashboard or login
 ### Chat Session
 - `session['chat_session_id']` for chatbot context
 
----
-
-## Common Query Patterns
-
-### Search and Filter
-```python
-search = request.args.get('search', '').strip()
-selected_class = request.args.get('class_select', '').strip()
-```
-
-### Pagination
-```python
-page = request.args.get('page', 1, type=int)
-per_page = 20
-results = query.paginate(page=page, per_page=per_page, error_out=False)
-```
-
-### JSON Request
-```python
-data = request.get_json() or {}
-```
-
-### Form Data
-```python
-value = request.form.get('field_name')
-```
-
----
-
-## Database Operations
-
-### Common Patterns
-```python
-# Get single record
-student = db.session.get(Student, student_id)
-
-# Query with filters
-students = Student.query.filter_by(student_class=class_name).all()
-
-# Create new record
-record = Model(field=value)
-db.session.add(record)
-db.session.commit()
-
-# Update record
-record.field = new_value
-db.session.commit()
-
-# Delete record
-db.session.delete(record)
-db.session.commit()
-```
-
----
-
-## Logging Changes
-
-Use `log_change()` helper to track database changes:
-```python
-log_change(
-    change_type='grade_update',
-    description='Updated grade',
-    student_id=student_id,
-    student_name=student.name,
-    student_class=student.student_class,
-    old_value=old_score,
-    new_value=new_score
-)
-```
-
----
-
-## Notifications
-
-Use `create_notification()` to send notifications:
-```python
-create_notification(
-    title="Notification title",
-    message="Notification message",
-    notification_type='grade',
-    target_role='all'  # or specific class/role
-)
-```
+### Timetable AI Preview
+- `session['timetable_ai_preview_id']` for AI preview state
 
 ---
 
@@ -792,59 +1118,12 @@ create_notification(
 - `call_ollama(prompt)` - Simple text chat
 - `_call_gemini(prompt, image_path, is_json)` - Vision and JSON support (legacy name, uses Ollama)
 
-### Prompt Files
-Prompts stored in `prompts/` directory:
-- `chatbot_system.json` - Chatbot system prompt
-- `behavior_guide.json` - Behavior guide prompt
-- `school_rules.json` - School rules prompt
-- etc.
-
----
-
-## File Uploads
-
-### Upload Folder
-- Configured in `UPLOAD_FOLDER` (default: `uploads/`)
-- Used for OCR images, student photos, etc.
-
-### File Handling
-```python
-from app_helpers import UPLOAD_FOLDER
-filename = f"prefix_{uuid.uuid4().hex}_{original_filename}"
-filepath = os.path.join(UPLOAD_FOLDER, filename)
-file.save(filepath)
-```
-
----
-
-## Date/Time Handling
-
-### Current Week
-```python
-week_cfg = SystemConfig.query.filter_by(key="current_week").first()
-current_week = int(week_cfg.value) if week_cfg else 1
-```
-
-### ISO Week Calculation
-```python
-from datetime import datetime
-_, week_num, _ = datetime.now().isocalendar()
-```
-
----
-
-## Mobile Support
-
-### Mobile Navigation
-- Bottom navigation bar (mobile only, max-width: 1023px)
-- Swipe gestures for sidebar
-- Responsive templates
-
-### Mobile Routes
-All routes support mobile responsive design via:
-- Responsive CSS in templates
-- Touch-friendly UI components
-- Mobile-specific navigation
+### AI Features
+1. **Context-Aware Chatbot** - Conversation memory, student search, action buttons
+2. **OCR Grade Entry** - Image processing, JSON parsing, student matching
+3. **Report Generation** - Conduct reports, parent reports, chart comments
+4. **Timetable Generation** - Image-to-timetable conversion
+5. **Class Statistics Analysis** - AI-powered class analysis
 
 ---
 
@@ -853,9 +1132,6 @@ All routes support mobile responsive design via:
 ### Password Hashing
 - Uses `werkzeug.security.generate_password_hash()`
 - Supports legacy plain text for backward compatibility
-
-### CSRF Protection
-- Flask-WTF CSRF protection (if enabled)
 
 ### SQL Injection Prevention
 - Uses SQLAlchemy ORM (parameterized queries)
@@ -866,27 +1142,15 @@ All routes support mobile responsive design via:
 
 ---
 
-## Performance Considerations
+## File Uploads
 
-### Database Queries
-- Use indexing on frequently queried fields
-- Lazy loading with SQLAlchemy relationships
-- Pagination for large datasets
+### Upload Folder
+- Configured in `UPLOAD_FOLDER` (default: `uploads/`)
+- Subfolders: `student_portraits/`, `face_enrollment/`, `attendance_photos/`, `face_models/`, `timetable_ai_preview/`
 
-### Caching
-- Consider adding Redis for session caching (future)
-
-### Async Operations
-- Long-running AI calls should be async (future enhancement)
-
----
-
-## Future Enhancements
-
-### Planned Features
-- WebSocket for real-time updates
-- API versioning
-- Rate limiting
-- Request validation with schemas
-- Async task queue for heavy operations
-- More comprehensive API documentation with OpenAPI/Swagger
+### File Handling Pattern
+```python
+filename = f"prefix_{uuid.uuid4().hex}_{original_filename}"
+filepath = os.path.join(UPLOAD_FOLDER, filename)
+file.save(filepath)
+```

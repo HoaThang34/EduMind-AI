@@ -1,18 +1,20 @@
-# EduMind-AI System Architecture
+# Kiến Trúc Hệ Thống EduMind-AI
 
-## Overview
-EduMind-AI is a comprehensive school management system built with Flask that combines traditional school management features with modern AI capabilities. The system manages students, grades, violations, attendance, timetables, and includes AI-powered chatbot, OCR grade entry, and automated report generation.
+## Tổng Quan
+
+EduMind-AI là hệ thống quản lý trường học toàn diện, kết hợp các tính năng quản lý truyền thống với khả năng AI hiện đại. Hệ thống quản lý học sinh, điểm số, vi phạm, điểm danh, thời khóa biểu, sổ đầu bài và tích hợp chatbot AI.
 
 ---
 
-## Technology Stack
+## Tech Stack
 
 ### Backend
-- **Framework:** Flask (Python web framework)
-- **Database:** SQLite with SQLAlchemy ORM
+- **Framework:** Flask 3.1 (Python)
+- **Database:** SQLite + SQLAlchemy ORM 2.0
 - **Authentication:** Flask-Login
 - **AI/LLM:** Ollama (local LLM server)
-- **OCR:** Ollama vision models (Gemini-compatible)
+- **OCR/Vision:** Ollama vision models
+- **Face Recognition:** ArcFace ONNX + OpenCV DNN
 - **Data Processing:** Pandas (Excel operations)
 - **Security:** Werkzeug password hashing
 
@@ -22,7 +24,7 @@ EduMind-AI is a comprehensive school management system built with Flask that com
 - **Charts:** Chart.js
 - **Icons:** Bootstrap Icons
 - **JavaScript:** Vanilla JS (ES6+)
-- **QR Codes:** API-based generation (qrserver.com)
+- **QR Codes:** API-based generation
 
 ### Development Tools
 - **Environment:** Python 3.x
@@ -32,106 +34,151 @@ EduMind-AI is a comprehensive school management system built with Flask that com
 
 ---
 
-## System Architecture
+## Kiến Trúc Hệ Thống
 
 ### Layered Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                     Presentation Layer                    │
-│  (HTML Templates, JavaScript, CSS, Mobile Interface)     │
-└─────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────┐
-│                      Application Layer                     │
-│  (Flask Routes, Blueprints, Business Logic, Helpers)     │
-└─────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────┐
-│                       Data Access Layer                    │
-│  (SQLAlchemy ORM, Database Models, Queries)              │
-└─────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────┐
-│                      Data Layer                            │
-│  (SQLite Database, File Storage, AI Models)              │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    Presentation Layer                        │
+│        (HTML Templates, JavaScript, CSS, Mobile UI)         │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                     Application Layer                        │
+│     (Flask Routes, Blueprints, Business Logic, Helpers)      │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    Data Access Layer                        │
+│        (SQLAlchemy ORM, Database Models, Queries)            │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                       Data Layer                            │
+│        (SQLite Database, File Storage, AI Models)           │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Component Architecture
+## Kiến Trúc Component
 
 ### 1. Application Entry Point (`app.py`)
-**Responsibilities:**
-- Flask app initialization
-- Database configuration
-- Blueprint registration
-- Login manager setup
-- Database migration functions
+
+**Trách nhiệm:**
+- Khởi tạo Flask app
+- Cấu hình database
+- Đăng ký blueprints
+- Setup Login manager
+- Migration functions
 - Static file serving
-- Startup database creation
+- Khởi tạo database khi startup
 
 **Key Functions:**
-- `create_database()` - Initialize DB with migrations
-- `ensure_*()` functions - Schema migrations
-- `load_user()` - User loader for Flask-Login
+- `create_database()` - Khởi tạo DB với migrations
+- `ensure_*()` functions - 16 schema migrations
+- `load_user()` - User loader cho Flask-Login
 
 ---
 
 ### 2. Database Models (`models.py`)
+
 **Design Patterns:**
 - Active Record pattern (SQLAlchemy)
 - Relationships defined as attributes
-- Cascade delete for related records
-- Unique constraints for data integrity
-- Indexes on frequently queried fields
+- Cascade delete cho related records
+- Unique constraints cho data integrity
+- Indexes trên frequently queried fields
 
-**Model Categories:**
-- **User Models:** Teacher, Student
-- **Academic Models:** Subject, Grade, ClassSubject
-- **Discipline Models:** Violation, ViolationType, BonusRecord, BonusType
-- **Attendance Models:** AttendanceRecord, AttendanceMonitoringSession
-- **Timetable Models:** TimetableSlot, LessonBookEntry, LessonBookWeek, LessonBookSlot
-- **Communication Models:** Notification, GroupChatMessage, PrivateMessage, ChatConversation
-- **Management Models:** ClassRoom, SystemConfig, Permission, TeacherPermission
-- **Audit Models:** ChangeLog, WeeklyArchive
-- **Finance Models:** ClassFundCollection, ClassFundExpense
+**Model Categories (31 models total):**
+
+**User Models:**
+- `Teacher` - Tài khoản giáo viên với RBAC
+- `Student` - Hồ sơ học sinh
+
+**Academic Models:**
+- `Subject` - Môn học
+- `Grade` - Điểm số
+- `ClassSubject` - Phân công môn học cho lớp
+- `TimetableSlot` - Ô thời khóa biểu
+
+**Discipline Models:**
+- `ViolationType` - Loại vi phạm
+- `Violation` - Bản ghi vi phạm
+- `BonusType` - Loại điểm cộng
+- `BonusRecord` - Bản ghi điểm cộng
+- `ConductSetting` - Cấu hình ngưỡng hạnh kiểm
+
+**Attendance Models:**
+- `AttendanceRecord` - Bản ghi điểm danh
+- `AttendanceMonitoringSession` - Phiên theo dõi điểm danh
+- `SessionViolationRecord` - Vi phạm trong phiên
+
+**Lesson Book Models:**
+- `LessonBookEntry` - Sổ đầu bài (theo entry)
+- `LessonBookWeek` - Meta tuần sổ đầu bài
+- `LessonBookSlot` - Ô slot trong grid tuần
+
+**Communication Models:**
+- `Notification` - Thông báo giáo viên
+- `StudentNotification` - Thông báo học sinh
+- `GroupChatMessage` - Tin nhắn nhóm
+- `PrivateMessage` - Tin nhắn riêng
+- `ChatConversation` - Lịch sử chatbot
+
+**Management Models:**
+- `ClassRoom` - Lớp học
+- `SystemConfig` - Cấu hình hệ thống
+- `Permission` - Định nghĩa quyền
+- `TeacherPermission` - Gán quyền cho giáo viên
+- `TeacherClassAssignment` - Phân công giáo viên dạy lớp
+
+**Finance Models:**
+- `ClassFundCollection` - Thu tiền quỹ lớp
+- `ClassFundExpense` - Chi tiêu quỹ lớp
+
+**Audit Models:**
+- `ChangeLog` - Lịch sử thay đổi
+- `WeeklyArchive` - Lưu trữ tuần
 
 ---
 
 ### 3. Route Organization (`routes/`)
+
 **Blueprint Pattern:**
-Each module is a separate Flask Blueprint for modularity:
+Mỗi module là một Flask Blueprint riêng biệt:
 
 ```
 routes/
-├── auth.py              → auth_bp (Authentication)
-├── grades.py            → grades_bp (Grade management)
-├── student.py           → student_bp (Student portal)
+├── auth.py              → auth_bp (Đăng nhập/đăng xuất)
+├── grades.py            → grades_bp (Quản lý điểm)
+├── student.py           → student_bp (Cổng học sinh)
 ├── ai_engine.py         → ai_engine_bp (AI features)
 ├── core.py              → Direct app registration (Core features)
-├── admin_mgmt.py        → Admin management
-├── violations_mgmt.py   → Violation management
-├── students_mgmt.py     → Student management
-├── subjects_mgmt.py     → Subject management
-├── rules_bonus.py       → Rules and bonuses
-├── messaging.py         → Messaging system
-├── lesson_book.py       → Lesson book
-├── timetable.py         → Timetable
-├── class_fund.py        → Class fund
-├── attendance.py        → Attendance
-└── class_subjects.py    → Class-subject assignments
+├── admin_mgmt.py        → admin_bp (Quản lý admin)
+├── violations_mgmt.py   → violations_bp (Quản lý vi phạm)
+├── students_mgmt.py     → students_bp (Quản lý học sinh)
+├── subjects_mgmt.py     → subjects_bp (Quản lý môn học)
+├── rules_bonus.py       → rules_bonus_bp (Rules & bonuses)
+├── messaging.py         → messaging_bp (Nhắn tin)
+├── lesson_book.py      → lesson_book_bp (Sổ đầu bài)
+├── timetable.py         → timetable_bp (Thời khóa biểu)
+├── class_fund.py       → class_fund_bp (Quỹ lớp)
+├── attendance.py        → attendance_bp (Điểm danh)
+├── class_subjects.py    → class_subjects_bp (Class subjects)
+└── face_engine.py       → (Engine, không phải route)
 ```
 
 **Registration Flow:**
-1. Blueprints defined in individual files
-2. Registered in `routes/__init__.py`
-3. Called from `app.py` during initialization
+1. Blueprints định nghĩa trong individual files
+2. Đăng ký trong `routes/__init__.py`
+3. Gọi từ `app.py` trong initialization
 
 ---
 
 ### 4. Helper Functions (`app_helpers.py`)
+
 **Categories:**
 
 **Authentication & Authorization:**
@@ -144,55 +191,50 @@ routes/
 
 **AI Integration:**
 - `call_ollama()` - Ollama chat API
+- `_call_gemini()` - Vision và JSON support (legacy name, dùng Ollama)
+- `_parse_llm_json_response()` - Parse AI JSON responses
 - `get_ollama_client()` - Ollama client instance
 - `get_ollama_model()` - Get configured model
-- `_call_gemini()` - Vision and JSON support (legacy name)
-- `_parse_llm_json_response()` - Parse AI JSON responses
+
+**Face Recognition:**
+- `get_engine()` - Get FaceEngine singleton
 
 **Data Processing:**
-- `parse_excel_file()` - Excel parsing with pandas
+- `parse_excel_file()` - Excel parsing với pandas
 - `import_violations_to_db()` - Bulk import
 - `calculate_student_gpa()` - GPA calculation
-- `calculate_week_from_date()` - Week number from date
 - `normalize_student_code()` - Student code normalization
 - `normalize_parent_phone_for_login()` - Phone normalization
 
-**Chatbot Memory:**
-- `get_or_create_chat_session()` - Session management
-- `get_conversation_history()` - Retrieve chat history
-- `save_message()` - Save chat message
+**Student Status:**
+- `update_student_conduct()` - Auto-update conduct status
+- `update_student_academic_status()` - Auto-update academic status
+- `is_reset_needed()` - Check if weekly reset needed
 
 **Notifications & Logging:**
 - `create_notification()` - Create system notification
-- `broadcast_timetable_update()` - Broadcast timetable changes
 - `log_change()` - Audit logging
+- `broadcast_timetable_update()` - Broadcast timetable changes
 
 **Timetable Helpers:**
 - `timetable_class_variants_for_filter()` - Class name matching
 - `resolve_class_name_for_timetable()` - Class name resolution
 - `resolve_subject_for_timetable()` - Subject resolution
 
-**Student Status:**
-- `update_student_conduct()` - Auto-update conduct status
-- `is_reset_needed()` - Check if weekly reset needed
+**Chatbot Memory:**
+- `get_or_create_chat_session()` - Session management
+- `get_conversation_history()` - Retrieve chat history
+- `save_message()` - Save chat message
 
 ---
 
-### 5. AI/Prompt System (`prompts.py` & `prompts/`)
+### 5. AI/Prompt System (`prompts.py`)
+
 **Architecture:**
 - Centralized prompt definitions
 - JSON-based prompt storage
-- Prompt templates with placeholders
-- Intent detection for multi-purpose chatbot
-
-**Prompt Categories:**
-- Chatbot system prompts
-- Student learning prompts
-- School rules prompts
-- Behavior guide prompts
-- Teacher assistant prompts
-- OCR grade prompts
-- Vision prompts
+- Prompt templates với placeholders
+- Intent detection cho multi-purpose chatbot
 
 **Usage Pattern:**
 ```python
@@ -207,35 +249,50 @@ response, error = call_ollama(prompt)
 
 ---
 
-### 6. Template System (`templates/`)
+### 6. Face Recognition Engine (`routes/face_engine.py`)
+
+**Architecture (DeepFace-style):**
+```
+1. Face Detection  → OpenCV DNN ResNet-SSD (or Haar Cascade fallback)
+2. Face Alignment  → 5-point landmark → affine transform
+3. Embedding       → ArcFace ONNX (InsightFace buffalo_l)
+4. Similarity      → Cosine distance between 512-dim embeddings
+```
+
+**Key Components:**
+- `FaceDetector` - Face detection (DNN or Haar)
+- `ArcFaceExtractor` - ONNX embedding extraction
+- `FaceEngine` - High-level API (find, extract_embedding, detect_faces)
+- `ONNXModel` - ONNX Runtime wrapper với lazy loading
+
+**Model Files:**
+- ArcFace ONNX: `uploads/face_models/.onnx/w600k_r50.onnx`
+- ResNet Prototxt: `uploads/face_models/.onnx/deploy.prototxt`
+- ResNet Model: `uploads/face_models/.onnx/res10_300x300_ssd_iter_140000.caffemodel`
+
+---
+
+### 7. Template System (`templates/`)
+
 **Template Hierarchy:**
 ```
 templates/
-├── base.html                    → Base layout with navigation
+├── base.html                    → Base layout với navigation
 ├── login.html                   → Login page
 ├── welcome.html                 → Welcome/login selection
 ├── home.html                    → Home page
 ├── dashboard.html               → Main dashboard
 ├── student_dashboard.html       → Student portal dashboard
 ├── chatbot.html                 → AI chatbot interface
-├── assistant_chatbot.html       → Multi-purpose assistant
 ├── manage_grades.html           → Grade management
 ├── student_grades.html          → Individual student grades
 ├── student_transcript.html      → Student transcript
 ├── parent_report.html           → Parent report
-├── ocr_grades.html              → OCR grade entry
+├── ocr_grades.html             → OCR grade entry
 ├── attendance/                  → Attendance templates
 ├── messaging/                   → Messaging templates
 └── ...                          → Other feature templates
 ```
-
-**Template Features:**
-- Jinja2 inheritance (extends base.html)
-- Flask-Login integration (current_user)
-- Flash message display
-- CSRF protection
-- Mobile-responsive design
-- Bootstrap components
 
 ---
 
@@ -279,14 +336,16 @@ Teacher → Upload image → POST /api/ocr-grades
 → Log changes → Send notifications
 ```
 
-### 5. Attendance Flow
+### 5. Face Recognition Attendance Flow
 ```
-Teacher → Open monitoring session → AttendanceMonitoringSession
-→ Capture face/scan QR → POST /api/attendance/checkin
-→ Face recognition/QR validation → AttendanceRecord
+Teacher → Open monitoring session
+→ Capture face → POST /api/attendance/face_checkin
+→ FaceEngine.detect_faces() → FaceDetector
+→ FaceEngine.extract_embedding() → ArcFaceExtractor
+→ Cosine similarity vs DB embeddings
+→ Match found → AttendanceRecord created
 → Mark violations → SessionViolationRecord
 → Confirm session → Convert to official Violation
-→ Update student scores
 ```
 
 ---
@@ -294,8 +353,8 @@ Teacher → Open monitoring session → AttendanceMonitoringSession
 ## Security Architecture
 
 ### Authentication
-- **Password Hashing:** Werkzeug security (hash with salt)
-- **Session Management:** Flask-Login with secure cookies
+- **Password Hashing:** Werkzeug security (hash với salt)
+- **Session Management:** Flask-Login với secure cookies
 - **Session Storage:** Server-side Flask sessions
 - **Login Persistence:** Remember me functionality
 
@@ -303,7 +362,7 @@ Teacher → Open monitoring session → AttendanceMonitoringSession
 - **Role-Based Access Control (RBAC):**
   - 6 user roles: admin, homeroom_teacher, subject_teacher, both, discipline_officer, parent_student
 - **Permission-Based Access Control (PBAC):**
-  - Granular permissions in Permission table
+  - Granular permissions trong Permission table
   - TeacherPermission assigns permissions to teachers
 - **Decorators:**
   - `@login_required` - Authentication check
@@ -315,13 +374,13 @@ Teacher → Open monitoring session → AttendanceMonitoringSession
 - **SQL Injection Prevention:** SQLAlchemy ORM (parameterized queries)
 - **XSS Prevention:** Jinja2 auto-escaping
 - **CSRF Protection:** Flask-WTF (when enabled)
-- **File Upload Validation:** Extension and size checks
-- **Input Validation:** Server-side validation for all inputs
+- **File Upload Validation:** Extension và size checks
+- **Input Validation:** Server-side validation cho all inputs
 
 ### Audit Trail
 - **ChangeLog Table:** Records all database changes
-- **Automatic Logging:** `log_change()` helper for tracking
-- **Change Types:** grade, grade_update, grade_delete, violation, bonus, etc.
+- **Automatic Logging:** `log_change()` helper cho tracking
+- **Change Types:** grade, grade_update, grade_delete, violation, bonus, score_reset, bulk_violation, etc.
 
 ---
 
@@ -339,10 +398,10 @@ Application → app_helpers.py
 1. **Context-Aware Chatbot**
    - Conversation memory in database
    - Student search integration
-   - Action buttons for navigation
+   - Action buttons cho navigation
 
 2. **OCR Grade Entry**
-   - Vision model for image processing
+   - Vision model cho image processing
    - JSON response parsing
    - Student matching algorithms
 
@@ -357,17 +416,22 @@ Application → app_helpers.py
    - Structured JSON output
    - Week-based scheduling
 
+5. **Face Recognition**
+   - ArcFace embeddings
+   - 1:N identification
+   - Real-time camera processing
+
 ### AI Model Configuration
 - **Primary Model:** OLLAMA_MODEL in .env
 - **Fallback Model:** OLLAMA_FALLBACK_MODEL in .env
 - **Host:** OLLAMA_HOST in .env (default: localhost:11434)
-- **Vision Support:** Models with vision capabilities (llava, qwen2.5-vl)
+- **Vision Support:** Models với vision capabilities
 
 ### Error Handling
 - Graceful degradation on AI failures
 - Fallback responses
 - User-friendly error messages
-- Retry logic with fallback model
+- Retry logic với fallback model
 
 ---
 
@@ -377,7 +441,7 @@ Application → app_helpers.py
 - **Breakpoint:** max-width: 1023px for mobile
 - **Framework:** Bootstrap 5 responsive grid
 - **Touch Targets:** Minimum 56px height
-- **Safe Area:** Support for notched phones
+- **Safe Area:** Support cho notched phones
 
 ### Mobile Navigation
 - **Bottom Navigation Bar:** Fixed position, thumb-accessible
@@ -388,8 +452,6 @@ Application → app_helpers.py
 ### Mobile Features
 - **QR Code Scanning:** Camera-based QR scanning
 - **Face Recognition:** Mobile camera integration
-- **Offline Support:** Service worker (planned)
-- **Push Notifications:** Web Push API (planned)
 
 ---
 
@@ -398,7 +460,7 @@ Application → app_helpers.py
 ### Database Optimization
 - **Indexes:** On frequently queried fields
 - **Lazy Loading:** SQLAlchemy relationships
-- **Eager Loading:** `joinedload()` for N+1 prevention
+- **Eager Loading:** `joinedload()` cho N+1 prevention
 - **Pagination:** For large datasets
 
 ### Caching Strategy
@@ -409,8 +471,6 @@ Application → app_helpers.py
 ### Frontend Optimization
 - **Lazy Loading:** Images and components
 - **Debouncing:** Search and resize events
-- **Minification:** CSS/JS (future)
-- **Bundle Splitting:** Code splitting (future)
 
 ---
 
@@ -429,7 +489,7 @@ Application → app_helpers.py
 ### Session Storage
 - **Current:** Flask session (server-side)
 - **Future:** Redis for distributed sessions
-- **Scaling:** Horizontal scaling with shared session store
+- **Scaling:** Horizontal scaling với shared session store
 
 ---
 
@@ -456,7 +516,6 @@ SECRET_KEY=your-secret-key
 OLLAMA_HOST=http://localhost:11434
 OLLAMA_MODEL=llama3.2
 OLLAMA_FALLBACK_MODEL=llama3.2
-GEMINI_API_KEY=your-gemini-key (if using Gemini)
 ```
 
 ---
@@ -466,10 +525,10 @@ GEMINI_API_KEY=your-gemini-key (if using Gemini)
 ### External Services
 1. **Ollama API** - Local LLM server
 2. **QR Code API** - qrserver.com for QR generation
-3. **Gemini API** - Optional cloud AI backup
 
 ### File System
 - **uploads/** - User uploads (OCR images, photos)
+- **uploads/face_models/.onnx/** - ArcFace ONNX models
 - **logo/** - School logo
 - **musics/** - Audio files
 - **database.db** - SQLite database
@@ -486,7 +545,6 @@ GEMINI_API_KEY=your-gemini-key (if using Gemini)
 - **Try-Catch Blocks:** Around critical operations
 - **Database Rollback:** On transaction errors
 - **Flash Messages:** User-friendly error display
-- **Logging:** Console and file logging
 
 ### AI Errors
 - **Fallback Responses:** When AI fails
@@ -498,70 +556,6 @@ GEMINI_API_KEY=your-gemini-key (if using Gemini)
 - **Fetch Error Handling:** Network failures
 - **Validation Errors:** Client-side validation
 - **User Feedback:** Toast notifications
-- **Console Logging:** Debug information
-
----
-
-## Testing Strategy (Planned)
-
-### Unit Tests
-- Model tests
-- Helper function tests
-- Route tests
-
-### Integration Tests
-- API endpoint tests
-- Database operation tests
-- AI integration tests
-
-### End-to-End Tests
-- User flow tests
-- Mobile responsive tests
-- Cross-browser tests
-
----
-
-## Monitoring & Logging
-
-### Application Logging
-- **Console Logging:** Development
-- **File Logging:** Production (planned)
-- **Error Tracking:** Sentry (planned)
-
-### Database Monitoring
-- **Query Performance:** Slow query logging
-- **Connection Pool:** Monitor connections
-- **Backup Strategy:** Regular backups
-
-### AI Monitoring
-- **Response Times:** AI call duration
-- **Error Rates:** AI failure tracking
-- **Model Performance:** Response quality metrics
-
----
-
-## Future Enhancements
-
-### Short Term
-1. WebSocket for real-time updates
-2. Redis for session caching
-3. PostgreSQL migration
-4. API versioning
-5. Rate limiting
-
-### Medium Term
-1. Mobile app (React Native)
-2. Parent portal improvements
-3. Advanced analytics dashboard
-4. Email notifications
-5. SMS integration
-
-### Long Term
-1. Multi-school support
-2. Cloud deployment
-3. Advanced AI features
-4. Integration with external systems
-5. Mobile push notifications
 
 ---
 
@@ -606,4 +600,3 @@ GEMINI_API_KEY=your-gemini-key (if using Gemini)
 - Follow mobile-first approach
 - Test responsive design
 - Optimize for performance
-- Ensure accessibility

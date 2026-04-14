@@ -1,260 +1,262 @@
 # EduMind-AI Documentation
 
-This directory contains comprehensive documentation for the EduMind-AI school management system.
+Hệ thống quản lý trường học toàn diện kết hợp AI, xây dựng trên nền tảng Flask với khả năng quản lý học sinh, điểm số, điểm danh, thời khóa biểu, sổ đầu bài và chatbot AI.
 
-## Documentation Files
+## Cấu trúc Tài liệu
 
-### 1. [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md)
-Complete database schema documentation including:
-- All 31 database models with field descriptions
-- Relationships between models
-- Indexes and constraints
-- Migration notes
-- Default data
+| File | Mô tả |
+|------|-------|
+| [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) | Schema database đầy đủ (31 models, quan hệ, migration) |
+| [API_ROUTES.md](./API_ROUTES.md) | Danh sách API endpoints backend đầy đủ |
+| [FRONTEND_API_ROUTES.md](./FRONTEND_API_ROUTES.md) | Tích hợp frontend - API gọi từ JavaScript |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | Kiến trúc hệ thống chi tiết |
+| [AI_QUICK_REFERENCE.md](./AI_QUICK_REFERENCE.md) | Hướng dẫn nhanh cho AI assistant |
 
-**Purpose:** Help AI understand the data structure and relationships when working with database operations.
+## Cấu Trúc Dự Án
 
----
-
-### 2. [API_ROUTES.md](./API_ROUTES.md)
-Backend API routes documentation including:
-- All Flask routes organized by module
-- Request/response formats
-- Authentication and authorization
-- Permission decorators
-- Common patterns
-
-**Purpose:** Help AI understand the backend API structure, endpoints, and how to implement new routes or modify existing ones.
-
----
-
-### 3. [FRONTEND_API_ROUTES.md](./FRONTEND_API_ROUTES.md)
-Frontend API integration documentation including:
-- JavaScript API calls from templates
-- AJAX request patterns
-- Form submissions
-- File uploads
-- UI component patterns
-- Mobile-specific implementations
-
-**Purpose:** Help AI understand how the frontend interacts with the backend and how to implement new frontend features.
-
----
-
-### 4. [ARCHITECTURE.md](./ARCHITECTURE.md) (Recommended)
-System architecture overview including:
-- Project structure
-- Technology stack
-- Design patterns
-- Component relationships
-- Data flow
-- Security considerations
-
-**Purpose:** Help AI understand the overall system architecture and design decisions.
-
----
-
-## Quick Reference
-
-### Project Structure
 ```
 EduMind-AI/
-├── app.py                  # Main Flask application
-├── models.py               # SQLAlchemy database models
-├── app_helpers.py          # Helper functions and utilities
-├── prompts.py              # AI prompts for chatbot
+├── app.py                  # Flask app chính, DB init, migrations
+├── models.py               # 31 SQLAlchemy models
+├── app_helpers.py          # Helper functions, decorators, AI integration
+├── prompts.py              # AI prompts định nghĩa
 ├── requirements.txt        # Python dependencies
-├── routes/                 # Flask route blueprints
-│   ├── __init__.py
-│   ├── auth.py            # Authentication
-│   ├── grades.py          # Grade management
-│   ├── student.py         # Student portal
-│   ├── ai_engine.py       # AI/Chatbot
-│   ├── core.py            # Core routes
-│   ├── admin_mgmt.py      # Admin management
-│   ├── violations_mgmt.py # Violation management
-│   ├── students_mgmt.py   # Student management
-│   ├── subjects_mgmt.py   # Subject management
-│   ├── rules_bonus.py     # Rules and bonuses
-│   ├── messaging.py       # Messaging system
-│   ├── lesson_book.py     # Lesson book
-│   ├── timetable.py       # Timetable
-│   ├── class_fund.py      # Class fund
-│   ├── attendance.py      # Attendance
-│   └── class_subjects.py  # Class-subject assignments
-├── templates/              # HTML templates
-├── prompts/                # AI prompt JSON files
-├── logo/                   # Logo files
-├── musics/                 # Audio files
-├── uploads/                # Uploaded files
-└── docs/                   # Documentation (this folder)
+├── rebuild_db.py          # Script rebuild database
+├── .env.example           # Environment variables mẫu
+├── .env                    # Environment variables (không commit)
+│
+├── routes/                 # Flask Blueprints
+│   ├── __init__.py        # Đăng ký tất cả blueprints
+│   ├── auth.py            # Đăng nhập/đăng xuất (auth_bp)
+│   ├── grades.py          # Quản lý điểm (grades_bp)
+│   ├── student.py         # Cổng học sinh (student_bp)
+│   ├── ai_engine.py      # Chatbot AI, OCR, reports (ai_engine_bp)
+│   ├── core.py           # Dashboard, profile, history
+│   ├── admin_mgmt.py     # Quản lý admin
+│   ├── violations_mgmt.py # Quản lý vi phạm
+│   ├── students_mgmt.py   # CRUD học sinh
+│   ├── subjects_mgmt.py   # CRUD môn học
+│   ├── rules_bonus.py     # Loại vi phạm, loại điểm cộng
+│   ├── messaging.py       # Nhắn tin, thông báo
+│   ├── lesson_book.py    # Sổ đầu bài điện tử
+│   ├── timetable.py      # Thời khóa biểu
+│   ├── class_fund.py     # Quỹ lớp
+│   ├── attendance.py     # Điểm danh (face/QR)
+│   ├── class_subjects.py # Phân công môn học
+│   └── face_engine.py    # Nhận diện khuôn mặt (ArcFace ONNX)
+│
+├── templates/             # HTML templates (Jinja2)
+│   ├── base.html         # Layout nền
+│   ├── dashboard.html    # Dashboard chính
+│   ├── chatbot.html      # Giao diện chatbot AI
+│   ├── manage_grades.html # Quản lý điểm
+│   ├── attendance/       # Templates điểm danh
+│   ├── messaging/        # Templates nhắn tin
+│   └── *.html            # Các trang chức năng
+│
+├── prompts/              # AI prompt JSON files
+├── logo/                 # Logo trường
+├── musics/               # File âm thanh
+├── uploads/              # Uploaded files, face models
+│   └── face_models/.onnx # ArcFace ONNX model
+└── database.db            # SQLite database
 ```
 
-### Technology Stack
-- **Backend:** Flask (Python)
-- **Database:** SQLite with SQLAlchemy ORM
-- **AI/LLM:** Ollama (local models)
-- **Frontend:** HTML, CSS, JavaScript, Bootstrap
-- **Authentication:** Flask-Login
-- **OCR:** Gemini Vision API (via Ollama vision models)
-- **Charts:** Chart.js
+## Các Tính Năng Chính
 
-### Key Design Patterns
-- **Blueprint Pattern:** Routes organized into blueprints
-- **Role-Based Access Control:** Multiple user roles with granular permissions
-- **Repository Pattern:** Database operations through SQLAlchemy ORM
-- **Helper Pattern:** Shared utilities in app_helpers.py
-- **Template Inheritance:** Base template with common elements
+### 1. Quản Lý Học Sinh
+- CRUD học sinh đầy đủ
+- Thông tin phụ huynh, CCCD, dân tộc
+- Ảnh chân dung, QR code học sinh
+- Tự động cập nhật hạnh kiểm, cảnh báo
 
-### User Roles
-1. **admin** - Full system access
-2. **homeroom_teacher** - Access to assigned class
-3. **subject_teacher** - Access to assigned subject and classes
-4. **both** - Combined homeroom + subject teacher
-5. **discipline_officer** - Violation management
-6. **parent_student** - Student/parent portal access
+### 2. Quản Lý Điểm
+- Điểm TX/GK/HK theo từng môn
+- Nhiều cột điểm cùng loại
+- OCR nhận diện điểm từ hình ảnh
+- Tính GPA tự động
+- Báo cáo phụ huynh
 
-### Permission System
-- Granular permissions defined in `Permission` table
-- Assigned to teachers via `TeacherPermission` table
-- Decorators: `@permission_required()`, `@role_or_permission_required()`
+### 3. Hệ Thống Kỷ Luật
+- Vi phạm + điểm trừ
+- Điểm cộng (bonus)
+- Tự động cập nhật hạnh kiểm (Tốt/Khá/Trung bình/Yếu)
+- Mức cảnh báo (Xanh/Vàng/Đỏ)
+- Nhập vi phạm hàng loạt từ Excel
 
-### AI Integration
-- **Chatbot:** Context-aware with conversation memory
-- **OCR:** Grade entry from images
-- **Report Generation:** AI-generated reports and comments
-- **Timetable:** AI-generated timetable from images
-- **Models:** Configurable via Ollama (OLLAMA_MODEL in .env)
+### 4. AI Tích Hợp (Ollama)
+- Chatbot có nhớ ngữ cảnh
+- OCR nhận diện điểm từ ảnh
+- Tạo báo cáo học sinh tự động
+- Tạo báo cáo phụ huynh
+- Sinh thời khóa biểu từ ảnh
+- Phân tích thống kê lớp
 
-### Mobile Support
-- Responsive design with Bootstrap
-- Mobile bottom navigation bar
-- Touch-friendly UI
-- Swipe gestures for sidebar
-- QR code scanning for attendance
+### 5. Điểm Danh
+- Nhận diện khuôn mặt (ArcFace ONNX)
+- QR code check-in
+- Phiên theo dõi điểm danh theo giờ
+- Tự động ghi nhận vi phạm trễ/vắng
 
----
+### 6. Thời Khóa Biểu
+- Theo tuần ISO (1-53)
+- Nhiều năm học
+- Hỗ trợ AI sinh TKB từ ảnh
+- Grid view trực quan
 
-## For AI Assistants
+### 7. Sổ Đầu Bài
+- Grid tuần theo tiết/ngày
+- Mỗi slot ghi: môn, bài, mục tiêu, phương pháp, đánh giá, bài tập
+- Ghi chú tuần cho giáo viên
 
-When working with EduMind-AI codebase:
+### 8. Thông Báo & Nhắn Tin
+- Thông báo hệ thống
+- Nhắn tin nhóm
+- Nhắn tin riêng
+- Thông báo cho học sinh
 
-1. **Always check the database schema** in DATABASE_SCHEMA.md before creating/modifying models
-2. **Review existing routes** in API_ROUTES.md to understand patterns before adding new endpoints
-3. **Follow frontend patterns** in FRONTEND_API_ROUTES.md for consistent API integration
-4. **Use helper functions** from app_helpers.py (documented in API_ROUTES.md)
-5. **Apply appropriate decorators** for authentication and authorization
-6. **Log changes** using `log_change()` helper for audit trail
-7. **Send notifications** using `create_notification()` for important events
-8. **Test role-based access** to ensure proper permissions
+## Vai Trò Người Dùng
+
+| Role | Mã | Quyền truy cập |
+|------|-----|---------------|
+| Quản trị viên | admin | Toàn quyền hệ thống |
+| Giáo viên chủ nhiệm | homeroom_teacher | Lớp được phân công |
+| Giáo viên bộ môn | subject_teacher | Các lớp được phân công |
+| GVCN + GVBM | both | Cả hai |
+| Giáo viên nền nếp | discipline_officer | Tất cả học sinh |
+| Phụ huynh/Học sinh | parent_student | Cổng học sinh |
+
+## Công Nghệ Sử Dụng
+
+| Layer | Công nghệ |
+|-------|-----------|
+| Backend | Flask 3.1, SQLAlchemy 2.0 |
+| Database | SQLite |
+| AI | Ollama (local LLM) |
+| Face Recognition | ArcFace ONNX + OpenCV DNN |
+| Frontend | HTML5, CSS3, Bootstrap 5, JavaScript ES6+ |
+| Charts | Chart.js |
+| Password | Werkzeug (hash + salt) |
+| Auth | Flask-Login |
+
+## Cài Đặt
+
+```bash
+# 1. Clone/Copy dự án
+cd EduMind-AI
+
+# 2. Tạo virtual environment
+python -m venv venv
+venv\Scripts\activate  # Windows
+
+# 3. Cài dependencies
+pip install -r requirements.txt
+
+# 4. Copy và chỉnh .env
+copy .env.example .env
+# Chỉnh OLLAMA_MODEL, OLLAMA_HOST trong .env
+
+# 5. Chạy Ollama (AI server)
+ollama serve
+ollama pull llama3.2  # hoặc model bạn chọn
+
+# 6. Khởi chạy
+python app.py
+```
+
+## Account Mặc Định
+
+| Username | Password | Role |
+|----------|----------|------|
+| admin | admin | admin |
+
+## Các Lệnh Quan Trọng
+
+```bash
+# Khởi tạo database
+python rebuild_db.py
+
+# Kiểm tra Ollama models
+ollama list
+
+# Pull model mới
+ollama pull llama3.2
+```
+
+## AI Model Configuration (.env)
+
+```env
+SECRET_KEY=your-secret-key
+OLLAMA_HOST=http://localhost:11434
+OLLAMA_MODEL=llama3.2
+OLLAMA_FALLBACK_MODEL=llama3.2
+```
+
+## Hướng Dẫn Cho AI Assistant
+
+Khi làm việc với codebase EduMind-AI:
+
+1. **Check database schema** trong `docs/DATABASE_SCHEMA.md` trước khi tạo/sửa model
+2. **Xem API routes** trong `docs/API_ROUTES.md` để hiểu pattern trước khi thêm endpoint mới
+3. **Follow frontend patterns** trong `docs/FRONTEND_API_ROUTES.md` cho API integration nhất quán
+4. **Dùng helper functions** từ `app_helpers.py` - đã được document đầy đủ
+5. **Áp dụng decorators** phù hợp cho authentication và authorization
+6. **Log changes** bằng `log_change()` cho audit trail
+7. **Gửi notifications** bằng `create_notification()` cho các sự kiện quan trọng
+8. **Test role-based access** để đảm bảo quyền hạn đúng
 
 ### Common Tasks
 
-**Adding a new route:**
-1. Choose appropriate route file (or create new blueprint)
-2. Apply decorators (@login_required, @permission_required, etc.)
-3. Follow existing patterns for request/response handling
-4. Update API_ROUTES.md documentation
-5. Add corresponding frontend API calls if needed
+**Thêm route mới:**
+1. Chọn file route phù hợp (hoặc tạo blueprint mới)
+2. Áp decorators (@login_required, @permission_required, etc.)
+3. Follow pattern có sẵn cho request/response
+4. Update API_ROUTES.md
 
-**Adding a new model:**
-1. Add model to models.py
-2. Create migration function in app.py
-3. Add relationships to existing models if needed
-4. Update DATABASE_SCHEMA.md documentation
-5. Create CRUD routes in appropriate route file
+**Thêm model mới:**
+1. Thêm model vào models.py
+2. Tạo migration function trong app.py
+3. Thêm relationships nếu cần
+4. Update DATABASE_SCHEMA.md
+5. Tạo CRUD routes
 
-**Adding AI feature:**
-1. Create prompt in prompts/ directory
-2. Use `call_ollama()` or `_call_gemini()` helpers
-3. Add API route in ai_engine.py or appropriate file
+**Thêm tính năng AI:**
+1. Tạo prompt trong prompts/ directory
+2. Dùng `call_ollama()` hoặc `_call_gemini()` helpers
+3. Thêm API route trong ai_engine.py
 4. Implement frontend interface
-5. Add error handling for AI failures
+5. Xử lý lỗi AI graceful
 
-**Modifying permissions:**
-1. Add permission code to Permission table
-2. Update permission decorators on routes
-3. Document in API_ROUTES.md
-4. Test with different user roles
-
----
-
-## Maintenance Notes
+## Bảo Trì
 
 ### Database Migrations
-- Schema changes require migration functions in app.py
-- Always test migrations on development database first
-- Use `ensure_*` pattern for backward compatibility
+- Schema changes cần migration functions trong app.py
+- Luôn test migrations trên dev database trước
+- Dùng pattern `ensure_*` cho backward compatibility
 
 ### AI Model Configuration
-- Configure Ollama host and model in .env file
-- Test model availability before deployment
-- Handle AI failures gracefully with fallback responses
+- Configure Ollama host và model trong .env
+- Test model availability trước deployment
+- Handle AI failures graceful với fallback responses
 
 ### Security
-- Never commit .env file with secrets
-- Use password hashing for all user passwords
-- Validate all user inputs
-- Apply CSRF protection for form submissions
-- Sanitize outputs to prevent XSS
-
-### Performance
-- Use database indexes on frequently queried fields
-- Implement pagination for large datasets
-- Cache frequently accessed data
-- Optimize database queries with SQLAlchemy
-
----
-
-## Updating Documentation
-
-When making changes to the codebase:
-
-1. **Update relevant documentation file(s)**
-2. **Keep documentation in sync with code**
-3. **Add examples for new features**
-4. **Update architecture overview if structure changes**
-5. **Review documentation for accuracy**
-
----
-
-## Additional Resources
-
-### Configuration Files
-- `.env` - Environment variables (not in git)
-- `.env.example` - Example environment variables
-- `requirements.txt` - Python dependencies
-
-### Key Files to Understand
-- `app.py` - Application initialization and database setup
-- `models.py` - All database models
-- `app_helpers.py` - Shared helper functions
-- `routes/__init__.py` - Blueprint registration
-- `prompts.py` - AI prompt definitions
-
-### Template Structure
-- `base.html` - Base template with navigation
-- `login.html` - Login page
-- `dashboard.html` - Main dashboard
-- `student_dashboard.html` - Student portal dashboard
-- `chatbot.html` - AI chatbot interface
-
----
-
-## Contact & Support
-
-For questions about the codebase or documentation:
-- Review existing code patterns
-- Check documentation files
-- Refer to Flask and SQLAlchemy documentation
-- Consult Ollama documentation for AI features
-
----
+- Không commit .env file
+- Dùng password hashing cho tất cả passwords
+- Validate tất cả user inputs
+- Sanitize outputs để prevent XSS
 
 ## Version History
 
-- **v1.0** - Initial documentation (April 2026)
-  - Database schema documentation
-  - API routes documentation
-  - Frontend API documentation
-  - README and architecture overview
+- **v2.0** (April 2026) - Nâng cấp lớn
+  - Face recognition engine (ArcFace ONNX)
+  - Session-based attendance monitoring
+  - Lesson book grid view
+  - AI-powered report generation
+  - Class fund management
+  - Teacher class assignments
+  - Mở rộng database schema (31 models)
+  - Cập nhật tài liệu đầy đủ
+
+- **v1.0** (Early 2026) - Phiên bản ban đầu
+  - Basic student/grade/violation management
+  - Simple chatbot
