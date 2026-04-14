@@ -2,137 +2,679 @@
 {% block title %}Trợ Lý Đa Năng{% endblock %}
 
 {% block content %}
-<div
-    class="h-[85vh] flex flex-col bg-white rounded-xl shadow-card overflow-hidden border border-[hsl(240,5.9%,90%)] max-w-4xl mx-auto">
-    <div class="bg-teal-600 p-4 flex items-center justify-between text-white shadow-md z-10">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-teal-600 shadow-inner">
-                <i class="fas fa-graduation-cap text-xl"></i>
-            </div>
-            <div>
-                <h1 class="font-bold text-lg leading-tight">Trợ Lý Đa Năng</h1>
-                <p class="text-teal-200 text-xs flex items-center gap-1">
-                    <span class="w-2 h-2 bg-green-400 rounded-full"></span> Trực tuyến
-                </p>
-            </div>
-        </div>
-        <div class="flex items-center gap-2">
-            <button onclick="location.reload()" class="text-teal-200 hover:text-white transition" title="Tải lại trang">
-                <i class="fas fa-sync-alt"></i>
-            </button>
-        </div>
-    </div>
+<div class="max-w-[1600px] mx-auto">
+    <div class="relative overflow-hidden rounded-3xl border border-slate-200 bg-white text-slate-900 shadow-2xl">
+        <div class="pointer-events-none absolute -top-24 left-20 h-64 w-64 rounded-full bg-cyan-200/60 blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-32 right-20 h-72 w-72 rounded-full bg-fuchsia-200/50 blur-3xl"></div>
 
-    <div id="chat-log" class="flex-1 p-6 overflow-y-auto space-y-4 bg-accent">
-        <div class="flex items-start gap-3">
-            <div
-                class="w-8 h-8 rounded-full bg-teal-100 flex-shrink-0 flex items-center justify-center text-teal-600 text-sm font-bold">
-                AI</div>
-            <div
-                class="bg-white p-3.5 rounded-xl rounded-tl-none shadow-sm text-foreground text-sm max-w-[80%] border border-[hsl(240,5.9%,90%)]">
-                Chào cô/thầy! 🎓 Em có thể giúp cô/thầy:
-                <br><br>
-                📚 <b>Nội quy nhà trường</b>: Tra cứu quy định, vi phạm, mức phạt
-                <br>
-                💬 <b>Cách ứng xử</b>: Tư vấn xử lý tình huống học sinh
-                <br>
-                ✍️ <b>Trợ giúp công việc</b>: Soạn nhận xét, phương pháp giáo dục
-                <br><br>
-                Cô/thầy cứ hỏi em nhé! 😊
-            </div>
-        </div>
-    </div>
+        <div class="relative h-[85vh] min-h-[700px] grid lg:grid-cols-[340px_1fr]">
+            <aside class="border-r border-slate-200 bg-slate-50/90 backdrop-blur-sm p-4 flex flex-col min-h-0">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-cyan-400 to-indigo-500 flex items-center justify-center text-slate-950">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h2 class="font-semibold truncate">Assistant Workspace</h2>
+                        <p class="text-xs text-slate-500">Trợ lý AI phiên bản giao diện mới</p>
+                    </div>
+                </div>
 
-    <div class="p-4 bg-white border-t border-[hsl(240,5.9%,90%)]">
-        <form id="chat-form" class="flex items-center gap-2">
-            <input type="text" id="chat-input"
-                class="flex-1 p-3 bg-accent border-transparent rounded-full focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition shadow-inner text-sm"
-                placeholder="Hỏi về nội quy, ứng xử, hoặc nhờ trợ giúp..." autocomplete="off">
-            <button type="submit"
-                class="w-12 h-12 bg-teal-600 text-white rounded-full shadow-md hover:bg-teal-700 hover:shadow-card transition-all flex items-center justify-center flex-shrink-0">
-                <i class="fas fa-paper-plane text-sm"></i>
-            </button>
-        </form>
+                <div class="space-y-3 mb-4">
+                    <button id="new-session-btn" type="button"
+                        class="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-500 text-slate-950 font-semibold py-2.5 hover:opacity-90 transition">
+                        <i class="fas fa-plus"></i> Tạo phiên mới
+                    </button>
+                    <div class="flex items-center gap-2">
+                        <button id="rename-session-btn" type="button"
+                            class="flex-1 rounded-xl border border-slate-300 hover:border-slate-400 py-2 text-sm bg-white">Đổi tên</button>
+                        <button id="clear-chat-btn" type="button"
+                            class="flex-1 rounded-xl border border-slate-300 hover:border-red-400 py-2 text-sm bg-white">Xóa chat</button>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="text-xs text-slate-500">Tìm kiếm lịch sử trong phiên hiện tại</label>
+                    <div class="mt-1 flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2">
+                        <i class="fas fa-search text-xs text-slate-400"></i>
+                        <input id="history-search-input" type="text" placeholder="Nhập từ khóa..."
+                            class="w-full bg-transparent outline-none text-sm placeholder:text-slate-400">
+                    </div>
+                </div>
+
+                <div class="mb-4 min-h-0">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-semibold">Danh sách phiên</h3>
+                        <span id="session-count" class="text-xs text-slate-500">0</span>
+                    </div>
+                    <div id="session-list" class="space-y-2 overflow-y-auto max-h-[240px] pr-1"></div>
+                </div>
+
+                <div class="min-h-0">
+                    <h3 class="text-sm font-semibold mb-2 text-amber-700">Phản hồi đã pin</h3>
+                    <div id="pinned-list" class="space-y-2 overflow-y-auto max-h-[220px] pr-1"></div>
+                </div>
+            </aside>
+
+            <section class="flex flex-col min-w-0 min-h-0 bg-white">
+                <header class="border-b border-slate-200 px-5 py-4 bg-white/90 backdrop-blur">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <h1 id="active-session-title" class="text-lg font-semibold truncate"></h1>
+                            <p id="active-session-meta" class="text-xs text-slate-500"></p>
+                            <div id="workspace-stats" class="mt-2 flex flex-wrap gap-2 text-[11px]"></div>
+                        </div>
+                        <button id="export-chat-btn" type="button"
+                            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs hover:border-cyan-400 transition">
+                            <i class="fas fa-file-export mr-1"></i> Export TXT
+                        </button>
+                    </div>
+                    <div id="quick-prompts" class="mt-3 flex flex-wrap gap-2">
+                        <button type="button" class="quick-prompt rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs hover:border-cyan-400 transition"
+                            data-prompt="Tạo checklist xử lý học sinh vi phạm lần đầu trong 1 tiết học.">Checklist xử lý nhanh</button>
+                        <button type="button" class="quick-prompt rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs hover:border-cyan-400 transition"
+                            data-prompt="Soạn mẫu phản hồi cho phụ huynh về việc con hay mất tập trung trong lớp.">Mẫu phản hồi phụ huynh</button>
+                        <button type="button" class="quick-prompt rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs hover:border-cyan-400 transition"
+                            data-prompt="Gợi ý kế hoạch 15 phút ổn định lớp khi học sinh ồn ào.">Ổn định lớp học</button>
+                    </div>
+                </header>
+
+                <div id="chat-log" class="flex-1 min-h-0 overflow-y-auto px-5 py-4 space-y-4 bg-gradient-to-b from-slate-50 to-white"></div>
+
+                <footer class="border-t border-slate-200 bg-white px-5 py-4">
+                    <form id="chat-form" class="space-y-2">
+                        <div class="rounded-2xl border border-slate-300 bg-slate-50 p-3 flex items-end gap-2">
+                            <textarea id="chat-input" rows="1"
+                                class="flex-1 resize-none max-h-44 bg-transparent outline-none text-sm leading-relaxed placeholder:text-slate-400"
+                                placeholder="Nhập câu hỏi chi tiết để nhận phản hồi tốt hơn..." autocomplete="off"></textarea>
+                            <button id="send-button" type="submit"
+                                class="h-11 w-11 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-500 text-slate-950 font-bold disabled:opacity-40 disabled:cursor-not-allowed">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                        <div class="flex items-center justify-between text-xs text-slate-500">
+                            <span id="stream-status">Sẵn sàng</span>
+                            <span id="input-counter">0 ký tự</span>
+                        </div>
+                    </form>
+                </footer>
+            </section>
+        </div>
     </div>
 </div>
 
 <script>
+    const STORAGE_KEY = 'edumind_assistant_workspace_v1';
+    const OLD_STORAGE_KEY = 'edumind_assistant_chat_history_v2';
+    const defaultWelcomeMessage = `Chào cô/thầy! Em có thể hỗ trợ:
+
+📚 **Nội quy nhà trường**: tra cứu quy định, vi phạm, mức xử lý.
+💬 **Cách ứng xử**: tư vấn xử lý tình huống với học sinh.
+✍️ **Trợ giúp công việc**: soạn nhận xét, gợi ý phương pháp giáo dục.
+
+Cô/thầy có thể dùng nhiều phiên chat để tách theo chủ đề, tìm kiếm lịch sử, pin phản hồi quan trọng và export khi cần.`;
+
     const chatLog = document.getElementById('chat-log');
     const chatForm = document.getElementById('chat-form');
     const chatInput = document.getElementById('chat-input');
+    const sendButton = document.getElementById('send-button');
+    const inputCounter = document.getElementById('input-counter');
+    const streamStatus = document.getElementById('stream-status');
+    const quickPrompts = document.querySelectorAll('.quick-prompt');
+    const historySearchInput = document.getElementById('history-search-input');
+    const sessionList = document.getElementById('session-list');
+    const pinnedList = document.getElementById('pinned-list');
+    const sessionCount = document.getElementById('session-count');
+    const activeSessionTitle = document.getElementById('active-session-title');
+    const activeSessionMeta = document.getElementById('active-session-meta');
+    const workspaceStats = document.getElementById('workspace-stats');
+    const newSessionBtn = document.getElementById('new-session-btn');
+    const renameSessionBtn = document.getElementById('rename-session-btn');
+    const clearChatBtn = document.getElementById('clear-chat-btn');
+    const exportChatBtn = document.getElementById('export-chat-btn');
 
-    chatForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const userMessage = chatInput.value.trim();
-        if (userMessage === '') return;
+    let workspace = { activeSessionId: null, sessions: [] };
+    let isStreaming = false;
 
-        appendMessage(userMessage, 'user');
-        chatInput.value = '';
-        sendMessage(userMessage);
-    });
-
-    function sendMessage(message) {
-        // Show loading bubble
-        const loadingId = 'loading-' + Date.now();
-        const loadingDiv = document.createElement('div');
-        loadingDiv.id = loadingId;
-        loadingDiv.className = 'flex items-start gap-3';
-        loadingDiv.innerHTML = `
-            <div class="w-8 h-8 rounded-full bg-teal-100 flex-shrink-0 flex items-center justify-center text-teal-600 text-sm font-bold">AI</div>
-            <div class="bg-white p-3.5 rounded-xl rounded-tl-none shadow-sm border border-[hsl(240,5.9%,90%)]">
-                <div class="flex space-x-1">
-                    <div class="w-2 h-2 bg-slate-300 rounded-full animate-bounce"></div>
-                    <div class="w-2 h-2 bg-slate-300 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                    <div class="w-2 h-2 bg-slate-300 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
-                </div>
-            </div>`;
-        chatLog.appendChild(loadingDiv);
-        chatLog.scrollTop = chatLog.scrollHeight;
-
-        fetch("{{ url_for('ai_engine.api_assistant_chatbot') }}", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: message })
-        })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById(loadingId).remove();
-                appendMessage(data.response, 'bot');
-            })
-            .catch(error => {
-                document.getElementById(loadingId).remove();
-                appendMessage('❌ Lỗi kết nối. Vui lòng kiểm tra Ollama đang chạy.', 'bot');
-            });
+    function uid() {
+        return `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
     }
 
-    function appendMessage(message, sender) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = sender === 'user' ? 'flex items-end justify-end gap-2' : 'flex items-start gap-3';
+    function getNowTime() {
+        return new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    }
 
-        // Avatar for Bot only
-        let avatarHTML = '';
-        if (sender !== 'user') {
-            avatarHTML = `<div class="w-8 h-8 rounded-full bg-teal-100 flex-shrink-0 flex items-center justify-center text-teal-600 text-sm font-bold">AI</div>`;
+    function getNowIso() {
+        return new Date().toISOString();
+    }
+
+    function escapeHtml(text) {
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function applyHighlight(text, query) {
+        if (!query.trim()) return text;
+        const safe = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return text.replace(new RegExp(`(${safe})`, 'gi'), '<mark class="bg-yellow-200 px-0.5 rounded">$1</mark>');
+    }
+
+    function formatInlineMarkdown(text, query = '') {
+        let content = escapeHtml(text);
+        content = content.replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-[12px]">$1</code>');
+        content = content.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold">$1</strong>');
+        content = content.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        content = content.replace(/~~([^~]+)~~/g, '<del>$1</del>');
+        content = content.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-cyan-700 underline">$1</a>');
+        return applyHighlight(content, query);
+    }
+
+    function isTableLine(line) {
+        return line.includes('|');
+    }
+
+    function isTableSeparator(line) {
+        const compact = line.replace(/\s+/g, '');
+        return /^\|?[:\-|]+\|?$/.test(compact) && compact.includes('-');
+    }
+
+    function splitTableRow(line) {
+        return line
+            .trim()
+            .replace(/^\|/, '')
+            .replace(/\|$/, '')
+            .split('|')
+            .map((cell) => cell.trim());
+    }
+
+    function formatMessage(text, query = '') {
+        const lines = (text || '').replace(/\r/g, '').split('\n');
+        const html = [];
+        let i = 0;
+
+        while (i < lines.length) {
+            const rawLine = lines[i];
+            const line = rawLine.trim();
+
+            if (!line) {
+                i += 1;
+                continue;
+            }
+
+            if (line.startsWith('```')) {
+                const language = line.slice(3).trim();
+                const codeLines = [];
+                i += 1;
+                while (i < lines.length && !lines[i].trim().startsWith('```')) {
+                    codeLines.push(lines[i]);
+                    i += 1;
+                }
+                if (i < lines.length) i += 1;
+                const escapedCode = escapeHtml(codeLines.join('\n'));
+                html.push(`
+                    <div class="my-3 overflow-hidden rounded-xl border border-slate-300">
+                        <div class="px-3 py-1.5 text-[11px] bg-slate-100 text-slate-500">${language || 'code'}</div>
+                        <pre class="bg-slate-900 text-slate-100 p-3 overflow-auto text-xs"><code>${escapedCode}</code></pre>
+                    </div>
+                `);
+                continue;
+            }
+
+            if (isTableLine(line) && i + 1 < lines.length && isTableSeparator(lines[i + 1])) {
+                const header = splitTableRow(lines[i]);
+                i += 2;
+                const bodyRows = [];
+                while (i < lines.length && isTableLine(lines[i].trim()) && lines[i].trim() !== '') {
+                    bodyRows.push(splitTableRow(lines[i]));
+                    i += 1;
+                }
+
+                const headerHtml = header.map((cell) =>
+                    `<th class="px-2.5 py-2 border border-slate-300 bg-slate-100 text-left font-semibold">${formatInlineMarkdown(cell, query)}</th>`).join('');
+                const bodyHtml = bodyRows.map((row) => {
+                    const cells = row.map((cell) =>
+                        `<td class="px-2.5 py-2 border border-slate-300 align-top">${formatInlineMarkdown(cell, query)}</td>`).join('');
+                    return `<tr>${cells}</tr>`;
+                }).join('');
+
+                html.push(`
+                    <div class="my-3 overflow-auto rounded-xl border border-slate-300">
+                        <table class="min-w-full border-collapse text-xs">
+                            <thead><tr>${headerHtml}</tr></thead>
+                            <tbody>${bodyHtml}</tbody>
+                        </table>
+                    </div>
+                `);
+                continue;
+            }
+
+            const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
+            if (headingMatch) {
+                const level = headingMatch[1].length;
+                const heading = formatInlineMarkdown(headingMatch[2], query);
+                const size = ['text-xl', 'text-lg', 'text-base', 'text-sm', 'text-sm', 'text-sm'][level - 1];
+                html.push(`<h${level} class="${size} font-semibold mt-3 mb-1">${heading}</h${level}>`);
+                i += 1;
+                continue;
+            }
+
+            if (/^[-*_]{3,}$/.test(line)) {
+                html.push('<hr class="my-3 border-slate-300">');
+                i += 1;
+                continue;
+            }
+
+            if (/^>\s?/.test(line)) {
+                const quoteLines = [];
+                while (i < lines.length && /^>\s?/.test(lines[i].trim())) {
+                    quoteLines.push(lines[i].trim().replace(/^>\s?/, ''));
+                    i += 1;
+                }
+                html.push(`<blockquote class="my-3 border-l-4 border-cyan-300 bg-cyan-50 text-slate-700 px-3 py-2 rounded-r-lg">${formatInlineMarkdown(quoteLines.join('<br>'), query)}</blockquote>`);
+                continue;
+            }
+
+            if (/^[-*]\s+/.test(line)) {
+                const items = [];
+                while (i < lines.length && /^[-*]\s+/.test(lines[i].trim())) {
+                    items.push(lines[i].trim().replace(/^[-*]\s+/, ''));
+                    i += 1;
+                }
+                const itemHtml = items.map((item) => `<li>${formatInlineMarkdown(item, query)}</li>`).join('');
+                html.push(`<ul class="list-disc ml-5 my-2 space-y-1">${itemHtml}</ul>`);
+                continue;
+            }
+
+            if (/^\d+\.\s+/.test(line)) {
+                const items = [];
+                while (i < lines.length && /^\d+\.\s+/.test(lines[i].trim())) {
+                    items.push(lines[i].trim().replace(/^\d+\.\s+/, ''));
+                    i += 1;
+                }
+                const itemHtml = items.map((item) => `<li>${formatInlineMarkdown(item, query)}</li>`).join('');
+                html.push(`<ol class="list-decimal ml-5 my-2 space-y-1">${itemHtml}</ol>`);
+                continue;
+            }
+
+            const paragraphLines = [rawLine];
+            i += 1;
+            while (i < lines.length && lines[i].trim() !== '') {
+                if (/^(#{1,6})\s+/.test(lines[i].trim()) || lines[i].trim().startsWith('```')) break;
+                if (/^[-*]\s+/.test(lines[i].trim()) || /^\d+\.\s+/.test(lines[i].trim())) break;
+                if (/^>\s?/.test(lines[i].trim())) break;
+                if (isTableLine(lines[i].trim()) && i + 1 < lines.length && isTableSeparator(lines[i + 1])) break;
+                paragraphLines.push(lines[i]);
+                i += 1;
+            }
+            html.push(`<p class="my-2">${formatInlineMarkdown(paragraphLines.join('<br>'), query)}</p>`);
         }
 
-        const bubbleClass = sender === 'user'
-            ? 'bg-teal-600 text-white rounded-xl rounded-br-none shadow-md'
-            : 'bg-white text-foreground rounded-xl rounded-tl-none shadow-sm border border-[hsl(240,5.9%,90%)]';
+        return html.join('');
+    }
 
-        // Format Text - hỗ trợ markdown
-        let formattedMsg = message
-            .replace(/\*\*(.*?)\*\*/g, '<b class="font-bold">$1</b>')  // **bold**
-            .replace(/\n/g, '<br>');  // line break
+    function getActiveSession() {
+        return workspace.sessions.find((s) => s.id === workspace.activeSessionId) || null;
+    }
 
-        let contentHTML = `
-            <div class="flex flex-col items-${sender === 'user' ? 'end' : 'start'} max-w-[85%]">
-                <div class="p-3.5 text-sm ${bubbleClass}">${formattedMsg}</div>
+    function saveWorkspace() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(workspace));
+    }
+
+    function migrateOldHistory() {
+        const oldRaw = localStorage.getItem(OLD_STORAGE_KEY);
+        if (!oldRaw) return null;
+        try {
+            const oldMessages = JSON.parse(oldRaw);
+            if (!Array.isArray(oldMessages) || !oldMessages.length) return null;
+            return {
+                id: uid(),
+                name: 'Phiên cũ đã chuyển đổi',
+                createdAt: getNowIso(),
+                updatedAt: getNowIso(),
+                messages: oldMessages.map((m) => ({
+                    id: uid(),
+                    sender: m.sender || 'bot',
+                    message: m.message || '',
+                    timestamp: m.timestamp || getNowTime(),
+                    pinned: false
+                }))
+            };
+        } catch (err) {
+            return null;
+        }
+    }
+
+    function loadWorkspace() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            if (!parsed || !Array.isArray(parsed.sessions)) return null;
+            return parsed;
+        } catch (err) {
+            return null;
+        }
+    }
+
+    function createSession(name = null) {
+        const sessionNumber = workspace.sessions.length + 1;
+        const session = {
+            id: uid(),
+            name: name || `Phiên chat ${sessionNumber}`,
+            createdAt: getNowIso(),
+            updatedAt: getNowIso(),
+            messages: [{
+                id: uid(),
+                sender: 'bot',
+                message: defaultWelcomeMessage,
+                timestamp: getNowTime(),
+                pinned: false
+            }]
+        };
+        workspace.sessions.unshift(session);
+        workspace.activeSessionId = session.id;
+        saveWorkspace();
+        return session;
+    }
+
+    function initWorkspace() {
+        const loaded = loadWorkspace();
+        if (loaded) {
+            workspace = loaded;
+            if (!workspace.activeSessionId && workspace.sessions[0]) workspace.activeSessionId = workspace.sessions[0].id;
+            return;
+        }
+        const migratedSession = migrateOldHistory();
+        if (migratedSession) {
+            workspace = { activeSessionId: migratedSession.id, sessions: [migratedSession] };
+        } else {
+            workspace = { activeSessionId: null, sessions: [] };
+            createSession('Phiên chat mặc định');
+        }
+        saveWorkspace();
+    }
+
+    function updateInputUi() {
+        const text = chatInput.value.trim();
+        sendButton.disabled = text.length === 0 || isStreaming;
+        inputCounter.textContent = `${chatInput.value.length} ký tự`;
+        chatInput.style.height = 'auto';
+        chatInput.style.height = `${Math.min(chatInput.scrollHeight, 160)}px`;
+    }
+
+    function getFilteredMessages() {
+        const session = getActiveSession();
+        if (!session) return [];
+        const query = historySearchInput.value.trim().toLowerCase();
+        if (!query) return session.messages;
+        return session.messages.filter((m) => m.message.toLowerCase().includes(query));
+    }
+
+    function messageHtml(msg, query) {
+        const isUser = msg.sender === 'user';
+        const bubbleClass = isUser
+            ? 'bg-gradient-to-r from-cyan-500 to-indigo-500 text-slate-950 rounded-2xl rounded-br-md shadow-lg'
+            : 'bg-white border border-slate-300 text-slate-800 rounded-2xl rounded-tl-md shadow-md';
+        const avatar = isUser ? '' : `<div class="w-9 h-9 rounded-xl bg-cyan-100 flex-shrink-0 flex items-center justify-center text-cyan-700 text-sm font-bold">AI</div>`;
+        const actions = isUser
+            ? ''
+            : `<button data-action="copy" data-id="${msg.id}" class="px-1 text-[11px] text-slate-500 hover:text-slate-700 transition" title="Sao chép"><i class="fas fa-copy"></i></button>
+               <button data-action="pin" data-id="${msg.id}" class="px-1 text-[11px] ${msg.pinned ? 'text-amber-500' : 'text-slate-500'} hover:text-amber-500 transition" title="Pin phản hồi"><i class="fas fa-star"></i></button>`;
+        const wrapperClass = isUser ? 'flex items-end justify-end gap-2 animate-fade-in-up' : 'flex items-start gap-3 animate-fade-in-up';
+        return `
+            <div class="${wrapperClass}" data-message-id="${msg.id}">
+                ${avatar}
+                <div class="flex flex-col items-${isUser ? 'end' : 'start'} max-w-[95%] lg:max-w-[92%]">
+                    <div class="p-4 text-sm leading-relaxed ${bubbleClass}">${formatMessage(msg.message, query)}</div>
+                    <div class="flex items-center gap-1 mt-1">
+                        <span class="px-1 text-[11px] text-slate-400">${msg.timestamp}</span>
+                        ${actions}
+                    </div>
+                </div>
             </div>
         `;
+    }
 
-        messageDiv.innerHTML = sender === 'user' ? (contentHTML) : (avatarHTML + contentHTML);
-        chatLog.appendChild(messageDiv);
+    function renderChat() {
+        const session = getActiveSession();
+        if (!session) return;
+        const query = historySearchInput.value.trim();
+        const filtered = getFilteredMessages();
+        chatLog.innerHTML = filtered.length
+            ? filtered.map((msg) => messageHtml(msg, query)).join('')
+            : `<div class="text-sm text-slate-500 bg-white border border-dashed border-slate-300 rounded-xl p-4">Không có kết quả phù hợp với từ khóa tìm kiếm.</div>`;
         chatLog.scrollTop = chatLog.scrollHeight;
     }
+
+    function renderSessions() {
+        const activeId = workspace.activeSessionId;
+        sessionList.innerHTML = workspace.sessions.map((s) => `
+            <button type="button" data-session-id="${s.id}"
+                class="w-full text-left p-3 rounded-xl border transition ${s.id === activeId ? 'border-cyan-400 bg-cyan-50' : 'border-slate-300 bg-white hover:border-slate-400'}">
+                <div class="text-sm font-medium truncate">${escapeHtml(s.name)}</div>
+                <div class="text-[11px] text-slate-500 mt-1">${s.messages.length} tin nhắn</div>
+            </button>
+        `).join('');
+        sessionCount.textContent = `${workspace.sessions.length} phiên`;
+    }
+
+    function renderPinned() {
+        const session = getActiveSession();
+        if (!session) return;
+        const pins = session.messages.filter((m) => m.sender === 'bot' && m.pinned);
+        pinnedList.innerHTML = pins.length
+            ? pins.map((p) => `
+                <button type="button" data-jump-id="${p.id}" class="w-full text-left p-2.5 rounded-lg bg-amber-50 border border-amber-300 hover:border-amber-400 transition">
+                    <div class="text-[11px] text-amber-700 font-medium mb-1">${p.timestamp}</div>
+                    <div class="text-xs text-slate-700 line-clamp-3">${escapeHtml(p.message.slice(0, 180))}</div>
+                </button>
+            `).join('')
+            : `<div class="text-xs text-slate-500 bg-white rounded-lg border border-dashed border-slate-300 p-3">Chưa có phản hồi nào được pin.</div>`;
+    }
+
+    function renderHeaderInfo() {
+        const session = getActiveSession();
+        if (!session) return;
+        const pins = session.messages.filter((m) => m.sender === 'bot' && m.pinned).length;
+        activeSessionTitle.textContent = session.name;
+        activeSessionMeta.textContent = `${session.messages.length} tin nhắn · ${pins} phản hồi đã pin · ${workspace.sessions.length} phiên`;
+        workspaceStats.innerHTML = `
+            <span class="px-2 py-1 rounded-full border border-slate-300 bg-white text-slate-600">Phiên: ${workspace.sessions.length}</span>
+            <span class="px-2 py-1 rounded-full border border-slate-300 bg-white text-slate-600">Tin nhắn: ${session.messages.length}</span>
+            <span class="px-2 py-1 rounded-full border border-amber-300 bg-amber-50 text-amber-700">Pin: ${pins}</span>
+            <span class="px-2 py-1 rounded-full border border-cyan-300 bg-cyan-50 text-cyan-700">Streaming realtime</span>
+        `;
+    }
+
+    function rerenderAll() {
+        renderSessions();
+        renderPinned();
+        renderHeaderInfo();
+        renderChat();
+    }
+
+    function appendMessage(sender, message, { streaming = false } = {}) {
+        const session = getActiveSession();
+        if (!session) return;
+        const msg = {
+            id: uid(),
+            sender,
+            message: streaming ? '' : message,
+            timestamp: getNowTime(),
+            pinned: false
+        };
+        session.messages.push(msg);
+        session.updatedAt = getNowIso();
+        saveWorkspace();
+        rerenderAll();
+        if (!streaming) return Promise.resolve();
+
+        return new Promise((resolve) => {
+            const full = message || '';
+            let index = 0;
+            const step = Math.max(1, Math.floor(full.length / 120));
+            streamStatus.textContent = 'AI đang phản hồi realtime...';
+            const timer = setInterval(() => {
+                index += step;
+                msg.message = full.slice(0, index);
+                renderChat();
+                if (index >= full.length) {
+                    clearInterval(timer);
+                    msg.message = full;
+                    saveWorkspace();
+                    rerenderAll();
+                    streamStatus.textContent = 'Sẵn sàng';
+                    resolve();
+                }
+            }, 20);
+        });
+    }
+
+    async function sendMessage(message) {
+        if (isStreaming) return;
+        isStreaming = true;
+        updateInputUi();
+        streamStatus.textContent = 'Đang gửi yêu cầu...';
+        try {
+            const response = await fetch("{{ url_for('ai_engine.api_assistant_chatbot') }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+            const data = await response.json();
+            await appendMessage('bot', data.response || 'Không có phản hồi từ AI.', { streaming: true });
+        } catch (err) {
+            await appendMessage('bot', '❌ Lỗi kết nối. Vui lòng kiểm tra Ollama đang chạy.', { streaming: true });
+        } finally {
+            isStreaming = false;
+            updateInputUi();
+        }
+    }
+
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = chatInput.value.trim();
+        if (!text || isStreaming) return;
+        await appendMessage('user', text);
+        chatInput.value = '';
+        updateInputUi();
+        await sendMessage(text);
+    });
+
+    chatInput.addEventListener('input', updateInputUi);
+    chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            chatForm.requestSubmit();
+        }
+    });
+
+    quickPrompts.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            chatInput.value = btn.dataset.prompt || '';
+            updateInputUi();
+            chatInput.focus();
+        });
+    });
+
+    historySearchInput.addEventListener('input', renderChat);
+
+    sessionList.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-session-id]');
+        if (!btn) return;
+        workspace.activeSessionId = btn.dataset.sessionId;
+        saveWorkspace();
+        rerenderAll();
+    });
+
+    pinnedList.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-jump-id]');
+        if (!btn) return;
+        const target = chatLog.querySelector(`[data-message-id="${btn.dataset.jumpId}"]`);
+        if (!target) return;
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.classList.add('ring-2', 'ring-amber-300', 'rounded-xl');
+        setTimeout(() => target.classList.remove('ring-2', 'ring-amber-300', 'rounded-xl'), 1200);
+    });
+
+    chatLog.addEventListener('click', async (e) => {
+        const button = e.target.closest('button[data-action]');
+        if (!button) return;
+        const id = button.dataset.id;
+        const session = getActiveSession();
+        if (!session) return;
+        const msg = session.messages.find((m) => m.id === id);
+        if (!msg) return;
+        if (button.dataset.action === 'copy') {
+            try {
+                await navigator.clipboard.writeText(msg.message);
+                const old = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(() => { button.innerHTML = old; }, 1000);
+            } catch (err) {
+                // ignore clipboard error
+            }
+        }
+        if (button.dataset.action === 'pin') {
+            msg.pinned = !msg.pinned;
+            saveWorkspace();
+            rerenderAll();
+        }
+    });
+
+    newSessionBtn.addEventListener('click', () => {
+        createSession();
+        rerenderAll();
+    });
+
+    renameSessionBtn.addEventListener('click', () => {
+        const session = getActiveSession();
+        if (!session) return;
+        const nextName = prompt('Nhập tên mới cho phiên chat:', session.name);
+        if (!nextName || !nextName.trim()) return;
+        session.name = nextName.trim();
+        session.updatedAt = getNowIso();
+        saveWorkspace();
+        rerenderAll();
+    });
+
+    clearChatBtn.addEventListener('click', () => {
+        const session = getActiveSession();
+        if (!session) return;
+        if (!confirm('Xóa toàn bộ tin nhắn trong phiên hiện tại?')) return;
+        session.messages = [{
+            id: uid(),
+            sender: 'bot',
+            message: defaultWelcomeMessage,
+            timestamp: getNowTime(),
+            pinned: false
+        }];
+        session.updatedAt = getNowIso();
+        saveWorkspace();
+        rerenderAll();
+    });
+
+    exportChatBtn.addEventListener('click', () => {
+        const session = getActiveSession();
+        if (!session) return;
+        const lines = session.messages.map((item) => `[${item.timestamp}] ${item.sender === 'user' ? 'Bạn' : 'AI'}: ${item.message}`);
+        const blob = new Blob([lines.join('\n\n')], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const date = new Date().toISOString().slice(0, 10);
+        a.href = url;
+        a.download = `${session.name.replace(/[\\/:*?"<>|]/g, '_')}-${date}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    });
+
+    initWorkspace();
+    rerenderAll();
+    updateInputUi();
 </script>
 {% endblock %}
