@@ -498,11 +498,16 @@ def student_qr_attendance_dashboard():
         school_name=None,
         qr_data=qr_data,
     )
-    from app_helpers import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa
+
+
+@student_bp.route("/api/student/chat", methods=["POST"])
+@student_required
+def student_chat():
     """
     API Chatbot cho học sinh.
     Chấp nhận: application/json { "message", "mode" } hoặc multipart/form-data với message, mode, file (tùy chọn).
     """
+    from app_helpers import normalize_student_code, get_or_create_chat_session, get_conversation_history, save_message, calculate_student_gpa
     msg = ""
     mode = "rule"
     file_obj = None
