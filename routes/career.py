@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
-from models import db, Student, UniversityMajor, MajorSubjectWeight, StudentPinnedMajor, StudentTargetMajor, SystemConfig
+from models import db, Student, UniversityMajor, MajorSubjectWeight, StudentPinnedMajor, StudentTargetMajor, SystemConfig, MajorEntryScore
 from app_helpers import calculate_subject_averages, calculate_fit_score
 import datetime
 
@@ -95,11 +95,23 @@ def api_browse():
 
     group = request.args.get('group', '')
     min_fit = request.args.get('min_fit', 0, type=float)
-    q = request.args.get('q', '').strip().lower()
+    q = request.args.get('q', '').strip()
+    university = request.args.get('university', '').strip()
+    admission_block = request.args.get('admission_block', '').strip()
 
+    from sqlalchemy import or_
     query = UniversityMajor.query
+    if q:
+        query = query.filter(or_(
+            UniversityMajor.name.ilike(f'%{q}%'),
+            UniversityMajor.university.ilike(f'%{q}%')
+        ))
+    if university:
+        query = query.filter(UniversityMajor.university == university)
+    if admission_block:
+        query = query.filter(UniversityMajor.admission_block == admission_block)
     if group:
-        query = query.filter_by(major_group=group)
+        query = query.filter(UniversityMajor.major_group == group)
     majors = query.all()
 
     pinned_ids = {p.major_id for p in StudentPinnedMajor.query.filter_by(student_id=student.id)}
@@ -108,8 +120,6 @@ def api_browse():
 
     results = []
     for major in majors:
-        if q and q not in major.name.lower() and q not in major.university.lower():
-            continue
         wlist = _weights_list(major)
         if not wlist:
             continue
@@ -117,16 +127,137 @@ def api_browse():
         if fit['fit_pct'] < min_fit:
             continue
         labels, stu_scores, maj_scores, _ = _radar(major.id, averages)
+        entry_scores_sorted = sorted(
+            [{'year': es.year, 'score': es.score} for es in major.entry_scores],
+            key=lambda x: x['year']
+        )
         results.append({
             'id': major.id, 'name': major.name, 'university': major.university,
             'faculty': major.faculty, 'major_group': major.major_group,
+            'admission_block': major.admission_block,
+            'entry_score': major.entry_score,
             'fit_pct': fit['fit_pct'],
             'is_pinned': major.id in pinned_ids,
             'is_target': major.id == target_id,
             'radar': {'labels': labels, 'student_scores': stu_scores, 'major_scores': maj_scores},
+            'entry_scores': entry_scores_sorted,
         })
     results.sort(key=lambda x: x['fit_pct'], reverse=True)
     return jsonify({'majors': results})
+
+
+@career_bp.route('/api/student/career/simulate', methods=['POST'])
+def api_simulate():
+    student = _student()
+    if not student:
+        return jsonify({'error': 'unauthorized'}), 401
+    scores = request.json.get('scores', {})
+    if not scores:
+        return jsonify({'error': 'scores required'}), 400
+
+    majors = UniversityMajor.query.all()
+    results = []
+    for major in majors:
+        wlist = _weights_list(major)
+        if not wlist:
+            continue
+        fit = calculate_fit_score(scores, wlist)
+        results.append({
+            'id': major.id, 'name': major.name, 'university': major.university,
+            'admission_block': major.admission_block,
+            'entry_score': major.entry_score,
+            'fit_pct': fit['fit_pct'],
+            'gaps': fit['gaps'],
+        })
+    results.sort(key=lambda x: x['fit_pct'], reverse=True)
+    return jsonify({'majors': results})
+
+
+@career_bp.route('/api/student/career/compare')
+def api_compare():
+    student = _student()
+    if not student:
+        return jsonify({'error': 'unauthorized'}), 401
+    raw = request.args.get('major_ids', '')
+    try:
+        ids = [int(x) for x in raw.split(',') if x.strip()]
+    except ValueError:
+        return jsonify({'error': 'invalid major_ids'}), 400
+    if len(ids) > 4:
+        return jsonify({'error': 'max 4 majors'}), 400
+
+    sem, yr = _cfg()
+    averages = calculate_subject_averages(student.id, sem, yr)
+
+    results = []
+    for mid in ids:
+        major = UniversityMajor.query.get(mid)
+        if not major:
+            continue
+        wlist = _weights_list(major)
+        fit = calculate_fit_score(averages, wlist)
+        labels, stu_scores, maj_scores, _ = _radar(mid, averages)
+        entry_scores_sorted = sorted(
+            [{'year': es.year, 'score': es.score} for es in major.entry_scores],
+            key=lambda x: x['year']
+        )
+        results.append({
+            'id': major.id, 'name': major.name, 'university': major.university,
+            'faculty': major.faculty, 'major_group': major.major_group,
+            'admission_block': major.admission_block,
+            'entry_score': major.entry_score,
+            'fit_pct': fit['fit_pct'],
+            'gaps': fit['gaps'],
+            'weights': wlist,
+            'radar': {'labels': labels, 'student_scores': stu_scores, 'major_scores': maj_scores},
+            'entry_scores': entry_scores_sorted,
+        })
+    return jsonify({'majors': results, 'student_scores': averages})
+
+
+@career_bp.route('/api/student/career/score-history')
+def api_score_history():
+    student = _student()
+    if not student:
+        return jsonify({'error': 'unauthorized'}), 401
+    raw = request.args.get('major_ids', '')
+    try:
+        ids = [int(x) for x in raw.split(',') if x.strip()]
+    except ValueError:
+        return jsonify({'error': 'invalid major_ids'}), 400
+
+    result = {}
+    for mid in ids:
+        scores = MajorEntryScore.query.filter_by(major_id=mid).order_by(MajorEntryScore.year).all()
+        result[mid] = [{'year': s.year, 'score': s.score} for s in scores]
+    return jsonify(result)
+
+
+@career_bp.route('/api/student/career/map-data')
+def api_map_data():
+    student = _student()
+    if not student:
+        return jsonify({'error': 'unauthorized'}), 401
+    sem, yr = _cfg()
+    averages = calculate_subject_averages(student.id, sem, yr)
+
+    majors = UniversityMajor.query.all()
+    result = []
+    for major in majors:
+        wlist = _weights_list(major)
+        if not wlist:
+            continue
+        weight_vector = {w['subject_name']: w['weight'] for w in wlist}
+        fit = calculate_fit_score(averages, wlist)
+        result.append({
+            'id': major.id, 'name': major.name, 'university': major.university,
+            'major_group': major.major_group,
+            'admission_block': major.admission_block,
+            'entry_score': major.entry_score or 20.0,
+            'fit_pct': fit['fit_pct'],
+            'weight_vector': weight_vector,
+        })
+    return jsonify({'majors': result})
 
 
 @career_bp.route('/api/student/career/pin', methods=['POST'])
@@ -184,6 +315,24 @@ def career_browse():
     return render_template('student_career_browse.html', student=student, groups=groups)
 
 
+@career_bp.route('/student/career/compare')
+def career_compare():
+    student = _student()
+    if not student:
+        return redirect(url_for('student.student_login'))
+    major_ids = request.args.get('major_ids', '')
+    return render_template('student_career_compare.html',
+                           student=student, major_ids=major_ids)
+
+
+@career_bp.route('/student/career/map')
+def career_map():
+    student = _student()
+    if not student:
+        return redirect(url_for('student.student_login'))
+    return render_template('student_career_map.html', student=student)
+
+
 @career_bp.route('/admin/majors')
 def admin_majors():
     from flask_login import current_user
@@ -220,5 +369,38 @@ def admin_delete_major(major_id):
         return jsonify({'error': 'unauthorized'}), 401
     major = UniversityMajor.query.get_or_404(major_id)
     db.session.delete(major)
+    db.session.commit()
+    return jsonify({'ok': True})
+
+
+@career_bp.route('/admin/majors/<int:major_id>', methods=['PATCH'])
+def admin_update_major(major_id):
+    from flask_login import current_user
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        return jsonify({'error': 'unauthorized'}), 401
+    major = UniversityMajor.query.get_or_404(major_id)
+    data = request.json
+    if 'admission_block' in data:
+        major.admission_block = data['admission_block']
+    if 'entry_score' in data:
+        major.entry_score = float(data['entry_score']) if data['entry_score'] else None
+    db.session.commit()
+    return jsonify({'ok': True})
+
+
+@career_bp.route('/admin/majors/<int:major_id>/entry-scores', methods=['POST'])
+def admin_add_entry_score(major_id):
+    from flask_login import current_user
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        return jsonify({'error': 'unauthorized'}), 401
+    UniversityMajor.query.get_or_404(major_id)
+    data = request.json
+    year = int(data['year'])
+    score = float(data['score'])
+    existing = MajorEntryScore.query.filter_by(major_id=major_id, year=year).first()
+    if existing:
+        existing.score = score
+    else:
+        db.session.add(MajorEntryScore(major_id=major_id, year=year, score=score))
     db.session.commit()
     return jsonify({'ok': True})
