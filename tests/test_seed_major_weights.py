@@ -86,3 +86,17 @@ def test_derive_weights_deterministic(blocks_data):
     w1 = derive_weights(FakeMajor(), blocks_data, DB_SUBJECTS)
     w2 = derive_weights(FakeMajor(), blocks_data, DB_SUBJECTS)
     assert w1 == w2
+
+
+def test_derive_weights_returns_none_on_unknown_block(blocks_data):
+    from seed_major_weights import derive_weights
+    class FakeMajor:
+        id = 1; admission_block = "UNKNOWN"; entry_score = 20.0; major_group = "Kỹ thuật"
+    assert derive_weights(FakeMajor(), blocks_data, ["Toán"]) is None
+
+
+def test_derive_weights_returns_none_on_missing_entry_score(blocks_data):
+    from seed_major_weights import derive_weights
+    class FakeMajor:
+        id = 1; admission_block = "A01"; entry_score = None; major_group = "Kỹ thuật"
+    assert derive_weights(FakeMajor(), blocks_data, ["Toán"]) is None
