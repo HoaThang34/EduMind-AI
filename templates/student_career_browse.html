@@ -7,128 +7,146 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>tailwind.config={theme:{extend:{fontFamily:{sans:['"Be Vietnam Pro"','system-ui','sans-serif']}}}}</script>
   <style>
-    body { background: #f5f5f5; font-family: 'Be Vietnam Pro', system-ui, sans-serif; }
-    .sort-pill { cursor: pointer; }
-    .sort-pill.active { background: #0d6efd !important; }
+    body { background:#f5f5f5; font-family:'Be Vietnam Pro',system-ui,sans-serif; }
+    .card { background:#fff; border:1px solid #e5e5e5; border-radius:8px; }
+    .major-card { transition:box-shadow .15s ease; }
+    .major-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.08); }
+    .tag-ok   { background:#dcfce7; color:#166534; }
+    .tag-warn { background:#fef9c3; color:#854d0e; }
+    .tag-fail { background:#fee2e2; color:#991b1b; }
+    #grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+    .btn-action { font-size:11px; padding:3px 9px; border-radius:5px; border:1px solid #e5e5e5; background:#fff; cursor:pointer; font-weight:500; transition:background .1s; }
+    .btn-action:hover { background:#f0f0f0; }
+    .btn-action.active { background:#0070f3; color:#fff; border-color:#0070f3; }
+    .btn-action.active-target { background:#7c3aed; color:#fff; border-color:#7c3aed; }
+    .sort-pill { font-size:10px; padding:2px 8px; border-radius:4px; cursor:pointer; font-weight:500; transition:background .1s; }
+    .sort-pill.active { background:#0070f3; color:#fff; }
+    .sort-pill:not(.active) { background:#f0f0f0; color:#6b7280; }
+    .filter-chip { font-size:10px; padding:2px 8px; border-radius:4px; background:#0070f3; color:#fff; cursor:pointer; }
+    .spinner { width:32px; height:32px; border:3px solid #e5e5e5; border-top-color:#0070f3; border-radius:50%; animation:spin .6s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    input[type=range] { -webkit-appearance:none; height:4px; background:#e5e5e5; border-radius:2px; outline:none; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#0070f3; cursor:pointer; }
   </style>
 </head>
-<body>
+<body class="min-h-screen">
 
-<nav class="navbar navbar-light bg-white border-bottom px-3">
-  <div class="d-flex align-items-center gap-3">
-    <a href="{{ url_for('career.career_main') }}" class="text-decoration-none text-muted small">
-      <i class="fas fa-arrow-left me-1"></i>Phân tích năng lực
-    </a>
-    <span class="text-muted">/</span>
-    <span class="fw-semibold small">Duyệt tất cả ngành</span>
+<!-- Nav -->
+<nav class="bg-white border-b border-[#e5e5e5] px-6 py-3 flex items-center gap-4">
+  <a href="{{ url_for('career.career_main') }}" class="text-sm text-gray-500 hover:text-gray-800 flex items-center gap-1.5">
+    <i class="fas fa-arrow-left text-xs"></i> Phan tich nang luc
+  </a>
+  <span class="text-[#e5e5e5]">/</span>
+  <span class="text-sm font-semibold text-gray-800">Duyet tat ca nganh</span>
+  <div class="ml-auto flex items-center gap-3">
+    <span class="text-sm text-gray-500">{{ student.name }}</span>
   </div>
-  <span class="text-muted small">{{ student.name }}</span>
 </nav>
 
-<div class="container-fluid py-4" id="browse-app">
-
-  <!-- TOP FILTER BAR -->
-  <div class="card mb-3 shadow-sm">
-    <div class="card-body py-2">
-      <div class="d-flex flex-wrap gap-2 align-items-center">
-        <input type="text" id="search-input" class="form-control form-control-sm" style="max-width:220px"
-               placeholder="🔍 Tìm ngành hoặc trường...">
-        <select id="filter-university" class="form-select form-select-sm" style="max-width:160px">
-          <option value="">Tất cả trường</option>
-        </select>
-        <select id="filter-block" class="form-select form-select-sm" style="max-width:130px">
-          <option value="">Tất cả khối</option>
-          <option>A1</option><option>A00</option><option>B00</option>
-          <option>D01</option><option>C00</option>
-        </select>
-        <select id="filter-group" class="form-select form-select-sm" style="max-width:140px">
-          <option value="">Tất cả nhóm ngành</option>
-          {% for g in groups %}<option>{{ g }}</option>{% endfor %}
-        </select>
-        <div class="d-flex align-items-center gap-1">
-          <label class="small text-muted mb-0">Phù hợp ≥</label>
-          <input type="range" id="filter-fit" min="0" max="100" value="0" style="width:80px">
-          <span id="filter-fit-label" class="small fw-bold text-success">0%</span>
-        </div>
-      </div>
-      <div class="d-flex gap-2 mt-2 flex-wrap align-items-center">
-        <span class="text-muted small">Sắp xếp:</span>
-        <span class="badge sort-pill bg-primary active" data-sort="fit" style="cursor:pointer">Phù hợp nhất</span>
-        <span class="badge sort-pill bg-secondary" data-sort="score_desc" style="cursor:pointer">ĐC cao → thấp</span>
-        <span class="badge sort-pill bg-secondary" data-sort="score_asc" style="cursor:pointer">ĐC thấp → cao</span>
-        <span class="badge sort-pill bg-secondary" data-sort="name" style="cursor:pointer">Tên A-Z</span>
-        <div id="active-chips" class="d-flex gap-1 flex-wrap ms-2"></div>
-      </div>
+<!-- Filter bar -->
+<div class="bg-white border-b border-[#e5e5e5] px-4 py-3">
+  <div class="max-w-7xl mx-auto flex flex-wrap gap-2 items-center">
+    <div class="relative flex-1 min-w-[200px] max-w-xs">
+      <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+      <input type="text" id="searchInput" placeholder="Tim nganh hoac truong..."
+        class="w-full pl-8 pr-3 py-1.5 text-sm border border-[#e5e5e5] rounded-md focus:outline-none focus:border-blue-400">
+    </div>
+    <select id="universityFilter" class="text-sm border border-[#e5e5e5] rounded-md px-2.5 py-1.5 bg-white focus:outline-none">
+      <option value="">Tat ca truong</option>
+    </select>
+    <select id="blockFilter" class="text-sm border border-[#e5e5e5] rounded-md px-2.5 py-1.5 bg-white focus:outline-none">
+      <option value="">Tat ca khoi</option>
+      <option>A1</option><option>A00</option><option>B00</option><option>D01</option><option>C00</option>
+    </select>
+    <select id="groupFilter" class="text-sm border border-[#e5e5e5] rounded-md px-2.5 py-1.5 bg-white focus:outline-none">
+      <option value="">Tat ca nhom nganh</option>
+      {% for g in groups %}<option value="{{ g }}">{{ g }}</option>{% endfor %}
+    </select>
+    <div class="flex items-center gap-1.5">
+      <span class="text-[10px] text-gray-400 whitespace-nowrap">Phu hop</span>
+      <input type="range" id="fitRange" min="0" max="100" value="0" class="w-20">
+      <span id="fitRangeLabel" class="text-[10px] font-bold text-gray-600">0%</span>
     </div>
   </div>
-
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <span id="result-count" class="text-muted small">Đang tải...</span>
-    <div class="d-flex gap-2">
-      <button class="btn btn-sm btn-outline-warning" onclick="openSimulator()">🎯 Mô phỏng điểm</button>
-      <button class="btn btn-sm btn-primary d-none" id="compare-btn" onclick="goCompare()">
-        So sánh (<span id="compare-count">0</span>)
-      </button>
-    </div>
-  </div>
-
-  <div class="row g-3" id="majors-grid"></div>
-</div>
-
-<!-- SIMULATOR MODAL -->
-<div class="modal fade" id="simulatorModal" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">🎯 Nếu điểm của bạn là...</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p class="text-muted small">Điều chỉnh điểm dự kiến — danh sách ngành sẽ cập nhật ngay</p>
-        <div id="simulator-sliders" class="row g-2"></div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline-secondary btn-sm" onclick="resetSimulator()">Reset về điểm thật</button>
-        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
-      </div>
-    </div>
+  <!-- Sort + chips -->
+  <div class="max-w-7xl mx-auto flex flex-wrap gap-2 items-center mt-2">
+    <span class="text-[10px] text-gray-400">Sap xep:</span>
+    <span class="sort-pill active" data-sort="fit">Phu hop nhat</span>
+    <span class="sort-pill" data-sort="score_desc">DC cao → thap</span>
+    <span class="sort-pill" data-sort="score_asc">DC thap → cao</span>
+    <span class="sort-pill" data-sort="name">Ten A-Z</span>
+    <div id="activeChips" class="flex gap-1 flex-wrap ml-2"></div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<!-- Top bar -->
+<div class="max-w-7xl mx-auto px-4 pt-4 flex justify-between items-center">
+  <span id="countBadge" class="text-xs text-gray-400"></span>
+  <div class="flex gap-2">
+    <button onclick="openSimulator()" class="text-xs px-3 py-1.5 border border-[#e5e5e5] rounded-md bg-white hover:bg-[#f0f0f0] font-medium text-gray-700">
+      <i class="fas fa-crosshairs mr-1"></i>Mo phong diem
+    </button>
+    <button id="compareBtn" class="hidden text-xs px-3 py-1.5 bg-[#0070f3] text-white rounded-md font-medium" onclick="goCompare()">
+      So sanh (<span id="compareCount">0</span>)
+    </button>
+  </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 py-4">
+  <div id="loadingState" class="flex justify-center py-20"><div class="spinner"></div></div>
+  <div id="grid" class="hidden"></div>
+  <div id="emptyState" class="hidden text-center py-20 text-gray-400 text-sm">Khong co nganh nao phu hop voi bo loc hien tai.</div>
+</div>
+
+<!-- Simulator Modal -->
+<div id="simulatorModal" class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4">
+  <div class="card w-full max-w-2xl p-6 max-h-[80vh] overflow-y-auto">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-gray-900"><i class="fas fa-crosshairs mr-1.5 text-[#0070f3]"></i>Neu diem cua ban la...</h3>
+      <button onclick="closeSimulator()" class="text-gray-400 hover:text-gray-700"><i class="fas fa-times"></i></button>
+    </div>
+    <p class="text-xs text-gray-400 mb-3">Dieu chinh diem du kien — danh sach nganh se cap nhat ngay</p>
+    <div id="simSliders" class="grid grid-cols-2 md:grid-cols-3 gap-3"></div>
+    <div class="flex justify-end gap-2 mt-4 pt-3 border-t border-[#f0f0f0]">
+      <button onclick="resetSimulator()" class="text-xs px-3 py-1.5 border border-[#e5e5e5] rounded-md bg-white hover:bg-[#f0f0f0]">Reset ve diem that</button>
+      <button onclick="closeSimulator()" class="text-xs px-3 py-1.5 bg-gray-800 text-white rounded-md">Dong</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-5 right-5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg shadow-lg hidden z-50"></div>
+
 <script>
 let allMajors = [], simScores = {}, realScores = {};
 let compareIds = new Set(JSON.parse(sessionStorage.getItem('compare_major_ids') || '[]'));
 let currentSort = 'fit', simTimer = null, searchTimer = null;
-let sparklineCharts = {};
+const miniCharts = {}, sparkCharts = {};
 
-function getFilters() {
-  return {
-    q: document.getElementById('search-input').value.trim(),
-    university: document.getElementById('filter-university').value,
-    admission_block: document.getElementById('filter-block').value,
-    group: document.getElementById('filter-group').value,
-    min_fit: parseInt(document.getElementById('filter-fit').value),
-  };
-}
-
-async function loadMajors() {
-  const f = getFilters();
+// ── Fetch & Filters ────────────────────────────────────────────────
+async function fetchMajors() {
   const params = new URLSearchParams();
-  if (f.q) params.set('q', f.q);
-  if (f.university) params.set('university', f.university);
-  if (f.admission_block) params.set('admission_block', f.admission_block);
-  if (f.group) params.set('group', f.group);
-  if (f.min_fit > 0) params.set('min_fit', f.min_fit);
-  const r = await fetch('/api/student/career/browse?' + params);
-  const data = await r.json();
-  allMajors = data.majors;
+  const q = document.getElementById('searchInput').value.trim();
+  const university = document.getElementById('universityFilter').value;
+  const block = document.getElementById('blockFilter').value;
+  const group = document.getElementById('groupFilter').value;
+  const minFit = parseInt(document.getElementById('fitRange').value) || 0;
+  if (q) params.set('q', q);
+  if (university) params.set('university', university);
+  if (block) params.set('admission_block', block);
+  if (group) params.set('group', group);
+  if (minFit > 0) params.set('min_fit', minFit);
+  const res = await fetch('/api/student/career/browse?' + params);
+  const d = await res.json();
+  allMajors = d.majors || [];
+  document.getElementById('loadingState').classList.add('hidden');
   renderGrid();
-  updateChips(f);
+  updateChips();
 }
 
 function renderGrid() {
@@ -138,186 +156,217 @@ function renderGrid() {
     if (currentSort === 'score_asc') return (a.entry_score||0) - (b.entry_score||0);
     return a.name.localeCompare(b.name);
   });
-  const grid = document.getElementById('majors-grid');
-  // Destroy old sparklines
-  Object.values(sparklineCharts).forEach(c => c.destroy());
-  sparklineCharts = {};
-  grid.innerHTML = '';
-  document.getElementById('result-count').textContent = `${sorted.length} ngành`;
-  sorted.forEach(m => {
-    const fitColor = m.fit_pct >= 70 ? 'success' : m.fit_pct >= 50 ? 'warning' : 'danger';
-    const checked = compareIds.has(m.id) ? 'checked' : '';
-    const trend = getTrend(m.entry_scores);
-    const col = document.createElement('div');
-    col.className = 'col-md-6 col-lg-4';
-    col.innerHTML = `
-      <div class="card h-100 shadow-sm">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-start">
-            <div>
-              <h6 class="mb-0 fw-bold">${m.name}</h6>
-              <small class="text-muted">${m.university}</small><br>
-              <small class="text-secondary">${m.admission_block || ''} | ĐC: ${m.entry_score || '—'}</small>
-            </div>
-            <input type="checkbox" class="form-check-input ms-2" ${checked}
-                   onchange="toggleCompare(${m.id}, this.checked)">
-          </div>
-          <div class="mt-2 d-flex align-items-center gap-2">
-            <div class="progress flex-grow-1" style="height:6px">
-              <div class="progress-bar bg-${fitColor}" style="width:${m.fit_pct}%"></div>
-            </div>
-            <span class="fw-bold text-${fitColor} small">${Math.round(m.fit_pct)}%</span>
-          </div>
-          <div class="d-flex justify-content-between align-items-center mt-2">
-            <small class="text-muted">Xu hướng:</small>
-            <canvas id="spark-${m.id}" width="80" height="30"></canvas>
-            <small class="text-${trend.color} fw-bold">${trend.label}</small>
-          </div>
-        </div>
-      </div>`;
-    grid.appendChild(col);
-    renderSparkline(m.id, m.entry_scores);
-  });
+  Object.values(miniCharts).forEach(c => c.destroy()); Object.keys(miniCharts).forEach(k => delete miniCharts[k]);
+  Object.values(sparkCharts).forEach(c => c.destroy()); Object.keys(sparkCharts).forEach(k => delete sparkCharts[k]);
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('emptyState');
+  document.getElementById('countBadge').textContent = sorted.length + ' nganh';
+  if (sorted.length === 0) { grid.classList.add('hidden'); empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden'); grid.classList.remove('hidden');
+  grid.innerHTML = sorted.map(m => majorCard(m)).join('');
+  sorted.forEach(m => { initMiniRadar(m); initSparkline(m); });
 }
 
+// ── Card ────────────────────────────────────────────────────────────
+function fitClass(p) { return p>=80?'text-green-600':p>=60?'text-amber-600':'text-red-500'; }
+function fitBarClass(p) { return p>=80?'bg-green-500':p>=60?'bg-amber-400':'bg-red-400'; }
+function fitTagClass(p) { return p>=80?'tag-ok':p>=60?'tag-warn':'tag-fail'; }
 function getTrend(scores) {
-  if (!scores || scores.length < 2) return { label: '—', color: 'secondary' };
+  if (!scores || scores.length < 2) return {label:'—',cls:'text-gray-400'};
   const diff = (scores[scores.length-1].score - scores[0].score).toFixed(1);
-  if (diff > 0) return { label: `↑ +${diff}`, color: 'danger' };
-  if (diff < 0) return { label: `↓ ${diff}`, color: 'success' };
-  return { label: '→ 0', color: 'secondary' };
+  if (diff > 0) return {label:'↑ +'+diff,cls:'text-red-500'};
+  if (diff < 0) return {label:'↓ '+diff,cls:'text-green-600'};
+  return {label:'→ 0',cls:'text-gray-400'};
 }
 
-function renderSparkline(majorId, scores) {
-  const canvas = document.getElementById(`spark-${majorId}`);
-  if (!canvas || !scores || !scores.length) return;
-  sparklineCharts[majorId] = new Chart(canvas, {
-    type: 'line',
-    data: {
-      labels: scores.map(s => s.year),
-      datasets: [{ data: scores.map(s => s.score), borderColor: '#3b82f6',
-                   borderWidth: 1.5, pointRadius: 2, fill: false, tension: 0.3 }]
+function majorCard(m) {
+  const checked = compareIds.has(m.id) ? 'checked' : '';
+  const pinBtn = m.is_pinned
+    ? `<button onclick="unpin(${m.id},this)" class="btn-action active"><i class="fas fa-thumbtack mr-1"></i>Da ghim</button>`
+    : `<button onclick="pin(${m.id},this)" class="btn-action"><i class="far fa-thumbtack mr-1"></i>Ghim</button>`;
+  const targetBtn = m.is_target
+    ? `<button class="btn-action active-target" disabled><i class="fas fa-star mr-1"></i>Muc tieu</button>`
+    : `<button onclick="setTarget(${m.id},this)" class="btn-action"><i class="far fa-star mr-1"></i>Muc tieu</button>`;
+  const trend = getTrend(m.entry_scores);
+
+  return `<div class="card major-card p-4 flex flex-col gap-2.5" id="card-${m.id}">
+    <div>
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-gray-900 text-sm leading-tight truncate">${m.name}</div>
+          <div class="text-[11px] text-gray-400 truncate mt-0.5">${m.university}</div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-xs font-bold tabular-nums ${fitClass(m.fit_pct)}">${m.fit_pct.toFixed(0)}%</span>
+          <input type="checkbox" ${checked} onchange="toggleCompare(${m.id},this.checked)"
+            class="w-3.5 h-3.5 rounded border-gray-300 text-[#0070f3] cursor-pointer">
+        </div>
+      </div>
+      <div class="text-[10px] text-gray-400 mt-0.5">${m.admission_block||''} ${m.admission_block&&m.entry_score?'|':''} ${m.entry_score?'DC: '+m.entry_score:''}</div>
+      ${m.major_group?`<span class="inline-block mt-1 text-[10px] px-1.5 py-0.5 rounded bg-[#f0f0f0] text-gray-500">${m.major_group}</span>`:''}
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="flex-1 bg-[#f5f5f5] rounded-full h-1.5">
+        <div class="h-1.5 rounded-full ${fitBarClass(m.fit_pct)}" style="width:${Math.min(m.fit_pct,100).toFixed(0)}%"></div>
+      </div>
+      <span class="text-[10px] ${fitTagClass(m.fit_pct)} px-1.5 py-0.5 rounded font-medium">${m.fit_pct.toFixed(0)}%</span>
+    </div>
+    <div class="flex justify-center" style="height:120px">
+      <canvas id="mini-${m.id}" width="120" height="120"></canvas>
+    </div>
+    <div class="flex items-center justify-between px-1">
+      <span class="text-[10px] text-gray-400">Xu huong:</span>
+      <canvas id="spark-${m.id}" width="80" height="28"></canvas>
+      <span class="text-[10px] font-bold ${trend.cls}">${trend.label}</span>
+    </div>
+    <div class="flex gap-2 pt-1.5 border-t border-[#f0f0f0]">
+      ${pinBtn}
+      ${targetBtn}
+    </div>
+  </div>`;
+}
+
+// ── Mini radar ──────────────────────────────────────────────────────
+function initMiniRadar(m) {
+  const canvas = document.getElementById('mini-'+m.id);
+  if (!canvas || !m.radar || m.radar.labels.length===0) return;
+  miniCharts[m.id] = new Chart(canvas.getContext('2d'), {
+    type:'radar',
+    data:{
+      labels:m.radar.labels,
+      datasets:[
+        {data:m.radar.student_scores,backgroundColor:'rgba(0,112,243,.12)',borderColor:'#0070f3',borderWidth:1.5,pointRadius:2,pointBackgroundColor:'#0070f3'},
+        {data:m.radar.major_scores,backgroundColor:'rgba(249,115,22,.08)',borderColor:'#f97316',borderWidth:1.5,borderDash:[4,3],pointRadius:2,pointBackgroundColor:'#f97316'},
+      ]
     },
-    options: { plugins: { legend: { display: false } },
-               scales: { x: { display: false }, y: { display: false } },
-               animation: false, responsive: false }
+    options:{responsive:false,scales:{r:{min:0,max:10,ticks:{display:false},grid:{color:'#eee'},pointLabels:{font:{size:8},color:'#9ca3af'}}},plugins:{legend:{display:false},tooltip:{enabled:false}}}
   });
 }
 
-function toggleCompare(id, checked) {
-  if (checked) {
-    if (compareIds.size >= 4) { alert('Tối đa 4 ngành'); return; }
-    compareIds.add(id);
-  } else { compareIds.delete(id); }
-  sessionStorage.setItem('compare_major_ids', JSON.stringify([...compareIds]));
-  const btn = document.getElementById('compare-btn');
-  document.getElementById('compare-count').textContent = compareIds.size;
-  btn.classList.toggle('d-none', compareIds.size < 2);
-}
-
-function goCompare() {
-  window.location.href = '/student/career/compare?major_ids=' + [...compareIds].join(',');
-}
-
-async function openSimulator() {
-  const r = await fetch('/api/student/career/map-data');
-  const data = await r.json();
-  const subjects = new Set();
-  data.majors.forEach(m => Object.keys(m.weight_vector).forEach(s => subjects.add(s)));
-  const container = document.getElementById('simulator-sliders');
-  container.innerHTML = '';
-  subjects.forEach(subj => {
-    const current = realScores[subj] || 5.0;
-    simScores[subj] = current;
-    const div = document.createElement('div');
-    div.className = 'col-md-4';
-    div.innerHTML = `
-      <label class="small fw-bold">${subj}</label>
-      <div class="d-flex align-items-center gap-2">
-        <input type="range" class="form-range" min="0" max="10" step="0.1" value="${current}"
-               data-subj="${subj}" oninput="onSimSlider(this)">
-        <span class="small" id="val-${subj.replace(/\s/g,'_')}">${current}</span>
-      </div>`;
-    container.appendChild(div);
+// ── Sparkline ───────────────────────────────────────────────────────
+function initSparkline(m) {
+  const canvas = document.getElementById('spark-'+m.id);
+  if (!canvas || !m.entry_scores || !m.entry_scores.length) return;
+  sparkCharts[m.id] = new Chart(canvas.getContext('2d'), {
+    type:'line',
+    data:{labels:m.entry_scores.map(s=>s.year),datasets:[{data:m.entry_scores.map(s=>s.score),borderColor:'#3b82f6',borderWidth:1.5,pointRadius:1.5,fill:false,tension:0.3}]},
+    options:{plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}},animation:false,responsive:false}
   });
-  new bootstrap.Modal(document.getElementById('simulatorModal')).show();
 }
 
-function onSimSlider(el) {
-  simScores[el.dataset.subj] = parseFloat(el.value);
-  document.getElementById('val-' + el.dataset.subj.replace(/\s/g,'_')).textContent = el.value;
-  clearTimeout(simTimer);
-  simTimer = setTimeout(runSimulate, 300);
+// ── Pin / Target / Compare ──────────────────────────────────────────
+function showToast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.remove('hidden');
+  setTimeout(()=>t.classList.add('hidden'),2000);
 }
 
-async function runSimulate() {
-  const r = await fetch('/api/student/career/simulate', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ scores: simScores })
-  });
-  const data = await r.json();
-  const fitMap = {};
-  data.majors.forEach(m => { fitMap[m.id] = m.fit_pct; });
-  allMajors.forEach(m => { if (fitMap[m.id] !== undefined) m.fit_pct = fitMap[m.id]; });
-  renderGrid();
+async function pin(id,btn) {
+  const r=await fetch('/api/student/career/pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({major_id:id})});
+  if(r.ok){btn.className='btn-action active';btn.innerHTML='<i class="fas fa-thumbtack mr-1"></i>Da ghim';btn.onclick=function(){unpin(id,btn)};const m=allMajors.find(x=>x.id===id);if(m)m.is_pinned=true;showToast('Da ghim nganh');}
+}
+async function unpin(id,btn) {
+  const r=await fetch('/api/student/career/pin/'+id,{method:'DELETE'});
+  if(r.ok){btn.className='btn-action';btn.innerHTML='<i class="far fa-thumbtack mr-1"></i>Ghim';btn.onclick=function(){pin(id,btn)};const m=allMajors.find(x=>x.id===id);if(m)m.is_pinned=false;showToast('Da bo ghim');}
+}
+async function setTarget(id,btn) {
+  const r=await fetch('/api/student/career/target',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({major_id:id})});
+  if(r.ok){document.querySelectorAll('.btn-action.active-target').forEach(b=>{b.className='btn-action';b.innerHTML='<i class="far fa-star mr-1"></i>Muc tieu';b.disabled=false;});btn.className='btn-action active-target';btn.innerHTML='<i class="fas fa-star mr-1"></i>Muc tieu';btn.disabled=true;allMajors.forEach(m=>m.is_target=(m.id===id));showToast('Da dat lam nganh muc tieu');}
 }
 
-function resetSimulator() {
-  simScores = { ...realScores };
-  document.querySelectorAll('[data-subj]').forEach(el => {
-    el.value = realScores[el.dataset.subj] || 5.0;
-    document.getElementById('val-' + el.dataset.subj.replace(/\s/g,'_')).textContent = el.value;
-  });
-  runSimulate();
+function toggleCompare(id,checked) {
+  if(checked){if(compareIds.size>=4){alert('Toi da 4 nganh');return;}compareIds.add(id);}else{compareIds.delete(id);}
+  sessionStorage.setItem('compare_major_ids',JSON.stringify([...compareIds]));
+  document.getElementById('compareCount').textContent=compareIds.size;
+  document.getElementById('compareBtn').classList.toggle('hidden',compareIds.size<2);
 }
+function goCompare() { window.location.href='/student/career/compare?major_ids='+[...compareIds].join(','); }
 
-function updateChips(f) {
-  const container = document.getElementById('active-chips');
-  container.innerHTML = '';
-  const add = (label, clearFn) => {
-    const chip = document.createElement('span');
-    chip.className = 'badge bg-primary';
-    chip.style.cursor = 'pointer';
-    chip.textContent = label + ' ×';
-    chip.onclick = clearFn;
-    container.appendChild(chip);
-  };
-  if (f.q) add(`"${f.q}"`, () => { document.getElementById('search-input').value=''; loadMajors(); });
-  if (f.university) add(f.university, () => { document.getElementById('filter-university').value=''; loadMajors(); });
-  if (f.admission_block) add(`Khối: ${f.admission_block}`, () => { document.getElementById('filter-block').value=''; loadMajors(); });
-  if (f.group) add(f.group, () => { document.getElementById('filter-group').value=''; loadMajors(); });
-  if (f.min_fit > 0) add(`≥${f.min_fit}%`, () => { document.getElementById('filter-fit').value=0; document.getElementById('filter-fit-label').textContent='0%'; loadMajors(); });
-}
-
-async function populateUniversities() {
-  const r = await fetch('/api/student/career/browse');
-  const data = await r.json();
-  const unis = [...new Set(data.majors.map(m => m.university))].sort();
-  const sel = document.getElementById('filter-university');
-  unis.forEach(u => sel.add(new Option(u, u)));
-}
-
-document.getElementById('search-input').addEventListener('input', () => {
-  clearTimeout(searchTimer); searchTimer = setTimeout(loadMajors, 400);
-});
-['filter-university','filter-block','filter-group'].forEach(id =>
-  document.getElementById(id).addEventListener('change', loadMajors));
-document.getElementById('filter-fit').addEventListener('input', function() {
-  document.getElementById('filter-fit-label').textContent = this.value + '%';
-  clearTimeout(searchTimer); searchTimer = setTimeout(loadMajors, 400);
-});
-document.querySelectorAll('.sort-pill').forEach(pill => {
-  pill.addEventListener('click', function() {
-    document.querySelectorAll('.sort-pill').forEach(p => { p.classList.remove('bg-primary'); p.classList.add('bg-secondary'); });
-    this.classList.remove('bg-secondary'); this.classList.add('bg-primary');
-    currentSort = this.dataset.sort;
+// ── Sort pills ──────────────────────────────────────────────────────
+document.querySelectorAll('.sort-pill').forEach(pill=>{
+  pill.addEventListener('click',function(){
+    document.querySelectorAll('.sort-pill').forEach(p=>p.classList.remove('active'));
+    this.classList.add('active');
+    currentSort=this.dataset.sort;
     renderGrid();
   });
 });
 
+// ── Filter chips ────────────────────────────────────────────────────
+function updateChips() {
+  const c=document.getElementById('activeChips'); c.innerHTML='';
+  const add=(label,clearFn)=>{const s=document.createElement('span');s.className='filter-chip';s.textContent=label+' ×';s.onclick=clearFn;c.appendChild(s);};
+  const q=document.getElementById('searchInput').value.trim();
+  const uni=document.getElementById('universityFilter').value;
+  const blk=document.getElementById('blockFilter').value;
+  const grp=document.getElementById('groupFilter').value;
+  const fit=parseInt(document.getElementById('fitRange').value)||0;
+  if(q) add('"'+q+'"',()=>{document.getElementById('searchInput').value='';fetchMajors();});
+  if(uni) add(uni,()=>{document.getElementById('universityFilter').value='';fetchMajors();});
+  if(blk) add('Khoi: '+blk,()=>{document.getElementById('blockFilter').value='';fetchMajors();});
+  if(grp) add(grp,()=>{document.getElementById('groupFilter').value='';fetchMajors();});
+  if(fit>0) add('>='+fit+'%',()=>{document.getElementById('fitRange').value=0;document.getElementById('fitRangeLabel').textContent='0%';fetchMajors();});
+}
+
+// ── Filter listeners ────────────────────────────────────────────────
+document.getElementById('searchInput').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(fetchMajors,400);});
+['universityFilter','blockFilter','groupFilter'].forEach(id=>document.getElementById(id).addEventListener('change',fetchMajors));
+document.getElementById('fitRange').addEventListener('input',function(){document.getElementById('fitRangeLabel').textContent=this.value+'%';clearTimeout(searchTimer);searchTimer=setTimeout(fetchMajors,400);});
+
+// ── Populate university dropdown ────────────────────────────────────
+async function populateUniversities() {
+  const r=await fetch('/api/student/career/browse');
+  const d=await r.json();
+  const unis=[...new Set((d.majors||[]).map(m=>m.university))].sort();
+  const sel=document.getElementById('universityFilter');
+  unis.forEach(u=>sel.add(new Option(u,u)));
+}
+
+// ── Simulator ───────────────────────────────────────────────────────
+function openSimulator() {
+  document.getElementById('simulatorModal').classList.remove('hidden');
+  fetch('/api/student/career/map-data').then(r=>r.json()).then(data=>{
+    const subjects=new Set();
+    data.majors.forEach(m=>Object.keys(m.weight_vector).forEach(s=>subjects.add(s)));
+    const container=document.getElementById('simSliders');container.innerHTML='';
+    subjects.forEach(subj=>{
+      const current=realScores[subj]||5.0; simScores[subj]=current;
+      const id='sim-'+subj.replace(/\s/g,'_');
+      const div=document.createElement('div');
+      div.innerHTML=`<label class="text-[10px] font-semibold text-gray-600">${subj}</label>
+        <div class="flex items-center gap-2"><input type="range" min="0" max="10" step="0.1" value="${current}" data-subj="${subj}" oninput="onSimSlider(this)" class="flex-1"><span class="text-xs font-bold tabular-nums w-8 text-right" id="${id}">${current}</span></div>`;
+      container.appendChild(div);
+    });
+  });
+}
+function closeSimulator() { document.getElementById('simulatorModal').classList.add('hidden'); }
+document.getElementById('simulatorModal').addEventListener('click',function(e){if(e.target===this)closeSimulator();});
+
+function onSimSlider(el) {
+  simScores[el.dataset.subj]=parseFloat(el.value);
+  document.getElementById('sim-'+el.dataset.subj.replace(/\s/g,'_')).textContent=el.value;
+  clearTimeout(simTimer);simTimer=setTimeout(runSimulate,300);
+}
+async function runSimulate() {
+  const r=await fetch('/api/student/career/simulate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scores:simScores})});
+  const d=await r.json();
+  const fitMap={};d.majors.forEach(m=>{fitMap[m.id]=m.fit_pct;});
+  allMajors.forEach(m=>{if(fitMap[m.id]!==undefined)m.fit_pct=fitMap[m.id];});
+  renderGrid();
+}
+function resetSimulator() {
+  simScores={...realScores};
+  document.querySelectorAll('[data-subj]').forEach(el=>{
+    el.value=realScores[el.dataset.subj]||5.0;
+    document.getElementById('sim-'+el.dataset.subj.replace(/\s/g,'_')).textContent=el.value;
+  });
+  runSimulate();
+}
+
+// ── Init ────────────────────────────────────────────────────────────
+document.getElementById('compareCount').textContent=compareIds.size;
+if(compareIds.size>=2) document.getElementById('compareBtn').classList.remove('hidden');
 populateUniversities();
-loadMajors();
+fetchMajors();
 </script>
 </body>
 </html>
