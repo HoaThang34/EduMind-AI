@@ -22,14 +22,15 @@ def _weights_list(major):
 
 
 def _radar(major_id, averages):
-    """Full radar: axes = tất cả môn học sinh có điểm.
-    Major layer = min_score của ngành cho môn đó, 0 nếu ngành không yêu cầu môn đó."""
+    """Radar: axes = union(môn khối/liên quan của ngành, môn HS có điểm).
+    Core = môn có weight >= 0.03 (khối + liên quan). Môn weight=0 không lên radar."""
     weights = MajorSubjectWeight.query.filter_by(major_id=major_id).all()
     req = {w.subject_name: w.min_score for w in weights}
     wlist = [{'subject_name': w.subject_name, 'weight': w.weight, 'min_score': w.min_score}
              for w in weights]
-    labels = list(averages.keys())
-    stu_scores = [averages[s] for s in labels]
+    core = {w.subject_name for w in weights if w.weight >= 0.03}
+    labels = sorted(core | set(averages.keys()))
+    stu_scores = [averages.get(s, 0.0) for s in labels]
     maj_scores = [req.get(s, 0.0) for s in labels]
     return labels, stu_scores, maj_scores, wlist
 
