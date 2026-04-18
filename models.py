@@ -570,3 +570,47 @@ class TeacherClassAssignment(db.Model):
     teacher = db.relationship("Teacher", foreign_keys=[teacher_id], backref="class_assignments")
     subject = db.relationship("Subject", backref="teacher_assignments")
     creator = db.relationship("Teacher", foreign_keys=[created_by])
+
+
+class UniversityMajor(db.Model):
+    __tablename__ = 'university_major'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), nullable=False)
+    university = db.Column(db.String(150), nullable=False)
+    faculty = db.Column(db.String(150))
+    major_group = db.Column(db.String(50))  # Kỹ thuật, Kinh tế, Y dược, Xã hội,...
+    description = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+    weights = db.relationship('MajorSubjectWeight', backref='major',
+                               cascade='all, delete-orphan', lazy=True)
+    pinned_by = db.relationship('StudentPinnedMajor', backref='major',
+                                 cascade='all, delete-orphan', lazy=True)
+    targeted_by = db.relationship('StudentTargetMajor', backref='major',
+                                   cascade='all, delete-orphan', lazy=True)
+
+
+class MajorSubjectWeight(db.Model):
+    __tablename__ = 'major_subject_weight'
+    id = db.Column(db.Integer, primary_key=True)
+    major_id = db.Column(db.Integer, db.ForeignKey('university_major.id'), nullable=False)
+    subject_name = db.Column(db.String(100), nullable=False)  # khớp Subject.name
+    weight = db.Column(db.Float, nullable=False)   # tổng các weight của 1 ngành = 1.0
+    min_score = db.Column(db.Float, nullable=False)  # điểm yêu cầu 0-10
+
+
+class StudentPinnedMajor(db.Model):
+    __tablename__ = 'student_pinned_major'
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
+    major_id = db.Column(db.Integer, db.ForeignKey('university_major.id'), nullable=False)
+    pinned_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    __table_args__ = (db.UniqueConstraint('student_id', 'major_id'),)
+
+
+class StudentTargetMajor(db.Model):
+    __tablename__ = 'student_target_major'
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False, unique=True)
+    major_id = db.Column(db.Integer, db.ForeignKey('university_major.id'), nullable=False)
+    set_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
