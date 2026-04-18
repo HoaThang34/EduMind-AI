@@ -229,7 +229,11 @@ function majorCard(m) {
 // ── Mini radar ──────────────────────────────────────────────────────
 function initMiniRadar(m) {
   const canvas = document.getElementById('mini-'+m.id);
-  if (!canvas || !m.radar || m.radar.labels.length===0) return;
+  if (!canvas) return;
+  if (!m.radar || m.radar.labels.length < 3) {
+    canvas.parentElement.innerHTML = '<div class="text-[10px] text-gray-400 text-center self-center">Chưa có dữ liệu radar</div>';
+    return;
+  }
   miniCharts[m.id] = new Chart(canvas.getContext('2d'), {
     type:'radar',
     data:{
