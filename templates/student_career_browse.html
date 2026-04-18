@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Duyệt ngành – EduMind AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['"Be Vietnam Pro"', 'system-ui', 'sans-serif'] } } } }</script>
+  <style>
+    body { background: #f5f5f5; font-family: 'Be Vietnam Pro', system-ui, sans-serif; }
+    .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; }
+    .major-card { transition: box-shadow .15s ease; }
+    .major-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+    .tag-ok   { background:#dcfce7; color:#166534; }
+    .tag-warn { background:#fef9c3; color:#854d0e; }
+    .tag-fail { background:#fee2e2; color:#991b1b; }
+    #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+    .btn-action { font-size:11px; padding:3px 9px; border-radius:5px; border:1px solid #e5e5e5; background:#fff; cursor:pointer; font-weight:500; transition:background .1s; }
+    .btn-action:hover { background:#f0f0f0; }
+    .btn-action.active { background:#0070f3; color:#fff; border-color:#0070f3; }
+    .btn-action.active-target { background:#7c3aed; color:#fff; border-color:#7c3aed; }
+    .spinner { width:32px; height:32px; border:3px solid #e5e5e5; border-top-color:#0070f3; border-radius:50%; animation:spin .6s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
+</head>
+<body class="min-h-screen">
+
+<!-- Nav -->
+<nav class="bg-white border-b border-[#e5e5e5] px-6 py-3 flex items-center gap-4">
+  <a href="{{ url_for('career.career_main') }}" class="text-sm text-gray-500 hover:text-gray-800 flex items-center gap-1.5">
+    <i class="fas fa-arrow-left text-xs"></i> Phân tích năng lực
+  </a>
+  <span class="text-[#e5e5e5]">/</span>
+  <span class="text-sm font-semibold text-gray-800">Duyệt tất cả ngành</span>
+  <div class="ml-auto flex items-center gap-3">
+    <span class="text-sm text-gray-500">{{ student.name }}</span>
+  </div>
+</nav>
+
+<!-- Filter bar -->
+<div class="bg-white border-b border-[#e5e5e5] px-4 py-3">
+  <div class="max-w-7xl mx-auto flex flex-wrap gap-2 items-center">
+    <!-- Search -->
+    <div class="relative flex-1 min-w-[200px] max-w-xs">
+      <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+      <input type="text" id="searchInput" placeholder="Tìm ngành hoặc trường..."
+        class="w-full pl-8 pr-3 py-1.5 text-sm border border-[#e5e5e5] rounded-md focus:outline-none focus:border-blue-400">
+    </div>
+    <!-- Group filter -->
+    <select id="groupFilter" class="text-sm border border-[#e5e5e5] rounded-md px-2.5 py-1.5 bg-white focus:outline-none">
+      <option value="">Tất cả nhóm ngành</option>
+      {% for g in groups %}
+      <option value="{{ g }}">{{ g }}</option>
+      {% endfor %}
+    </select>
+    <!-- Min fit -->
+    <select id="fitFilter" class="text-sm border border-[#e5e5e5] rounded-md px-2.5 py-1.5 bg-white focus:outline-none">
+      <option value="0">Mọi mức phù hợp</option>
+      <option value="60">&gt; 60% phù hợp</option>
+      <option value="70">&gt; 70% phù hợp</option>
+      <option value="80">&gt; 80% phù hợp</option>
+    </select>
+    <!-- Count -->
+    <span id="countBadge" class="text-xs text-gray-400 ml-auto"></span>
+  </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 py-5">
+  <!-- Loading -->
+  <div id="loadingState" class="flex justify-center py-20">
+    <div class="spinner"></div>
+  </div>
+  <!-- Grid -->
+  <div id="grid" class="hidden"></div>
+  <!-- Empty -->
+  <div id="emptyState" class="hidden text-center py-20 text-gray-400 text-sm">
+    Không có ngành nào phù hợp với bộ lọc hiện tại.
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-5 right-5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg shadow-lg hidden z-50"></div>
+
+<script>
+let allMajors = [];
+
+// ── Fetch ───────────────────────────────────────────────────────────
+async function fetchMajors() {
+  const res = await fetch('/api/student/career/browse');
+  const d = await res.json();
+  allMajors = d.majors || [];
+  document.getElementById('loadingState').classList.add('hidden');
+  applyFilters();
+}
+
+// ── Filters ─────────────────────────────────────────────────────────
+function applyFilters() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const group = document.getElementById('groupFilter').value;
+  const minFit = parseFloat(document.getElementById('fitFilter').value) || 0;
+
+  let list = allMajors;
+  if (q) list = list.filter(m => m.name.toLowerCase().includes(q) || m.university.toLowerCase().includes(q));
+  if (group) list = list.filter(m => m.major_group === group);
+  if (minFit > 0) list = list.filter(m => m.fit_pct >= minFit);
+
+  document.getElementById('countBadge').textContent = `${list.length} ngành`;
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('emptyState');
+  if (list.length === 0) {
+    grid.classList.add('hidden'); empty.classList.remove('hidden');
+  } else {
+    empty.classList.add('hidden'); grid.classList.remove('hidden');
+    grid.innerHTML = list.map(m => majorCard(m)).join('');
+    list.forEach(m => initMiniRadar(m));
+  }
+}
+
+['searchInput','groupFilter','fitFilter'].forEach(id =>
+  document.getElementById(id).addEventListener('input', applyFilters)
+);
+
+// ── Card ─────────────────────────────────────────────────────────────
+function fitClass(pct) {
+  if (pct >= 80) return 'text-green-600';
+  if (pct >= 60) return 'text-amber-600';
+  return 'text-red-500';
+}
+function fitBarClass(pct) {
+  if (pct >= 80) return 'bg-green-500';
+  if (pct >= 60) return 'bg-amber-400';
+  return 'bg-red-400';
+}
+function fitTagClass(pct) {
+  if (pct >= 80) return 'tag-ok';
+  if (pct >= 60) return 'tag-warn';
+  return 'tag-fail';
+}
+
+function majorCard(m) {
+  const pinBtn = m.is_pinned
+    ? `<button onclick="unpin(${m.id}, this)" class="btn-action active" title="Bỏ ghim"><i class="fas fa-thumbtack mr-1"></i>Đã ghim</button>`
+    : `<button onclick="pin(${m.id}, this)" class="btn-action" title="Ghim ngành"><i class="far fa-thumbtack mr-1"></i>Ghim</button>`;
+  const targetBtn = m.is_target
+    ? `<button class="btn-action active-target" disabled><i class="fas fa-star mr-1"></i>Mục tiêu</button>`
+    : `<button onclick="setTarget(${m.id}, this)" class="btn-action"><i class="far fa-star mr-1"></i>Mục tiêu</button>`;
+
+  return `<div class="card major-card p-4 flex flex-col gap-3" id="card-${m.id}">
+    <!-- Header -->
+    <div>
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-gray-900 text-sm leading-tight truncate">${m.name}</div>
+          <div class="text-[11px] text-gray-400 truncate mt-0.5">${m.university}</div>
+        </div>
+        <span class="text-xs font-bold tabular-nums shrink-0 ${fitClass(m.fit_pct)}">${m.fit_pct.toFixed(0)}%</span>
+      </div>
+      ${m.major_group ? `<span class="inline-block mt-1 text-[10px] px-1.5 py-0.5 rounded bg-[#f0f0f0] text-gray-500">${m.major_group}</span>` : ''}
+    </div>
+
+    <!-- Fit bar -->
+    <div class="flex items-center gap-2">
+      <div class="flex-1 bg-[#f5f5f5] rounded-full h-1.5">
+        <div class="h-1.5 rounded-full ${fitBarClass(m.fit_pct)}" style="width:${Math.min(m.fit_pct,100).toFixed(0)}%"></div>
+      </div>
+      <span class="text-[10px] ${fitTagClass(m.fit_pct)} px-1.5 py-0.5 rounded font-medium">${m.fit_pct.toFixed(0)}%</span>
+    </div>
+
+    <!-- Mini radar -->
+    <div class="flex justify-center" style="height:120px">
+      <canvas id="mini-${m.id}" width="120" height="120"></canvas>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex gap-2 pt-1 border-t border-[#f0f0f0]">
+      ${pinBtn}
+      ${targetBtn}
+    </div>
+  </div>`;
+}
+
+// ── Mini radar ───────────────────────────────────────────────────────
+const miniCharts = {};
+function initMiniRadar(m) {
+  const canvas = document.getElementById(`mini-${m.id}`);
+  if (!canvas || !m.radar || m.radar.labels.length === 0) return;
+  if (miniCharts[m.id]) { miniCharts[m.id].destroy(); }
+  miniCharts[m.id] = new Chart(canvas.getContext('2d'), {
+    type: 'radar',
+    data: {
+      labels: m.radar.labels,
+      datasets: [
+        { data: m.radar.student_scores, backgroundColor:'rgba(0,112,243,.12)', borderColor:'#0070f3', borderWidth:1.5, pointRadius:2, pointBackgroundColor:'#0070f3' },
+        { data: m.radar.major_scores, backgroundColor:'rgba(249,115,22,.08)', borderColor:'#f97316', borderWidth:1.5, borderDash:[4,3], pointRadius:2, pointBackgroundColor:'#f97316' },
+      ]
+    },
+    options: {
+      responsive: false,
+      scales: { r: { min:0, max:10, ticks:{display:false}, grid:{color:'#eeeeee'}, pointLabels:{font:{size:8}, color:'#9ca3af'} } },
+      plugins: { legend:{display:false}, tooltip:{enabled:false} },
+    }
+  });
+}
+
+// ── Actions ──────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  setTimeout(() => t.classList.add('hidden'), 2000);
+}
+
+async function pin(majorId, btn) {
+  const res = await fetch('/api/student/career/pin', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({major_id: majorId})
+  });
+  if (res.ok) {
+    btn.className = 'btn-action active';
+    btn.innerHTML = '<i class="fas fa-thumbtack mr-1"></i>Đã ghim';
+    btn.onclick = function() { unpin(majorId, btn); };
+    const m = allMajors.find(x => x.id === majorId);
+    if (m) m.is_pinned = true;
+    showToast('Đã ghim ngành');
+  }
+}
+
+async function unpin(majorId, btn) {
+  const res = await fetch(`/api/student/career/pin/${majorId}`, { method:'DELETE' });
+  if (res.ok) {
+    btn.className = 'btn-action';
+    btn.innerHTML = '<i class="far fa-thumbtack mr-1"></i>Ghim';
+    btn.onclick = function() { pin(majorId, btn); };
+    const m = allMajors.find(x => x.id === majorId);
+    if (m) m.is_pinned = false;
+    showToast('Đã bỏ ghim');
+  }
+}
+
+async function setTarget(majorId, btn) {
+  const res = await fetch('/api/student/career/target', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({major_id: majorId})
+  });
+  if (res.ok) {
+    // Reset all other target buttons
+    document.querySelectorAll('.btn-action.active-target').forEach(b => {
+      b.className = 'btn-action';
+      b.innerHTML = '<i class="far fa-star mr-1"></i>Mục tiêu';
+      b.disabled = false;
+    });
+    btn.className = 'btn-action active-target';
+    btn.innerHTML = '<i class="fas fa-star mr-1"></i>Mục tiêu';
+    btn.disabled = true;
+    allMajors.forEach(m => m.is_target = (m.id === majorId));
+    showToast('Đã đặt làm ngành mục tiêu');
+  }
+}
+
+// ── Init ─────────────────────────────────────────────────────────────
+fetchMajors();
+</script>
+</body>
+</html>

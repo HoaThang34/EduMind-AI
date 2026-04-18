@@ -574,6 +574,9 @@ class TeacherClassAssignment(db.Model):
 
 class UniversityMajor(db.Model):
     __tablename__ = 'university_major'
+    __table_args__ = (
+        db.UniqueConstraint('name', 'university', name='uq_major_university'),
+    )
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
     university = db.Column(db.String(150), nullable=False)
@@ -592,6 +595,9 @@ class UniversityMajor(db.Model):
 
 class MajorSubjectWeight(db.Model):
     __tablename__ = 'major_subject_weight'
+    __table_args__ = (
+        db.UniqueConstraint('major_id', 'subject_name', name='uq_major_subject'),
+    )
     id = db.Column(db.Integer, primary_key=True)
     major_id = db.Column(db.Integer, db.ForeignKey('university_major.id'), nullable=False)
     subject_name = db.Column(db.String(100), nullable=False)  # khớp Subject.name
@@ -601,16 +607,19 @@ class MajorSubjectWeight(db.Model):
 
 class StudentPinnedMajor(db.Model):
     __tablename__ = 'student_pinned_major'
+    __table_args__ = (db.UniqueConstraint('student_id', 'major_id', name='uq_student_pinned_major'),)
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False, index=True)
     major_id = db.Column(db.Integer, db.ForeignKey('university_major.id'), nullable=False)
     pinned_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-    __table_args__ = (db.UniqueConstraint('student_id', 'major_id'),)
 
 
 class StudentTargetMajor(db.Model):
     __tablename__ = 'student_target_major'
+    __table_args__ = (
+        db.UniqueConstraint('student_id', name='uq_student_target_major'),
+    )
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False, unique=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False, index=True)
     major_id = db.Column(db.Integer, db.ForeignKey('university_major.id'), nullable=False)
     set_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)

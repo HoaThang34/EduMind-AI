@@ -1,0 +1,1671 @@
+[
+  {
+    "name": "Khoa học Máy tính",
+    "university": "ĐH Công nghệ - ĐHQGHN",
+    "faculty": "Khoa Công nghệ Thông tin",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Đào tạo chuyên gia CNTT với nền tảng lý thuyết vững, nghiên cứu AI, hệ thống phần mềm.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.45, "min_score": 8.0},
+      {"subject_name": "Lý", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.25, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Kỹ thuật Phần mềm",
+    "university": "ĐH Công nghệ - ĐHQGHN",
+    "faculty": "Khoa Công nghệ Thông tin",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Đào tạo kỹ sư phần mềm với kỹ năng thiết kế, phát triển và kiểm thử hệ thống phần mềm quy mô lớn.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.30, "min_score": 6.5},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Trí tuệ Nhân tạo",
+    "university": "ĐH Công nghệ - ĐHQGHN",
+    "faculty": "Khoa Công nghệ Thông tin",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Chuyên sâu về machine learning, deep learning và ứng dụng AI trong thực tiễn.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.50, "min_score": 8.5},
+      {"subject_name": "Lý", "weight": 0.25, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.25, "min_score": 7.5}
+    ]
+  },
+  {
+    "name": "Công nghệ Thông tin",
+    "university": "ĐHBK Hà Nội",
+    "faculty": "Viện Công nghệ Thông tin và Truyền thông",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Chương trình CNTT tổng hợp, đào tạo kỹ sư toàn diện về lập trình, mạng và hệ thống.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Kỹ thuật Điện tử - Viễn thông",
+    "university": "ĐHBK Hà Nội",
+    "faculty": "Viện Điện tử - Viễn thông",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Đào tạo kỹ sư điện tử viễn thông, thiết kế vi mạch, hệ thống nhúng và truyền thông.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.45, "min_score": 8.0},
+      {"subject_name": "Anh", "weight": 0.20, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Kỹ thuật Cơ điện tử",
+    "university": "ĐHBK Hà Nội",
+    "faculty": "Viện Cơ khí",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Kết hợp cơ học, điện tử và lập trình, đào tạo kỹ sư robot và tự động hóa hiện đại.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.45, "min_score": 8.0},
+      {"subject_name": "Hóa", "weight": 0.20, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Kỹ thuật Hóa học",
+    "university": "ĐHBK Hà Nội",
+    "faculty": "Viện Kỹ thuật Hóa học",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Nghiên cứu và ứng dụng hóa học trong sản xuất công nghiệp, vật liệu và năng lượng.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Lý", "weight": 0.25, "min_score": 6.5},
+      {"subject_name": "Hóa", "weight": 0.45, "min_score": 8.0}
+    ]
+  },
+  {
+    "name": "Kỹ thuật Xây dựng",
+    "university": "ĐHBK Hà Nội",
+    "faculty": "Viện Xây dựng",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Thiết kế kết cấu, thi công công trình dân dụng, cầu đường và hạ tầng đô thị.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.40, "min_score": 7.0},
+      {"subject_name": "Lý", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Hóa", "weight": 0.20, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Kỹ thuật Điện",
+    "university": "ĐHBK Hà Nội",
+    "faculty": "Viện Điện",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Hệ thống điện, thiết bị điện, năng lượng tái tạo và điều khiển tự động.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.50, "min_score": 8.0},
+      {"subject_name": "Anh", "weight": 0.15, "min_score": 5.5}
+    ]
+  },
+  {
+    "name": "Vật lý Kỹ thuật",
+    "university": "ĐHBK Hà Nội",
+    "faculty": "Viện Vật lý Kỹ thuật",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Ứng dụng vật lý vào kỹ thuật hạt nhân, quang học và khoa học vật liệu.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 8.0},
+      {"subject_name": "Lý", "weight": 0.55, "min_score": 8.5},
+      {"subject_name": "Hóa", "weight": 0.10, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Công nghệ Thông tin",
+    "university": "ĐH FPT",
+    "faculty": "Khoa Công nghệ Thông tin",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Chương trình CNTT theo chuẩn quốc tế, tập trung phát triển phần mềm và khởi nghiệp.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.40, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.40, "min_score": 8.0},
+      {"subject_name": "Lý", "weight": 0.20, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Kỹ thuật Phần mềm",
+    "university": "ĐH FPT",
+    "faculty": "Khoa Công nghệ Thông tin",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Đào tạo lập trình viên full-stack với kỹ năng thực chiến từ năm 1.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.45, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.20, "min_score": 5.5}
+    ]
+  },
+  {
+    "name": "Trí tuệ Nhân tạo",
+    "university": "ĐH FPT",
+    "faculty": "Khoa Công nghệ Thông tin",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Ứng dụng AI trong kinh doanh và sản phẩm, kết hợp khoa học dữ liệu thực tế.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.45, "min_score": 8.0},
+      {"subject_name": "Anh", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.20, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "An toàn Thông tin",
+    "university": "ĐH Công nghệ - ĐHQGHN",
+    "faculty": "Khoa Công nghệ Thông tin",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Bảo mật hệ thống, kiểm thử xâm nhập và phòng chống tấn công mạng.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.30, "min_score": 6.5},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Khoa học Dữ liệu",
+    "university": "ĐH Khoa học Tự nhiên - ĐHQGHN",
+    "faculty": "Khoa Toán - Cơ - Tin học",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Phân tích dữ liệu lớn, thống kê và học máy ứng dụng trong nhiều lĩnh vực.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.55, "min_score": 8.5},
+      {"subject_name": "Anh", "weight": 0.25, "min_score": 7.0},
+      {"subject_name": "Lý", "weight": 0.20, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Toán học",
+    "university": "ĐH Khoa học Tự nhiên - ĐHQGHN",
+    "faculty": "Khoa Toán - Cơ - Tin học",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Nghiên cứu toán thuần túy và ứng dụng, đại số, giải tích và tối ưu hóa.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.70, "min_score": 9.0},
+      {"subject_name": "Lý", "weight": 0.20, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.10, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Công nghệ Thông tin",
+    "university": "ĐHBK TP.HCM",
+    "faculty": "Khoa Khoa học và Kỹ thuật Máy tính",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Đào tạo kỹ sư CNTT toàn diện theo mô hình tiên tiến, liên kết doanh nghiệp.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Kỹ thuật Hàng không",
+    "university": "ĐHBK TP.HCM",
+    "faculty": "Khoa Kỹ thuật Giao thông",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Thiết kế, bảo dưỡng và vận hành hệ thống máy bay và phương tiện bay.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 8.0},
+      {"subject_name": "Lý", "weight": 0.50, "min_score": 8.5},
+      {"subject_name": "Anh", "weight": 0.15, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Kỹ thuật Sinh học",
+    "university": "ĐHBK TP.HCM",
+    "faculty": "Khoa Kỹ thuật Hóa học",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Ứng dụng sinh học phân tử và công nghệ lên men trong sản xuất công nghiệp.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 7.0},
+      {"subject_name": "Hóa", "weight": 0.40, "min_score": 8.0},
+      {"subject_name": "Sinh", "weight": 0.35, "min_score": 7.5}
+    ]
+  },
+  {
+    "name": "Kỹ thuật Môi trường",
+    "university": "ĐHBK Hà Nội",
+    "faculty": "Viện Khoa học và Công nghệ Môi trường",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Xử lý nước thải, khí thải và quản lý môi trường bền vững.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Hóa", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Sinh", "weight": 0.30, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Quản trị Kinh doanh",
+    "university": "ĐH Kinh tế Quốc dân",
+    "faculty": "Khoa Quản trị Kinh doanh",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Đào tạo nhà quản lý doanh nghiệp toàn diện: chiến lược, marketing và vận hành.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.40, "min_score": 7.0},
+      {"subject_name": "Văn", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.5}
+    ]
+  },
+  {
+    "name": "Kinh tế",
+    "university": "ĐH Kinh tế Quốc dân",
+    "faculty": "Khoa Kinh tế học",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Phân tích kinh tế vĩ mô, vi mô và chính sách kinh tế quốc gia.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.45, "min_score": 7.5},
+      {"subject_name": "Văn", "weight": 0.25, "min_score": 6.5},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Tài chính - Ngân hàng",
+    "university": "ĐH Kinh tế Quốc dân",
+    "faculty": "Khoa Tài chính Ngân hàng",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Quản lý tài chính doanh nghiệp, đầu tư chứng khoán và nghiệp vụ ngân hàng.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.45, "min_score": 7.5},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Văn", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Kế toán",
+    "university": "ĐH Kinh tế Quốc dân",
+    "faculty": "Khoa Kế toán",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Kế toán tài chính, kiểm toán và báo cáo tài chính theo chuẩn quốc tế.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.50, "min_score": 7.5},
+      {"subject_name": "Văn", "weight": 0.25, "min_score": 6.5},
+      {"subject_name": "Anh", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Marketing",
+    "university": "ĐH Kinh tế Quốc dân",
+    "faculty": "Viện Marketing và Quản trị",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Nghiên cứu thị trường, xây dựng thương hiệu và digital marketing.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.30, "min_score": 6.5},
+      {"subject_name": "Văn", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.5}
+    ]
+  },
+  {
+    "name": "Thương mại Quốc tế",
+    "university": "ĐH Ngoại thương",
+    "faculty": "Khoa Kinh tế và Kinh doanh Quốc tế",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Xuất nhập khẩu, logistics và đàm phán thương mại quốc tế.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.45, "min_score": 8.0},
+      {"subject_name": "Văn", "weight": 0.20, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Kinh doanh Quốc tế",
+    "university": "ĐH Ngoại thương",
+    "faculty": "Khoa Quản trị Kinh doanh",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Quản lý doanh nghiệp đa quốc gia, FDI và chiến lược thâm nhập thị trường toàn cầu.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.50, "min_score": 8.5},
+      {"subject_name": "Văn", "weight": 0.20, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Logistic và Quản lý Chuỗi cung ứng",
+    "university": "ĐH Ngoại thương",
+    "faculty": "Khoa Kinh tế và Kinh doanh Quốc tế",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Tối ưu hóa chuỗi cung ứng, vận tải và kho bãi trong bối cảnh toàn cầu hóa.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.40, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Địa", "weight": 0.20, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Quản trị Kinh doanh",
+    "university": "ĐH Kinh tế TP.HCM",
+    "faculty": "Khoa Quản trị",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Chương trình đào tạo quản lý doanh nghiệp tại TP.HCM với thực tập doanh nghiệp từ năm 2.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.40, "min_score": 7.0},
+      {"subject_name": "Văn", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.5}
+    ]
+  },
+  {
+    "name": "Tài chính",
+    "university": "ĐH Kinh tế TP.HCM",
+    "faculty": "Khoa Tài chính",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Phân tích tài chính doanh nghiệp, thị trường vốn và quản lý rủi ro.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.50, "min_score": 7.5},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Văn", "weight": 0.20, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Quản trị Khách sạn",
+    "university": "ĐH Kinh tế TP.HCM",
+    "faculty": "Khoa Du lịch",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Quản lý khách sạn, resort và dịch vụ lưu trú chất lượng cao.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Quản trị Kinh doanh",
+    "university": "RMIT Việt Nam",
+    "faculty": "Khoa Kinh doanh và Quản lý",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Chương trình chuẩn Úc, toàn tiếng Anh, tư duy quản trị toàn cầu.",
+    "weights": [
+      {"subject_name": "Anh", "weight": 0.55, "min_score": 8.5},
+      {"subject_name": "Toán", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Văn", "weight": 0.15, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Công nghệ Thông tin",
+    "university": "RMIT Việt Nam",
+    "faculty": "Khoa Khoa học, Kỹ thuật và Công nghệ",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Chương trình quốc tế toàn tiếng Anh, định hướng khởi nghiệp và đổi mới sáng tạo.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.50, "min_score": 8.5},
+      {"subject_name": "Lý", "weight": 0.15, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Thiết kế Đồ họa",
+    "university": "RMIT Việt Nam",
+    "faculty": "Khoa Truyền thông và Thiết kế",
+    "major_group": "Nghệ thuật",
+    "description": "Thiết kế thương hiệu, UX/UI và truyền thông thị giác theo chuẩn quốc tế.",
+    "weights": [
+      {"subject_name": "Anh", "weight": 0.45, "min_score": 8.0},
+      {"subject_name": "Văn", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Toán", "weight": 0.20, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Y khoa",
+    "university": "ĐH Y Hà Nội",
+    "faculty": "Khoa Y",
+    "major_group": "Y Dược",
+    "description": "Đào tạo bác sĩ đa khoa 6 năm với nền tảng y khoa vững và thực hành lâm sàng.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.30, "min_score": 8.0},
+      {"subject_name": "Hóa", "weight": 0.35, "min_score": 8.5},
+      {"subject_name": "Sinh", "weight": 0.35, "min_score": 8.5}
+    ]
+  },
+  {
+    "name": "Răng Hàm Mặt",
+    "university": "ĐH Y Hà Nội",
+    "faculty": "Khoa Răng Hàm Mặt",
+    "major_group": "Y Dược",
+    "description": "Chẩn đoán và điều trị các bệnh lý răng miệng, phẫu thuật hàm mặt.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 8.0},
+      {"subject_name": "Hóa", "weight": 0.35, "min_score": 8.5},
+      {"subject_name": "Sinh", "weight": 0.40, "min_score": 9.0}
+    ]
+  },
+  {
+    "name": "Dược học",
+    "university": "ĐH Dược Hà Nội",
+    "faculty": "Khoa Dược",
+    "major_group": "Y Dược",
+    "description": "Nghiên cứu, bào chế và kiểm nghiệm dược phẩm, quản lý dược bệnh viện.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 7.5},
+      {"subject_name": "Hóa", "weight": 0.45, "min_score": 8.5},
+      {"subject_name": "Sinh", "weight": 0.30, "min_score": 8.0}
+    ]
+  },
+  {
+    "name": "Y tế Công cộng",
+    "university": "ĐH Y Hà Nội",
+    "faculty": "Viện Đào tạo Y học Dự phòng và Y tế Công cộng",
+    "major_group": "Y Dược",
+    "description": "Phòng chống dịch bệnh, sức khỏe cộng đồng và quản lý y tế.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.30, "min_score": 7.5},
+      {"subject_name": "Hóa", "weight": 0.30, "min_score": 7.5},
+      {"subject_name": "Sinh", "weight": 0.40, "min_score": 8.0}
+    ]
+  },
+  {
+    "name": "Điều dưỡng",
+    "university": "ĐH Y Hà Nội",
+    "faculty": "Khoa Điều dưỡng",
+    "major_group": "Y Dược",
+    "description": "Chăm sóc sức khỏe bệnh nhân, kỹ năng lâm sàng và y tế cộng đồng.",
+    "weights": [
+      {"subject_name": "Hóa", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Sinh", "weight": 0.40, "min_score": 8.0},
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Kỹ thuật Y sinh",
+    "university": "ĐHBK Hà Nội",
+    "faculty": "Trường Cơ khí",
+    "major_group": "Y Dược",
+    "description": "Nghiên cứu và phát triển thiết bị y tế, cảm biến sinh học và hệ thống chẩn đoán.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.30, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Sinh", "weight": 0.35, "min_score": 7.5}
+    ]
+  },
+  {
+    "name": "Sinh học",
+    "university": "ĐH Khoa học Tự nhiên - ĐHQGHN",
+    "faculty": "Khoa Sinh học",
+    "major_group": "Y Dược",
+    "description": "Sinh học phân tử, di truyền, sinh thái học và nghiên cứu cơ bản về sự sống.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.20, "min_score": 7.0},
+      {"subject_name": "Hóa", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Sinh", "weight": 0.45, "min_score": 8.5}
+    ]
+  },
+  {
+    "name": "Công nghệ Sinh học",
+    "university": "ĐHBK Hà Nội",
+    "faculty": "Viện Công nghệ Sinh học và Công nghệ Thực phẩm",
+    "major_group": "Y Dược",
+    "description": "Ứng dụng công nghệ sinh học trong y tế, nông nghiệp và công nghiệp thực phẩm.",
+    "weights": [
+      {"subject_name": "Hóa", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Sinh", "weight": 0.45, "min_score": 8.0},
+      {"subject_name": "Toán", "weight": 0.20, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Sư phạm Toán",
+    "university": "ĐH Sư phạm Hà Nội",
+    "faculty": "Khoa Toán",
+    "major_group": "Sư phạm",
+    "description": "Đào tạo giáo viên Toán THCS, THPT với phương pháp dạy học hiện đại.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.65, "min_score": 8.5},
+      {"subject_name": "Văn", "weight": 0.20, "min_score": 6.5},
+      {"subject_name": "Anh", "weight": 0.15, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Sư phạm Văn",
+    "university": "ĐH Sư phạm Hà Nội",
+    "faculty": "Khoa Ngữ văn",
+    "major_group": "Sư phạm",
+    "description": "Đào tạo giáo viên Ngữ văn, nghiên cứu văn học và ngôn ngữ học.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.65, "min_score": 8.5},
+      {"subject_name": "Sử", "weight": 0.20, "min_score": 7.0},
+      {"subject_name": "Toán", "weight": 0.15, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Sư phạm Tiếng Anh",
+    "university": "ĐH Sư phạm Hà Nội",
+    "faculty": "Khoa Ngoại ngữ",
+    "major_group": "Sư phạm",
+    "description": "Đào tạo giáo viên Anh văn với phương pháp giảng dạy giao tiếp hiện đại.",
+    "weights": [
+      {"subject_name": "Anh", "weight": 0.65, "min_score": 8.5},
+      {"subject_name": "Văn", "weight": 0.25, "min_score": 7.0},
+      {"subject_name": "Toán", "weight": 0.10, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Sư phạm Vật lý",
+    "university": "ĐH Sư phạm Hà Nội",
+    "faculty": "Khoa Vật lý",
+    "major_group": "Sư phạm",
+    "description": "Đào tạo giáo viên Vật lý với kiến thức thực nghiệm và phương pháp dạy học tích cực.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.55, "min_score": 8.5},
+      {"subject_name": "Anh", "weight": 0.10, "min_score": 5.5}
+    ]
+  },
+  {
+    "name": "Sư phạm Hóa học",
+    "university": "ĐH Sư phạm Hà Nội",
+    "faculty": "Khoa Hóa học",
+    "major_group": "Sư phạm",
+    "description": "Đào tạo giáo viên Hóa học, nghiên cứu thực nghiệm và ứng dụng hóa học.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 7.0},
+      {"subject_name": "Hóa", "weight": 0.60, "min_score": 8.5},
+      {"subject_name": "Sinh", "weight": 0.15, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Sư phạm Sinh học",
+    "university": "ĐH Sư phạm Hà Nội",
+    "faculty": "Khoa Sinh học",
+    "major_group": "Sư phạm",
+    "description": "Đào tạo giáo viên Sinh học với kiến thức sinh học phân tử và thực địa.",
+    "weights": [
+      {"subject_name": "Hóa", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Sinh", "weight": 0.55, "min_score": 8.5},
+      {"subject_name": "Toán", "weight": 0.10, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Giáo dục Mầm non",
+    "university": "ĐH Sư phạm Hà Nội",
+    "faculty": "Khoa Giáo dục Mầm non",
+    "major_group": "Sư phạm",
+    "description": "Chăm sóc và giáo dục trẻ em dưới 6 tuổi theo phương pháp phát triển toàn diện.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.45, "min_score": 7.5},
+      {"subject_name": "Sinh", "weight": 0.30, "min_score": 6.5},
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Giáo dục Tiểu học",
+    "university": "ĐH Sư phạm Hà Nội",
+    "faculty": "Khoa Giáo dục Tiểu học",
+    "major_group": "Sư phạm",
+    "description": "Giảng dạy các môn ở bậc tiểu học, phát triển kỹ năng đọc viết và tư duy.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.45, "min_score": 7.5},
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.20, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Sư phạm Tin học",
+    "university": "ĐH Sư phạm TP.HCM",
+    "faculty": "Khoa Công nghệ Thông tin",
+    "major_group": "Sư phạm",
+    "description": "Đào tạo giáo viên Tin học với nền tảng lập trình và dạy học công nghệ.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.45, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.30, "min_score": 6.5},
+      {"subject_name": "Anh", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Luật",
+    "university": "ĐH Luật Hà Nội",
+    "faculty": "Khoa Luật Dân sự",
+    "major_group": "Luật - Hành chính",
+    "description": "Đào tạo luật sư và cán bộ pháp lý với kiến thức pháp luật toàn diện.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.45, "min_score": 7.5},
+      {"subject_name": "Sử", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Luật Kinh tế",
+    "university": "ĐH Luật Hà Nội",
+    "faculty": "Khoa Luật Kinh tế",
+    "major_group": "Luật - Hành chính",
+    "description": "Pháp luật doanh nghiệp, hợp đồng thương mại và tranh chấp kinh tế.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.25, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Hành chính học",
+    "university": "ĐH Nội vụ Hà Nội",
+    "faculty": "Khoa Hành chính học",
+    "major_group": "Luật - Hành chính",
+    "description": "Quản lý hành chính nhà nước, chính sách công và quản trị công.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.40, "min_score": 7.0},
+      {"subject_name": "Sử", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Địa", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Quản trị Nhà nước và Chính sách",
+    "university": "ĐH Kinh tế Quốc dân",
+    "faculty": "Khoa Nhà nước và Pháp luật",
+    "major_group": "Luật - Hành chính",
+    "description": "Phân tích chính sách, quản lý công và cải cách thể chế.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.40, "min_score": 7.0},
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Sử", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Ngôn ngữ Anh",
+    "university": "ĐH Khoa học Xã hội và Nhân văn - ĐHQGHN",
+    "faculty": "Khoa Ngôn ngữ học",
+    "major_group": "Xã hội - Nhân văn",
+    "description": "Ngôn ngữ học tiếng Anh, dịch thuật và văn hóa Anh - Mỹ.",
+    "weights": [
+      {"subject_name": "Anh", "weight": 0.60, "min_score": 8.5},
+      {"subject_name": "Văn", "weight": 0.30, "min_score": 7.5},
+      {"subject_name": "Sử", "weight": 0.10, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Báo chí",
+    "university": "ĐH Khoa học Xã hội và Nhân văn - ĐHQGHN",
+    "faculty": "Khoa Báo chí và Truyền thông",
+    "major_group": "Xã hội - Nhân văn",
+    "description": "Báo in, truyền hình, báo mạng và kỹ năng phỏng vấn, điều tra.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.50, "min_score": 8.0},
+      {"subject_name": "Sử", "weight": 0.25, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.25, "min_score": 7.5}
+    ]
+  },
+  {
+    "name": "Quan hệ Quốc tế",
+    "university": "ĐH Khoa học Xã hội và Nhân văn - ĐHQGHN",
+    "faculty": "Khoa Quan hệ Quốc tế",
+    "major_group": "Xã hội - Nhân văn",
+    "description": "Ngoại giao, chính trị quốc tế và quan hệ đa phương.",
+    "weights": [
+      {"subject_name": "Anh", "weight": 0.40, "min_score": 8.0},
+      {"subject_name": "Văn", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Sử", "weight": 0.25, "min_score": 7.5}
+    ]
+  },
+  {
+    "name": "Tâm lý học",
+    "university": "ĐH Khoa học Xã hội và Nhân văn - ĐHQGHN",
+    "faculty": "Khoa Tâm lý học",
+    "major_group": "Xã hội - Nhân văn",
+    "description": "Tâm lý học lâm sàng, tổ chức và giáo dục.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Sinh", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Xã hội học",
+    "university": "ĐH Khoa học Xã hội và Nhân văn - ĐHQGHN",
+    "faculty": "Khoa Xã hội học",
+    "major_group": "Xã hội - Nhân văn",
+    "description": "Phân tích xã hội, nghiên cứu dân số và phát triển cộng đồng.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Sử", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Địa", "weight": 0.30, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Triết học",
+    "university": "ĐH Khoa học Xã hội và Nhân văn - ĐHQGHN",
+    "faculty": "Khoa Triết học",
+    "major_group": "Xã hội - Nhân văn",
+    "description": "Lịch sử triết học, đạo đức học và logic học.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.40, "min_score": 8.0},
+      {"subject_name": "Sử", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Anh", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Lịch sử",
+    "university": "ĐH Khoa học Xã hội và Nhân văn - ĐHQGHN",
+    "faculty": "Khoa Lịch sử",
+    "major_group": "Xã hội - Nhân văn",
+    "description": "Lịch sử Việt Nam và thế giới, nghiên cứu khảo cổ và bảo tồn di sản.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Sử", "weight": 0.50, "min_score": 8.5},
+      {"subject_name": "Địa", "weight": 0.15, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Địa lý",
+    "university": "ĐH Khoa học Tự nhiên - ĐHQGHN",
+    "faculty": "Khoa Địa lý",
+    "major_group": "Xã hội - Nhân văn",
+    "description": "Địa lý tự nhiên, địa lý kinh tế và hệ thống thông tin địa lý (GIS).",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Địa", "weight": 0.45, "min_score": 8.0},
+      {"subject_name": "Sử", "weight": 0.25, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Truyền thông Đa phương tiện",
+    "university": "ĐH Kinh tế Quốc dân",
+    "faculty": "Viện Marketing và Quản trị",
+    "major_group": "Xã hội - Nhân văn",
+    "description": "Sản xuất nội dung số, quản lý mạng xã hội và chiến lược truyền thông.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Anh", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Ngôn ngữ Trung Quốc",
+    "university": "ĐH Hà Nội",
+    "faculty": "Khoa Tiếng Trung Quốc",
+    "major_group": "Xã hội - Nhân văn",
+    "description": "Tiếng Trung thương mại, dịch thuật và văn hóa Trung Hoa.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Sử", "weight": 0.30, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Ngôn ngữ Nhật",
+    "university": "ĐH Hà Nội",
+    "faculty": "Khoa Tiếng Nhật",
+    "major_group": "Xã hội - Nhân văn",
+    "description": "Tiếng Nhật kinh doanh, dịch thuật và văn hóa Nhật Bản.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Toán", "weight": 0.30, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Ngôn ngữ Hàn Quốc",
+    "university": "ĐH Hà Nội",
+    "faculty": "Khoa Tiếng Hàn",
+    "major_group": "Xã hội - Nhân văn",
+    "description": "Tiếng Hàn thương mại, K-culture và cơ hội làm việc tại Hàn Quốc.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.45, "min_score": 7.5},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Sử", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Du lịch",
+    "university": "ĐH Khoa học Xã hội và Nhân văn - ĐHQGHN",
+    "faculty": "Khoa Du lịch học",
+    "major_group": "Xã hội - Nhân văn",
+    "description": "Quản lý du lịch, hướng dẫn viên và phát triển sản phẩm du lịch bền vững.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Địa", "weight": 0.25, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Nông học",
+    "university": "ĐH Nông nghiệp Hà Nội",
+    "faculty": "Khoa Nông học",
+    "major_group": "Nông Lâm",
+    "description": "Trồng trọt, giống cây trồng và kỹ thuật canh tác hiện đại.",
+    "weights": [
+      {"subject_name": "Hóa", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Sinh", "weight": 0.45, "min_score": 7.5},
+      {"subject_name": "Toán", "weight": 0.20, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Chăn nuôi",
+    "university": "ĐH Nông nghiệp Hà Nội",
+    "faculty": "Khoa Chăn nuôi",
+    "major_group": "Nông Lâm",
+    "description": "Kỹ thuật chăn nuôi gia súc, gia cầm và dinh dưỡng vật nuôi.",
+    "weights": [
+      {"subject_name": "Hóa", "weight": 0.30, "min_score": 6.5},
+      {"subject_name": "Sinh", "weight": 0.50, "min_score": 7.5},
+      {"subject_name": "Toán", "weight": 0.20, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Thú y",
+    "university": "ĐH Nông nghiệp Hà Nội",
+    "faculty": "Khoa Thú y",
+    "major_group": "Nông Lâm",
+    "description": "Chẩn đoán, phòng và điều trị bệnh cho gia súc, gia cầm và vật nuôi.",
+    "weights": [
+      {"subject_name": "Hóa", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Sinh", "weight": 0.50, "min_score": 8.0},
+      {"subject_name": "Toán", "weight": 0.15, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Lâm học",
+    "university": "ĐH Lâm nghiệp",
+    "faculty": "Khoa Lâm học",
+    "major_group": "Nông Lâm",
+    "description": "Quản lý tài nguyên rừng, lâm sinh và bảo tồn đa dạng sinh học.",
+    "weights": [
+      {"subject_name": "Sinh", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Địa", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Hóa", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Nuôi trồng Thủy sản",
+    "university": "ĐH Nha Trang",
+    "faculty": "Khoa Nuôi trồng Thủy sản",
+    "major_group": "Nông Lâm",
+    "description": "Kỹ thuật nuôi tôm, cá và các loài thủy sản thương phẩm.",
+    "weights": [
+      {"subject_name": "Hóa", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Sinh", "weight": 0.45, "min_score": 7.5},
+      {"subject_name": "Toán", "weight": 0.20, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Kiến trúc",
+    "university": "ĐH Kiến trúc Hà Nội",
+    "faculty": "Khoa Kiến trúc",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Thiết kế công trình dân dụng, đô thị và kiến trúc cảnh quan.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Lý", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Văn", "weight": 0.40, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Quy hoạch Vùng và Đô thị",
+    "university": "ĐH Kiến trúc Hà Nội",
+    "faculty": "Khoa Quy hoạch Đô thị và Nông thôn",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Lập quy hoạch đô thị, quản lý không gian và phát triển hạ tầng.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Địa", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Văn", "weight": 0.30, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Thiết kế Nội thất",
+    "university": "ĐH Mỹ thuật Công nghiệp",
+    "faculty": "Khoa Thiết kế Nội thất",
+    "major_group": "Nghệ thuật",
+    "description": "Thiết kế không gian sống, văn phòng và thương mại theo xu hướng hiện đại.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 6.5},
+      {"subject_name": "Văn", "weight": 0.40, "min_score": 7.0},
+      {"subject_name": "Lý", "weight": 0.35, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Hội họa",
+    "university": "ĐH Mỹ thuật Việt Nam",
+    "faculty": "Khoa Hội họa",
+    "major_group": "Nghệ thuật",
+    "description": "Tranh sơn dầu, lụa và đồ họa theo phong cách truyền thống và hiện đại.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.50, "min_score": 7.0},
+      {"subject_name": "Sử", "weight": 0.30, "min_score": 6.5},
+      {"subject_name": "Anh", "weight": 0.20, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Âm nhạc học",
+    "university": "Nhạc viện Hà Nội",
+    "faculty": "Khoa Âm nhạc học",
+    "major_group": "Nghệ thuật",
+    "description": "Lý luận âm nhạc, biểu diễn và sư phạm âm nhạc.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.50, "min_score": 7.5},
+      {"subject_name": "Sử", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Toán", "weight": 0.20, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Điện ảnh",
+    "university": "ĐH Sân khấu - Điện ảnh Hà Nội",
+    "faculty": "Khoa Đạo diễn - Biên kịch",
+    "major_group": "Nghệ thuật",
+    "description": "Đạo diễn phim, biên kịch và sản xuất nội dung sáng tạo.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.60, "min_score": 8.0},
+      {"subject_name": "Sử", "weight": 0.25, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.15, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Thiết kế Đồ họa",
+    "university": "ĐH Mỹ thuật Công nghiệp",
+    "faculty": "Khoa Thiết kế Đồ họa",
+    "major_group": "Nghệ thuật",
+    "description": "Thiết kế nhận diện thương hiệu, bao bì và ấn phẩm truyền thông.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.40, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Kinh tế Nông nghiệp",
+    "university": "ĐH Nông nghiệp Hà Nội",
+    "faculty": "Khoa Kinh tế và PTNT",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Kinh tế nông nghiệp, chuỗi giá trị nông sản và chính sách phát triển nông thôn.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.40, "min_score": 7.0},
+      {"subject_name": "Sinh", "weight": 0.30, "min_score": 6.5},
+      {"subject_name": "Địa", "weight": 0.30, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Kỹ thuật Tài nguyên nước",
+    "university": "ĐH Thủy lợi",
+    "faculty": "Khoa Kỹ thuật Tài nguyên nước",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Quy hoạch thủy lợi, xây dựng đập, hồ chứa và quản lý tài nguyên nước.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Địa", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Địa chất học",
+    "university": "ĐH Khoa học Tự nhiên - ĐHQGHN",
+    "faculty": "Khoa Địa chất",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Nghiên cứu cấu tạo vỏ Trái Đất, khoáng sản và địa chất công trình.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Lý", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Hóa", "weight": 0.35, "min_score": 7.5}
+    ]
+  },
+  {
+    "name": "Kỹ thuật Dầu khí",
+    "university": "ĐH Mỏ - Địa chất",
+    "faculty": "Khoa Dầu khí",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Khoan thăm dò, khai thác và chế biến dầu khí.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.40, "min_score": 8.0},
+      {"subject_name": "Hóa", "weight": 0.25, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Quản lý Đất đai",
+    "university": "ĐH Tài nguyên và Môi trường Hà Nội",
+    "faculty": "Khoa Quản lý Đất đai",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Quy hoạch sử dụng đất, đo đạc bản đồ và đăng ký đất đai.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Địa", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Vật lý",
+    "university": "ĐH Khoa học Tự nhiên - ĐHQGHN",
+    "faculty": "Khoa Vật lý",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Vật lý lý thuyết, vật lý thực nghiệm và vật lý ứng dụng.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 8.5},
+      {"subject_name": "Lý", "weight": 0.55, "min_score": 9.0},
+      {"subject_name": "Hóa", "weight": 0.10, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Hóa học",
+    "university": "ĐH Khoa học Tự nhiên - ĐHQGHN",
+    "faculty": "Khoa Hóa học",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Hóa vô cơ, hóa hữu cơ và hóa phân tích ứng dụng.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 7.5},
+      {"subject_name": "Hóa", "weight": 0.60, "min_score": 9.0},
+      {"subject_name": "Lý", "weight": 0.15, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Công nghệ Thực phẩm",
+    "university": "ĐHBK Hà Nội",
+    "faculty": "Viện Công nghệ Sinh học và Công nghệ Thực phẩm",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Bảo quản, chế biến thực phẩm và kiểm soát an toàn vệ sinh thực phẩm.",
+    "weights": [
+      {"subject_name": "Hóa", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Sinh", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Quản trị Du lịch và Lữ hành",
+    "university": "ĐH Kinh tế TP.HCM",
+    "faculty": "Khoa Du lịch",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Quản lý tour, phát triển sản phẩm du lịch và marketing điểm đến.",
+    "weights": [
+      {"subject_name": "Anh", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Văn", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Địa", "weight": 0.25, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Kế toán - Kiểm toán",
+    "university": "ĐH Ngoại thương",
+    "faculty": "Khoa Tài chính Ngân hàng",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Kế toán quốc tế, kiểm toán nội bộ và phân tích tài chính theo chuẩn IFRS.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.50, "min_score": 8.0},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.5},
+      {"subject_name": "Văn", "weight": 0.20, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Khởi nghiệp và Đổi mới Sáng tạo",
+    "university": "ĐH FPT",
+    "faculty": "Khoa Kinh doanh",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Xây dựng startup, tư duy thiết kế và huy động vốn đầu tư mạo hiểm.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.40, "min_score": 8.0},
+      {"subject_name": "Văn", "weight": 0.30, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Điều dưỡng",
+    "university": "ĐH Y Dược TP.HCM",
+    "faculty": "Khoa Điều dưỡng - Kỹ thuật Y tế",
+    "major_group": "Y Dược",
+    "description": "Chăm sóc bệnh nhân trong bệnh viện và cộng đồng theo chuẩn quốc tế.",
+    "weights": [
+      {"subject_name": "Hóa", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Sinh", "weight": 0.40, "min_score": 8.0},
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Y khoa",
+    "university": "ĐH Y Dược TP.HCM",
+    "faculty": "Khoa Y",
+    "major_group": "Y Dược",
+    "description": "Đào tạo bác sĩ 6 năm với thực hành lâm sàng từ năm 3 tại bệnh viện TP.HCM.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.30, "min_score": 8.0},
+      {"subject_name": "Hóa", "weight": 0.35, "min_score": 8.5},
+      {"subject_name": "Sinh", "weight": 0.35, "min_score": 9.0}
+    ]
+  },
+  {
+    "name": "Kỹ thuật Giao thông",
+    "university": "ĐH Giao thông Vận tải",
+    "faculty": "Khoa Kỹ thuật Xây dựng",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Thiết kế đường bộ, cầu, hầm và hạ tầng giao thông vận tải.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.45, "min_score": 7.5},
+      {"subject_name": "Hóa", "weight": 0.20, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Kỹ thuật Hàng hải",
+    "university": "ĐH Hàng hải Việt Nam",
+    "faculty": "Khoa Máy tàu biển",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Vận hành, sửa chữa tàu biển và kỹ thuật hàng hải quốc tế.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Lý", "weight": 0.45, "min_score": 7.5},
+      {"subject_name": "Anh", "weight": 0.20, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Điều khiển học",
+    "university": "ĐHBK Hà Nội",
+    "faculty": "Viện Điện tử - Viễn thông",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Hệ thống điều khiển tự động, robot công nghiệp và IoT.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.40, "min_score": 8.0},
+      {"subject_name": "Lý", "weight": 0.45, "min_score": 8.0},
+      {"subject_name": "Anh", "weight": 0.15, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Kỹ thuật Ô tô",
+    "university": "ĐHBK TP.HCM",
+    "faculty": "Khoa Kỹ thuật Giao thông",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Thiết kế, chế tạo và bảo dưỡng xe ô tô và xe điện.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.50, "min_score": 8.0},
+      {"subject_name": "Hóa", "weight": 0.15, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Năng lượng Tái tạo",
+    "university": "ĐHBK Hà Nội",
+    "faculty": "Viện Điện",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Điện mặt trời, điện gió và hệ thống lưu trữ năng lượng bền vững.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.50, "min_score": 8.0},
+      {"subject_name": "Hóa", "weight": 0.15, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Mạng Máy tính và Truyền thông Dữ liệu",
+    "university": "ĐH Công nghệ - ĐHQGHN",
+    "faculty": "Khoa Mạng và Truyền thông",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Thiết kế mạng, bảo mật hệ thống và truyền thông dữ liệu tốc độ cao.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.25, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Hệ thống Thông tin",
+    "university": "ĐH Kinh tế Quốc dân",
+    "faculty": "Viện Công nghệ Thông tin và Kinh tế số",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Xây dựng hệ thống ERP, phân tích dữ liệu doanh nghiệp và chuyển đổi số.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Anh", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Văn", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Khoa học Tự nhiên",
+    "university": "ĐH Khoa học Tự nhiên - ĐHQGHN",
+    "faculty": "Khoa Khoa học Cơ bản",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Tích hợp Toán, Lý, Hóa, Sinh theo định hướng nghiên cứu liên ngành.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.30, "min_score": 8.0},
+      {"subject_name": "Lý", "weight": 0.25, "min_score": 8.0},
+      {"subject_name": "Hóa", "weight": 0.25, "min_score": 8.0},
+      {"subject_name": "Sinh", "weight": 0.20, "min_score": 7.5}
+    ]
+  },
+  {
+    "name": "Quản lý Nguồn nhân lực",
+    "university": "ĐH Kinh tế Quốc dân",
+    "faculty": "Khoa Kinh tế và Quản lý",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Tuyển dụng, đào tạo, đánh giá hiệu suất và phát triển tổ chức.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.30, "min_score": 6.5},
+      {"subject_name": "Văn", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.5}
+    ]
+  },
+  {
+    "name": "Kinh tế Đầu tư",
+    "university": "ĐH Kinh tế Quốc dân",
+    "faculty": "Khoa Kinh tế học",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Phân tích dự án đầu tư, thẩm định và quản lý danh mục đầu tư.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.50, "min_score": 7.5},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Văn", "weight": 0.20, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Bất động sản",
+    "university": "ĐH Kinh tế Quốc dân",
+    "faculty": "Khoa Bất động sản và Kinh tế Tài nguyên",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Định giá bất động sản, môi giới và quản lý dự án bất động sản.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.45, "min_score": 7.0},
+      {"subject_name": "Địa", "weight": 0.30, "min_score": 6.5},
+      {"subject_name": "Văn", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Kỹ thuật Vật liệu",
+    "university": "ĐHBK Hà Nội",
+    "faculty": "Viện Khoa học và Kỹ thuật Vật liệu",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Nghiên cứu vật liệu mới, kim loại, polymer và vật liệu composite.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Hóa", "weight": 0.40, "min_score": 8.0}
+    ]
+  },
+  {
+    "name": "Công nghệ Nano",
+    "university": "ĐHQG Hà Nội",
+    "faculty": "Khoa Khoa học và Công nghệ Tiên tiến",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Nghiên cứu vật liệu nano, cảm biến và ứng dụng y sinh học.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 8.0},
+      {"subject_name": "Lý", "weight": 0.40, "min_score": 8.5},
+      {"subject_name": "Hóa", "weight": 0.35, "min_score": 8.5}
+    ]
+  },
+  {
+    "name": "Kỹ thuật Hạt nhân",
+    "university": "ĐHBK Hà Nội",
+    "faculty": "Viện Vật lý Kỹ thuật",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "An toàn bức xạ, lò phản ứng hạt nhân và ứng dụng y học hạt nhân.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.30, "min_score": 8.5},
+      {"subject_name": "Lý", "weight": 0.55, "min_score": 9.0},
+      {"subject_name": "Hóa", "weight": 0.15, "min_score": 7.5}
+    ]
+  },
+  {
+    "name": "Công nghệ May và Thời trang",
+    "university": "ĐH Công nghiệp Hà Nội",
+    "faculty": "Khoa Công nghệ May và Thiết kế Thời trang",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Thiết kế thời trang, kỹ thuật cắt may và quản lý chuỗi sản xuất dệt may.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 6.5},
+      {"subject_name": "Văn", "weight": 0.40, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.35, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Quản lý Nhà nước",
+    "university": "Học viện Hành chính Quốc gia",
+    "faculty": "Khoa Hành chính học",
+    "major_group": "Luật - Hành chính",
+    "description": "Quản trị nhà nước, công vụ và cải cách hành chính công.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.40, "min_score": 7.0},
+      {"subject_name": "Sử", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Công tác Xã hội",
+    "university": "ĐH Lao động - Xã hội",
+    "faculty": "Khoa Công tác Xã hội",
+    "major_group": "Xã hội - Nhân văn",
+    "description": "Hỗ trợ cộng đồng, can thiệp xã hội và phúc lợi xã hội.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.45, "min_score": 7.0},
+      {"subject_name": "Sinh", "weight": 0.25, "min_score": 6.0},
+      {"subject_name": "Sử", "weight": 0.30, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Bảo hiểm",
+    "university": "Học viện Tài chính",
+    "faculty": "Khoa Bảo hiểm",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Tính phí bảo hiểm, định phí actuarial và quản lý rủi ro tài chính.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.55, "min_score": 8.0},
+      {"subject_name": "Anh", "weight": 0.25, "min_score": 7.0},
+      {"subject_name": "Văn", "weight": 0.20, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Thống kê",
+    "university": "ĐH Kinh tế Quốc dân",
+    "faculty": "Viện Thống kê",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Thu thập, phân tích và diễn giải số liệu thống kê kinh tế - xã hội.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.60, "min_score": 8.0},
+      {"subject_name": "Anh", "weight": 0.25, "min_score": 7.0},
+      {"subject_name": "Văn", "weight": 0.15, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Quản lý Giáo dục",
+    "university": "ĐH Sư phạm Hà Nội",
+    "faculty": "Khoa Quản lý Giáo dục",
+    "major_group": "Sư phạm",
+    "description": "Quản lý nhà trường, chính sách giáo dục và phát triển chương trình.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Toán", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Thiết kế Vi mạch",
+    "university": "ĐH Công nghệ - ĐHQGHN",
+    "faculty": "Khoa Điện tử - Viễn thông",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Thiết kế chip bán dẫn, VLSI và hệ thống nhúng hiệu năng cao.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.40, "min_score": 8.5},
+      {"subject_name": "Lý", "weight": 0.45, "min_score": 8.5},
+      {"subject_name": "Anh", "weight": 0.15, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Điện tử Viễn thông",
+    "university": "ĐH Công nghệ - ĐHQGHN",
+    "faculty": "Khoa Điện tử - Viễn thông",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Thiết kế vi mạch, xử lý tín hiệu số và hệ thống truyền thông không dây.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 8.0},
+      {"subject_name": "Lý", "weight": 0.45, "min_score": 8.0},
+      {"subject_name": "Anh", "weight": 0.20, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Kinh tế Chính trị",
+    "university": "ĐH Kinh tế - ĐHQGHN",
+    "faculty": "Khoa Kinh tế Chính trị",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Lý luận kinh tế Marxist và kinh tế học chính trị đương đại.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Sử", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Địa", "weight": 0.25, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Quan hệ Lao động",
+    "university": "ĐH Lao động - Xã hội",
+    "faculty": "Khoa Quan hệ Lao động",
+    "major_group": "Luật - Hành chính",
+    "description": "Pháp luật lao động, thương lượng tập thể và quản lý nhân sự.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Sử", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Toán", "weight": 0.30, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Ngôn ngữ Nga",
+    "university": "ĐH Hà Nội",
+    "faculty": "Khoa Tiếng Nga",
+    "major_group": "Xã hội - Nhân văn",
+    "description": "Tiếng Nga thương mại, văn hóa Nga và quan hệ Việt - Nga.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.45, "min_score": 7.5},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Sử", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Ngôn ngữ Pháp",
+    "university": "ĐH Hà Nội",
+    "faculty": "Khoa Tiếng Pháp",
+    "major_group": "Xã hội - Nhân văn",
+    "description": "Tiếng Pháp giao tiếp, thương mại và văn hóa Pháp ngữ.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.45, "min_score": 7.5},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Sử", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Văn học",
+    "university": "ĐH Khoa học Xã hội và Nhân văn - ĐHQGHN",
+    "faculty": "Khoa Văn học",
+    "major_group": "Xã hội - Nhân văn",
+    "description": "Văn học Việt Nam và nước ngoài, lý luận văn học và sáng tác.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.65, "min_score": 8.5},
+      {"subject_name": "Sử", "weight": 0.25, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.10, "min_score": 6.0}
+    ]
+  },
+  {
+    "name": "Nghiên cứu Phát triển",
+    "university": "ĐH Kinh tế - ĐHQGHN",
+    "faculty": "Khoa Kinh tế Phát triển",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Phân tích phát triển kinh tế, giảm nghèo và hợp tác quốc tế.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Anh", "weight": 0.35, "min_score": 8.0},
+      {"subject_name": "Địa", "weight": 0.25, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Dịch thuật",
+    "university": "ĐH Hà Nội",
+    "faculty": "Khoa Ngôn ngữ và Văn hóa Anh - Mỹ",
+    "major_group": "Xã hội - Nhân văn",
+    "description": "Dịch thuật Anh - Việt, phiên dịch hội nghị và bản địa hóa.",
+    "weights": [
+      {"subject_name": "Anh", "weight": 0.60, "min_score": 9.0},
+      {"subject_name": "Văn", "weight": 0.35, "min_score": 8.0},
+      {"subject_name": "Sử", "weight": 0.05, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Tin học Ứng dụng",
+    "university": "ĐH Sư phạm Hà Nội",
+    "faculty": "Khoa Toán - Tin",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Lập trình ứng dụng, quản trị hệ thống và tin học văn phòng nâng cao.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.45, "min_score": 7.5},
+      {"subject_name": "Lý", "weight": 0.30, "min_score": 6.5},
+      {"subject_name": "Anh", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Kinh doanh Thương mại",
+    "university": "ĐH Thương mại",
+    "faculty": "Khoa Thương mại",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Quản lý bán hàng, phân phối và chuỗi cung ứng trong thương mại bán lẻ.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Văn", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Công nghệ Ô tô",
+    "university": "ĐH Công nghiệp Hà Nội",
+    "faculty": "Khoa Công nghệ Ô tô",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Sửa chữa, bảo dưỡng và chẩn đoán ô tô theo chuẩn kỹ thuật hiện đại.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Lý", "weight": 0.50, "min_score": 7.5},
+      {"subject_name": "Hóa", "weight": 0.20, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Game Design",
+    "university": "ĐH FPT",
+    "faculty": "Khoa Thiết kế",
+    "major_group": "Nghệ thuật",
+    "description": "Thiết kế game 2D/3D, cơ chế gameplay và lập trình game engine.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Anh", "weight": 0.40, "min_score": 8.0},
+      {"subject_name": "Văn", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Khoa học Vũ trụ và Viễn thám",
+    "university": "ĐH Khoa học Tự nhiên - ĐHQGHN",
+    "faculty": "Khoa Vật lý",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Nghiên cứu vũ trụ, vệ tinh nhân tạo và ứng dụng viễn thám.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 8.5},
+      {"subject_name": "Lý", "weight": 0.55, "min_score": 9.0},
+      {"subject_name": "Anh", "weight": 0.10, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Logistics và Quản lý Chuỗi cung ứng",
+    "university": "ĐH Giao thông Vận tải",
+    "faculty": "Khoa Vận tải - Kinh tế",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Tối ưu hóa vận tải, kho bãi và quản lý luồng hàng hóa trong chuỗi cung ứng.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Anh", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Địa", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Khoa học Môi trường",
+    "university": "ĐH Khoa học Tự nhiên - ĐHQGHN",
+    "faculty": "Khoa Môi trường",
+    "major_group": "Nông Lâm",
+    "description": "Quan trắc môi trường, đánh giá tác động và giải pháp môi trường bền vững.",
+    "weights": [
+      {"subject_name": "Hóa", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Sinh", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Địa", "weight": 0.30, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Khởi nghiệp Xã hội",
+    "university": "ĐH FPT",
+    "faculty": "Khoa Kinh doanh",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Doanh nghiệp xã hội, tác động cộng đồng và quản trị phi lợi nhuận.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Quản lý Thể thao",
+    "university": "ĐH TDTT Bắc Ninh",
+    "faculty": "Khoa Quản lý TDTT",
+    "major_group": "Xã hội - Nhân văn",
+    "description": "Quản lý câu lạc bộ thể thao, tổ chức sự kiện và marketing thể thao.",
+    "weights": [
+      {"subject_name": "Văn", "weight": 0.35, "min_score": 6.5},
+      {"subject_name": "Sinh", "weight": 0.30, "min_score": 6.5},
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Kiến trúc Cảnh quan",
+    "university": "ĐH Kiến trúc Hà Nội",
+    "faculty": "Khoa Kiến trúc Cảnh quan",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Thiết kế công viên, vườn và không gian xanh đô thị.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 6.5},
+      {"subject_name": "Sinh", "weight": 0.35, "min_score": 7.0},
+      {"subject_name": "Văn", "weight": 0.40, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Y học Cổ truyền",
+    "university": "ĐH Y Hà Nội",
+    "faculty": "Khoa Y học Cổ truyền",
+    "major_group": "Y Dược",
+    "description": "Đông y, châm cứu và kết hợp y học cổ truyền với y học hiện đại.",
+    "weights": [
+      {"subject_name": "Hóa", "weight": 0.30, "min_score": 8.0},
+      {"subject_name": "Sinh", "weight": 0.40, "min_score": 8.5},
+      {"subject_name": "Văn", "weight": 0.30, "min_score": 7.5}
+    ]
+  },
+  {
+    "name": "Phục hồi Chức năng",
+    "university": "ĐH Y Dược TP.HCM",
+    "faculty": "Khoa Phục hồi Chức năng",
+    "major_group": "Y Dược",
+    "description": "Vật lý trị liệu, phục hồi vận động và hỗ trợ bệnh nhân sau chấn thương.",
+    "weights": [
+      {"subject_name": "Sinh", "weight": 0.45, "min_score": 8.0},
+      {"subject_name": "Hóa", "weight": 0.30, "min_score": 7.5},
+      {"subject_name": "Toán", "weight": 0.25, "min_score": 7.0}
+    ]
+  },
+  {
+    "name": "Kiểm soát Không lưu",
+    "university": "Học viện Hàng không Việt Nam",
+    "faculty": "Khoa Điều hành Bay",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Kiểm soát không lưu, điều hành sân bay và an toàn hàng không.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 8.0},
+      {"subject_name": "Lý", "weight": 0.40, "min_score": 8.0},
+      {"subject_name": "Anh", "weight": 0.25, "min_score": 8.5}
+    ]
+  },
+  {
+    "name": "Tài chính Doanh nghiệp",
+    "university": "Học viện Tài chính",
+    "faculty": "Khoa Tài chính Doanh nghiệp",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Quản lý ngân sách, cấu trúc vốn và phân tích đầu tư cho doanh nghiệp.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.50, "min_score": 8.0},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.0},
+      {"subject_name": "Văn", "weight": 0.20, "min_score": 6.5}
+    ]
+  },
+  {
+    "name": "Quản lý Bệnh viện",
+    "university": "ĐH Y Hà Nội",
+    "faculty": "Viện Đào tạo Quản lý Y tế",
+    "major_group": "Y Dược",
+    "description": "Quản trị bệnh viện, chính sách y tế và kinh tế y tế.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Sinh", "weight": 0.35, "min_score": 7.5},
+      {"subject_name": "Anh", "weight": 0.30, "min_score": 7.5}
+    ]
+  },
+  {
+    "name": "An toàn Thông tin",
+    "university": "Học viện Kỹ thuật Mật mã",
+    "faculty": "Khoa An toàn Thông tin",
+    "major_group": "Kỹ thuật - Công nghệ",
+    "description": "Mật mã học, bảo mật hệ thống và điều tra số trong an ninh mạng.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.50, "min_score": 8.5},
+      {"subject_name": "Lý", "weight": 0.25, "min_score": 7.0},
+      {"subject_name": "Anh", "weight": 0.25, "min_score": 7.5}
+    ]
+  },
+  {
+    "name": "Kinh tế Quốc tế",
+    "university": "ĐH Kinh tế - ĐHQGHN",
+    "faculty": "Khoa Kinh tế Quốc tế",
+    "major_group": "Kinh tế - Quản trị",
+    "description": "Thương mại quốc tế, tỷ giá và chính sách kinh tế đối ngoại.",
+    "weights": [
+      {"subject_name": "Toán", "weight": 0.40, "min_score": 7.5},
+      {"subject_name": "Anh", "weight": 0.40, "min_score": 8.0},
+      {"subject_name": "Địa", "weight": 0.20, "min_score": 6.5}
+    ]
+  }
+]

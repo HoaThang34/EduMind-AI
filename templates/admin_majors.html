@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý Ngành – Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background:#f5f5f5; font-family:'Be Vietnam Pro',system-ui,sans-serif; }
+    .card { background:#fff; border:1px solid #e5e5e5; border-radius:8px; }
+  </style>
+</head>
+<body class="min-h-screen">
+
+<nav class="bg-white border-b border-[#e5e5e5] px-6 py-3 flex items-center gap-4">
+  <a href="{{ url_for('main.admin_dashboard') }}" class="text-sm text-gray-500 hover:text-gray-800 flex items-center gap-1.5">
+    <i class="fas fa-arrow-left text-xs"></i> Admin
+  </a>
+  <span class="text-[#e5e5e5]">/</span>
+  <span class="text-sm font-semibold text-gray-800">Quản lý ngành đại học</span>
+  <button onclick="openAddModal()"
+    class="ml-auto text-sm px-3 py-1.5 bg-[#0070f3] text-white rounded-md hover:bg-blue-700 font-medium">
+    <i class="fas fa-plus mr-1.5"></i>Thêm ngành
+  </button>
+</nav>
+
+<div class="max-w-6xl mx-auto px-4 py-6">
+  <div class="card overflow-hidden">
+    <div class="px-5 py-3 border-b border-[#e5e5e5] flex items-center gap-3">
+      <span class="text-sm font-semibold text-gray-700">Danh sách ngành ({{ majors|length }})</span>
+      <input type="text" id="searchInput" placeholder="Tìm kiếm..."
+        class="ml-auto text-sm border border-[#e5e5e5] rounded-md px-3 py-1.5 w-48 focus:outline-none focus:border-blue-400">
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm" id="majorsTable">
+        <thead class="bg-[#fafafa] text-[11px] text-gray-400 uppercase">
+          <tr>
+            <th class="px-4 py-2.5 text-left">Tên ngành</th>
+            <th class="px-4 py-2.5 text-left">Trường</th>
+            <th class="px-4 py-2.5 text-left">Nhóm ngành</th>
+            <th class="px-4 py-2.5 text-center">Số môn</th>
+            <th class="px-4 py-2.5 text-center">Ngày tạo</th>
+            <th class="px-4 py-2.5"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#f0f0f0]">
+          {% for m in majors %}
+          <tr id="row-{{ m.id }}" data-search="{{ m.name|lower }} {{ m.university|lower }}">
+            <td class="px-4 py-3">
+              <div class="font-medium text-gray-900">{{ m.name }}</div>
+              {% if m.faculty %}<div class="text-xs text-gray-400">{{ m.faculty }}</div>{% endif %}
+            </td>
+            <td class="px-4 py-3 text-gray-600">{{ m.university }}</td>
+            <td class="px-4 py-3">
+              {% if m.major_group %}
+              <span class="text-xs px-2 py-0.5 rounded bg-[#f0f0f0] text-gray-600">{{ m.major_group }}</span>
+              {% endif %}
+            </td>
+            <td class="px-4 py-3 text-center tabular-nums text-gray-600">{{ m.weights|length }}</td>
+            <td class="px-4 py-3 text-center text-xs text-gray-400">
+              {{ m.created_at.strftime('%d/%m/%Y') if m.created_at else '—' }}
+            </td>
+            <td class="px-4 py-3 text-right">
+              <button onclick="deleteMajor({{ m.id }}, this)"
+                class="text-xs text-red-400 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add Modal -->
+<div id="addModal" class="fixed inset-0 bg-black/40 z-50 hidden flex items-start justify-center p-6 overflow-y-auto">
+  <div class="card w-full max-w-lg my-4">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-[#e5e5e5]">
+      <h3 class="font-bold text-gray-900">Thêm ngành mới</h3>
+      <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-700"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="addForm" class="p-5 space-y-4">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="col-span-2">
+          <label class="text-xs text-gray-500 font-medium">Tên ngành *</label>
+          <input name="name" required class="mt-1 w-full border border-[#e5e5e5] rounded-md px-3 py-2 text-sm focus:outline-none focus:border-blue-400">
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 font-medium">Trường đại học *</label>
+          <input name="university" required class="mt-1 w-full border border-[#e5e5e5] rounded-md px-3 py-2 text-sm focus:outline-none focus:border-blue-400">
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 font-medium">Khoa / Viện</label>
+          <input name="faculty" class="mt-1 w-full border border-[#e5e5e5] rounded-md px-3 py-2 text-sm focus:outline-none focus:border-blue-400">
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 font-medium">Nhóm ngành</label>
+          <input name="major_group" placeholder="Kỹ thuật, Kinh tế..." class="mt-1 w-full border border-[#e5e5e5] rounded-md px-3 py-2 text-sm focus:outline-none focus:border-blue-400">
+        </div>
+        <div class="col-span-2">
+          <label class="text-xs text-gray-500 font-medium">Mô tả</label>
+          <textarea name="description" rows="2" class="mt-1 w-full border border-[#e5e5e5] rounded-md px-3 py-2 text-sm focus:outline-none focus:border-blue-400 resize-none"></textarea>
+        </div>
+      </div>
+
+      <!-- Weights -->
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-xs text-gray-500 font-medium">Môn học & trọng số</label>
+          <button type="button" onclick="addWeightRow()"
+            class="text-xs text-[#0070f3] hover:underline"><i class="fas fa-plus mr-1"></i>Thêm môn</button>
+        </div>
+        <div id="weightsContainer" class="space-y-2">
+          <!-- rows added dynamically -->
+        </div>
+        <p class="text-[11px] text-gray-400 mt-1">Tổng trọng số nên = 1.0. Điểm yêu cầu thang 0–10.</p>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" onclick="closeAddModal()"
+          class="text-sm px-4 py-2 border border-[#e5e5e5] rounded-md hover:bg-gray-50">Hủy</button>
+        <button type="submit"
+          class="text-sm px-4 py-2 bg-[#0070f3] text-white rounded-md hover:bg-blue-700 font-medium">Lưu</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-5 right-5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg shadow-lg hidden z-50"></div>
+
+<script>
+// ── Search ───────────────────────────────────────────────────────────
+document.getElementById('searchInput').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  document.querySelectorAll('#majorsTable tbody tr').forEach(row => {
+    row.style.display = row.dataset.search.includes(q) ? '' : 'none';
+  });
+});
+
+// ── Delete ───────────────────────────────────────────────────────────
+async function deleteMajor(id, btn) {
+  if (!confirm('Xóa ngành này? Hành động không thể hoàn tác.')) return;
+  const res = await fetch(`/admin/majors/${id}`, { method: 'DELETE' });
+  if (res.ok) {
+    document.getElementById(`row-${id}`).remove();
+    showToast('Đã xóa ngành');
+  }
+}
+
+// ── Add modal ────────────────────────────────────────────────────────
+function openAddModal() {
+  document.getElementById('addModal').classList.remove('hidden');
+  document.getElementById('weightsContainer').innerHTML = '';
+  document.getElementById('addForm').reset();
+  addWeightRow();
+}
+function closeAddModal() {
+  document.getElementById('addModal').classList.add('hidden');
+}
+document.getElementById('addModal').addEventListener('click', function(e) {
+  if (e.target === this) closeAddModal();
+});
+
+const SUBJECTS = ['Toán','Văn','Anh','Lý','Hóa','Sinh','Sử','Địa','GDCD','Tin học'];
+
+function addWeightRow() {
+  const c = document.getElementById('weightsContainer');
+  const div = document.createElement('div');
+  div.className = 'flex gap-2 items-center';
+  div.innerHTML = `
+    <select class="flex-1 border border-[#e5e5e5] rounded-md px-2 py-1.5 text-sm focus:outline-none focus:border-blue-400 w-subject">
+      ${SUBJECTS.map(s => `<option>${s}</option>`).join('')}
+    </select>
+    <input type="number" step="0.01" min="0" max="1" placeholder="Trọng số" class="w-24 border border-[#e5e5e5] rounded-md px-2 py-1.5 text-sm focus:outline-none focus:border-blue-400">
+    <input type="number" step="0.1" min="0" max="10" placeholder="Điểm min" class="w-24 border border-[#e5e5e5] rounded-md px-2 py-1.5 text-sm focus:outline-none focus:border-blue-400">
+    <button type="button" onclick="this.parentElement.remove()" class="text-gray-300 hover:text-red-400 px-1"><i class="fas fa-times"></i></button>
+  `;
+  c.appendChild(div);
+}
+
+document.getElementById('addForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const fd = new FormData(this);
+  const weights = [];
+  document.querySelectorAll('#weightsContainer > div').forEach(row => {
+    const els = row.querySelectorAll('select, input[type=number]');
+    if (els.length >= 3 && els[1].value && els[2].value) {
+      weights.push({ subject_name: els[0].value, weight: parseFloat(els[1].value), min_score: parseFloat(els[2].value) });
+    }
+  });
+  const payload = {
+    name: fd.get('name'), university: fd.get('university'),
+    faculty: fd.get('faculty'), major_group: fd.get('major_group'),
+    description: fd.get('description'), weights
+  };
+  const res = await fetch('/admin/majors/add', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  });
+  if (res.ok) {
+    closeAddModal();
+    showToast('Đã thêm ngành. Tải lại trang để xem.');
+    setTimeout(() => location.reload(), 1500);
+  } else {
+    showToast('Lỗi: không thể thêm ngành');
+  }
+});
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  setTimeout(() => t.classList.add('hidden'), 2500);
+}
+</script>
+</body>
+</html>

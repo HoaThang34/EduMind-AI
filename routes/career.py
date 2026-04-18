@@ -1,0 +1,221 @@
+from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
+from models import db, Student, UniversityMajor, MajorSubjectWeight, StudentPinnedMajor, StudentTargetMajor, SystemConfig
+from app_helpers import calculate_subject_averages, calculate_fit_score
+import datetime
+
+career_bp = Blueprint('career', __name__)
+
+
+def _student():
+    sid = session.get('student_id')
+    return Student.query.get(sid) if sid else None
+
+
+def _cfg():
+    configs = {c.key: c.value for c in SystemConfig.query.all()}
+    return int(configs.get('current_semester', '1')), configs.get('school_year', '2025-2026')
+
+
+def _weights_list(major):
+    return [{'subject_name': w.subject_name, 'weight': w.weight, 'min_score': w.min_score}
+            for w in major.weights]
+
+
+def _radar(major_id, averages):
+    weights = MajorSubjectWeight.query.filter_by(major_id=major_id).all()
+    return (
+        [w.subject_name for w in weights],
+        [averages.get(w.subject_name, 0.0) for w in weights],
+        [w.min_score for w in weights],
+        [{'subject_name': w.subject_name, 'weight': w.weight, 'min_score': w.min_score} for w in weights],
+    )
+
+
+@career_bp.route('/student/career')
+def career_main():
+    student = _student()
+    if not student:
+        return redirect(url_for('student.student_login'))
+    sem, yr = _cfg()
+    averages = calculate_subject_averages(student.id, sem, yr)
+
+    target = StudentTargetMajor.query.filter_by(student_id=student.id).first()
+    target_major = target.major if target else None
+    target_data = None
+    if target_major:
+        fit = calculate_fit_score(averages, _weights_list(target_major))
+        target_data = {'major': target_major, 'fit_pct': fit['fit_pct'], 'gaps': fit['gaps']}
+
+    pins = StudentPinnedMajor.query.filter_by(student_id=student.id).all()
+    pinned_data = []
+    for p in pins:
+        fit = calculate_fit_score(averages, _weights_list(p.major))
+        pinned_data.append({'major': p.major, 'fit_pct': fit['fit_pct']})
+
+    default_major = target_major or UniversityMajor.query.first()
+    if default_major:
+        labels, stu_scores, maj_scores, _ = _radar(default_major.id, averages)
+    else:
+        labels, stu_scores, maj_scores = [], [], []
+
+    return render_template('student_career.html',
+        student=student, target_data=target_data, pinned_data=pinned_data,
+        radar_labels=labels, radar_student=stu_scores, radar_major=maj_scores,
+        default_major=default_major)
+
+
+@career_bp.route('/api/student/career/radar-data')
+def api_radar_data():
+    student = _student()
+    if not student:
+        return jsonify({'error': 'unauthorized'}), 401
+    major_id = request.args.get('major_id', type=int)
+    major = UniversityMajor.query.get_or_404(major_id)
+    sem, yr = _cfg()
+    averages = calculate_subject_averages(student.id, sem, yr)
+    labels, stu_scores, maj_scores, wlist = _radar(major_id, averages)
+    fit = calculate_fit_score(averages, wlist)
+    return jsonify({
+        'labels': labels, 'student_scores': stu_scores, 'major_scores': maj_scores,
+        'fit_pct': fit['fit_pct'], 'gaps': fit['gaps'],
+        'major': {'id': major.id, 'name': major.name, 'university': major.university},
+    })
+
+
+@career_bp.route('/api/student/career/browse')
+def api_browse():
+    student = _student()
+    if not student:
+        return jsonify({'error': 'unauthorized'}), 401
+    sem, yr = _cfg()
+    averages = calculate_subject_averages(student.id, sem, yr)
+
+    group = request.args.get('group', '')
+    min_fit = request.args.get('min_fit', 0, type=float)
+    q = request.args.get('q', '').strip().lower()
+
+    query = UniversityMajor.query
+    if group:
+        query = query.filter_by(major_group=group)
+    majors = query.all()
+
+    pinned_ids = {p.major_id for p in StudentPinnedMajor.query.filter_by(student_id=student.id)}
+    target = StudentTargetMajor.query.filter_by(student_id=student.id).first()
+    target_id = target.major_id if target else None
+
+    results = []
+    for major in majors:
+        if q and q not in major.name.lower() and q not in major.university.lower():
+            continue
+        wlist = _weights_list(major)
+        if not wlist:
+            continue
+        fit = calculate_fit_score(averages, wlist)
+        if fit['fit_pct'] < min_fit:
+            continue
+        labels, stu_scores, maj_scores, _ = _radar(major.id, averages)
+        results.append({
+            'id': major.id, 'name': major.name, 'university': major.university,
+            'faculty': major.faculty, 'major_group': major.major_group,
+            'fit_pct': fit['fit_pct'],
+            'is_pinned': major.id in pinned_ids,
+            'is_target': major.id == target_id,
+            'radar': {'labels': labels, 'student_scores': stu_scores, 'major_scores': maj_scores},
+        })
+    results.sort(key=lambda x: x['fit_pct'], reverse=True)
+    return jsonify({'majors': results})
+
+
+@career_bp.route('/api/student/career/pin', methods=['POST'])
+def api_pin():
+    student = _student()
+    if not student:
+        return jsonify({'error': 'unauthorized'}), 401
+    major_id = request.json.get('major_id')
+    if not UniversityMajor.query.get(major_id):
+        return jsonify({'error': 'not found'}), 404
+    if not StudentPinnedMajor.query.filter_by(student_id=student.id, major_id=major_id).first():
+        db.session.add(StudentPinnedMajor(
+            student_id=student.id, major_id=major_id, pinned_at=datetime.datetime.utcnow()))
+        db.session.commit()
+    return jsonify({'ok': True})
+
+
+@career_bp.route('/api/student/career/pin/<int:major_id>', methods=['DELETE'])
+def api_unpin(major_id):
+    student = _student()
+    if not student:
+        return jsonify({'error': 'unauthorized'}), 401
+    pin = StudentPinnedMajor.query.filter_by(student_id=student.id, major_id=major_id).first()
+    if pin:
+        db.session.delete(pin)
+        db.session.commit()
+    return jsonify({'ok': True})
+
+
+@career_bp.route('/api/student/career/target', methods=['POST'])
+def api_set_target():
+    student = _student()
+    if not student:
+        return jsonify({'error': 'unauthorized'}), 401
+    major_id = request.json.get('major_id')
+    if not UniversityMajor.query.get(major_id):
+        return jsonify({'error': 'not found'}), 404
+    existing = StudentTargetMajor.query.filter_by(student_id=student.id).first()
+    if existing:
+        existing.major_id = major_id
+        existing.set_at = datetime.datetime.utcnow()
+    else:
+        db.session.add(StudentTargetMajor(
+            student_id=student.id, major_id=major_id, set_at=datetime.datetime.utcnow()))
+    db.session.commit()
+    return jsonify({'ok': True})
+
+
+@career_bp.route('/student/career/browse')
+def career_browse():
+    student = _student()
+    if not student:
+        return redirect(url_for('student.student_login'))
+    groups = [g[0] for g in db.session.query(UniversityMajor.major_group).distinct().all() if g[0]]
+    return render_template('student_career_browse.html', student=student, groups=groups)
+
+
+@career_bp.route('/admin/majors')
+def admin_majors():
+    from flask_login import current_user
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        return redirect(url_for('auth.login'))
+    majors = UniversityMajor.query.order_by(UniversityMajor.university).all()
+    return render_template('admin_majors.html', majors=majors)
+
+
+@career_bp.route('/admin/majors/add', methods=['POST'])
+def admin_add_major():
+    from flask_login import current_user
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        return jsonify({'error': 'unauthorized'}), 401
+    data = request.json
+    major = UniversityMajor(
+        name=data['name'], university=data['university'],
+        faculty=data.get('faculty', ''), major_group=data.get('major_group', ''),
+        description=data.get('description', ''), created_at=datetime.datetime.utcnow())
+    db.session.add(major)
+    db.session.flush()
+    for w in data.get('weights', []):
+        db.session.add(MajorSubjectWeight(
+            major_id=major.id, subject_name=w['subject_name'],
+            weight=float(w['weight']), min_score=float(w['min_score'])))
+    db.session.commit()
+    return jsonify({'ok': True, 'id': major.id})
+
+
+@career_bp.route('/admin/majors/<int:major_id>', methods=['DELETE'])
+def admin_delete_major(major_id):
+    from flask_login import current_user
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        return jsonify({'error': 'unauthorized'}), 401
+    major = UniversityMajor.query.get_or_404(major_id)
+    db.session.delete(major)
+    db.session.commit()
+    return jsonify({'ok': True})
