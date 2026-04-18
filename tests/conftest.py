@@ -24,7 +24,7 @@ def client(app):
 @pytest.fixture
 def student_session(client, app):
     with app.app_context():
-        s = Student.query.filter_by(username='test_student').first()
+        s = Student.query.filter_by(student_code='TS001').first()
         with client.session_transaction() as sess:
             sess['student_id'] = s.id
     return client
@@ -33,11 +33,10 @@ def student_session(client, app):
 def _seed_test_data():
     from werkzeug.security import generate_password_hash
     student = Student(
-        username='test_student',
-        password=generate_password_hash('password'),
-        full_name='Học Sinh Test',
-        class_id=None,
+        name='Học Sinh Test',
         student_code='TS001',
+        student_class='12A1',
+        password=generate_password_hash('password'),
     )
     _db.session.add(student)
     _db.session.flush()

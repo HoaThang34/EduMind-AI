@@ -575,13 +575,15 @@ class TeacherClassAssignment(db.Model):
 class UniversityMajor(db.Model):
     __tablename__ = 'university_major'
     __table_args__ = (
-        db.UniqueConstraint('name', 'university', name='uq_major_university'),
+        db.UniqueConstraint('name', 'university', 'admission_block', name='uq_major_university_block'),
     )
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
     university = db.Column(db.String(150), nullable=False)
     faculty = db.Column(db.String(150))
-    major_group = db.Column(db.String(50))  # Kỹ thuật, Kinh tế, Y dược, Xã hội,...
+    major_group = db.Column(db.String(50))
+    admission_block = db.Column(db.String(20))
+    entry_score = db.Column(db.Float)
     description = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
@@ -591,6 +593,8 @@ class UniversityMajor(db.Model):
                                  cascade='all, delete-orphan', lazy=True)
     targeted_by = db.relationship('StudentTargetMajor', backref='major',
                                    cascade='all, delete-orphan', lazy=True)
+    entry_scores = db.relationship('MajorEntryScore', backref='major',
+                                    cascade='all, delete-orphan', lazy=True)
 
 
 class MajorSubjectWeight(db.Model):
@@ -623,3 +627,12 @@ class StudentTargetMajor(db.Model):
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False, index=True)
     major_id = db.Column(db.Integer, db.ForeignKey('university_major.id'), nullable=False)
     set_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+
+class MajorEntryScore(db.Model):
+    __tablename__ = 'major_entry_score'
+    __table_args__ = (db.UniqueConstraint('major_id', 'year', name='uq_major_year'),)
+    id = db.Column(db.Integer, primary_key=True)
+    major_id = db.Column(db.Integer, db.ForeignKey('university_major.id'), nullable=False, index=True)
+    year = db.Column(db.Integer, nullable=False)
+    score = db.Column(db.Float, nullable=False)
