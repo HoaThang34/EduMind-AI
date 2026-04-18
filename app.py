@@ -30,7 +30,10 @@ def musics_file(filename):
 
 
 app.config["SECRET_KEY"] = "chia-khoa-bi-mat-cua-ban-ne-123456"
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(basedir, "database.db")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
+    "EDUMIND_DB_URI",
+    "sqlite:///" + os.path.join(basedir, "database.db"),
+)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)

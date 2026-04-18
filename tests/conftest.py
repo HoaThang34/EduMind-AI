@@ -1,18 +1,35 @@
+import os
+# CRITICAL: force :memory: DB BEFORE importing app. app.py reads EDUMIND_DB_URI
+# from env at module load. Previously conftest mutated config AFTER app loaded,
+# so the Flask-SQLAlchemy engine stayed bound to production database.db and
+# drop_all() at teardown wiped real data.
+os.environ['EDUMIND_DB_URI'] = 'sqlite:///:memory:'
+
 import pytest
 from app import app as flask_app
 from models import db as _db, UniversityMajor, MajorSubjectWeight, MajorEntryScore, Student
 import datetime
 
 
+def _assert_memory_db():
+    url = str(_db.engine.url)
+    if ':memory:' not in url:
+        raise RuntimeError(
+            f"REFUSING to run tests against non-memory DB: {url}. "
+            "Set EDUMIND_DB_URI=sqlite:///:memory: before importing app."
+        )
+
+
 @pytest.fixture(scope='session')
 def app():
     flask_app.config['TESTING'] = True
-    flask_app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     flask_app.config['WTF_CSRF_ENABLED'] = False
     with flask_app.app_context():
+        _assert_memory_db()
         _db.create_all()
         _seed_test_data()
         yield flask_app
+        _assert_memory_db()
         _db.drop_all()
 
 
