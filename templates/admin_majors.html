@@ -42,6 +42,8 @@
             <th class="px-4 py-2.5 text-left">Tên ngành</th>
             <th class="px-4 py-2.5 text-left">Trường</th>
             <th class="px-4 py-2.5 text-left">Nhóm ngành</th>
+            <th class="px-4 py-2.5 text-center">Khối XT</th>
+            <th class="px-4 py-2.5 text-center">ĐC 2025</th>
             <th class="px-4 py-2.5 text-center">Số môn</th>
             <th class="px-4 py-2.5 text-center">Ngày tạo</th>
             <th class="px-4 py-2.5"></th>
@@ -59,6 +61,16 @@
               {% if m.major_group %}
               <span class="text-xs px-2 py-0.5 rounded bg-[#f0f0f0] text-gray-600">{{ m.major_group }}</span>
               {% endif %}
+            </td>
+            <td class="px-4 py-3 text-center">
+              <input type="text" class="border border-[#e5e5e5] rounded px-1 py-0.5 text-xs text-center" style="width:70px"
+                     value="{{ m.admission_block or '' }}"
+                     onchange="updateMajorField({{ m.id }}, 'admission_block', this.value)">
+            </td>
+            <td class="px-4 py-3 text-center">
+              <input type="number" class="border border-[#e5e5e5] rounded px-1 py-0.5 text-xs text-center" style="width:80px"
+                     step="0.1" value="{{ m.entry_score or '' }}"
+                     onchange="updateMajorField({{ m.id }}, 'entry_score', this.value)">
             </td>
             <td class="px-4 py-3 text-center tabular-nums text-gray-600">{{ m.weights|length }}</td>
             <td class="px-4 py-3 text-center text-xs text-gray-400">
@@ -218,6 +230,14 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.remove('hidden');
   setTimeout(() => t.classList.add('hidden'), 2500);
+}
+
+async function updateMajorField(id, field, value) {
+  await fetch(`/admin/majors/${id}`, {
+    method: 'PATCH',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({[field]: value})
+  });
 }
 </script>
 </body>
