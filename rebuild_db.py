@@ -1,10 +1,25 @@
+"""
+XÓA TOÀN BỘ DATABASE và tạo lại từ đầu.
+CHỈ dùng khi setup lần đầu trên máy mới — KHÔNG dùng để migrate.
+Để thêm bảng/cột mới: dùng migrate.py
+
+Bắt buộc truyền --force để chạy:
+    python rebuild_db.py --force
+"""
+import sys
 import os
 from app import app, db
 from models import Teacher, SystemConfig, ViolationType, Subject, ClassRoom, ClassSubject
 from werkzeug.security import generate_password_hash
+from seed_majors import seed as seed_majors
+from seed_entry_scores import seed as seed_entry_scores
 
 def rebuild():
-    # Xóa database cũ
+    if "--force" not in sys.argv:
+        print("⛔  rebuild_db.py XÓA TOÀN BỘ DATA. Truyền --force nếu thực sự muốn chạy.")
+        print("    Để migrate an toàn: python migrate.py")
+        sys.exit(1)
+
     db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "database.db")
     if os.path.exists(db_path):
         os.remove(db_path)
@@ -148,6 +163,13 @@ def rebuild():
         db.session.add_all(rules)
 
         db.session.commit()
+
+        # 5. Seed university majors + entry scores
+        print("Seeding university majors...")
+        seed_majors()
+        print("Seeding entry scores...")
+        seed_entry_scores()
+
         print("Đã khởi tạo dữ liệu mẫu thành công.")
         print("Tài khoản admin: admin / admin123")
 
