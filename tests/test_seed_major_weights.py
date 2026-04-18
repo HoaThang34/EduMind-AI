@@ -46,3 +46,28 @@ def test_derive_weights_for_A01_STEM_major(blocks_data):
     assert 'Lý' not in by_subj
     assert 'Anh' not in by_subj
     assert 'Văn' not in by_subj
+
+
+def test_derive_weights_related_and_unrelated_bands(blocks_data):
+    """STEM major A01: Hóa học/Sinh học/Tin học trong [5,7]. Ngữ văn/Lịch sử/Địa lý trong [3, 4.5]."""
+    from seed_major_weights import derive_weights
+
+    class FakeMajor:
+        id = 42
+        name = "Test"
+        admission_block = "A01"
+        entry_score = 26.0
+        major_group = "Công nghệ"
+
+    weights = derive_weights(FakeMajor(), blocks_data, DB_SUBJECTS)
+    by_subj = {w['subject_name']: w for w in weights}
+
+    # Related (STEM): Hóa học, Sinh học, Tin học, Công nghệ
+    for subj in ['Hóa học', 'Sinh học', 'Tin học', 'Công nghệ']:
+        assert 5.0 <= by_subj[subj]['min_score'] <= 7.0, f"{subj}={by_subj[subj]['min_score']} not in [5,7]"
+        assert by_subj[subj]['weight'] == 0.03, f"{subj} weight should be 0.03"
+
+    # Unrelated: Lịch sử, Địa lý, Giáo dục công dân, Âm nhạc, Hội họa
+    for subj in ['Lịch sử', 'Địa lý', 'Giáo dục công dân', 'Âm nhạc', 'Hội họa']:
+        assert 3.0 <= by_subj[subj]['min_score'] <= 4.5, f"{subj}={by_subj[subj]['min_score']} not in [3, 4.5]"
+        assert by_subj[subj]['weight'] == 0.0, f"{subj} weight should be 0.0"
