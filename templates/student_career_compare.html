@@ -39,11 +39,42 @@
 
   <!-- Selected majors + add -->
   <div class="card p-4 mb-4">
-    <div id="selectedChips" class="flex flex-wrap gap-2 items-center"></div>
-    <div class="mt-2 relative max-w-xs">
-      <input type="text" id="addSearch" placeholder="+ Thêm ngành (gõ để tìm)..."
-        class="w-full text-sm border border-[#e5e5e5] rounded-md px-3 py-1.5 focus:outline-none focus:border-blue-400">
-      <div id="addDropdown" class="hidden absolute top-full left-0 w-full bg-white border border-[#e5e5e5] rounded-md mt-1 max-h-48 overflow-y-auto z-50 shadow-lg"></div>
+    <div class="flex flex-wrap gap-2 items-center">
+      <div id="selectedChips" class="flex flex-wrap gap-2 items-center"></div>
+      <button id="addMajorBtn" onclick="toggleAddBox()"
+        class="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 bg-[#0070f3] text-white rounded-md hover:bg-blue-700 font-medium">
+        <i class="fas fa-plus"></i> Thêm ngành
+      </button>
+      <span id="maxHint" class="hidden text-[11px] text-gray-400">(tối đa 4)</span>
+    </div>
+  </div>
+
+  <!-- Modal thêm ngành -->
+  <div id="addModal" class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4">
+    <div class="card w-full max-w-3xl max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-[#e5e5e5]">
+        <div>
+          <h3 class="font-bold text-gray-900 text-sm">Chọn ngành để so sánh</h3>
+          <span id="modalSelectedCount" class="text-[11px] text-gray-400">Đã chọn: 0</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="confirmAddMajors()" id="confirmBtn"
+            class="text-xs px-4 py-1.5 bg-[#0070f3] text-white rounded-md hover:bg-blue-700 font-medium disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+            Xác nhận
+          </button>
+          <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-700"><i class="fas fa-times"></i></button>
+        </div>
+      </div>
+      <div class="px-5 py-3 border-b border-[#e5e5e5]">
+        <div class="relative">
+          <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+          <input type="text" id="addSearch" placeholder="Tìm tên ngành hoặc trường..."
+            class="w-full text-sm border border-[#e5e5e5] rounded-md pl-8 pr-3 py-2 focus:outline-none focus:border-blue-400">
+        </div>
+      </div>
+      <div id="addGrid" class="flex-1 overflow-y-auto p-5">
+        <div class="text-center text-gray-400 text-sm py-8">Đang tải...</div>
+      </div>
     </div>
   </div>
 
@@ -84,7 +115,7 @@ const urlIds=new URLSearchParams(location.search).get('major_ids')||'';
 if(urlIds){urlIds.split(',').filter(Boolean).forEach(id=>compareIds.add(parseInt(id)));sessionStorage.setItem('compare_major_ids',JSON.stringify([...compareIds]));}
 
 async function loadAndRender(){
-  if(!compareIds.size){clearAll();return;}
+  if(!compareIds.size){currentData={majors:[],student_scores:{}};clearAll();renderChips();return;}
   const r=await fetch('/api/student/career/compare?major_ids='+[...compareIds].join(','));
   currentData=await r.json();
   renderChips();renderRadar();renderLine();renderTable();
@@ -92,7 +123,18 @@ async function loadAndRender(){
 
 function renderChips(){
   const c=document.getElementById('selectedChips');c.innerHTML='';
-  if(!currentData)return;
+  const btn=document.getElementById('addMajorBtn');
+  const hint=document.getElementById('maxHint');
+  const count=currentData?currentData.majors.length:0;
+  if(count>=4){btn.classList.add('opacity-50','cursor-not-allowed');hint.classList.remove('hidden');}
+  else{btn.classList.remove('opacity-50','cursor-not-allowed');hint.classList.add('hidden');}
+  if(!currentData||!count){
+    const empty=document.createElement('span');
+    empty.className='text-xs text-gray-400';
+    empty.textContent='Chưa có ngành nào — bấm "Thêm ngành" để bắt đầu';
+    c.appendChild(empty);
+    return;
+  }
   currentData.majors.forEach((m,i)=>{
     const s=document.createElement('span');
     s.className='inline-flex items-center gap-1.5 text-xs text-white px-2.5 py-1 rounded-md font-medium';
@@ -100,6 +142,11 @@ function renderChips(){
     s.innerHTML=`${m.name} — ${m.university}<button onclick="removeMajor(${m.id})" class="ml-1 opacity-70 hover:opacity-100"><i class="fas fa-times text-[10px]"></i></button>`;
     c.appendChild(s);
   });
+}
+
+function toggleAddBox(){
+  if(compareIds.size>=4){alert('Tối đa 4 ngành');return;}
+  openAddModal();
 }
 
 function removeMajor(id){compareIds.delete(id);sessionStorage.setItem('compare_major_ids',JSON.stringify([...compareIds]));loadAndRender();}
@@ -114,7 +161,7 @@ function renderRadar(){
     borderColor:COLORS[i],backgroundColor:COLORS[i]+'33',borderWidth:2
   }));
   if(currentData.student_scores&&Object.keys(currentData.student_scores).length){
-    datasets.push({label:'Điểm của bạn',data:allLabels.map(l=>currentData.student_scores[l]||0),borderColor:'#94a3b8',backgroundColor:'#94a3b822',borderWidth:2,borderDash:[5,3]});
+    datasets.push({label:'Điểm của bạn',data:allLabels.map(l=>currentData.student_scores[l]||0),borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,0.08)',borderWidth:2.5,borderDash:[6,4],pointBackgroundColor:'#ef4444',pointRadius:3});
   }
   radarChart=new Chart(document.getElementById('radarChart'),{
     type:'radar',data:{labels:allLabels,datasets},
@@ -167,27 +214,93 @@ function renderTable(){
 
 function clearAll(){if(radarChart)radarChart.destroy();if(lineChart)lineChart.destroy();document.getElementById('vsThead').innerHTML='';document.getElementById('vsTbody').innerHTML='';document.getElementById('selectedChips').innerHTML='';}
 
-// ── Add search ──────────────────────────────────────────────────────
+// ── Add modal (multi-select) ─────────────────────────────────────────
+const norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase();
+const acr=s=>norm(s).split(/\s+/).filter(Boolean).map(w=>w[0]).join('');
+let pendingIds=new Set();
+
+function updateModalCount(){
+  const maxNew=4-compareIds.size;
+  document.getElementById('modalSelectedCount').textContent=`Đã chọn: ${pendingIds.size} / ${maxNew} còn trống`;
+  const btn=document.getElementById('confirmBtn');
+  btn.disabled=pendingIds.size===0;
+}
+
+async function openAddModal(){
+  pendingIds=new Set();
+  document.getElementById('addModal').classList.remove('hidden');
+  document.getElementById('addSearch').value='';
+  if(!allMajorsCache){
+    const r=await fetch('/api/student/career/browse');
+    allMajorsCache=(await r.json()).majors;
+  }
+  updateModalCount();
+  renderAddGrid(allMajorsCache);
+  setTimeout(()=>document.getElementById('addSearch').focus(),50);
+}
+function closeAddModal(){document.getElementById('addModal').classList.add('hidden');pendingIds.clear();}
+document.getElementById('addModal').addEventListener('click',function(e){if(e.target===this)closeAddModal();});
+
+function renderAddGrid(list){
+  const grid=document.getElementById('addGrid');
+  const available=list.filter(m=>!compareIds.has(m.id));
+  if(!available.length){grid.innerHTML='<div class="text-gray-400 text-sm text-center py-8">Không tìm thấy ngành</div>';return;}
+  grid.innerHTML='<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">'+available.map(m=>{
+    const selected=pendingIds.has(m.id);
+    return `<div data-mid="${m.id}" class="border rounded-lg p-3 transition-all cursor-pointer ${selected?'border-blue-500 bg-blue-50 ring-2 ring-blue-200':'border-[#e5e5e5] hover:border-blue-300 hover:shadow-md'}" onclick="togglePick(${m.id})">
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex-1 min-w-0">
+          <div class="text-xs font-semibold text-gray-800 truncate">${m.name}</div>
+          <div class="text-[11px] text-gray-400 truncate">${m.university}</div>
+        </div>
+        <div class="shrink-0 w-5 h-5 rounded border flex items-center justify-center ${selected?'bg-[#0070f3] border-[#0070f3]':'border-gray-300'}">
+          ${selected?'<i class="fas fa-check text-white text-[10px]"></i>':''}
+        </div>
+      </div>
+      <div class="flex items-center justify-between mt-2">
+        <span class="text-[11px] text-gray-400">${m.admission_block||''}</span>
+        <span class="text-xs font-bold tabular-nums ${m.fit_pct>=80?'text-green-600':m.fit_pct>=60?'text-amber-600':'text-red-500'}">${Math.round(m.fit_pct)}%</span>
+      </div>
+    </div>`;
+  }).join('')+'</div>';
+}
+
+function togglePick(id){
+  const maxNew=4-compareIds.size;
+  if(pendingIds.has(id)){pendingIds.delete(id);}
+  else{if(pendingIds.size>=maxNew){alert(`Chỉ có thể thêm tối đa ${maxNew} ngành nữa`);return;}pendingIds.add(id);}
+  updateModalCount();
+  const card=document.querySelector(`[data-mid="${id}"]`);
+  if(card){
+    const lastQ=document.getElementById('addSearch').value.trim();
+    const qn=lastQ?norm(lastQ).replace(/\s/g,''):'';
+    const filtered=qn?(allMajorsCache||[]).filter(m=>{const hay=norm(m.name+' '+m.university).replace(/\s/g,'');return hay.includes(qn)||(acr(m.university)+acr(m.name)).includes(qn);}):allMajorsCache;
+    renderAddGrid(filtered||[]);
+  }
+}
+
+function confirmAddMajors(){
+  pendingIds.forEach(id=>compareIds.add(id));
+  sessionStorage.setItem('compare_major_ids',JSON.stringify([...compareIds]));
+  closeAddModal();
+  loadAndRender();
+}
+
 let addTimer;
-document.getElementById('addSearch').addEventListener('input',async function(){
+document.getElementById('addSearch').addEventListener('input',function(){
   clearTimeout(addTimer);
-  addTimer=setTimeout(async()=>{
+  addTimer=setTimeout(()=>{
     const q=this.value.trim();
-    if(!q){document.getElementById('addDropdown').classList.add('hidden');return;}
-    if(!allMajorsCache){const r=await fetch('/api/student/career/browse');allMajorsCache=(await r.json()).majors;}
-    const filtered=allMajorsCache.filter(m=>(m.name+m.university).toLowerCase().includes(q.toLowerCase())&&!compareIds.has(m.id)).slice(0,8);
-    const dd=document.getElementById('addDropdown');dd.innerHTML='';
-    filtered.forEach(m=>{
-      const item=document.createElement('div');
-      item.className='px-3 py-2 text-xs hover:bg-[#f5f5f5] cursor-pointer';
-      item.textContent=m.name+' — '+m.university;
-      item.onclick=()=>{if(compareIds.size>=4){alert('Tối đa 4 ngành');return;}compareIds.add(m.id);sessionStorage.setItem('compare_major_ids',JSON.stringify([...compareIds]));document.getElementById('addSearch').value='';dd.classList.add('hidden');loadAndRender();};
-      dd.appendChild(item);
+    if(!q){renderAddGrid(allMajorsCache||[]);return;}
+    const qn=norm(q).replace(/\s/g,'');
+    const filtered=(allMajorsCache||[]).filter(m=>{
+      const hay=norm(m.name+' '+m.university).replace(/\s/g,'');
+      if(hay.includes(qn))return true;
+      return (acr(m.university)+acr(m.name)).includes(qn);
     });
-    dd.classList.toggle('hidden',filtered.length===0);
-  },300);
+    renderAddGrid(filtered);
+  },200);
 });
-document.addEventListener('click',e=>{if(!e.target.closest('#addSearch'))document.getElementById('addDropdown').classList.add('hidden');});
 
 loadAndRender();
 </script>

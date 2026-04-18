@@ -61,7 +61,8 @@
     </select>
     <select id="blockFilter" class="text-sm border border-[#e5e5e5] rounded-md px-2.5 py-1.5 bg-white focus:outline-none">
       <option value="">Tất cả khối</option>
-      <option>A1</option><option>A00</option><option>B00</option><option>D01</option><option>C00</option>
+      <option>A00</option><option>A01</option><option>B00</option><option>B08</option>
+      <option>C00</option><option>D01</option><option>D07</option><option>D14</option>
     </select>
     <select id="groupFilter" class="text-sm border border-[#e5e5e5] rounded-md px-2.5 py-1.5 bg-white focus:outline-none">
       <option value="">Tất cả nhóm ngành</option>
@@ -183,7 +184,7 @@ function majorCard(m) {
   const checked = compareIds.has(m.id) ? 'checked' : '';
   const pinBtn = m.is_pinned
     ? `<button onclick="unpin(${m.id},this)" class="btn-action active"><i class="fas fa-thumbtack mr-1"></i>Đã ghim</button>`
-    : `<button onclick="pin(${m.id},this)" class="btn-action"><i class="far fa-thumbtack mr-1"></i>Ghim</button>`;
+    : `<button onclick="pin(${m.id},this)" class="btn-action"><i class="fas fa-thumbtack mr-1"></i>Ghim</button>`;
   const targetBtn = m.is_target
     ? `<button class="btn-action active-target" disabled><i class="fas fa-star mr-1"></i>Mục tiêu</button>`
     : `<button onclick="setTarget(${m.id},this)" class="btn-action"><i class="far fa-star mr-1"></i>Mục tiêu</button>`;
@@ -211,8 +212,8 @@ function majorCard(m) {
       </div>
       <span class="text-[10px] ${fitTagClass(m.fit_pct)} px-1.5 py-0.5 rounded font-medium">${m.fit_pct.toFixed(0)}%</span>
     </div>
-    <div class="flex justify-center" style="height:120px">
-      <canvas id="mini-${m.id}" width="120" height="120"></canvas>
+    <div class="flex justify-center items-center" style="height:150px">
+      <canvas id="mini-${m.id}" width="150" height="150"></canvas>
     </div>
     <div class="flex items-center justify-between px-1">
       <span class="text-[10px] text-gray-400">Xu hướng:</span>
@@ -234,16 +235,27 @@ function initMiniRadar(m) {
     canvas.parentElement.innerHTML = '<div class="text-[10px] text-gray-400 text-center self-center">Chưa có dữ liệu radar</div>';
     return;
   }
+  const shortLabel = s => {
+    const map = {'Giáo dục thể chất':'GDTC','Giáo dục công dân':'GDCD','Giáo dục địa phương':'GD Đ.P.',
+      'Hoạt động Trải nghiệm':'HĐTN','Công nghệ thông tin':'CNTT','Tiếng Anh':'Anh'};
+    if (map[s]) return map[s];
+    return s.length > 7 ? s.slice(0,6)+'…' : s;
+  };
   miniCharts[m.id] = new Chart(canvas.getContext('2d'), {
     type:'radar',
     data:{
-      labels:m.radar.labels,
+      labels:m.radar.labels.map(shortLabel),
       datasets:[
         {data:m.radar.student_scores,backgroundColor:'rgba(0,112,243,.12)',borderColor:'#0070f3',borderWidth:1.5,pointRadius:2,pointBackgroundColor:'#0070f3'},
         {data:m.radar.major_scores,backgroundColor:'rgba(249,115,22,.08)',borderColor:'#f97316',borderWidth:1.5,borderDash:[4,3],pointRadius:2,pointBackgroundColor:'#f97316'},
       ]
     },
-    options:{responsive:false,scales:{r:{min:0,max:10,ticks:{display:false},grid:{color:'#eee'},pointLabels:{font:{size:8},color:'#9ca3af'}}},plugins:{legend:{display:false},tooltip:{enabled:false}}}
+    options:{
+      responsive:false,
+      layout:{padding:{top:4,bottom:4,left:8,right:8}},
+      scales:{r:{min:0,max:10,ticks:{display:false},grid:{color:'#eee'},pointLabels:{font:{size:9},color:'#6b7280'}}},
+      plugins:{legend:{display:false},tooltip:{enabled:true,callbacks:{title:items=>m.radar.labels[items[0].dataIndex]}}}
+    }
   });
 }
 
@@ -270,7 +282,7 @@ async function pin(id,btn) {
 }
 async function unpin(id,btn) {
   const r=await fetch('/api/student/career/pin/'+id,{method:'DELETE'});
-  if(r.ok){btn.className='btn-action';btn.innerHTML='<i class="far fa-thumbtack mr-1"></i>Ghim';btn.onclick=function(){pin(id,btn)};const m=allMajors.find(x=>x.id===id);if(m)m.is_pinned=false;showToast('Đã bỏ ghim');}
+  if(r.ok){btn.className='btn-action';btn.innerHTML='<i class="fas fa-thumbtack mr-1"></i>Ghim';btn.onclick=function(){pin(id,btn)};const m=allMajors.find(x=>x.id===id);if(m)m.is_pinned=false;showToast('Đã bỏ ghim');}
 }
 async function setTarget(id,btn) {
   const r=await fetch('/api/student/career/target',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({major_id:id})});
@@ -326,42 +338,75 @@ async function populateUniversities() {
 }
 
 // ── Simulator ───────────────────────────────────────────────────────
-function openSimulator() {
+const SIM_CACHE_KEY = 'sim_scores_cache';
+
+async function ensureRealScores() {
+  if (Object.keys(realScores).length) return;
+  try {
+    const r = await fetch('/api/student/career/my-averages');
+    const d = await r.json();
+    realScores = d.averages || {};
+  } catch(e) { realScores = {}; }
+}
+
+async function openSimulator() {
   document.getElementById('simulatorModal').classList.remove('hidden');
-  fetch('/api/student/career/map-data').then(r=>r.json()).then(data=>{
-    const subjects=new Set();
-    data.majors.forEach(m=>Object.keys(m.weight_vector).forEach(s=>subjects.add(s)));
-    const container=document.getElementById('simSliders');container.innerHTML='';
-    subjects.forEach(subj=>{
-      const current=realScores[subj]||5.0; simScores[subj]=current;
-      const id='sim-'+subj.replace(/\s/g,'_');
-      const div=document.createElement('div');
-      div.innerHTML=`<label class="text-[10px] font-semibold text-gray-600">${subj}</label>
-        <div class="flex items-center gap-2"><input type="range" min="0" max="10" step="0.1" value="${current}" data-subj="${subj}" oninput="onSimSlider(this)" class="flex-1"><span class="text-xs font-bold tabular-nums w-8 text-right" id="${id}">${current}</span></div>`;
-      container.appendChild(div);
-    });
+  await ensureRealScores();
+  const data = await fetch('/api/student/career/map-data').then(r=>r.json());
+  const subjects = new Set();
+  data.majors.forEach(m => Object.keys(m.weight_vector).forEach(s => subjects.add(s)));
+  Object.keys(realScores).forEach(s => subjects.add(s));
+
+  const cached = JSON.parse(sessionStorage.getItem(SIM_CACHE_KEY) || '{}');
+  simScores = {};
+  subjects.forEach(s => {
+    simScores[s] = cached[s] !== undefined ? cached[s] : (realScores[s] || 5.0);
   });
+
+  const container = document.getElementById('simSliders'); container.innerHTML = '';
+  [...subjects].sort().forEach(subj => {
+    const current = simScores[subj];
+    const real = realScores[subj];
+    const id = 'sim-' + subj.replace(/\s/g,'_');
+    const diff = real !== undefined ? (current - real).toFixed(1) : null;
+    const div = document.createElement('div');
+    div.innerHTML = `<label class="text-[10px] font-semibold text-gray-600 flex justify-between">
+        <span>${subj}</span>
+        ${real !== undefined ? `<span class="text-gray-400 font-normal">thật: ${real.toFixed(1)}</span>` : '<span class="text-gray-300 font-normal">chưa có</span>'}
+      </label>
+      <div class="flex items-center gap-2">
+        <input type="range" min="0" max="10" step="0.1" value="${current}" data-subj="${subj}" oninput="onSimSlider(this)" class="flex-1">
+        <span class="text-xs font-bold tabular-nums w-8 text-right" id="${id}">${current.toFixed(1)}</span>
+      </div>`;
+    container.appendChild(div);
+  });
+  runSimulate();
 }
 function closeSimulator() { document.getElementById('simulatorModal').classList.add('hidden'); }
 document.getElementById('simulatorModal').addEventListener('click',function(e){if(e.target===this)closeSimulator();});
 
 function onSimSlider(el) {
-  simScores[el.dataset.subj]=parseFloat(el.value);
-  document.getElementById('sim-'+el.dataset.subj.replace(/\s/g,'_')).textContent=el.value;
-  clearTimeout(simTimer);simTimer=setTimeout(runSimulate,300);
+  const v = parseFloat(el.value);
+  simScores[el.dataset.subj] = v;
+  document.getElementById('sim-'+el.dataset.subj.replace(/\s/g,'_')).textContent = v.toFixed(1);
+  sessionStorage.setItem(SIM_CACHE_KEY, JSON.stringify(simScores));
+  clearTimeout(simTimer); simTimer = setTimeout(runSimulate, 300);
 }
 async function runSimulate() {
-  const r=await fetch('/api/student/career/simulate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scores:simScores})});
-  const d=await r.json();
-  const fitMap={};d.majors.forEach(m=>{fitMap[m.id]=m.fit_pct;});
-  allMajors.forEach(m=>{if(fitMap[m.id]!==undefined)m.fit_pct=fitMap[m.id];});
+  if (!Object.keys(simScores).length) return;
+  const r = await fetch('/api/student/career/simulate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scores:simScores})});
+  const d = await r.json();
+  const fitMap = {}; d.majors.forEach(m=>{fitMap[m.id]=m.fit_pct;});
+  allMajors.forEach(m=>{if(fitMap[m.id]!==undefined) m.fit_pct = fitMap[m.id];});
   renderGrid();
 }
 function resetSimulator() {
-  simScores={...realScores};
-  document.querySelectorAll('[data-subj]').forEach(el=>{
-    el.value=realScores[el.dataset.subj]||5.0;
-    document.getElementById('sim-'+el.dataset.subj.replace(/\s/g,'_')).textContent=el.value;
+  sessionStorage.removeItem(SIM_CACHE_KEY);
+  Object.keys(simScores).forEach(s => { simScores[s] = realScores[s] !== undefined ? realScores[s] : 5.0; });
+  document.querySelectorAll('[data-subj]').forEach(el => {
+    const v = simScores[el.dataset.subj];
+    el.value = v;
+    document.getElementById('sim-' + el.dataset.subj.replace(/\s/g,'_')).textContent = v.toFixed(1);
   });
   runSimulate();
 }
