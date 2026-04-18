@@ -100,3 +100,23 @@ def test_derive_weights_returns_none_on_missing_entry_score(blocks_data):
     class FakeMajor:
         id = 1; admission_block = "A01"; entry_score = None; major_group = "Kỹ thuật"
     assert derive_weights(FakeMajor(), blocks_data, ["Toán"]) is None
+
+
+def test_derive_weights_dedups_alias_siblings(blocks_data):
+    """Nếu DB có cả 'Ngữ văn' và 'Văn' (cùng alias → 'Văn'), chỉ sinh 1 entry."""
+    from seed_major_weights import derive_weights
+
+    class FakeMajor:
+        id = 10; admission_block = "A01"; entry_score = 25.0; major_group = "Công nghệ"
+
+    dup_subjects = ["Toán", "Vật lý", "Ngoại ngữ", "Ngữ văn", "Văn",
+                    "Giáo dục Quốc phòng và An ninh", "Giáo dục quốc phòng - An ninh"]
+    weights = derive_weights(FakeMajor(), blocks_data, dup_subjects)
+    names = [w['subject_name'] for w in weights]
+
+    assert len(names) == len(set(names)), f"Duplicates in output: {names}"
+    van_rows = [n for n in names if n in ('Văn', 'Ngữ văn')]
+    assert len(van_rows) == 1, f"Expected 1 Văn-alias row, got {van_rows}"
+    qpan_rows = [n for n in names if n in ('Giáo dục Quốc phòng và An ninh',
+                                            'Giáo dục quốc phòng - An ninh')]
+    assert len(qpan_rows) == 1, f"Expected 1 QPAN-alias row, got {qpan_rows}"

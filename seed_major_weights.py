@@ -78,10 +78,89 @@ def derive_weights(major, blocks_data, all_subject_names):
         score = round(rng.uniform(5.0, 7.0), 1)
         weights.append({'subject_name': db_name, 'min_score': score, 'weight': 0.03})
 
-    # (c) Unrelated: mọi DB name chưa dùng
-    unrelated_db = set(all_subject_names) - used_db_names
-    for db_name in sorted(unrelated_db):
+    # (c) Unrelated: mọi DB name chưa dùng, bỏ duplicate alias
+    used_canon = {aliases.get(n, n) for n in used_db_names}
+    for db_name in sorted(set(all_subject_names) - used_db_names):
+        canon = aliases.get(db_name, db_name)
+        if canon in used_canon:
+            continue
+        used_canon.add(canon)
         score = round(rng.uniform(3.0, 4.5), 1)
         weights.append({'subject_name': db_name, 'min_score': score, 'weight': 0.0})
 
     return weights
+
+
+def _update_major_from_real_data(major, real_data, blocks_data):
+    """Update entry_score, admission_block, MajorEntryScore từ real_majors_2025.json."""
+    from models import db, MajorEntryScore
+    key = f"{major.name}|{major.university}"
+    entry = real_data.get(key)
+    if not entry or not entry.get('verified'):
+        return False
+
+    block = entry.get('block')
+    if block and block in blocks_data['blocks']:
+        major.admission_block = block
+
+    scores = entry.get('scores', {})
+    if '2025' in scores:
+        major.entry_score = scores['2025']
+
+    # Upsert MajorEntryScore for 2023/2024/2025
+    for year_str, score in scores.items():
+        year = int(year_str)
+        existing = MajorEntryScore.query.filter_by(major_id=major.id, year=year).first()
+        if existing:
+            existing.score = score
+        else:
+            db.session.add(MajorEntryScore(major_id=major.id, year=year, score=score))
+
+    return True
+
+
+def seed():
+    from app import app
+    from models import db, UniversityMajor, MajorSubjectWeight, Subject
+
+    blocks_data = json.loads(Path('data/admission_blocks.json').read_text(encoding='utf-8'))
+    real_data_path = Path('data/real_majors_2025.json')
+    real_data = json.loads(real_data_path.read_text(encoding='utf-8')) if real_data_path.exists() else {}
+
+    with app.app_context():
+        all_subject_names = [s.name for s in Subject.query.all()]
+        majors = UniversityMajor.query.all()
+        print(f"Processing {len(majors)} majors...")
+
+        updated = skipped = 0
+        for i, major in enumerate(majors, 1):
+            # 1) update entry_score / block from real data
+            _update_major_from_real_data(major, real_data, blocks_data)
+
+            # 2) derive weights
+            weights = derive_weights(major, blocks_data, all_subject_names)
+            if weights is None:
+                skipped += 1
+                continue
+
+            # 3) idempotent: delete + insert
+            MajorSubjectWeight.query.filter_by(major_id=major.id).delete()
+            for w in weights:
+                db.session.add(MajorSubjectWeight(
+                    major_id=major.id,
+                    subject_name=w['subject_name'],
+                    weight=w['weight'],
+                    min_score=w['min_score']
+                ))
+            updated += 1
+
+            if i % 20 == 0:
+                print(f"  ...{i}/{len(majors)}")
+                db.session.commit()
+
+        db.session.commit()
+        print(f"✅ Updated {updated} majors, skipped {skipped} (no block / no entry_score)")
+
+
+if __name__ == '__main__':
+    seed()
