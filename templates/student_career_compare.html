@@ -19,8 +19,8 @@
 <body class="min-h-screen">
 
 <nav class="bg-white border-b border-[#e5e5e5] px-6 py-3 flex items-center gap-4">
-  <a href="{{ url_for('career.career_browse') }}" class="text-sm text-gray-500 hover:text-gray-800 flex items-center gap-1.5">
-    <i class="fas fa-arrow-left text-xs"></i> Duyệt ngành
+  <a href="{{ url_for('career.career_main') }}" class="text-sm text-gray-500 hover:text-gray-800 flex items-center gap-1.5">
+    <i class="fas fa-arrow-left text-xs"></i> Phân tích năng lực
   </a>
   <span class="text-[#e5e5e5]">/</span>
   <span class="text-sm font-semibold text-gray-800">So sánh ngành</span>
@@ -32,7 +32,7 @@
 <div class="max-w-7xl mx-auto px-4 py-6">
   <div class="flex items-center justify-between mb-5">
     <h1 class="text-lg font-bold text-gray-900">So sánh ngành</h1>
-    <a href="{{ url_for('career.career_browse') }}" class="text-sm text-gray-500 hover:text-gray-800">
+    <a href="{{ url_for('career.career_main') }}" class="text-sm text-gray-500 hover:text-gray-800">
       <i class="fas fa-arrow-left mr-1"></i>Quay lại
     </a>
   </div>
@@ -193,9 +193,9 @@ function renderTable(){
   const allSubjects=[...new Set(currentData.majors.flatMap(m=>m.weights.map(w=>w.subject_name)))];
   const rows=[
     {label:'% Phù hợp',fn:m=>`<strong class="${m.fit_pct>=70?'text-green-600':m.fit_pct>=50?'text-amber-600':'text-red-500'}">${Math.round(m.fit_pct)}%</strong>`,num:m=>m.fit_pct,higher:true},
-    {label:'ĐC 2025',fn:m=>m.entry_score||'—',num:m=>m.entry_score||0,higher:false},
+    {label:'Điểm chuẩn 2025',fn:m=>m.entry_score||'—',num:m=>m.entry_score||0,higher:false},
     {label:'Khối xét tuyển',fn:m=>m.admission_block||'—',num:null},
-    {label:'Xu hướng ĐC',fn:m=>{const s=m.entry_scores;if(!s||s.length<2)return'—';const d=(s[s.length-1].score-s[0].score).toFixed(1);return d>0?`<span class="text-red-500">↑ +${d}</span>`:d<0?`<span class="text-green-600">↓ ${d}</span>`:'→ 0';},num:null},
+    {label:'Xu hướng điểm chuẩn',fn:m=>{const s=m.entry_scores;if(!s||s.length<2)return'—';const d=(s[s.length-1].score-s[0].score).toFixed(1);return d>0?`<span class="text-red-500">↑ +${d}</span>`:d<0?`<span class="text-green-600">↓ ${d}</span>`:'→ 0';},num:null},
     ...allSubjects.map(subj=>({label:'Yêu cầu '+subj,fn:(m,ss)=>{const w=m.weights.find(x=>x.subject_name===subj);if(!w)return'—';const stu=ss[subj];return stu!==undefined?`<span class="${stu>=w.min_score?'text-green-600':'text-red-500'}">${w.min_score} ${stu>=w.min_score?'✓':'✗'}</span>`:w.min_score+'';},num:m=>{const w=m.weights.find(x=>x.subject_name===subj);return w?w.min_score:0;},higher:null}))
   ];
   rows.forEach(rd=>{

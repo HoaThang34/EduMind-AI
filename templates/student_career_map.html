@@ -3,196 +3,354 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ban do nganh – EduMind AI</title>
+  <title>Bản đồ ngành – EduMind AI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>tailwind.config={theme:{extend:{fontFamily:{sans:['"Be Vietnam Pro"','system-ui','sans-serif']}}}}</script>
   <style>
-    body { margin:0; font-family:'Be Vietnam Pro',system-ui,sans-serif; overflow:hidden; background:#0f172a; }
-    .ctrl-btn { font-size:12px; padding:4px 10px; border-radius:6px; background:#1e293b; color:#e2e8f0; border:1px solid #334155; cursor:pointer; }
-    .ctrl-btn:hover { background:#334155; }
-    .ctrl-input { font-size:12px; padding:4px 10px; border-radius:6px; background:#1e293b; color:#e2e8f0; border:1px solid #334155; outline:none; width:100%; }
-    .ctrl-input::placeholder { color:#64748b; }
-    .ctrl-input:focus { border-color:#3b82f6; }
-    .group-tag { font-size:10px; padding:2px 8px; border-radius:4px; cursor:pointer; transition:opacity .15s; }
-    .group-tag[data-active="0"] { opacity:0.35; }
+    body { font-family:'Be Vietnam Pro',system-ui,sans-serif; overflow:hidden; background:#f5f5f5; height:100vh; margin:0; }
+    .gtag { transition:opacity .15s; }
+    .gtag.off { opacity:.25; }
   </style>
 </head>
 <body>
 
-<div style="position:relative;height:100vh;overflow:hidden" id="mapApp">
+<!-- Nav — same pattern as browse/compare -->
+<nav class="bg-white border-b border-[#e5e5e5] px-6 py-3 flex items-center gap-4 relative z-[100]">
+  <a href="{{ url_for('career.career_main') }}" class="text-sm text-gray-500 hover:text-gray-800 flex items-center gap-1.5">
+    <i class="fas fa-arrow-left text-xs"></i> Phân tích năng lực
+  </a>
+  <span class="text-[#e5e5e5]">/</span>
+  <span class="text-sm font-semibold text-gray-800">Bản đồ ngành</span>
+  <div class="ml-auto flex items-center gap-3">
+    <span class="text-sm text-gray-500">{{ student.name }}</span>
+  </div>
+</nav>
 
-  <!-- Controls (left) -->
-  <div style="position:absolute;top:12px;left:12px;z-index:100;display:flex;flex-direction:column;gap:8px;width:220px">
-    <div class="flex gap-2 items-center">
-      <a href="{{ url_for('career.career_browse') }}" class="ctrl-btn"><i class="fas fa-arrow-left mr-1"></i>Ngành</a>
-      <span class="text-white text-xs font-bold truncate">{{ student.name }}</span>
+<!-- Filter bar — same pattern -->
+<div class="bg-white border-b border-[#e5e5e5] px-4 py-2.5 relative z-[100]">
+  <div class="flex flex-wrap gap-2.5 items-center">
+    <div class="relative min-w-[180px] max-w-[220px]">
+      <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+      <input type="text" id="mapSearch" placeholder="Tìm ngành hoặc trường..."
+        class="w-full pl-8 pr-3 py-1.5 text-sm border border-[#e5e5e5] rounded-md focus:outline-none focus:border-blue-400">
     </div>
-    <input type="text" id="mapSearch" class="ctrl-input" placeholder="Tìm ngành...">
-    <div id="groupFilters" class="flex flex-wrap gap-1"></div>
-    <label class="flex items-center gap-2 cursor-pointer">
-      <input type="checkbox" id="filterFitOnly" class="w-3.5 h-3.5 rounded border-gray-600 bg-[#1e293b]">
-      <span class="text-xs text-gray-300">Chỉ ngành phù hợp (>50%)</span>
+    <div id="groupFilters" class="flex flex-wrap gap-1.5"></div>
+    <label class="flex items-center gap-1.5 cursor-pointer ml-1">
+      <input type="checkbox" id="filterFitOnly" class="w-3.5 h-3.5 rounded border-gray-300 text-[#0070f3]">
+      <span class="text-[11px] text-gray-500">Chỉ ngành phù hợp (>50%)</span>
     </label>
-    <div class="flex gap-1">
-      <button class="ctrl-btn" onclick="zoomIn()">+</button>
-      <button class="ctrl-btn" onclick="zoomOut()">-</button>
-      <button class="ctrl-btn" onclick="resetZoom()"><i class="fas fa-undo text-[10px]"></i></button>
+    <div class="flex gap-1.5 ml-auto">
+      <button onclick="zoomIn()" class="text-xs px-2.5 py-1 border border-[#e5e5e5] rounded-md bg-white hover:bg-[#f0f0f0] font-medium text-gray-600">+</button>
+      <button onclick="zoomOut()" class="text-xs px-2.5 py-1 border border-[#e5e5e5] rounded-md bg-white hover:bg-[#f0f0f0] font-medium text-gray-600">−</button>
+      <button onclick="resetView()" class="text-xs px-2.5 py-1 border border-[#e5e5e5] rounded-md bg-white hover:bg-[#f0f0f0] font-medium text-gray-600">
+        <i class="fas fa-undo text-[10px]"></i>
+      </button>
     </div>
   </div>
+</div>
 
-  <!-- Detail panel (right) -->
-  <div id="detailPanel" style="position:absolute;right:0;top:0;bottom:0;width:280px;background:rgba(15,23,42,0.95);border-left:1px solid #334155;padding:16px;z-index:100;display:none;overflow-y:auto">
-    <button onclick="closePanel()" class="absolute top-3 right-3 text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
-    <h3 id="dpName" class="font-bold text-blue-400 text-sm mb-0.5"></h3>
-    <div id="dpUniversity" class="text-[11px] text-gray-400 mb-2"></div>
+<!-- Detail panel -->
+<div id="detailPanel" class="fixed right-0 top-0 bottom-0 w-[300px] bg-white border-l border-[#e5e5e5] z-[90] hidden overflow-y-auto shadow-[-2px_0_8px_rgba(0,0,0,.04)]" style="padding-top:100px">
+  <div class="px-4 pb-4">
+    <button onclick="closePanel()" class="absolute top-[104px] right-3 text-gray-400 hover:text-gray-700">
+      <i class="fas fa-times"></i>
+    </button>
+    <div class="font-semibold text-gray-900 text-sm" id="dpName"></div>
+    <div class="text-[11px] text-gray-500 mb-2" id="dpUniversity"></div>
     <div class="flex gap-1.5 mb-3">
-      <span id="dpBlock" class="text-[10px] px-2 py-0.5 rounded bg-[#334155] text-gray-300"></span>
-      <span id="dpGroup" class="text-[10px] px-2 py-0.5 rounded bg-[#1e293b] text-gray-400"></span>
+      <span id="dpBlock" class="text-[10px] px-2 py-0.5 rounded bg-[#f0f0f0] text-gray-700"></span>
+      <span id="dpGroup" class="text-[10px] px-2 py-0.5 rounded bg-[#f0f0f0] text-gray-500"></span>
     </div>
     <div class="mb-2">
-      <span id="dpFit" class="text-xl font-bold text-green-400"></span>
-      <span class="text-xs text-gray-500 ml-1">phù hợp</span>
+      <span id="dpFit" class="text-xl font-bold"></span>
+      <span class="text-[11px] text-gray-400 ml-1">phù hợp</span>
     </div>
-    <div class="text-xs text-gray-400 mb-3">ĐC 2025: <strong id="dpScore" class="text-white"></strong></div>
-    <div class="border-t border-[#334155] pt-2 mb-3">
-      <div class="text-[10px] text-gray-500 uppercase tracking-wide mb-1.5">Top môn yêu cầu</div>
+    <div class="text-xs text-gray-500 mb-3">Điểm chuẩn 2025: <strong id="dpScore" class="text-gray-900"></strong></div>
+    <div class="border-t border-[#e5e5e5] pt-2 mb-3">
+      <div class="text-[10px] text-gray-400 uppercase tracking-wide mb-1.5">Top môn yêu cầu</div>
       <div id="dpSubjects"></div>
     </div>
-    <div class="flex flex-col gap-2">
-      <button onclick="addToCompare()" class="ctrl-btn text-center"><i class="fas fa-plus mr-1"></i>So sánh</button>
-      <a href="{{ url_for('career.career_browse') }}" class="ctrl-btn text-center"><i class="fas fa-list mr-1"></i>Xem tất cả</a>
-    </div>
+    <button onclick="addToCompare()"
+      class="w-full text-xs py-1.5 border border-[#e5e5e5] rounded-md bg-white hover:bg-[#f0f0f0] font-medium text-gray-700 text-center">
+      <i class="fas fa-plus mr-1"></i>Thêm so sánh
+    </button>
   </div>
-
-  <svg id="mapSvg" width="100%" height="100%" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%)">
-    <g id="mapG"></g>
-  </svg>
 </div>
+
+<!-- Legend -->
+<div class="fixed bottom-3 left-3 z-[90] bg-white border border-[#e5e5e5] rounded-lg px-3.5 py-2.5 text-[10px] text-gray-500 space-y-1 shadow-sm">
+  <div><span class="inline-block w-2 h-2 rounded-full bg-[#ef4444] mr-1.5 align-middle"></span><strong class="text-gray-700">Bạn</strong> — vị trí năng lực</div>
+  <div><span class="inline-block w-2 h-2 rounded-full bg-gray-400 mr-1.5 align-middle"></span>Ngành — càng gần = càng phù hợp</div>
+  <div><span class="inline-block w-2 h-2 rounded-full bg-blue-400/30 mr-1.5 align-middle"></span>Vùng cụm ngành</div>
+</div>
+
+<svg id="mapSvg" width="100%" height="100%" style="background:#f5f5f5">
+  <defs>
+    <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <g id="mapG"></g>
+</svg>
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script>
-const GROUP_COLORS={'Kỹ thuật':'#3b82f6','Công nghệ':'#60a5fa','Kinh tế':'#f59e0b','Y dược':'#10b981','Xã hội':'#a78bfa','Nghệ thuật':'#f43f5e','Khoa học':'#06b6d4','Nông lâm':'#84cc16'};
-const DEFAULT_COLOR='#94a3b8';
-let simulation,svgEl,gEl,zoomBehavior,currentNode=null,allData=[];
+const GC={
+  'Kỹ thuật – Công nghệ':'#3b82f6',
+  'Kinh tế – Quản trị':'#f59e0b',
+  'Y Dược':'#10b981',
+  'Xã hội – Nhân văn':'#8b5cf6',
+  'Nghệ thuật':'#ec4899',
+  'Khoa học':'#06b6d4',
+  'Nông Lâm':'#84cc16',
+  'Sư phạm':'#f97316',
+  'Luật – Hành chính':'#6366f1'
+};
+const DC='#94a3b8';
+let sim,svgEl,gEl,zoomB,curNode=null,allData=[],studentVec={};
 let compareIds=new Set(JSON.parse(sessionStorage.getItem('compare_major_ids')||'[]'));
-
-function cosineSim(a,b,subjects){
-  let dot=0,nA=0,nB=0;
-  subjects.forEach(k=>{dot+=(a[k]||0)*(b[k]||0);nA+=(a[k]||0)**2;nB+=(b[k]||0)**2;});
-  return nA&&nB?dot/(Math.sqrt(nA)*Math.sqrt(nB)):0;
-}
 
 async function init(){
   const r=await fetch('/api/student/career/map-data');
   const data=await r.json();
   allData=data.majors;
-  renderMap(allData);
-  buildGroupFilters(allData);
+  studentVec=data.student_vector||{};
+  render(allData);
+  buildFilters(allData);
 }
 
-function renderMap(majors){
+function gc(g){return GC[g]||DC;}
+
+function render(majors){
+  const W=document.getElementById('mapSvg').clientWidth;
+  const H=document.getElementById('mapSvg').clientHeight;
+  const cx=W/2, cy=H/2;
+
+  const groups=[...new Set(majors.map(m=>m.major_group).filter(Boolean))];
+  const R=Math.min(W,H)*0.32;
+  const gpos={};
+  groups.forEach((g,i)=>{
+    const a=(2*Math.PI*i)/groups.length - Math.PI/2;
+    gpos[g]={x:cx+R*Math.cos(a), y:cy+R*Math.sin(a)};
+  });
+
+  // Student position: weighted average of group centers by fit
+  let sx=0,sy=0,sw=0;
+  majors.forEach(m=>{
+    const p=gpos[m.major_group];
+    if(!p)return;
+    const w=m.fit_pct/100;
+    sx+=p.x*w; sy+=p.y*w; sw+=w;
+  });
+  const studentX=sw?sx/sw:cx, studentY=sw?sy/sw:cy;
+
   const subjects=[...new Set(majors.flatMap(m=>Object.keys(m.weight_vector)))];
-  const nodesData=majors.map(m=>({...m}));
-  const linksData=[];
-  for(let i=0;i<nodesData.length;i++)
-    for(let j=i+1;j<nodesData.length;j++){
-      const sim=cosineSim(nodesData[i].weight_vector,nodesData[j].weight_vector,subjects);
-      if(sim>0.7)linksData.push({source:nodesData[i].id,target:nodesData[j].id,strength:sim});
+  const nodes=majors.map(m=>{
+    const p=gpos[m.major_group]||{x:cx,y:cy};
+    const fitFactor=m.fit_pct/100;
+    const toStudent=0.15*fitFactor;
+    const initX=p.x*(1-toStudent)+studentX*toStudent+(Math.random()-.5)*50;
+    const initY=p.y*(1-toStudent)+studentY*toStudent+(Math.random()-.5)*50;
+    return {...m, x:initX, y:initY};
+  });
+
+  const links=[];
+  for(let i=0;i<nodes.length;i++)
+    for(let j=i+1;j<nodes.length;j++){
+      if(nodes[i].major_group!==nodes[j].major_group)continue;
+      let dot=0,nA=0,nB=0;
+      subjects.forEach(k=>{dot+=(nodes[i].weight_vector[k]||0)*(nodes[j].weight_vector[k]||0);nA+=(nodes[i].weight_vector[k]||0)**2;nB+=(nodes[j].weight_vector[k]||0)**2;});
+      const s=nA&&nB?dot/(Math.sqrt(nA)*Math.sqrt(nB)):0;
+      if(s>.55)links.push({source:nodes[i].id,target:nodes[j].id,strength:s});
     }
-  const width=document.getElementById('mapSvg').clientWidth;
-  const height=document.getElementById('mapSvg').clientHeight;
-  svgEl=d3.select('#mapSvg');gEl=d3.select('#mapG');gEl.selectAll('*').remove();
-  zoomBehavior=d3.zoom().scaleExtent([0.2,4]).on('zoom',e=>gEl.attr('transform',e.transform));
-  svgEl.call(zoomBehavior);
-  const rScale=d3.scaleLinear().domain([15,30]).range([8,22]).clamp(true);
-  simulation=d3.forceSimulation(nodesData)
-    .force('link',d3.forceLink(linksData).id(d=>d.id).distance(80).strength(d=>d.strength*0.5))
-    .force('charge',d3.forceManyBody().strength(-200))
-    .force('center',d3.forceCenter(width/2,height/2))
-    .force('collision',d3.forceCollide(d=>rScale(d.entry_score||20)+10));
-  const link=gEl.append('g').selectAll('line').data(linksData).enter().append('line')
-    .attr('stroke','#475569').attr('stroke-opacity',d=>d.strength*0.5).attr('stroke-width',d=>d.strength*2);
-  const node=gEl.append('g').selectAll('g').data(nodesData).enter().append('g')
+
+  svgEl=d3.select('#mapSvg'); gEl=d3.select('#mapG'); gEl.selectAll('*').remove();
+  zoomB=d3.zoom().scaleExtent([.3,6]).on('zoom',e=>{
+    gEl.attr('transform',e.transform);
+    onZoom(e.transform.k);
+  });
+  svgEl.call(zoomB);
+
+  const rS=d3.scaleLinear().domain([0,100]).range([5,16]).clamp(true);
+  const cStr=.12;
+
+  sim=d3.forceSimulation(nodes)
+    .force('link',d3.forceLink(links).id(d=>d.id).distance(30).strength(d=>d.strength*.25))
+    .force('charge',d3.forceManyBody().strength(-40))
+    .force('cx',d3.forceX(d=>(gpos[d.major_group]||{x:cx}).x).strength(cStr))
+    .force('cy',d3.forceY(d=>(gpos[d.major_group]||{y:cy}).y).strength(cStr))
+    .force('col',d3.forceCollide(d=>rS(d.fit_pct)+3))
+    .alphaDecay(.025);
+
+  // Layers
+  const hullLayer=gEl.append('g');
+  const linkLayer=gEl.append('g');
+  const labelLayer=gEl.append('g');
+  const nodeLayer=gEl.append('g');
+  const studentLayer=gEl.append('g');
+
+  // Links
+  linkLayer.selectAll('line').data(links).enter().append('line')
+    .attr('stroke','#cbd5e1').attr('stroke-opacity',.2).attr('stroke-width',d=>d.strength*1.2);
+
+  // Student node
+  const stuG=studentLayer.append('g').attr('transform',`translate(${studentX},${studentY})`);
+  stuG.append('circle').attr('r',20).attr('fill','#ef4444').attr('fill-opacity',.08).attr('stroke','none');
+  stuG.append('circle').attr('r',12).attr('fill','#ef4444').attr('fill-opacity',.15).attr('stroke','none');
+  stuG.append('circle').attr('r',6).attr('fill','#ef4444').attr('stroke','#fff').attr('stroke-width',2).attr('filter','url(#glow)');
+  stuG.append('text').attr('dy',-12).attr('text-anchor','middle')
+    .attr('font-size','10px').attr('fill','#ef4444').attr('font-weight','600').text('Bạn');
+
+  // Proximity lines from student to nearby majors
+  const proxLines=studentLayer.selectAll('.prox-line').data(nodes.filter(n=>n.fit_pct>=60)).enter()
+    .append('line').attr('class','prox-line')
+    .attr('stroke','#ef4444').attr('stroke-opacity',d=>(d.fit_pct/100)*.2)
+    .attr('stroke-width',.8).attr('stroke-dasharray','3 3');
+
+  // Cluster labels
+  const clLabels=labelLayer.selectAll('text').data(groups).enter().append('text')
+    .attr('text-anchor','middle').attr('font-size','12px').attr('font-weight','600')
+    .attr('fill',d=>gc(d)).attr('fill-opacity',.7).text(d=>d);
+
+  // Major nodes
+  const node=nodeLayer.selectAll('g').data(nodes).enter().append('g')
     .style('cursor','pointer')
     .call(d3.drag()
-      .on('start',(e,d)=>{if(!e.active)simulation.alphaTarget(0.3).restart();d.fx=d.x;d.fy=d.y;})
+      .on('start',(e,d)=>{if(!e.active)sim.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y;})
       .on('drag',(e,d)=>{d.fx=e.x;d.fy=e.y;})
-      .on('end',(e,d)=>{if(!e.active)simulation.alphaTarget(0);d.fx=null;d.fy=null;}))
+      .on('end',(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null;}))
     .on('click',(e,d)=>showDetail(d));
-  node.append('circle')
-    .attr('r',d=>rScale(d.entry_score||20))
-    .attr('fill',d=>GROUP_COLORS[d.major_group]||DEFAULT_COLOR)
-    .attr('fill-opacity',0.85)
-    .attr('stroke','#1e293b').attr('stroke-width',1.5);
-  node.append('text')
-    .text(d=>d.name.length>12?d.name.slice(0,12)+'…':d.name)
-    .attr('text-anchor','middle').attr('dy','0.35em')
-    .attr('font-size','8px').attr('fill','white').attr('pointer-events','none');
-  simulation.on('tick',()=>{
-    link.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+
+  node.append('circle').attr('class','node-circle')
+    .attr('r',d=>rS(d.fit_pct))
+    .attr('fill',d=>gc(d.major_group)).attr('fill-opacity',.6);
+
+  node.append('text').attr('class','node-name')
+    .attr('dy',d=>rS(d.fit_pct)+10).attr('text-anchor','middle')
+    .attr('font-size','8px').attr('fill','#4b5563')
+    .text(d=>d.name.length>16?d.name.slice(0,15)+'…':d.name)
+    .style('display','none');
+
+  function updateHulls(){
+    hullLayer.selectAll('path').remove();
+    groups.forEach(g=>{
+      const pts=nodes.filter(d=>d.major_group===g).map(d=>[d.x,d.y]);
+      if(pts.length<3)return;
+      const hull=d3.polygonHull(pts);
+      if(!hull)return;
+      const pad=expand(hull,25);
+      hullLayer.append('path').attr('d','M'+pad.join('L')+'Z')
+        .attr('fill',gc(g)).attr('fill-opacity',.05)
+        .attr('stroke',gc(g)).attr('stroke-opacity',.15).attr('stroke-width',1).attr('stroke-dasharray','4 2');
+    });
+  }
+
+  sim.on('tick',()=>{
+    linkLayer.selectAll('line')
+      .attr('x1',d=>d.source.x).attr('y1',d=>d.source.y)
+      .attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
     node.attr('transform',d=>`translate(${d.x},${d.y})`);
+    proxLines.attr('x1',studentX).attr('y1',studentY).attr('x2',d=>d.x).attr('y2',d=>d.y);
+
+    clLabels.each(function(g){
+      const pts=nodes.filter(n=>n.major_group===g);
+      if(!pts.length)return;
+      const ax=d3.mean(pts,p=>p.x), minY=d3.min(pts,p=>p.y);
+      d3.select(this).attr('x',ax).attr('y',minY-18);
+    });
+    updateHulls();
   });
 }
 
+function expand(hull,pad){
+  const cx=d3.mean(hull,p=>p[0]),cy=d3.mean(hull,p=>p[1]);
+  return hull.map(p=>{
+    const dx=p[0]-cx,dy=p[1]-cy,len=Math.sqrt(dx*dx+dy*dy)||1;
+    return [p[0]+dx/len*pad,p[1]+dy/len*pad];
+  });
+}
+
+let curZoom=1;
+function onZoom(k){
+  curZoom=k;
+  gEl.selectAll('.node-name').style('display',k>1.3?'block':'none');
+  gEl.selectAll('.prox-line').style('display',k>1.5?'none':'block');
+}
+
 function showDetail(d){
-  currentNode=d;
+  curNode=d;
+  gEl.selectAll('.node-circle').attr('stroke','#fff').attr('stroke-width',1.5);
+  gEl.selectAll('.node-circle').filter(n=>n.id===d.id).attr('stroke','#111827').attr('stroke-width',2.5);
   document.getElementById('dpName').textContent=d.name;
   document.getElementById('dpUniversity').textContent=d.university;
   document.getElementById('dpBlock').textContent=d.admission_block||'—';
   document.getElementById('dpGroup').textContent=d.major_group||'—';
-  document.getElementById('dpFit').textContent=Math.round(d.fit_pct)+'%';
+  const fitEl=document.getElementById('dpFit');
+  fitEl.textContent=Math.round(d.fit_pct)+'%';
+  fitEl.style.color=d.fit_pct>=80?'#059669':d.fit_pct>=60?'#d97706':'#dc2626';
   document.getElementById('dpScore').textContent=d.entry_score||'—';
-  const subjDiv=document.getElementById('dpSubjects');subjDiv.innerHTML='';
-  Object.entries(d.weight_vector).sort((a,b)=>b[1]-a[1]).slice(0,3).forEach(([s,w])=>{
-    const el=document.createElement('div');el.className='text-xs text-gray-300 mb-1';
-    el.innerHTML=`<span class="text-gray-500">${s}:</span> trọng số ${(w*100).toFixed(0)}%`;
-    subjDiv.appendChild(el);
+  const sDiv=document.getElementById('dpSubjects');sDiv.innerHTML='';
+  Object.entries(d.weight_vector).sort((a,b)=>b[1]-a[1]).slice(0,5).forEach(([s,w])=>{
+    const el=document.createElement('div');
+    el.style.cssText='font-size:11px;color:#374151;margin-bottom:3px;display:flex;justify-content:space-between';
+    el.innerHTML=`<span>${s}</span><span style="color:#9ca3af">${(w*100).toFixed(0)}%</span>`;
+    sDiv.appendChild(el);
   });
-  document.getElementById('detailPanel').style.display='block';
+  document.getElementById('detailPanel').classList.remove('hidden');
 }
-function closePanel(){document.getElementById('detailPanel').style.display='none';currentNode=null;}
+function closePanel(){
+  document.getElementById('detailPanel').classList.add('hidden');
+  gEl.selectAll('.node-circle').attr('stroke','#fff').attr('stroke-width',1.5);
+  curNode=null;
+}
 
 function addToCompare(){
-  if(!currentNode)return;
+  if(!curNode)return;
   if(compareIds.size>=4){alert('Tối đa 4 ngành');return;}
-  compareIds.add(currentNode.id);
+  compareIds.add(curNode.id);
   sessionStorage.setItem('compare_major_ids',JSON.stringify([...compareIds]));
-  alert('Đã thêm "'+currentNode.name+'" vào danh sách so sánh ('+compareIds.size+'/4)');
+  alert('Đã thêm "'+curNode.name+'" vào so sánh ('+compareIds.size+'/4)');
 }
 
-function buildGroupFilters(majors){
+function buildFilters(majors){
   const groups=[...new Set(majors.map(m=>m.major_group).filter(Boolean))];
   const c=document.getElementById('groupFilters');c.innerHTML='';
   groups.forEach(g=>{
     const tag=document.createElement('span');
-    tag.className='group-tag';tag.style.background=GROUP_COLORS[g]||DEFAULT_COLOR;tag.style.color='#fff';
-    tag.textContent=g;tag.dataset.active='1';
-    tag.onclick=()=>{tag.dataset.active=tag.dataset.active==='1'?'0':'1';applyFilters();};
+    tag.className='gtag text-[10px] px-2 py-0.5 rounded-full cursor-pointer font-medium border';
+    const col=gc(g);
+    tag.style.background=col+'15';tag.style.color=col;tag.style.borderColor=col+'40';
+    tag.dataset.active='1';tag.dataset.group=g;tag.textContent=g;
+    tag.onclick=()=>{
+      const on=tag.dataset.active==='1';
+      tag.dataset.active=on?'0':'1';
+      tag.classList.toggle('off',on);
+      applyFilters();
+    };
     c.appendChild(tag);
   });
 }
 
 function applyFilters(){
-  const hidden=new Set([...document.getElementById('groupFilters').querySelectorAll('[data-active="0"]')].map(b=>b.textContent));
-  let filtered=allData;
+  const off=new Set([...document.querySelectorAll('.gtag[data-active="0"]')].map(b=>b.dataset.group));
+  let f=allData;
   const q=document.getElementById('mapSearch').value.toLowerCase();
-  if(q)filtered=filtered.filter(m=>(m.name+m.university).toLowerCase().includes(q));
-  if(document.getElementById('filterFitOnly').checked)filtered=filtered.filter(m=>m.fit_pct>50);
-  if(hidden.size>0)filtered=filtered.filter(m=>!hidden.has(m.major_group));
-  if(simulation)simulation.stop();
-  renderMap(filtered);
+  if(q)f=f.filter(m=>(m.name+m.university).toLowerCase().includes(q));
+  if(document.getElementById('filterFitOnly').checked)f=f.filter(m=>m.fit_pct>50);
+  if(off.size)f=f.filter(m=>!off.has(m.major_group));
+  if(sim)sim.stop();
+  render(f);
 }
 
-let searchTimer;
-document.getElementById('mapSearch').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(applyFilters,400);});
+let sT;
+document.getElementById('mapSearch').addEventListener('input',()=>{clearTimeout(sT);sT=setTimeout(applyFilters,350);});
 document.getElementById('filterFitOnly').addEventListener('change',applyFilters);
 
-function zoomIn(){svgEl.transition().duration(300).call(zoomBehavior.scaleBy,1.3);}
-function zoomOut(){svgEl.transition().duration(300).call(zoomBehavior.scaleBy,0.7);}
-function resetZoom(){svgEl.transition().duration(300).call(zoomBehavior.transform,d3.zoomIdentity);}
+function zoomIn(){svgEl.transition().duration(250).call(zoomB.scaleBy,1.4);}
+function zoomOut(){svgEl.transition().duration(250).call(zoomB.scaleBy,.7);}
+function resetView(){svgEl.transition().duration(400).call(zoomB.transform,d3.zoomIdentity);}
 
 init();
 </script>

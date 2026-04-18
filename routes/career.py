@@ -150,7 +150,7 @@ def api_browse():
         fit = calculate_fit_score(averages, wlist)
         if fit['fit_pct'] < min_fit:
             continue
-        labels, stu_scores, maj_scores, _ = _radar(major.id, averages, axes='core')
+        labels, stu_scores, maj_scores, _ = _radar(major.id, averages, axes='union')
         entry_scores_sorted = sorted(
             [{'year': es.year, 'score': es.score} for es in major.entry_scores],
             key=lambda x: x['year']
@@ -290,7 +290,8 @@ def api_map_data():
             'fit_pct': fit['fit_pct'],
             'weight_vector': weight_vector,
         })
-    return jsonify({'majors': result})
+    student_vector = {subj: avg for subj, avg in averages.items()}
+    return jsonify({'majors': result, 'student_vector': student_vector})
 
 
 @career_bp.route('/api/student/career/pin', methods=['POST'])

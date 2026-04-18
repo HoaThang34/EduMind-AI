@@ -19,7 +19,17 @@
     .tag-ok   { background:#dcfce7; color:#166534; }
     .tag-warn { background:#fef9c3; color:#854d0e; }
     .tag-fail { background:#fee2e2; color:#991b1b; }
-    #grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+    #grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    @media(max-width:900px){ #grid { grid-template-columns:repeat(2,1fr); } }
+    @media(max-width:560px){ #grid { grid-template-columns:1fr; } }
+    .search-wrap { position:relative; }
+    .search-dropdown { position:absolute; top:100%; left:0; right:0; z-index:20; background:#fff; border:1px solid #e5e5e5; border-top:none; border-radius:0 0 6px 6px; max-height:260px; overflow-y:auto; display:none; box-shadow:0 4px 12px rgba(0,0,0,.08); }
+    .search-dropdown.open { display:block; }
+    .search-item { padding:6px 10px; cursor:pointer; font-size:12px; display:flex; justify-content:space-between; align-items:center; }
+    .search-item:hover, .search-item.active { background:#f0f7ff; }
+    .search-item .si-name { color:#111; font-weight:500; }
+    .search-item .si-uni { color:#9ca3af; font-size:11px; }
+    .search-item .si-fit { font-size:11px; font-weight:600; }
     .btn-action { font-size:11px; padding:3px 9px; border-radius:5px; border:1px solid #e5e5e5; background:#fff; cursor:pointer; font-weight:500; transition:background .1s; }
     .btn-action:hover { background:#f0f0f0; }
     .btn-action.active { background:#0070f3; color:#fff; border-color:#0070f3; }
@@ -51,10 +61,13 @@
 <!-- Filter bar -->
 <div class="bg-white border-b border-[#e5e5e5] px-4 py-3">
   <div class="max-w-7xl mx-auto flex flex-wrap gap-2 items-center">
-    <div class="relative flex-1 min-w-[200px] max-w-xs">
-      <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-      <input type="text" id="searchInput" placeholder="Tìm ngành hoặc trường..."
-        class="w-full pl-8 pr-3 py-1.5 text-sm border border-[#e5e5e5] rounded-md focus:outline-none focus:border-blue-400">
+    <div class="search-wrap flex-1 min-w-[200px] max-w-xs">
+      <div class="relative">
+        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+        <input type="text" id="searchInput" placeholder="Tìm ngành hoặc trường..." autocomplete="off"
+          class="w-full pl-8 pr-3 py-1.5 text-sm border border-[#e5e5e5] rounded-md focus:outline-none focus:border-blue-400">
+      </div>
+      <div id="searchDropdown" class="search-dropdown"></div>
     </div>
     <select id="universityFilter" class="text-sm border border-[#e5e5e5] rounded-md px-2.5 py-1.5 bg-white focus:outline-none">
       <option value="">Tất cả trường</option>
@@ -78,8 +91,8 @@
   <div class="max-w-7xl mx-auto flex flex-wrap gap-2 items-center mt-2">
     <span class="text-[10px] text-gray-400">Sắp xếp:</span>
     <span class="sort-pill active" data-sort="fit">Phù hợp nhất</span>
-    <span class="sort-pill" data-sort="score_desc">ĐC cao → thấp</span>
-    <span class="sort-pill" data-sort="score_asc">ĐC thấp → cao</span>
+    <span class="sort-pill" data-sort="score_desc">Điểm chuẩn cao → thấp</span>
+    <span class="sort-pill" data-sort="score_asc">Điểm chuẩn thấp → cao</span>
     <span class="sort-pill" data-sort="name">Tên A-Z</span>
     <div id="activeChips" class="flex gap-1 flex-wrap ml-2"></div>
   </div>
@@ -91,6 +104,9 @@
   <div class="flex gap-2">
     <button onclick="openSimulator()" class="text-xs px-3 py-1.5 border border-[#e5e5e5] rounded-md bg-white hover:bg-[#f0f0f0] font-medium text-gray-700">
       <i class="fas fa-crosshairs mr-1"></i>Mô phỏng điểm
+    </button>
+    <button id="clearCompareBtn" class="hidden text-xs px-3 py-1.5 border border-[#e5e5e5] rounded-md bg-white hover:bg-[#f0f0f0] font-medium text-gray-500" onclick="clearCompare()">
+      <i class="fas fa-times mr-1"></i>Bỏ chọn tất cả
     </button>
     <button id="compareBtn" class="hidden text-xs px-3 py-1.5 bg-[#0070f3] text-white rounded-md font-medium" onclick="goCompare()">
       So sánh (<span id="compareCount">0</span>)
@@ -124,7 +140,7 @@
 <div id="toast" class="fixed bottom-5 right-5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg shadow-lg hidden z-50"></div>
 
 <script>
-let allMajors = [], simScores = {}, realScores = {};
+let allMajors = [], allMajorsFullCache = [], simScores = {}, realScores = {};
 let compareIds = new Set(JSON.parse(sessionStorage.getItem('compare_major_ids') || '[]'));
 let currentSort = 'fit', simTimer = null, searchTimer = null;
 const miniCharts = {}, sparkCharts = {};
@@ -200,10 +216,10 @@ function majorCard(m) {
         <div class="flex items-center gap-2 shrink-0">
           <span class="text-xs font-bold tabular-nums ${fitClass(m.fit_pct)}">${m.fit_pct.toFixed(0)}%</span>
           <input type="checkbox" ${checked} onchange="toggleCompare(${m.id},this.checked)"
-            class="w-3.5 h-3.5 rounded border-gray-300 text-[#0070f3] cursor-pointer">
+            class="w-4.5 h-4.5 rounded border-gray-300 text-[#0070f3] cursor-pointer" style="width:18px;height:18px">
         </div>
       </div>
-      <div class="text-[10px] text-gray-400 mt-0.5">${m.admission_block||''} ${m.admission_block&&m.entry_score?'|':''} ${m.entry_score?'ĐC: '+m.entry_score:''}</div>
+      <div class="text-[10px] text-gray-400 mt-0.5">${m.admission_block||''} ${m.admission_block&&m.entry_score?'|':''} ${m.entry_score?'Điểm chuẩn: '+m.entry_score:''}</div>
       ${m.major_group?`<span class="inline-block mt-1 text-[10px] px-1.5 py-0.5 rounded bg-[#f0f0f0] text-gray-500">${m.major_group}</span>`:''}
     </div>
     <div class="flex items-center gap-2">
@@ -212,8 +228,8 @@ function majorCard(m) {
       </div>
       <span class="text-[10px] ${fitTagClass(m.fit_pct)} px-1.5 py-0.5 rounded font-medium">${m.fit_pct.toFixed(0)}%</span>
     </div>
-    <div class="flex justify-center items-center" style="height:150px">
-      <canvas id="mini-${m.id}" width="150" height="150"></canvas>
+    <div class="flex justify-center items-center" style="height:250px">
+      <canvas id="mini-${m.id}" width="250" height="250"></canvas>
     </div>
     <div class="flex items-center justify-between px-1">
       <span class="text-[10px] text-gray-400">Xu hướng:</span>
@@ -291,11 +307,22 @@ async function setTarget(id,btn) {
 
 function toggleCompare(id,checked) {
   if(checked){if(compareIds.size>=4){alert('Tối đa 4 ngành');return;}compareIds.add(id);}else{compareIds.delete(id);}
+  syncCompareUI();
+}
+function syncCompareUI(){
   sessionStorage.setItem('compare_major_ids',JSON.stringify([...compareIds]));
   document.getElementById('compareCount').textContent=compareIds.size;
+  const has=compareIds.size>0;
   document.getElementById('compareBtn').classList.toggle('hidden',compareIds.size<2);
+  document.getElementById('clearCompareBtn').classList.toggle('hidden',!has);
 }
-function goCompare() { window.location.href='/student/career/compare?major_ids='+[...compareIds].join(','); }
+function clearCompare(){
+  compareIds.clear();
+  sessionStorage.setItem('compare_major_ids','[]');
+  document.querySelectorAll('#grid input[type=checkbox]').forEach(cb=>cb.checked=false);
+  syncCompareUI();
+}
+function goCompare() { window.location.href='{{ url_for("career.career_compare") }}?major_ids='+[...compareIds].join(','); }
 
 // ── Sort pills ──────────────────────────────────────────────────────
 document.querySelectorAll('.sort-pill').forEach(pill=>{
@@ -323,8 +350,59 @@ function updateChips() {
   if(fit>0) add('>='+fit+'%',()=>{document.getElementById('fitRange').value=0;document.getElementById('fitRangeLabel').textContent='0%';fetchMajors();});
 }
 
+// ── Search autocomplete ──────────────────────────────────────────────
+const searchEl = document.getElementById('searchInput');
+const dropdownEl = document.getElementById('searchDropdown');
+let acCache = [], acIdx = -1;
+
+const norm = s => (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase();
+
+function showSuggestions(q) {
+  if (!q) { dropdownEl.classList.remove('open'); return; }
+  const qn = norm(q);
+  const pool = allMajorsFullCache.length ? allMajorsFullCache : allMajors;
+  const hits = pool.filter(m => {
+    const hay = norm(m.name + ' ' + m.university);
+    return hay.includes(qn);
+  }).slice(0, 8);
+  acCache = hits; acIdx = -1;
+  if (!hits.length) { dropdownEl.classList.remove('open'); return; }
+  dropdownEl.innerHTML = hits.map((m,i) =>
+    `<div class="search-item" data-idx="${i}" onmousedown="pickSuggestion(${i})">
+      <div><span class="si-name">${m.name}</span><br><span class="si-uni">${m.university}</span></div>
+      <span class="si-fit ${fitClass(m.fit_pct)}">${m.fit_pct.toFixed(0)}%</span>
+    </div>`
+  ).join('');
+  dropdownEl.classList.add('open');
+}
+
+function pickSuggestion(i) {
+  const m = acCache[i]; if (!m) return;
+  searchEl.value = m.name;
+  dropdownEl.classList.remove('open');
+  fetchMajors();
+}
+
+searchEl.addEventListener('input', function() {
+  clearTimeout(searchTimer);
+  const q = this.value.trim();
+  showSuggestions(q);
+  searchTimer = setTimeout(fetchMajors, 400);
+});
+searchEl.addEventListener('keydown', function(e) {
+  if (!dropdownEl.classList.contains('open')) return;
+  const items = dropdownEl.querySelectorAll('.search-item');
+  if (e.key === 'ArrowDown') { e.preventDefault(); acIdx = Math.min(acIdx+1, items.length-1); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); acIdx = Math.max(acIdx-1, -1); }
+  else if (e.key === 'Enter' && acIdx >= 0) { e.preventDefault(); pickSuggestion(acIdx); return; }
+  else if (e.key === 'Escape') { dropdownEl.classList.remove('open'); return; }
+  else return;
+  items.forEach((el,i) => el.classList.toggle('active', i === acIdx));
+});
+searchEl.addEventListener('blur', () => setTimeout(() => dropdownEl.classList.remove('open'), 150));
+searchEl.addEventListener('focus', function() { if (this.value.trim()) showSuggestions(this.value.trim()); });
+
 // ── Filter listeners ────────────────────────────────────────────────
-document.getElementById('searchInput').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(fetchMajors,400);});
 ['universityFilter','blockFilter','groupFilter'].forEach(id=>document.getElementById(id).addEventListener('change',fetchMajors));
 document.getElementById('fitRange').addEventListener('input',function(){document.getElementById('fitRangeLabel').textContent=this.value+'%';clearTimeout(searchTimer);searchTimer=setTimeout(fetchMajors,400);});
 
@@ -332,7 +410,8 @@ document.getElementById('fitRange').addEventListener('input',function(){document
 async function populateUniversities() {
   const r=await fetch('/api/student/career/browse');
   const d=await r.json();
-  const unis=[...new Set((d.majors||[]).map(m=>m.university))].sort();
+  allMajorsFullCache = d.majors || [];
+  const unis=[...new Set(allMajorsFullCache.map(m=>m.university))].sort();
   const sel=document.getElementById('universityFilter');
   unis.forEach(u=>sel.add(new Option(u,u)));
 }
@@ -397,7 +476,10 @@ async function runSimulate() {
   const r = await fetch('/api/student/career/simulate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scores:simScores})});
   const d = await r.json();
   const fitMap = {}; d.majors.forEach(m=>{fitMap[m.id]=m.fit_pct;});
-  allMajors.forEach(m=>{if(fitMap[m.id]!==undefined) m.fit_pct = fitMap[m.id];});
+  allMajors.forEach(m=>{
+    if(fitMap[m.id]!==undefined) m.fit_pct = fitMap[m.id];
+    if(m.radar && m.radar.labels) m.radar.student_scores = m.radar.labels.map(l=>simScores[l]||0);
+  });
   renderGrid();
 }
 function resetSimulator() {
@@ -412,8 +494,7 @@ function resetSimulator() {
 }
 
 // ── Init ────────────────────────────────────────────────────────────
-document.getElementById('compareCount').textContent=compareIds.size;
-if(compareIds.size>=2) document.getElementById('compareBtn').classList.remove('hidden');
+syncCompareUI();
 populateUniversities();
 fetchMajors();
 </script>
