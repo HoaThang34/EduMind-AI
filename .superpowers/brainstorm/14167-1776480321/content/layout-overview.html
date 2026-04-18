@@ -1,0 +1,170 @@
+<h2>Định hướng chọn ngành — Layout tổng thể</h2>
+<p class="subtitle">3 hướng thiết kế trang. Click để chọn hướng bạn thích nhất.</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="A" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#0f172a;border-radius:8px;min-height:220px">
+      <!-- Layout A mockup -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;height:100%">
+        <!-- Left panel -->
+        <div style="background:#1e293b;border-radius:6px;padding:10px">
+          <div style="font-size:10px;color:#94a3b8;margin-bottom:6px">⬡ RADAR CỦA TÔI</div>
+          <div style="width:100%;aspect-ratio:1;background:#0f172a;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;margin:auto">
+            <svg viewBox="0 0 100 100" width="90" height="90">
+              <polygon points="50,10 85,32 85,68 50,90 15,68 15,32" fill="none" stroke="#334155" stroke-width="1"/>
+              <polygon points="50,25 72,37 72,63 50,75 28,63 28,37" fill="none" stroke="#334155" stroke-width="1"/>
+              <polygon points="50,40 62,47 62,57 50,62 38,57 38,47" fill="none" stroke="#334155" stroke-width="1"/>
+              <polygon points="50,15 78,35 75,65 50,83 22,65 22,35" fill="rgba(99,102,241,0.3)" stroke="#6366f1" stroke-width="1.5"/>
+              <text x="50" y="7" text-anchor="middle" fill="#94a3b8" font-size="5">Toán</text>
+              <text x="90" y="34" text-anchor="start" fill="#94a3b8" font-size="5">Lý</text>
+              <text x="90" y="70" text-anchor="start" fill="#94a3b8" font-size="5">Hóa</text>
+              <text x="50" y="97" text-anchor="middle" fill="#94a3b8" font-size="5">Sinh</text>
+              <text x="8" y="70" text-anchor="end" fill="#94a3b8" font-size="5">Văn</text>
+              <text x="8" y="34" text-anchor="end" fill="#94a3b8" font-size="5">Anh</text>
+            </svg>
+          </div>
+          <div style="font-size:9px;color:#6366f1;text-align:center;margin-top:4px">GPA: 7.8 / 10</div>
+        </div>
+        <!-- Right panel -->
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="background:#1e293b;border-radius:6px;padding:8px;flex:1">
+            <div style="font-size:10px;color:#94a3b8;margin-bottom:4px">🎯 NGÀNH MỤC TIÊU</div>
+            <div style="background:#312e81;border-radius:4px;padding:6px">
+              <div style="font-size:10px;color:#a5b4fc;font-weight:bold">AI — HUST</div>
+              <div style="font-size:8px;color:#6366f1">Fit: 82% ●●●●○</div>
+              <div style="margin-top:4px">
+                <div style="font-size:8px;color:#f87171">↑ Toán thiếu 0.8đ</div>
+                <div style="font-size:8px;color:#4ade80">✓ Anh đạt yêu cầu</div>
+                <div style="font-size:8px;color:#fbbf24">~ Lý gần đạt</div>
+              </div>
+            </div>
+          </div>
+          <div style="background:#1e293b;border-radius:6px;padding:8px;flex:1">
+            <div style="font-size:10px;color:#94a3b8;margin-bottom:4px">📌 NGÀNH ĐÃ PIN</div>
+            <div style="font-size:8px;color:#e2e8f0;margin-bottom:2px">● CNTT — UET &nbsp; 79%</div>
+            <div style="font-size:8px;color:#e2e8f0;margin-bottom:2px">● DS&AI — UEH &nbsp; 74%</div>
+            <div style="font-size:8px;color:#475569">+ Thêm ngành...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Split: Radar + Sidebar thông tin</h3>
+      <p>Radar học sinh chiếm nửa trái, nửa phải là ngành mục tiêu + ngành đã pin. Nhìn một lần thấy hết.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="B" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#0f172a;border-radius:8px;min-height:220px">
+      <!-- Layout B mockup -->
+      <div style="height:100%">
+        <!-- Top: Target major banner -->
+        <div style="background:#312e81;border-radius:6px;padding:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:9px;color:#a5b4fc">🎯 MỤC TIÊU</div>
+            <div style="font-size:11px;color:white;font-weight:bold">AI — HUST &nbsp; <span style="color:#6366f1">82%</span></div>
+          </div>
+          <div style="text-align:right;font-size:8px">
+            <div style="color:#f87171">Toán ↑0.8đ</div>
+            <div style="color:#4ade80">Anh ✓</div>
+            <div style="color:#fbbf24">Lý ~</div>
+          </div>
+        </div>
+        <!-- Middle: Radar full width -->
+        <div style="background:#1e293b;border-radius:6px;padding:8px;display:flex;align-items:center;justify-content:center;margin-bottom:8px">
+          <svg viewBox="0 0 120 100" width="200" height="90">
+            <polygon points="60,5 105,30 105,75 60,95 15,75 15,30" fill="none" stroke="#334155" stroke-width="1"/>
+            <polygon points="60,20 90,38 90,65 60,78 30,65 30,38" fill="none" stroke="#334155" stroke-width="1"/>
+            <polygon points="60,35 78,45 78,58 60,63 42,58 42,45" fill="none" stroke="#334155" stroke-width="1"/>
+            <!-- Student -->
+            <polygon points="60,10 95,32 90,70 60,88 25,70 22,33" fill="rgba(99,102,241,0.25)" stroke="#6366f1" stroke-width="1.5"/>
+            <!-- Major requirement -->
+            <polygon points="60,8 100,30 98,72 60,90 20,73 18,31" fill="rgba(251,146,60,0.15)" stroke="#fb923c" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <text x="60" y="3" text-anchor="middle" fill="#94a3b8" font-size="5">Toán</text>
+            <text x="110" y="32" fill="#94a3b8" font-size="5">Lý</text>
+            <text x="110" y="76" fill="#94a3b8" font-size="5">Anh</text>
+            <text x="60" y="100" text-anchor="middle" fill="#94a3b8" font-size="5">Văn</text>
+            <text x="5" y="76" fill="#94a3b8" font-size="5">Sử</text>
+            <text x="5" y="32" fill="#94a3b8" font-size="5">Hóa</text>
+          </svg>
+          <div style="font-size:8px;color:#64748b;margin-left:8px">
+            <div style="color:#6366f1">■ Bạn</div>
+            <div style="color:#fb923c">⋯ Yêu cầu</div>
+          </div>
+        </div>
+        <!-- Bottom: Pinned -->
+        <div style="display:flex;gap:4px">
+          <div style="background:#1e293b;border-radius:4px;padding:5px;flex:1;font-size:8px;color:#a5b4fc;text-align:center">📌 CNTT-UET<br/><span style="color:#4ade80">79%</span></div>
+          <div style="background:#1e293b;border-radius:4px;padding:5px;flex:1;font-size:8px;color:#a5b4fc;text-align:center">📌 DS&AI<br/><span style="color:#fbbf24">74%</span></div>
+          <div style="background:#1e293b;border-radius:4px;padding:5px;flex:1;font-size:8px;color:#475569;text-align:center">+ Thêm</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Radar trung tâm + Overlay 2 lớp</h3>
+      <p>Radar full width, overlay cả điểm học sinh lẫn yêu cầu ngành mục tiêu. Ngành pin hiện ở dưới như tab nhanh.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="C" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#0f172a;border-radius:8px;min-height:220px">
+      <div style="height:100%">
+        <!-- Search bar -->
+        <div style="background:#1e293b;border-radius:6px;padding:6px 10px;display:flex;align-items:center;gap:6px;margin-bottom:8px">
+          <div style="font-size:10px;color:#475569">🔍</div>
+          <div style="font-size:9px;color:#475569">Tìm ngành, trường...</div>
+          <div style="margin-left:auto;background:#312e81;border-radius:4px;padding:2px 6px;font-size:8px;color:#a5b4fc">Lọc ▾</div>
+        </div>
+        <!-- Major cards list -->
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <!-- Target major -->
+          <div style="background:#312e81;border-radius:6px;padding:8px;display:flex;align-items:center;gap:8px;border:1px solid #6366f1">
+            <div style="font-size:14px">🎯</div>
+            <div style="flex:1">
+              <div style="font-size:10px;color:white;font-weight:bold">AI — HUST</div>
+              <div style="font-size:8px;color:#a5b4fc">Toán ↑0.8 · Anh ✓ · Lý ~</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:13px;font-weight:bold;color:#a5b4fc">82%</div>
+              <div style="width:40px;height:4px;background:#334155;border-radius:2px;overflow:hidden"><div style="width:82%;height:100%;background:#6366f1"></div></div>
+            </div>
+          </div>
+          <!-- Pinned -->
+          <div style="background:#1e293b;border-radius:6px;padding:8px;display:flex;align-items:center;gap:8px">
+            <div style="font-size:14px">📌</div>
+            <div style="flex:1">
+              <div style="font-size:10px;color:#e2e8f0">CNTT — UET</div>
+              <div style="font-size:8px;color:#64748b">Toán ✓ · Lý ✓ · Anh ~</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:13px;font-weight:bold;color:#4ade80">79%</div>
+              <div style="width:40px;height:4px;background:#334155;border-radius:2px;overflow:hidden"><div style="width:79%;height:100%;background:#4ade80"></div></div>
+            </div>
+          </div>
+          <div style="background:#1e293b;border-radius:6px;padding:8px;display:flex;align-items:center;gap:8px">
+            <div style="font-size:14px">📌</div>
+            <div style="flex:1">
+              <div style="font-size:10px;color:#e2e8f0">DS & AI — UEH</div>
+              <div style="font-size:8px;color:#64748b">Toán ~ · Anh ✓</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:13px;font-weight:bold;color:#fbbf24">74%</div>
+              <div style="width:40px;height:4px;background:#334155;border-radius:2px;overflow:hidden"><div style="width:74%;height:100%;background:#fbbf24"></div></div>
+            </div>
+          </div>
+          <div style="background:#1e293b;border-radius:6px;padding:6px 8px;display:flex;align-items:center;gap:8px;opacity:0.5">
+            <div style="font-size:12px">◎</div>
+            <div style="font-size:9px;color:#64748b">MKT — NEU &nbsp; 61%</div>
+            <div style="margin-left:auto;width:40px;height:4px;background:#334155;border-radius:2px;overflow:hidden"><div style="width:61%;height:100%;background:#f87171"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Discovery list + Click vào xem radar</h3>
+      <p>Trang chính là danh sách ngành có fit % và gap nhanh. Click vào ngành bất kỳ mới mở radar so sánh chi tiết.</p>
+    </div>
+  </div>
+
+</div>

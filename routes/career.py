@@ -22,13 +22,16 @@ def _weights_list(major):
 
 
 def _radar(major_id, averages):
+    """Full radar: axes = tất cả môn học sinh có điểm.
+    Major layer = min_score của ngành cho môn đó, 0 nếu ngành không yêu cầu môn đó."""
     weights = MajorSubjectWeight.query.filter_by(major_id=major_id).all()
-    return (
-        [w.subject_name for w in weights],
-        [averages.get(w.subject_name, 0.0) for w in weights],
-        [w.min_score for w in weights],
-        [{'subject_name': w.subject_name, 'weight': w.weight, 'min_score': w.min_score} for w in weights],
-    )
+    req = {w.subject_name: w.min_score for w in weights}
+    wlist = [{'subject_name': w.subject_name, 'weight': w.weight, 'min_score': w.min_score}
+             for w in weights]
+    labels = list(averages.keys())
+    stu_scores = [averages[s] for s in labels]
+    maj_scores = [req.get(s, 0.0) for s in labels]
+    return labels, stu_scores, maj_scores, wlist
 
 
 @career_bp.route('/student/career')

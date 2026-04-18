@@ -1,0 +1,167 @@
+<style>
+  body { font-family: 'Be Vietnam Pro', system-ui, sans-serif; }
+  .mock { background:#fff; border:1px solid #e5e5e5; border-radius:10px; overflow:hidden; }
+  .mock-header { background:#f5f5f5; border-bottom:1px solid #e5e5e5; padding:8px 14px; font-size:11px; color:#888; font-weight:600; letter-spacing:.05em; text-transform:uppercase; }
+  .mock-body { padding:14px; }
+  .radar-circle { width:160px; height:160px; border-radius:50%; background:rgba(249,115,22,.08); border:2px dashed #f97316; display:flex; align-items:center; justify-content:center; margin:0 auto; }
+  .radar-inner { width:100px; height:100px; border-radius:50%; border:1px dashed #f9731660; display:flex; align-items:center; justify-content:center; }
+  .radar-core { width:50px; height:50px; border-radius:50%; border:1px dashed #f9731640; }
+  .bar-row { display:flex; align-items:center; gap:6px; margin-bottom:4px; font-size:11px; }
+  .bar-label { width:60px; color:#555; }
+  .bar-track { flex:1; height:6px; background:#f0f0f0; border-radius:3px; }
+  .bar-fill-ok { height:6px; background:#22c55e; border-radius:3px; }
+  .bar-fill-warn { height:6px; background:#f59e0b; border-radius:3px; }
+  .bar-fill-fail { height:6px; background:#ef4444; border-radius:3px; }
+  .tag { font-size:10px; padding:1px 5px; border-radius:3px; font-weight:600; }
+  .tag-ok { background:#dcfce7; color:#166534; }
+  .tag-warn { background:#fef9c3; color:#854d0e; }
+  .tag-fail { background:#fee2e2; color:#991b1b; }
+  .fit-number { font-size:28px; font-weight:700; color:#0070f3; font-variant-numeric:tabular-nums; }
+  .subject-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:4px; }
+  .section-label { font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:#9ca3af; font-weight:600; margin-bottom:6px; }
+  .compare-col { border:1px solid #e5e5e5; border-radius:8px; padding:10px; flex:1; }
+  .compare-col h4 { font-size:11px; font-weight:700; color:#111; margin:0 0 4px; }
+  .compare-col .univ { font-size:10px; color:#888; margin:0 0 8px; }
+  .fit-pct-big { font-size:22px; font-weight:800; color:#0070f3; font-variant-numeric:tabular-nums; }
+</style>
+
+<h2>Layout trang chính — Định hướng chọn ngành</h2>
+<p class="subtitle">Radar chỉ hiện yêu cầu ngành (không có điểm hs). Chọn cách layout phần còn lại của trang.</p>
+
+<div class="options">
+
+  <!-- Option A -->
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Radar lớn + Gap bars bên phải</h3>
+      <p>Radar 2 cột bên trái, sidebar bên phải thay bằng bar chart thể hiện khoảng cách điểm học sinh so với yêu cầu từng môn. Fit % to ở trên.</p>
+      <div class="mock" style="margin-top:10px">
+        <div class="mock-header">Preview Layout A</div>
+        <div class="mock-body">
+          <div style="display:grid;grid-template-columns:1fr 200px;gap:10px">
+            <!-- Left: radar area -->
+            <div>
+              <div style="font-size:10px;color:#888;margin-bottom:6px">So sánh với: <strong>Khoa học Máy tính — UET</strong> ▾</div>
+              <div style="display:flex;justify-content:center;align-items:center;height:130px;background:#fafafa;border:1px solid #eee;border-radius:8px;">
+                <div style="text-align:center;color:#ccc;font-size:11px">
+                  🕸 Radar chart<br><span style="font-size:9px">chỉ hiện polygon của ngành</span>
+                </div>
+              </div>
+              <div style="margin-top:8px;font-size:10px;color:#888">● Môn ngành yêu cầu &nbsp;&nbsp; ○ Môn ngành không yêu cầu</div>
+            </div>
+            <!-- Right: bars -->
+            <div>
+              <div class="fit-number" style="font-size:22px">74.2%</div>
+              <div style="font-size:9px;color:#888;margin-bottom:8px">Độ phù hợp</div>
+              <div class="section-label">Điểm bạn / Yêu cầu</div>
+              <div class="bar-row"><span class="bar-label">Toán</span><div class="bar-track"><div class="bar-fill-ok" style="width:75%"></div></div><span class="tag tag-ok">Đạt</span></div>
+              <div class="bar-row"><span class="bar-label">Vật lý</span><div class="bar-track"><div class="bar-fill-warn" style="width:65%"></div></div><span class="tag tag-warn">−0.5</span></div>
+              <div class="bar-row"><span class="bar-label">Tiếng Anh</span><div class="bar-track"><div class="bar-fill-fail" style="width:50%"></div></div><span class="tag tag-fail">−1.5</span></div>
+              <div class="bar-row"><span class="bar-label">Hóa học</span><div class="bar-track"><div class="bar-fill-ok" style="width:80%"></div></div><span class="tag tag-ok">Đạt</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Pros</h4><ul><li>Gap rõ ràng ngay lập tức</li><li>Radar sạch, focus vào ngành</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Mất đi overlay 2 lớp trực quan</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Radar + "Xem điểm của bạn" toggle</h3>
+      <p>Mặc định radar chỉ hiện ngành. Có toggle để bật thêm lớp điểm hs. Sidebar vẫn có target + pinned.</p>
+      <div class="mock" style="margin-top:10px">
+        <div class="mock-header">Preview Layout B</div>
+        <div class="mock-body">
+          <div style="display:grid;grid-template-columns:1fr 160px;gap:10px">
+            <div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <div style="font-size:10px;color:#888">So sánh với: <strong>CNTT — FPT</strong> ▾</div>
+                <div style="margin-left:auto;background:#f0f0f0;border-radius:20px;padding:2px 8px;font-size:10px;display:flex;gap:6px">
+                  <span style="background:#fff;border-radius:16px;padding:1px 7px;font-size:9px;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.1)">Ngành</span>
+                  <span style="font-size:9px;color:#888;padding:1px 4px">+ Điểm tôi</span>
+                </div>
+              </div>
+              <div style="height:120px;background:#fafafa;border:1px solid #eee;border-radius:8px;display:flex;align-items:center;justify-content:center">
+                <div style="text-align:center;color:#ccc;font-size:11px">🕸 Radar ngành only<br><span style="font-size:9px">Toggle bật để xem điểm hs</span></div>
+              </div>
+            </div>
+            <div>
+              <div class="section-label">Mục tiêu</div>
+              <div style="font-size:10px;font-weight:600">KHMT — UET</div>
+              <div style="font-size:9px;color:#888">74.2% phù hợp</div>
+              <div style="height:4px;background:#f0f0f0;border-radius:2px;margin:4px 0"><div style="width:74%;height:4px;background:#0070f3;border-radius:2px"></div></div>
+              <div class="section-label" style="margin-top:8px">Đã ghim</div>
+              <div style="font-size:10px;color:#555">KTPM — FPT &nbsp;<span style="color:#22c55e;font-weight:700">82%</span></div>
+              <div style="font-size:10px;color:#555">QTKD — NEU &nbsp;<span style="color:#f59e0b;font-weight:700">61%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Pros</h4><ul><li>Flexible — cả 2 chế độ</li><li>Giữ được sidebar quen thuộc</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Toggle thêm 1 bước tương tác</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>3-panel: Radar | Gap table | Compare</h3>
+      <p>Trang chia 3 phần theo chiều ngang. Radar ở giữa (major-only). Panel trái là "Profile của bạn" (điểm các môn). Panel phải là nút Compare → mở modal so sánh nhiều ngành.</p>
+      <div class="mock" style="margin-top:10px">
+        <div class="mock-header">Preview Layout C</div>
+        <div class="mock-body">
+          <div style="display:grid;grid-template-columns:130px 1fr 110px;gap:8px">
+            <!-- Profile panel -->
+            <div style="background:#fafafa;border:1px solid #eee;border-radius:6px;padding:8px">
+              <div class="section-label">Profile của bạn</div>
+              <div class="bar-row" style="flex-direction:column;align-items:flex-start;gap:2px">
+                <div style="font-size:10px;color:#555;width:100%;display:flex;justify-content:space-between"><span>Toán</span><strong>7.5</strong></div>
+                <div class="bar-track" style="width:100%"><div class="bar-fill-ok" style="width:75%"></div></div>
+              </div>
+              <div class="bar-row" style="flex-direction:column;align-items:flex-start;gap:2px">
+                <div style="font-size:10px;color:#555;width:100%;display:flex;justify-content:space-between"><span>T.Anh</span><strong>7.0</strong></div>
+                <div class="bar-track" style="width:100%"><div class="bar-fill-warn" style="width:70%"></div></div>
+              </div>
+              <div class="bar-row" style="flex-direction:column;align-items:flex-start;gap:2px">
+                <div style="font-size:10px;color:#555;width:100%;display:flex;justify-content:space-between"><span>Vật lý</span><strong>6.5</strong></div>
+                <div class="bar-track" style="width:100%"><div class="bar-fill-warn" style="width:65%"></div></div>
+              </div>
+              <div style="font-size:9px;color:#aaa;margin-top:4px">+6 môn khác...</div>
+            </div>
+            <!-- Radar -->
+            <div style="background:#fafafa;border:1px solid #eee;border-radius:6px;padding:8px;text-align:center">
+              <div style="font-size:9px;color:#888;margin-bottom:4px">CNTT — FPT ▾ &nbsp; <span style="background:#e8f0fe;color:#0070f3;padding:1px 5px;border-radius:3px;font-weight:700">82%</span></div>
+              <div style="height:90px;display:flex;align-items:center;justify-content:center;color:#ddd;font-size:11px">🕸 Radar</div>
+              <div style="font-size:9px;color:#888">Chỉ hiện yêu cầu ngành</div>
+            </div>
+            <!-- Compare panel -->
+            <div style="background:#fafafa;border:1px solid #eee;border-radius:6px;padding:8px">
+              <div class="section-label">So sánh</div>
+              <button style="width:100%;background:#0070f3;color:#fff;border:none;border-radius:5px;padding:5px 0;font-size:10px;cursor:pointer;font-weight:600">⚖ So sánh ngành</button>
+              <div style="margin-top:8px;font-size:9px;color:#888">Chọn 2–3 ngành để xem bảng so sánh chi tiết kiểu Versus</div>
+              <div style="margin-top:8px" class="section-label">Ghim (3)</div>
+              <div style="font-size:9px;color:#555">KHMT — UET</div>
+              <div style="font-size:9px;color:#555">KTPM — FPT</div>
+              <div style="font-size:9px;color:#555">QTKD — NEU</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Pros</h4><ul><li>Full thông tin một màn hình</li><li>Compare feature nổi bật</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Hơi dày trên mobile</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,148 @@
+<h2>Filter Panel — Chọn layout</h2>
+<p class="subtitle">Bộ lọc: trường, khối xét tuyển, nhóm ngành, % phù hợp tối thiểu</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="sidebar" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0f172a;padding:10px;border-radius:8px;min-height:180px">
+      <div style="display:flex;gap:8px;height:160px">
+        <!-- Sidebar filter -->
+        <div style="width:100px;background:#1e293b;border-radius:6px;padding:8px;font-size:9px;overflow:hidden">
+          <div style="color:#64748b;font-size:8px;text-transform:uppercase;margin-bottom:6px">Bộ lọc</div>
+          <input style="width:100%;background:#0f172a;border:1px solid #334155;border-radius:4px;padding:4px;color:#94a3b8;font-size:8px;margin-bottom:6px" placeholder="🔍 Tìm ngành, trường..."/>
+          <div style="color:#94a3b8;margin-bottom:3px;font-size:8px">Trường</div>
+          <select style="width:100%;background:#0f172a;border:1px solid #334155;border-radius:3px;padding:3px;color:#94a3b8;font-size:8px;margin-bottom:6px">
+            <option>Tất cả trường</option>
+          </select>
+          <div style="color:#94a3b8;margin-bottom:3px;font-size:8px">Khối xét tuyển</div>
+          <div style="display:flex;flex-wrap:wrap;gap:2px;margin-bottom:6px">
+            <span style="background:#1e3a8a;color:#93c5fd;padding:2px 5px;border-radius:10px;font-size:8px">A1</span>
+            <span style="background:#334155;color:#94a3b8;padding:2px 5px;border-radius:10px;font-size:8px">B00</span>
+            <span style="background:#334155;color:#94a3b8;padding:2px 5px;border-radius:10px;font-size:8px">D01</span>
+          </div>
+          <div style="color:#94a3b8;margin-bottom:3px;font-size:8px">% Phù hợp tối thiểu</div>
+          <div style="background:#0f172a;border-radius:3px;padding:3px;color:#22c55e;font-size:9px;text-align:center">≥ 60%</div>
+        </div>
+        <!-- Main content area -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+          <div style="background:#1e293b;border-radius:5px;padding:6px;display:flex;justify-content:space-between;align-items:center">
+            <span style="color:#60a5fa;font-size:9px;font-weight:bold">AI - HUST</span>
+            <span style="color:#22c55e;font-size:9px">87%</span>
+          </div>
+          <div style="background:#1e293b;border-radius:5px;padding:6px;display:flex;justify-content:space-between;align-items:center">
+            <span style="color:#f59e0b;font-size:9px;font-weight:bold">CNTT - VNU</span>
+            <span style="color:#22c55e;font-size:9px">72%</span>
+          </div>
+          <div style="background:#1e293b;border-radius:5px;padding:6px;display:flex;justify-content:space-between;align-items:center">
+            <span style="color:#a78bfa;font-size:9px;font-weight:bold">Luật - VNU</span>
+            <span style="color:#f59e0b;font-size:9px">45%</span>
+          </div>
+          <div style="background:#1e293b;border-radius:5px;padding:6px;display:flex;justify-content:space-between;align-items:center;opacity:0.5">
+            <span style="color:#94a3b8;font-size:9px">Y - HMU</span>
+            <span style="color:#ef4444;font-size:9px">28%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Sidebar cố định</h3>
+      <p>Filter panel dọc bên trái, danh sách ngành bên phải. Filter luôn visible, thay đổi ngay lập tức khi chọn. Phổ biến, quen thuộc.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="topbar" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0f172a;padding:10px;border-radius:8px;min-height:180px">
+      <!-- Top filter bar -->
+      <div style="background:#1e293b;border-radius:6px;padding:8px;margin-bottom:8px">
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <input style="flex:1;min-width:80px;background:#0f172a;border:1px solid #334155;border-radius:4px;padding:4px 8px;color:#94a3b8;font-size:9px" placeholder="🔍 Tìm ngành hoặc trường..."/>
+          <select style="background:#0f172a;border:1px solid #334155;border-radius:4px;padding:4px;color:#94a3b8;font-size:9px">
+            <option>Tất cả trường</option>
+          </select>
+          <select style="background:#0f172a;border:1px solid #334155;border-radius:4px;padding:4px;color:#94a3b8;font-size:9px">
+            <option>Tất cả khối</option>
+          </select>
+          <select style="background:#0f172a;border:1px solid #334155;border-radius:4px;padding:4px;color:#94a3b8;font-size:9px">
+            <option>≥ 50% phù hợp</option>
+          </select>
+        </div>
+        <!-- Active filters as chips -->
+        <div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap">
+          <span style="background:#1e3a8a;color:#93c5fd;padding:2px 8px;border-radius:10px;font-size:8px">Khối: A1 ×</span>
+          <span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:10px;font-size:8px;border:1px solid #334155">+ Thêm lọc</span>
+        </div>
+      </div>
+      <!-- Grid cards below -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+        <div style="background:#1e293b;border-radius:5px;padding:6px">
+          <div style="color:#60a5fa;font-size:9px;font-weight:bold">AI - HUST</div>
+          <div style="color:#22c55e;font-size:11px;font-weight:bold">87%</div>
+          <div style="color:#94a3b8;font-size:8px">A1 | ĐC: 28.5</div>
+        </div>
+        <div style="background:#1e293b;border-radius:5px;padding:6px">
+          <div style="color:#f59e0b;font-size:9px;font-weight:bold">CNTT - VNU</div>
+          <div style="color:#22c55e;font-size:11px;font-weight:bold">72%</div>
+          <div style="color:#94a3b8;font-size:8px">A1, D01 | ĐC: 26.0</div>
+        </div>
+        <div style="background:#1e293b;border-radius:5px;padding:6px">
+          <div style="color:#a78bfa;font-size:9px;font-weight:bold">Luật - VNU</div>
+          <div style="color:#f59e0b;font-size:11px;font-weight:bold">45%</div>
+          <div style="color:#94a3b8;font-size:8px">D01 | ĐC: 25.5</div>
+        </div>
+        <div style="background:#1e293b;border-radius:5px;padding:6px;opacity:0.5">
+          <div style="color:#94a3b8;font-size:9px">Y - HMU</div>
+          <div style="color:#ef4444;font-size:11px;font-weight:bold">28%</div>
+          <div style="color:#94a3b8;font-size:8px">B00 | ĐC: 29.0</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Top bar + chip filters</h3>
+      <p>Thanh filter ngang trên cùng, filter đang active hiện dưới dạng chip có thể xóa. Tiết kiệm không gian ngang, danh sách ngành dạng grid 2 cột.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="drawer" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0f172a;padding:10px;border-radius:8px;min-height:180px">
+      <!-- Collapsed filter bar with button -->
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px">
+        <input style="flex:1;background:#1e293b;border:1px solid #334155;border-radius:4px;padding:5px 10px;color:#94a3b8;font-size:9px" placeholder="🔍 Tìm ngành hoặc trường..."/>
+        <button style="background:#3b82f6;color:white;border:none;border-radius:4px;padding:5px 10px;font-size:9px;cursor:pointer">⚙ Lọc (2)</button>
+      </div>
+      <!-- Sort bar -->
+      <div style="display:flex;gap:4px;margin-bottom:8px">
+        <span style="background:#1e3a8a;color:#93c5fd;padding:3px 8px;border-radius:10px;font-size:8px">Phù hợp nhất ▾</span>
+        <span style="background:#1e293b;color:#94a3b8;padding:3px 8px;border-radius:10px;font-size:8px;border:1px solid #334155">ĐC cao → thấp</span>
+        <span style="background:#1e293b;color:#94a3b8;padding:3px 8px;border-radius:10px;font-size:8px;border:1px solid #334155">Tên A-Z</span>
+      </div>
+      <!-- List -->
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="background:#1e293b;border-radius:5px;padding:7px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="color:#60a5fa;font-size:9px;font-weight:bold">AI - HUST</div>
+            <div style="color:#64748b;font-size:8px">A1 | ĐC: 28.5</div>
+          </div>
+          <div style="text-align:right">
+            <div style="color:#22c55e;font-size:12px;font-weight:bold">87%</div>
+            <div style="width:50px;height:4px;background:#334155;border-radius:2px"><div style="width:87%;height:100%;background:#22c55e;border-radius:2px"></div></div>
+          </div>
+        </div>
+        <div style="background:#1e293b;border-radius:5px;padding:7px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="color:#f59e0b;font-size:9px;font-weight:bold">CNTT - VNU</div>
+            <div style="color:#64748b;font-size:8px">A1, D01 | ĐC: 26.0</div>
+          </div>
+          <div style="text-align:right">
+            <div style="color:#22c55e;font-size:12px;font-weight:bold">72%</div>
+            <div style="width:50px;height:4px;background:#334155;border-radius:2px"><div style="width:72%;height:100%;background:#22c55e;border-radius:2px"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Search bar + Drawer</h3>
+      <p>Search + sort pills luôn visible. Nút "Lọc (2)" mở drawer overlay khi click. Danh sách dạng list với progress bar fit%. Gọn nhất, mobile-friendly nhất.</p>
+    </div>
+  </div>
+
+</div>

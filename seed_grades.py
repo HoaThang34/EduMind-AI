@@ -17,32 +17,31 @@ from app import app
 from models import db, Student, Subject, Grade, SystemConfig
 
 
+# Keys = tên môn trong DB (Subject.name). Phải khớp chính xác với calculate_subject_averages.
 SUBJECT_SCORES = {
-    'Toán':  {'TX': 7.5, 'GK': 7.5, 'HK': 7.5},
-    'Văn':   {'TX': 7.0, 'GK': 7.0, 'HK': 7.0},
-    'Anh':   {'TX': 7.0, 'GK': 7.0, 'HK': 7.0},
-    'Lý':    {'TX': 6.5, 'GK': 6.5, 'HK': 6.5},
-    'Hóa':   {'TX': 6.0, 'GK': 6.0, 'HK': 6.0},
-    'Sinh':  {'TX': 6.0, 'GK': 6.0, 'HK': 6.0},
-    'Sử':    {'TX': 6.5, 'GK': 6.5, 'HK': 6.5},
-    'Địa':   {'TX': 7.0, 'GK': 7.0, 'HK': 7.0},
-    'GDCD':  {'TX': 8.0, 'GK': 8.0, 'HK': 8.0},
+    'Toán':                 {'TX': 7.5, 'GK': 7.5, 'HK': 7.5},
+    'Văn':                  {'TX': 7.0, 'GK': 7.0, 'HK': 7.0},
+    'Tiếng Anh':            {'TX': 7.0, 'GK': 7.0, 'HK': 7.0},
+    'Vật lý':               {'TX': 6.5, 'GK': 6.5, 'HK': 6.5},
+    'Hóa học':              {'TX': 6.0, 'GK': 6.0, 'HK': 6.0},
+    'Sinh học':             {'TX': 6.0, 'GK': 6.0, 'HK': 6.0},
+    'Lịch sử':              {'TX': 6.5, 'GK': 6.5, 'HK': 6.5},
+    'Địa lý':               {'TX': 7.0, 'GK': 7.0, 'HK': 7.0},
+    'Giáo dục công dân':    {'TX': 8.0, 'GK': 8.0, 'HK': 8.0},
 }
 
 
-def ensure_subject(name, class_name='10A1'):
+def ensure_subject(name):
     s = Subject.query.filter_by(name=name).first()
     if not s:
-        s = Subject(name=name, class_name=class_name, coefficient=1)
-        db.session.add(s)
-        db.session.flush()
+        raise RuntimeError(f'Subject "{name}" not found in DB. Run the app first to create default subjects.')
     return s
 
 
 def seed_student(student, semester, school_year):
     added = 0
     for subj_name, scores in SUBJECT_SCORES.items():
-        subj = ensure_subject(subj_name, student.class_name or '10A1')
+        subj = ensure_subject(subj_name)
         for grade_type, score in scores.items():
             exists = Grade.query.filter_by(
                 student_id=student.id, subject_id=subj.id,
@@ -85,7 +84,7 @@ def main():
         for s in students:
             n = seed_student(s, semester, school_year)
             total += n
-            print(f'  [{s.student_id}] {s.name}: {n} grade rows added')
+            print(f'  [{s.student_code}] {s.name}: {n} grade rows added')
 
         db.session.commit()
         print(f'\nDone. {total} grade records inserted (semester={semester}, year={school_year}).')

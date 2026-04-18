@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Định hướng chọn ngành</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #f5f5f5;
+    color: #111;
+    font-family: "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  .page-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px; padding-bottom: 16px;
+    border-bottom: 1px solid #e5e5e5;
+  }
+  .page-title { font-size: 18px; font-weight: 600; color: #000; letter-spacing: -0.3px; }
+  .page-subtitle { font-size: 12px; color: #888; margin-top: 2px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #fff; border: 1px solid #e5e5e5;
+    border-radius: 6px; padding: 5px 10px;
+    font-size: 12px; color: #666;
+  }
+  .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: #0070f3; flex-shrink: 0; }
+
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+    align-items: start;
+  }
+
+  .panel {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e5e5;
+  }
+  .panel-title { font-size: 11px; color: #888; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .selector-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 16px;
+    border-bottom: 1px solid #e5e5e5;
+    background: #fafafa;
+  }
+  .selector-label { font-size: 11px; color: #999; }
+  .selector-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: #fff; border: 1px solid #e5e5e5;
+    border-radius: 6px; padding: 4px 10px;
+    font-size: 12px; color: #111; font-weight: 500; cursor: pointer;
+  }
+  .selector-pill svg { width: 10px; height: 10px; color: #999; }
+  .selector-action { margin-left: auto; font-size: 11px; color: #0070f3; cursor: pointer; }
+
+  .radar-wrap {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 24px 16px 16px;
+  }
+  .legend { display: flex; gap: 20px; margin-top: 16px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #888; }
+  .legend-line { width: 18px; height: 2px; }
+  .legend-line.student { background: #0070f3; }
+  .legend-line.major { border-top: 2px dashed #f97316; }
+
+  .right-col { display: flex; flex-direction: column; gap: 12px; }
+
+  .target-card {
+    background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; overflow: hidden;
+  }
+  .target-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; border-bottom: 1px solid #e5e5e5;
+  }
+  .target-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+  .target-badge {
+    font-size: 10px; background: #eff6ff; border: 1px solid #bfdbfe;
+    color: #2563eb; border-radius: 4px; padding: 1px 7px; font-weight: 500;
+  }
+  .target-body { padding: 14px 16px; }
+  .target-name { font-size: 15px; font-weight: 600; color: #000; letter-spacing: -0.2px; }
+  .target-school { font-size: 12px; color: #999; margin-top: 2px; margin-bottom: 12px; }
+
+  .fit-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px; }
+  .fit-score { font-size: 28px; font-weight: 700; color: #000; letter-spacing: -1px; font-variant-numeric: tabular-nums; }
+  .fit-unit { font-size: 13px; color: #999; }
+  .fit-bar { height: 3px; background: #e5e5e5; border-radius: 2px; margin-bottom: 14px; overflow: hidden; }
+  .fit-bar-fill { height: 100%; background: #0070f3; border-radius: 2px; width: 82%; }
+
+  .subject-list { display: flex; flex-direction: column; gap: 6px; }
+  .subject-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 10px;
+    background: #fafafa; border: 1px solid #e5e5e5; border-radius: 6px;
+  }
+  .subject-name { font-size: 12px; color: #666; }
+  .subject-right { display: flex; align-items: center; gap: 8px; }
+  .subject-scores { font-size: 12px; color: #111; font-variant-numeric: tabular-nums; }
+  .subject-scores .req { color: #bbb; }
+  .status-tag {
+    font-size: 10px; font-weight: 500; border-radius: 4px; padding: 1px 6px; white-space: nowrap;
+  }
+  .status-ok  { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+  .status-warn { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+  .status-fail { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+
+  .state-banner {
+    margin-top: 10px; padding: 9px 12px;
+    background: #fafafa; border: 1px solid #e5e5e5; border-radius: 6px;
+    font-size: 11px; color: #666; line-height: 1.6;
+  }
+  .state-banner strong { color: #111; }
+
+  .pinned-card {
+    background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; overflow: hidden;
+  }
+  .pinned-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; border-bottom: 1px solid #e5e5e5;
+  }
+  .pinned-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+  .pinned-add { font-size: 11px; color: #0070f3; cursor: pointer; }
+
+  .pinned-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 16px; border-bottom: 1px solid #f0f0f0; cursor: pointer;
+  }
+  .pinned-item:last-child { border-bottom: none; }
+  .pinned-item:hover { background: #fafafa; }
+  .pinned-major { font-size: 13px; color: #111; font-weight: 500; }
+  .pinned-school { font-size: 11px; color: #999; margin-top: 1px; }
+  .pinned-right { display: flex; align-items: center; gap: 10px; }
+  .pinned-pct { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .pct-green { color: #16a34a; }
+  .pct-yellow { color: #d97706; }
+  .pinned-minibar { width: 40px; height: 3px; background: #e5e5e5; border-radius: 2px; overflow: hidden; }
+  .pinned-minibar-fill { height: 100%; border-radius: 2px; }
+
+  .add-row {
+    display: flex; align-items: center; justify-content: center;
+    padding: 11px 16px; font-size: 12px; color: #999; cursor: pointer;
+    border-top: 1px solid #f0f0f0;
+  }
+  .add-row:hover { color: #555; background: #fafafa; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div>
+    <div class="page-title">Định hướng chọn ngành</div>
+    <div class="page-subtitle">So sánh năng lực học tập với yêu cầu các ngành đại học</div>
+  </div>
+  <div class="badge">
+    <span class="dot"></span>
+    Nguyễn Văn A &nbsp;·&nbsp; 11A1 &nbsp;·&nbsp; GPA 7.82
+  </div>
+</div>
+
+<div class="main-grid">
+
+  <!-- LEFT: Radar -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Biểu đồ năng lực</span>
+    </div>
+    <div class="selector-bar">
+      <span class="selector-label">Đang so sánh với</span>
+      <div class="selector-pill">
+        Trí tuệ nhân tạo — HUST
+        <svg viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M1 1l4 4 4-4"/>
+        </svg>
+      </div>
+      <span class="selector-action">Duyệt tất cả ngành</span>
+    </div>
+    <div class="radar-wrap">
+      <svg viewBox="0 0 300 280" width="100%" style="max-width:400px">
+        <!-- Grid -->
+        <polygon points="150,18 238,68 238,178 150,228 62,178 62,68" fill="none" stroke="#e5e5e5" stroke-width="1"/>
+        <polygon points="150,48 210,80 210,160 150,192 90,160 90,80" fill="none" stroke="#e5e5e5" stroke-width="1"/>
+        <polygon points="150,78 182,96 182,144 150,162 118,144 118,96" fill="none" stroke="#e5e5e5" stroke-width="1"/>
+        <polygon points="150,108 166,116 166,134 150,142 134,134 134,116" fill="none" stroke="#ebebeb" stroke-width="1"/>
+        <!-- Axis lines -->
+        <line x1="150" y1="123" x2="150" y2="18" stroke="#e5e5e5" stroke-width="0.8"/>
+        <line x1="150" y1="123" x2="238" y2="68" stroke="#e5e5e5" stroke-width="0.8"/>
+        <line x1="150" y1="123" x2="238" y2="178" stroke="#e5e5e5" stroke-width="0.8"/>
+        <line x1="150" y1="123" x2="150" y2="228" stroke="#e5e5e5" stroke-width="0.8"/>
+        <line x1="150" y1="123" x2="62" y2="178" stroke="#e5e5e5" stroke-width="0.8"/>
+        <line x1="150" y1="123" x2="62" y2="68" stroke="#e5e5e5" stroke-width="0.8"/>
+        <!-- Major (dashed gray) -->
+        <polygon points="150,22 232,70 228,174 150,224 68,175 67,71"
+          fill="rgba(249,115,22,0.05)" stroke="#f97316" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <!-- Student (blue) -->
+        <polygon points="150,38 218,78 214,160 150,204 82,162 80,79"
+          fill="rgba(0,112,243,0.08)" stroke="#0070f3" stroke-width="2"/>
+        <!-- Dots -->
+        <circle cx="150" cy="38" r="3.5" fill="#0070f3"/>
+        <circle cx="218" cy="78" r="3.5" fill="#0070f3"/>
+        <circle cx="214" cy="160" r="3.5" fill="#0070f3"/>
+        <circle cx="150" cy="204" r="3.5" fill="#0070f3"/>
+        <circle cx="82" cy="162" r="3.5" fill="#0070f3"/>
+        <circle cx="80" cy="79" r="3.5" fill="#0070f3"/>
+        <!-- Score labels -->
+        <text x="150" y="33" text-anchor="middle" fill="#0070f3" font-size="9" font-family="monospace">7.5</text>
+        <text x="224" y="78" text-anchor="start" fill="#0070f3" font-size="9" font-family="monospace">8.2</text>
+        <text x="220" y="163" text-anchor="start" fill="#0070f3" font-size="9" font-family="monospace">6.1</text>
+        <text x="150" y="216" text-anchor="middle" fill="#0070f3" font-size="9" font-family="monospace">5.8</text>
+        <text x="76" y="165" text-anchor="end" fill="#0070f3" font-size="9" font-family="monospace">7.0</text>
+        <text x="74" y="79" text-anchor="end" fill="#0070f3" font-size="9" font-family="monospace">8.5</text>
+        <!-- Axis labels -->
+        <text x="150" y="12" text-anchor="middle" fill="#888" font-size="11" font-family="-apple-system,sans-serif">Toán học</text>
+        <text x="244" y="72" text-anchor="start" fill="#888" font-size="11" font-family="-apple-system,sans-serif">Vật lý</text>
+        <text x="244" y="182" text-anchor="start" fill="#888" font-size="11" font-family="-apple-system,sans-serif">Hóa học</text>
+        <text x="150" y="242" text-anchor="middle" fill="#888" font-size="11" font-family="-apple-system,sans-serif">Sinh học</text>
+        <text x="56" y="182" text-anchor="end" fill="#888" font-size="11" font-family="-apple-system,sans-serif">Ngữ văn</text>
+        <text x="56" y="72" text-anchor="end" fill="#888" font-size="11" font-family="-apple-system,sans-serif">Tiếng Anh</text>
+        <!-- Scale labels -->
+        <text x="153" y="43" fill="#ccc" font-size="8" font-family="monospace">8.0</text>
+        <text x="153" y="73" fill="#ccc" font-size="8" font-family="monospace">6.0</text>
+        <text x="153" y="103" fill="#ccc" font-size="8" font-family="monospace">4.0</text>
+      </svg>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-line student"></div>Điểm của bạn</div>
+        <div class="legend-item"><div class="legend-line major"></div>Yêu cầu ngành</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right-col">
+
+    <div class="target-card">
+      <div class="target-header">
+        <span class="target-label">Ngành mục tiêu</span>
+        <span class="target-badge">Đang theo dõi</span>
+      </div>
+      <div class="target-body">
+        <div class="target-name">Trí tuệ nhân tạo</div>
+        <div class="target-school">ĐH Bách Khoa Hà Nội</div>
+        <div class="fit-row">
+          <span class="fit-score">82</span>
+          <span class="fit-unit">% phù hợp</span>
+        </div>
+        <div class="fit-bar"><div class="fit-bar-fill"></div></div>
+        <div class="subject-list">
+          <div class="subject-row">
+            <span class="subject-name">Toán học</span>
+            <div class="subject-right">
+              <span class="subject-scores">7.5 <span class="req">/ 8.3</span></span>
+              <span class="status-tag status-fail">−0.8 điểm</span>
+            </div>
+          </div>
+          <div class="subject-row">
+            <span class="subject-name">Vật lý</span>
+            <div class="subject-right">
+              <span class="subject-scores">8.2 <span class="req">/ 8.0</span></span>
+              <span class="status-tag status-ok">Đạt</span>
+            </div>
+          </div>
+          <div class="subject-row">
+            <span class="subject-name">Tiếng Anh</span>
+            <div class="subject-right">
+              <span class="subject-scores">8.5 <span class="req">/ 8.5</span></span>
+              <span class="status-tag status-ok">Đạt</span>
+            </div>
+          </div>
+        </div>
+        <div class="state-banner">
+          Cải thiện <strong>Toán học thêm 0.8 điểm</strong> là đủ điều kiện cơ bản cho ngành này.
+        </div>
+      </div>
+    </div>
+
+    <div class="pinned-card">
+      <div class="pinned-header">
+        <span class="pinned-label">Đã ghim</span>
+        <span class="pinned-add">+ Thêm ngành</span>
+      </div>
+      <div class="pinned-item">
+        <div>
+          <div class="pinned-major">Công nghệ thông tin</div>
+          <div class="pinned-school">ĐH Công nghệ — ĐHQGHN</div>
+        </div>
+        <div class="pinned-right">
+          <span class="pinned-pct pct-green">79%</span>
+          <div class="pinned-minibar"><div class="pinned-minibar-fill" style="width:79%;background:#16a34a"></div></div>
+        </div>
+      </div>
+      <div class="pinned-item">
+        <div>
+          <div class="pinned-major">Khoa học dữ liệu & AI</div>
+          <div class="pinned-school">ĐH Kinh tế TP.HCM</div>
+        </div>
+        <div class="pinned-right">
+          <span class="pinned-pct pct-yellow">74%</span>
+          <div class="pinned-minibar"><div class="pinned-minibar-fill" style="width:74%;background:#d97706"></div></div>
+        </div>
+      </div>
+      <div class="add-row">+ Duyệt 150 ngành khác</div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

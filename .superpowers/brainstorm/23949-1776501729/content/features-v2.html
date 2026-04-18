@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html, body { height:100%; background:#f7f7f8; color:#111; font-family:system-ui,-apple-system,sans-serif; }
+  body { padding:24px 32px; overflow-y:auto; }
+
+  h2 { font-size:18px; font-weight:700; color:#111; margin-bottom:4px; }
+  .sub { font-size:13px; color:#6b7280; margin-bottom:20px; }
+
+  .group-label { font-size:10px; text-transform:uppercase; letter-spacing:.08em; font-weight:700; color:#9ca3af; margin:20px 0 10px; display:flex; align-items:center; gap:8px; }
+  .group-label::after { content:''; flex:1; height:1px; background:#e5e5e5; }
+
+  .feat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  .feat {
+    background:#fff;
+    border:1.5px solid #e5e5e5;
+    border-radius:10px;
+    padding:14px 16px;
+    cursor:pointer;
+    transition:border-color .15s, box-shadow .15s, background .15s;
+    display:flex; gap:12px; align-items:flex-start;
+    user-select:none;
+  }
+  .feat:hover { border-color:#0070f3; box-shadow:0 2px 12px rgba(0,112,243,.1); }
+  .feat.selected { border-color:#0070f3; background:#f0f7ff; }
+
+  .feat-num {
+    min-width:26px; height:26px; border-radius:50%;
+    background:#f0f0f0; color:#888;
+    font-size:11px; font-weight:800;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; margin-top:1px;
+    transition:background .15s, color .15s;
+  }
+  .feat.selected .feat-num { background:#0070f3; color:#fff; }
+
+  .feat-body { flex:1; min-width:0; }
+  .feat-icon { font-size:16px; margin-bottom:4px; }
+  .feat-title { font-size:13px; font-weight:700; color:#111; margin-bottom:3px; }
+  .feat-desc { font-size:11px; color:#6b7280; line-height:1.55; }
+
+  .feat-tags { display:flex; gap:4px; margin-top:7px; flex-wrap:wrap; align-items:center; }
+  .ftag { font-size:9px; padding:2px 7px; border-radius:10px; font-weight:600; }
+  .wow  { background:#fce7f3; color:#9d174d; }
+  .ai   { background:#ede9fe; color:#5b21b6; }
+  .data { background:#dcfce7; color:#166534; }
+  .ux   { background:#e0f2fe; color:#075985; }
+
+  .complexity { font-size:9px; color:#aaa; margin-top:5px; }
+  .c1::before { content:'● '; color:#22c55e; }
+  .c2::before { content:'● '; color:#f59e0b; }
+  .c3::before { content:'● '; color:#ef4444; }
+
+  .note {
+    margin-top:20px;
+    background:#fff;
+    border:1px solid #e5e5e5;
+    border-radius:10px;
+    padding:14px 16px;
+    font-size:12px;
+    color:#374151;
+    line-height:1.65;
+  }
+  .note strong { color:#0070f3; }
+
+  #indicator {
+    position:fixed; bottom:0; left:0; right:0;
+    background:#fff; border-top:1px solid #e5e5e5;
+    padding:10px 24px; font-size:12px; color:#6b7280;
+    display:flex; align-items:center; gap:10px;
+  }
+  #count { font-weight:700; color:#0070f3; }
+  #selections { font-size:11px; color:#9ca3af; flex:1; }
+</style>
+</head>
+<body>
+
+<h2>10 tính năng mở rộng — Định hướng chọn ngành</h2>
+<p class="sub">Click để chọn những tính năng muốn đưa vào. Có thể chọn nhiều.</p>
+
+<!-- Group 1 -->
+<div class="group-label">📊 Phân tích & Mô phỏng</div>
+<div class="feat-grid">
+
+  <div class="feat" onclick="toggle(this,'Score Simulator')">
+    <div class="feat-num">1</div>
+    <div class="feat-body">
+      <div class="feat-icon">🎚️</div>
+      <div class="feat-title">Score Simulator</div>
+      <div class="feat-desc">Kéo thanh điểm từng môn → fit % cập nhật realtime. "Nếu Toán tôi lên 8.5, tôi đủ thêm 12 ngành."</div>
+      <div class="feat-tags"><span class="ftag wow">⭐ Ấn tượng</span><span class="ftag ux">UX mượt</span></div>
+      <div class="complexity c2">Độ phức tạp: Trung bình</div>
+    </div>
+  </div>
+
+  <div class="feat" onclick="toggle(this,'Bottleneck Heatmap')">
+    <div class="feat-num">2</div>
+    <div class="feat-body">
+      <div class="feat-icon">🔥</div>
+      <div class="feat-title">Bottleneck Heatmap</div>
+      <div class="feat-desc">Môn học nào đang chặn nhiều ngành nhất? Grid màu: đỏ = bottleneck, xanh = thế mạnh — nhìn 1 giây biết ngay.</div>
+      <div class="feat-tags"><span class="ftag data">Insight</span><span class="ftag wow">⭐ Ấn tượng</span></div>
+      <div class="complexity c1">Độ phức tạp: Dễ</div>
+    </div>
+  </div>
+
+  <div class="feat" onclick="toggle(this,'Lộ trình cải thiện')">
+    <div class="feat-num">3</div>
+    <div class="feat-body">
+      <div class="feat-icon">🗺️</div>
+      <div class="feat-title">Lộ trình cải thiện</div>
+      <div class="feat-desc">Chọn ngành mục tiêu → tính cần cải thiện bao nhiêu điểm từng môn, ưu tiên theo impact/effort ratio.</div>
+      <div class="feat-tags"><span class="ftag ux">Thực dụng</span><span class="ftag data">Data-driven</span></div>
+      <div class="complexity c2">Độ phức tạp: Trung bình</div>
+    </div>
+  </div>
+
+  <div class="feat" onclick="toggle(this,'Scenario Planning')">
+    <div class="feat-num">4</div>
+    <div class="feat-body">
+      <div class="feat-icon">🔀</div>
+      <div class="feat-title">Scenario Planning</div>
+      <div class="feat-desc">"Nếu tôi chọn khối A1 thay A thì sao?" So sánh 2 kịch bản điểm thi, xem phổ ngành thay đổi thế nào.</div>
+      <div class="feat-tags"><span class="ftag ux">Strategic</span></div>
+      <div class="complexity c3">Độ phức tạp: Cao</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Group 2 -->
+<div class="group-label">🧭 Khám phá & Gợi ý</div>
+<div class="feat-grid">
+
+  <div class="feat" onclick="toggle(this,'Ngành dành cho bạn')">
+    <div class="feat-num">5</div>
+    <div class="feat-body">
+      <div class="feat-icon">✨</div>
+      <div class="feat-title">"Ngành dành cho bạn"</div>
+      <div class="feat-desc">Auto-recommend top 5 ngành phù hợp nhất theo profile — hiện ngay đầu trang, không cần browse thủ công.</div>
+      <div class="feat-tags"><span class="ftag wow">⭐ Ấn tượng</span><span class="ftag ux">First-time UX</span></div>
+      <div class="complexity c1">Độ phức tạp: Dễ</div>
+    </div>
+  </div>
+
+  <div class="feat" onclick="toggle(this,'Bubble Map ngành')">
+    <div class="feat-num">6</div>
+    <div class="feat-body">
+      <div class="feat-icon">🫧</div>
+      <div class="feat-title">Bubble Map ngành</div>
+      <div class="feat-desc">~140 ngành hiện dạng bubble chart: trục X = fit%, nhóm theo ngành, click bubble xem chi tiết. Visualize toàn cảnh.</div>
+      <div class="feat-tags"><span class="ftag wow">⭐ Ấn tượng</span><span class="ftag data">Exploratory</span></div>
+      <div class="complexity c2">Độ phức tạp: Trung bình</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Group 3 -->
+<div class="group-label">⚖️ So sánh & Quyết định</div>
+<div class="feat-grid">
+
+  <div class="feat" onclick="toggle(this,'Bảng so sánh Versus')">
+    <div class="feat-num">7</div>
+    <div class="feat-body">
+      <div class="feat-icon">⚔️</div>
+      <div class="feat-title">Bảng so sánh Versus</div>
+      <div class="feat-desc">Chọn 2–4 ngành → bảng chi tiết theo cột: fit%, từng môn yêu cầu, gap, trường, nhóm ngành. Trang riêng, có thể export.</div>
+      <div class="feat-tags"><span class="ftag wow">⭐ Ấn tượng</span><span class="ftag ux">Decision tool</span></div>
+      <div class="complexity c2">Độ phức tạp: Trung bình</div>
+    </div>
+  </div>
+
+  <div class="feat" onclick="toggle(this,'Decision Matrix')">
+    <div class="feat-num">8</div>
+    <div class="feat-body">
+      <div class="feat-icon">📋</div>
+      <div class="feat-title">Decision Matrix</div>
+      <div class="feat-desc">Học sinh tự chấm thêm tiêu chí: học phí, vị trí trường, triển vọng việc làm → weighted score tổng hợp để ra quyết định.</div>
+      <div class="feat-tags"><span class="ftag ux">Personalized</span></div>
+      <div class="complexity c3">Độ phức tạp: Cao</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Group 4 -->
+<div class="group-label">🤖 AI & Thông minh</div>
+<div class="feat-grid">
+
+  <div class="feat" onclick="toggle(this,'AI Career Advisor')">
+    <div class="feat-num">9</div>
+    <div class="feat-body">
+      <div class="feat-icon">🤖</div>
+      <div class="feat-title">AI Career Advisor</div>
+      <div class="feat-desc">Chat với AI về định hướng — AI có context đầy đủ: điểm thực tế, ngành đã pin, mục tiêu. Trả lời cá nhân hóa, không generic.</div>
+      <div class="feat-tags"><span class="ftag ai">AI-powered</span><span class="ftag wow">⭐ Ấn tượng</span></div>
+      <div class="complexity c2">Độ phức tạp: Trung bình</div>
+    </div>
+  </div>
+
+  <div class="feat" onclick="toggle(this,'Strength Profile Card')">
+    <div class="feat-num">10</div>
+    <div class="feat-body">
+      <div class="feat-icon">🧬</div>
+      <div class="feat-title">Strength Profile Card</div>
+      <div class="feat-desc">AI đọc điểm → gán nhãn "Tư duy Kỹ thuật / Ngôn ngữ / Tự nhiên" kèm giải thích. Card đẹp, shareable.</div>
+      <div class="feat-tags"><span class="ftag ai">AI-powered</span><span class="ftag wow">⭐ Viral</span></div>
+      <div class="complexity c1">Độ phức tạp: Dễ</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="note">
+  💡 <strong>Combo đề xuất:</strong> 5 + 2 + 7 + 1 + 9 — cho cảm giác hệ thống thực sự "hiểu" học sinh, không chỉ là bộ lọc ngành đơn thuần.
+</div>
+
+<div style="height:52px"></div>
+<div id="indicator">
+  Đã chọn: <span id="count">0</span> tính năng &nbsp;·&nbsp;
+  <span id="selections">Chưa chọn gì</span>
+</div>
+
+<script>
+const selected = new Set();
+function toggle(el, name) {
+  el.classList.toggle('selected');
+  if (selected.has(name)) selected.delete(name);
+  else selected.add(name);
+  document.getElementById('count').textContent = selected.size;
+  document.getElementById('selections').textContent =
+    selected.size ? [...selected].join(' · ') : 'Chưa chọn gì';
+}
+</script>
+</body>
+</html>
