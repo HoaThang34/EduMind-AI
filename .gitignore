@@ -9,7 +9,8 @@ uploads/
 brain/
 *.log
 .vscode/
-data/
+data/*
+!data/*.json
 diemhk10hoa/
 anh11tin/
 .cursor/
