@@ -71,3 +71,18 @@ def test_derive_weights_related_and_unrelated_bands(blocks_data):
     for subj in ['Lịch sử', 'Địa lý', 'Giáo dục công dân', 'Âm nhạc', 'Hội họa']:
         assert 3.0 <= by_subj[subj]['min_score'] <= 4.5, f"{subj}={by_subj[subj]['min_score']} not in [3, 4.5]"
         assert by_subj[subj]['weight'] == 0.0, f"{subj} weight should be 0.0"
+
+
+def test_derive_weights_deterministic(blocks_data):
+    """Gọi 2 lần với cùng major_id → output giống nhau."""
+    from seed_major_weights import derive_weights
+
+    class FakeMajor:
+        id = 777
+        admission_block = "D01"
+        entry_score = 25.0
+        major_group = "Kinh tế"
+
+    w1 = derive_weights(FakeMajor(), blocks_data, DB_SUBJECTS)
+    w2 = derive_weights(FakeMajor(), blocks_data, DB_SUBJECTS)
+    assert w1 == w2
