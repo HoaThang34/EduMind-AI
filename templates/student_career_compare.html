@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>So sanh nganh – EduMind AI</title>
+  <title>So sánh ngành – EduMind AI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -20,10 +20,10 @@
 
 <nav class="bg-white border-b border-[#e5e5e5] px-6 py-3 flex items-center gap-4">
   <a href="{{ url_for('career.career_browse') }}" class="text-sm text-gray-500 hover:text-gray-800 flex items-center gap-1.5">
-    <i class="fas fa-arrow-left text-xs"></i> Duyet nganh
+    <i class="fas fa-arrow-left text-xs"></i> Duyệt ngành
   </a>
   <span class="text-[#e5e5e5]">/</span>
-  <span class="text-sm font-semibold text-gray-800">So sanh nganh</span>
+  <span class="text-sm font-semibold text-gray-800">So sánh ngành</span>
   <div class="ml-auto flex items-center gap-3">
     <span class="text-sm text-gray-500">{{ student.name }}</span>
   </div>
@@ -31,9 +31,9 @@
 
 <div class="max-w-7xl mx-auto px-4 py-6">
   <div class="flex items-center justify-between mb-5">
-    <h1 class="text-lg font-bold text-gray-900">So sanh nganh</h1>
+    <h1 class="text-lg font-bold text-gray-900">So sánh ngành</h1>
     <a href="{{ url_for('career.career_browse') }}" class="text-sm text-gray-500 hover:text-gray-800">
-      <i class="fas fa-arrow-left mr-1"></i>Quay lai
+      <i class="fas fa-arrow-left mr-1"></i>Quay lại
     </a>
   </div>
 
@@ -41,7 +41,7 @@
   <div class="card p-4 mb-4">
     <div id="selectedChips" class="flex flex-wrap gap-2 items-center"></div>
     <div class="mt-2 relative max-w-xs">
-      <input type="text" id="addSearch" placeholder="+ Them nganh (go de tim)..."
+      <input type="text" id="addSearch" placeholder="+ Thêm ngành (gõ để tìm)..."
         class="w-full text-sm border border-[#e5e5e5] rounded-md px-3 py-1.5 focus:outline-none focus:border-blue-400">
       <div id="addDropdown" class="hidden absolute top-full left-0 w-full bg-white border border-[#e5e5e5] rounded-md mt-1 max-h-48 overflow-y-auto z-50 shadow-lg"></div>
     </div>
@@ -49,7 +49,7 @@
 
   <!-- Radar chart -->
   <div class="card p-5 mb-4">
-    <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Radar so sanh mon hoc</div>
+    <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Radar so sánh môn học</div>
     <div class="flex justify-center">
       <canvas id="radarChart" style="max-width:500px;max-height:400px"></canvas>
     </div>
@@ -57,14 +57,14 @@
 
   <!-- Line chart -->
   <div class="card p-5 mb-4">
-    <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Xu huong diem chuan (2023–2025)</div>
+    <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Xu hướng điểm chuẩn (2023–2025)</div>
     <canvas id="lineChart" height="120"></canvas>
   </div>
 
   <!-- Versus table -->
   <div class="card overflow-hidden">
     <div class="px-5 py-3 border-b border-[#e5e5e5]">
-      <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">So sanh chi tiet</span>
+      <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">So sánh chi tiết</span>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
@@ -114,7 +114,7 @@ function renderRadar(){
     borderColor:COLORS[i],backgroundColor:COLORS[i]+'33',borderWidth:2
   }));
   if(currentData.student_scores&&Object.keys(currentData.student_scores).length){
-    datasets.push({label:'Diem cua ban',data:allLabels.map(l=>currentData.student_scores[l]||0),borderColor:'#94a3b8',backgroundColor:'#94a3b822',borderWidth:2,borderDash:[5,3]});
+    datasets.push({label:'Điểm của bạn',data:allLabels.map(l=>currentData.student_scores[l]||0),borderColor:'#94a3b8',backgroundColor:'#94a3b822',borderWidth:2,borderDash:[5,3]});
   }
   radarChart=new Chart(document.getElementById('radarChart'),{
     type:'radar',data:{labels:allLabels,datasets},
@@ -131,7 +131,7 @@ function renderLine(){
   }));
   lineChart=new Chart(document.getElementById('lineChart'),{
     type:'line',data:{datasets},
-    options:{scales:{x:{type:'linear',min:2022,max:2026,ticks:{stepSize:1,callback:v=>Number.isInteger(v)?v:'',font:{size:10}}},y:{title:{display:true,text:'Diem chuan',font:{size:10}},ticks:{font:{size:10}}}},plugins:{legend:{position:'bottom',labels:{font:{size:10}}}}}
+    options:{scales:{x:{type:'linear',min:2022,max:2026,ticks:{stepSize:1,callback:v=>Number.isInteger(v)?v:'',font:{size:10}}},y:{title:{display:true,text:'Điểm chuẩn',font:{size:10}},ticks:{font:{size:10}}}},plugins:{legend:{position:'bottom',labels:{font:{size:10}}}}}
   });
 }
 
@@ -140,16 +140,16 @@ function renderTable(){
   thead.innerHTML=tbody.innerHTML='';
   if(!currentData||!currentData.majors.length)return;
   const hr=document.createElement('tr');
-  hr.innerHTML='<th class="px-4 py-2.5 text-left" style="width:160px">Tieu chi</th>';
+  hr.innerHTML='<th class="px-4 py-2.5 text-left" style="width:160px">Tiêu chí</th>';
   currentData.majors.forEach((m,i)=>{hr.innerHTML+=`<th class="px-4 py-2.5 text-left" style="color:${COLORS[i]}">${m.name}<br><span class="font-normal text-gray-400">${m.university}</span></th>`;});
   thead.appendChild(hr);
   const allSubjects=[...new Set(currentData.majors.flatMap(m=>m.weights.map(w=>w.subject_name)))];
   const rows=[
-    {label:'% Phu hop',fn:m=>`<strong class="${m.fit_pct>=70?'text-green-600':m.fit_pct>=50?'text-amber-600':'text-red-500'}">${Math.round(m.fit_pct)}%</strong>`,num:m=>m.fit_pct,higher:true},
-    {label:'DC 2025',fn:m=>m.entry_score||'—',num:m=>m.entry_score||0,higher:false},
-    {label:'Khoi xet tuyen',fn:m=>m.admission_block||'—',num:null},
-    {label:'Xu huong DC',fn:m=>{const s=m.entry_scores;if(!s||s.length<2)return'—';const d=(s[s.length-1].score-s[0].score).toFixed(1);return d>0?`<span class="text-red-500">↑ +${d}</span>`:d<0?`<span class="text-green-600">↓ ${d}</span>`:'→ 0';},num:null},
-    ...allSubjects.map(subj=>({label:'Yeu cau '+subj,fn:(m,ss)=>{const w=m.weights.find(x=>x.subject_name===subj);if(!w)return'—';const stu=ss[subj];return stu!==undefined?`<span class="${stu>=w.min_score?'text-green-600':'text-red-500'}">${w.min_score} ${stu>=w.min_score?'✓':'✗'}</span>`:w.min_score+'';},num:m=>{const w=m.weights.find(x=>x.subject_name===subj);return w?w.min_score:0;},higher:null}))
+    {label:'% Phù hợp',fn:m=>`<strong class="${m.fit_pct>=70?'text-green-600':m.fit_pct>=50?'text-amber-600':'text-red-500'}">${Math.round(m.fit_pct)}%</strong>`,num:m=>m.fit_pct,higher:true},
+    {label:'ĐC 2025',fn:m=>m.entry_score||'—',num:m=>m.entry_score||0,higher:false},
+    {label:'Khối xét tuyển',fn:m=>m.admission_block||'—',num:null},
+    {label:'Xu hướng ĐC',fn:m=>{const s=m.entry_scores;if(!s||s.length<2)return'—';const d=(s[s.length-1].score-s[0].score).toFixed(1);return d>0?`<span class="text-red-500">↑ +${d}</span>`:d<0?`<span class="text-green-600">↓ ${d}</span>`:'→ 0';},num:null},
+    ...allSubjects.map(subj=>({label:'Yêu cầu '+subj,fn:(m,ss)=>{const w=m.weights.find(x=>x.subject_name===subj);if(!w)return'—';const stu=ss[subj];return stu!==undefined?`<span class="${stu>=w.min_score?'text-green-600':'text-red-500'}">${w.min_score} ${stu>=w.min_score?'✓':'✗'}</span>`:w.min_score+'';},num:m=>{const w=m.weights.find(x=>x.subject_name===subj);return w?w.min_score:0;},higher:null}))
   ];
   rows.forEach(rd=>{
     const tr=document.createElement('tr');
@@ -181,7 +181,7 @@ document.getElementById('addSearch').addEventListener('input',async function(){
       const item=document.createElement('div');
       item.className='px-3 py-2 text-xs hover:bg-[#f5f5f5] cursor-pointer';
       item.textContent=m.name+' — '+m.university;
-      item.onclick=()=>{if(compareIds.size>=4){alert('Toi da 4 nganh');return;}compareIds.add(m.id);sessionStorage.setItem('compare_major_ids',JSON.stringify([...compareIds]));document.getElementById('addSearch').value='';dd.classList.add('hidden');loadAndRender();};
+      item.onclick=()=>{if(compareIds.size>=4){alert('Tối đa 4 ngành');return;}compareIds.add(m.id);sessionStorage.setItem('compare_major_ids',JSON.stringify([...compareIds]));document.getElementById('addSearch').value='';dd.classList.add('hidden');loadAndRender();};
       dd.appendChild(item);
     });
     dd.classList.toggle('hidden',filtered.length===0);

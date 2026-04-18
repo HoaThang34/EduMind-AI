@@ -27,14 +27,14 @@
   <!-- Controls (left) -->
   <div style="position:absolute;top:12px;left:12px;z-index:100;display:flex;flex-direction:column;gap:8px;width:220px">
     <div class="flex gap-2 items-center">
-      <a href="{{ url_for('career.career_browse') }}" class="ctrl-btn"><i class="fas fa-arrow-left mr-1"></i>Nganh</a>
+      <a href="{{ url_for('career.career_browse') }}" class="ctrl-btn"><i class="fas fa-arrow-left mr-1"></i>Ngành</a>
       <span class="text-white text-xs font-bold truncate">{{ student.name }}</span>
     </div>
-    <input type="text" id="mapSearch" class="ctrl-input" placeholder="Tim nganh...">
+    <input type="text" id="mapSearch" class="ctrl-input" placeholder="Tìm ngành...">
     <div id="groupFilters" class="flex flex-wrap gap-1"></div>
     <label class="flex items-center gap-2 cursor-pointer">
       <input type="checkbox" id="filterFitOnly" class="w-3.5 h-3.5 rounded border-gray-600 bg-[#1e293b]">
-      <span class="text-xs text-gray-300">Chi nganh phu hop (>50%)</span>
+      <span class="text-xs text-gray-300">Chỉ ngành phù hợp (>50%)</span>
     </label>
     <div class="flex gap-1">
       <button class="ctrl-btn" onclick="zoomIn()">+</button>
@@ -54,16 +54,16 @@
     </div>
     <div class="mb-2">
       <span id="dpFit" class="text-xl font-bold text-green-400"></span>
-      <span class="text-xs text-gray-500 ml-1">phu hop</span>
+      <span class="text-xs text-gray-500 ml-1">phù hợp</span>
     </div>
-    <div class="text-xs text-gray-400 mb-3">DC 2025: <strong id="dpScore" class="text-white"></strong></div>
+    <div class="text-xs text-gray-400 mb-3">ĐC 2025: <strong id="dpScore" class="text-white"></strong></div>
     <div class="border-t border-[#334155] pt-2 mb-3">
-      <div class="text-[10px] text-gray-500 uppercase tracking-wide mb-1.5">Top mon yeu cau</div>
+      <div class="text-[10px] text-gray-500 uppercase tracking-wide mb-1.5">Top môn yêu cầu</div>
       <div id="dpSubjects"></div>
     </div>
     <div class="flex flex-col gap-2">
-      <button onclick="addToCompare()" class="ctrl-btn text-center"><i class="fas fa-plus mr-1"></i>So sanh</button>
-      <a href="{{ url_for('career.career_browse') }}" class="ctrl-btn text-center"><i class="fas fa-list mr-1"></i>Xem tat ca</a>
+      <button onclick="addToCompare()" class="ctrl-btn text-center"><i class="fas fa-plus mr-1"></i>So sánh</button>
+      <a href="{{ url_for('career.career_browse') }}" class="ctrl-btn text-center"><i class="fas fa-list mr-1"></i>Xem tất cả</a>
     </div>
   </div>
 
@@ -74,7 +74,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script>
-const GROUP_COLORS={'Ky thuat':'#3b82f6','Cong nghe':'#60a5fa','Kinh te':'#f59e0b','Y duoc':'#10b981','Xa hoi':'#a78bfa','Nghe thuat':'#f43f5e','Khoa hoc':'#06b6d4','Nong lam':'#84cc16'};
+const GROUP_COLORS={'Kỹ thuật':'#3b82f6','Công nghệ':'#60a5fa','Kinh tế':'#f59e0b','Y dược':'#10b981','Xã hội':'#a78bfa','Nghệ thuật':'#f43f5e','Khoa học':'#06b6d4','Nông lâm':'#84cc16'};
 const DEFAULT_COLOR='#94a3b8';
 let simulation,svgEl,gEl,zoomBehavior,currentNode=null,allData=[];
 let compareIds=new Set(JSON.parse(sessionStorage.getItem('compare_major_ids')||'[]'));
@@ -148,7 +148,7 @@ function showDetail(d){
   const subjDiv=document.getElementById('dpSubjects');subjDiv.innerHTML='';
   Object.entries(d.weight_vector).sort((a,b)=>b[1]-a[1]).slice(0,3).forEach(([s,w])=>{
     const el=document.createElement('div');el.className='text-xs text-gray-300 mb-1';
-    el.innerHTML=`<span class="text-gray-500">${s}:</span> trong so ${(w*100).toFixed(0)}%`;
+    el.innerHTML=`<span class="text-gray-500">${s}:</span> trọng số ${(w*100).toFixed(0)}%`;
     subjDiv.appendChild(el);
   });
   document.getElementById('detailPanel').style.display='block';
@@ -157,10 +157,10 @@ function closePanel(){document.getElementById('detailPanel').style.display='none
 
 function addToCompare(){
   if(!currentNode)return;
-  if(compareIds.size>=4){alert('Toi da 4 nganh');return;}
+  if(compareIds.size>=4){alert('Tối đa 4 ngành');return;}
   compareIds.add(currentNode.id);
   sessionStorage.setItem('compare_major_ids',JSON.stringify([...compareIds]));
-  alert('Da them "'+currentNode.name+'" vao danh sach so sanh ('+compareIds.size+'/4)');
+  alert('Đã thêm "'+currentNode.name+'" vào danh sách so sánh ('+compareIds.size+'/4)');
 }
 
 function buildGroupFilters(majors){
