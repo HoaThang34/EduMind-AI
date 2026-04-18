@@ -13,6 +13,7 @@ from models import Teacher, SystemConfig, ViolationType, Subject, ClassRoom, Cla
 from werkzeug.security import generate_password_hash
 from seed_majors import seed as seed_majors
 from seed_entry_scores import seed as seed_entry_scores
+from seed_major_weights import seed as seed_major_weights
 
 def rebuild():
     if "--force" not in sys.argv:
@@ -164,11 +165,13 @@ def rebuild():
 
         db.session.commit()
 
-        # 5. Seed university majors + entry scores
+        # 5. Seed university majors + entry scores + weights
         print("Seeding university majors...")
         seed_majors()
         print("Seeding entry scores...")
         seed_entry_scores()
+        print("Seeding major weights (real scores + block distribution)...")
+        seed_major_weights()
 
         print("Đã khởi tạo dữ liệu mẫu thành công.")
         print("Tài khoản admin: admin / admin123")
