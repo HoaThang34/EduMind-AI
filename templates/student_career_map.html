@@ -3,211 +3,196 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bản đồ ngành – EduMind AI</title>
+  <title>Ban do nganh – EduMind AI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { margin: 0; font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden; background: #0f172a; }
+    body { margin:0; font-family:'Be Vietnam Pro',system-ui,sans-serif; overflow:hidden; background:#0f172a; }
+    .ctrl-btn { font-size:12px; padding:4px 10px; border-radius:6px; background:#1e293b; color:#e2e8f0; border:1px solid #334155; cursor:pointer; }
+    .ctrl-btn:hover { background:#334155; }
+    .ctrl-input { font-size:12px; padding:4px 10px; border-radius:6px; background:#1e293b; color:#e2e8f0; border:1px solid #334155; outline:none; width:100%; }
+    .ctrl-input::placeholder { color:#64748b; }
+    .ctrl-input:focus { border-color:#3b82f6; }
+    .group-tag { font-size:10px; padding:2px 8px; border-radius:4px; cursor:pointer; transition:opacity .15s; }
+    .group-tag[data-active="0"] { opacity:0.35; }
   </style>
 </head>
 <body>
 
-<div style="position:relative;height:100vh;overflow:hidden" id="map-app">
+<div style="position:relative;height:100vh;overflow:hidden" id="mapApp">
 
+  <!-- Controls (left) -->
   <div style="position:absolute;top:12px;left:12px;z-index:100;display:flex;flex-direction:column;gap:8px;width:220px">
-    <div class="d-flex gap-2">
-      <a href="/student/career/browse" class="btn btn-sm btn-dark">← Ngành</a>
-      <span class="text-white small align-self-center fw-bold">{{ student.name }}</span>
+    <div class="flex gap-2 items-center">
+      <a href="{{ url_for('career.career_browse') }}" class="ctrl-btn"><i class="fas fa-arrow-left mr-1"></i>Nganh</a>
+      <span class="text-white text-xs font-bold truncate">{{ student.name }}</span>
     </div>
-    <input type="text" id="map-search" class="form-control form-control-sm"
-           placeholder="🔍 Tìm ngành...">
-    <div id="group-filters" class="d-flex flex-wrap gap-1"></div>
-    <div class="form-check form-switch">
-      <input class="form-check-input" type="checkbox" id="filter-fit-only">
-      <label class="form-check-label small text-white" for="filter-fit-only">Chỉ ngành phù hợp (>50%)</label>
-    </div>
-    <div class="d-flex gap-1">
-      <button class="btn btn-sm btn-dark" onclick="zoom(1.3)">＋</button>
-      <button class="btn btn-sm btn-dark" onclick="zoom(0.7)">－</button>
-      <button class="btn btn-sm btn-dark" onclick="resetZoom()">↺</button>
-    </div>
-  </div>
-
-  <div id="detail-panel" style="position:absolute;right:0;top:0;bottom:0;width:280px;
-       background:rgba(15,23,42,0.95);border-left:1px solid #334155;
-       padding:16px;z-index:100;display:none;overflow-y:auto">
-    <button class="btn-close btn-close-white float-end" onclick="closePanel()"></button>
-    <h6 id="dp-name" class="fw-bold text-primary mb-0"></h6>
-    <small id="dp-university" class="text-muted d-block mb-1"></small>
-    <span class="badge bg-secondary" id="dp-block"></span>
-    <span class="badge bg-dark ms-1" id="dp-group"></span>
-    <div class="mt-2">
-      <span class="text-success fw-bold fs-5" id="dp-fit"></span>
-      <small class="text-muted"> phù hợp</small>
-    </div>
-    <div class="mt-1">
-      <small class="text-muted">ĐC 2025: <strong id="dp-score" class="text-white"></strong></small>
-    </div>
-    <hr class="border-secondary my-2">
-    <div class="small text-muted mb-1">Top môn yêu cầu:</div>
-    <div id="dp-subjects"></div>
-    <div class="mt-3 d-flex flex-column gap-2">
-      <button class="btn btn-sm btn-outline-warning" onclick="addToCompare()">+ So sánh</button>
-      <a href="/student/career/browse" class="btn btn-sm btn-outline-primary">Xem tất cả ngành</a>
+    <input type="text" id="mapSearch" class="ctrl-input" placeholder="Tim nganh...">
+    <div id="groupFilters" class="flex flex-wrap gap-1"></div>
+    <label class="flex items-center gap-2 cursor-pointer">
+      <input type="checkbox" id="filterFitOnly" class="w-3.5 h-3.5 rounded border-gray-600 bg-[#1e293b]">
+      <span class="text-xs text-gray-300">Chi nganh phu hop (>50%)</span>
+    </label>
+    <div class="flex gap-1">
+      <button class="ctrl-btn" onclick="zoomIn()">+</button>
+      <button class="ctrl-btn" onclick="zoomOut()">-</button>
+      <button class="ctrl-btn" onclick="resetZoom()"><i class="fas fa-undo text-[10px]"></i></button>
     </div>
   </div>
 
-  <svg id="map-svg" width="100%" height="100%"
-       style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%)">
-    <g id="map-g"></g>
+  <!-- Detail panel (right) -->
+  <div id="detailPanel" style="position:absolute;right:0;top:0;bottom:0;width:280px;background:rgba(15,23,42,0.95);border-left:1px solid #334155;padding:16px;z-index:100;display:none;overflow-y:auto">
+    <button onclick="closePanel()" class="absolute top-3 right-3 text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+    <h3 id="dpName" class="font-bold text-blue-400 text-sm mb-0.5"></h3>
+    <div id="dpUniversity" class="text-[11px] text-gray-400 mb-2"></div>
+    <div class="flex gap-1.5 mb-3">
+      <span id="dpBlock" class="text-[10px] px-2 py-0.5 rounded bg-[#334155] text-gray-300"></span>
+      <span id="dpGroup" class="text-[10px] px-2 py-0.5 rounded bg-[#1e293b] text-gray-400"></span>
+    </div>
+    <div class="mb-2">
+      <span id="dpFit" class="text-xl font-bold text-green-400"></span>
+      <span class="text-xs text-gray-500 ml-1">phu hop</span>
+    </div>
+    <div class="text-xs text-gray-400 mb-3">DC 2025: <strong id="dpScore" class="text-white"></strong></div>
+    <div class="border-t border-[#334155] pt-2 mb-3">
+      <div class="text-[10px] text-gray-500 uppercase tracking-wide mb-1.5">Top mon yeu cau</div>
+      <div id="dpSubjects"></div>
+    </div>
+    <div class="flex flex-col gap-2">
+      <button onclick="addToCompare()" class="ctrl-btn text-center"><i class="fas fa-plus mr-1"></i>So sanh</button>
+      <a href="{{ url_for('career.career_browse') }}" class="ctrl-btn text-center"><i class="fas fa-list mr-1"></i>Xem tat ca</a>
+    </div>
+  </div>
+
+  <svg id="mapSvg" width="100%" height="100%" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%)">
+    <g id="mapG"></g>
   </svg>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script>
-const GROUP_COLORS = {
-  'Kỹ thuật':'#3b82f6','Công nghệ':'#60a5fa','Kinh tế':'#f59e0b',
-  'Y dược':'#10b981','Xã hội':'#a78bfa','Nghệ thuật':'#f43f5e',
-  'Khoa học':'#06b6d4','Nông lâm':'#84cc16'
-};
-const DEFAULT_COLOR = '#94a3b8';
-let simulation, svgEl, gEl, zoomBehavior, currentNode = null, allData = [];
-let compareIds = new Set(JSON.parse(sessionStorage.getItem('compare_major_ids') || '[]'));
+const GROUP_COLORS={'Ky thuat':'#3b82f6','Cong nghe':'#60a5fa','Kinh te':'#f59e0b','Y duoc':'#10b981','Xa hoi':'#a78bfa','Nghe thuat':'#f43f5e','Khoa hoc':'#06b6d4','Nong lam':'#84cc16'};
+const DEFAULT_COLOR='#94a3b8';
+let simulation,svgEl,gEl,zoomBehavior,currentNode=null,allData=[];
+let compareIds=new Set(JSON.parse(sessionStorage.getItem('compare_major_ids')||'[]'));
 
-function cosineSim(a, b, subjects) {
-  let dot=0, normA=0, normB=0;
-  subjects.forEach(k => { dot+=(a[k]||0)*(b[k]||0); normA+=(a[k]||0)**2; normB+=(b[k]||0)**2; });
-  return normA&&normB ? dot/(Math.sqrt(normA)*Math.sqrt(normB)) : 0;
+function cosineSim(a,b,subjects){
+  let dot=0,nA=0,nB=0;
+  subjects.forEach(k=>{dot+=(a[k]||0)*(b[k]||0);nA+=(a[k]||0)**2;nB+=(b[k]||0)**2;});
+  return nA&&nB?dot/(Math.sqrt(nA)*Math.sqrt(nB)):0;
 }
 
-async function init() {
-  const r = await fetch('/api/student/career/map-data');
-  const data = await r.json();
-  allData = data.majors;
+async function init(){
+  const r=await fetch('/api/student/career/map-data');
+  const data=await r.json();
+  allData=data.majors;
   renderMap(allData);
   buildGroupFilters(allData);
 }
 
-function renderMap(majors) {
-  const subjects = [...new Set(majors.flatMap(m => Object.keys(m.weight_vector)))];
-  const nodesData = majors.map(m => ({...m}));
-  const linksData = [];
-  for (let i=0; i<nodesData.length; i++)
-    for (let j=i+1; j<nodesData.length; j++) {
-      const sim = cosineSim(nodesData[i].weight_vector, nodesData[j].weight_vector, subjects);
-      if (sim > 0.7) linksData.push({source: nodesData[i].id, target: nodesData[j].id, strength: sim});
+function renderMap(majors){
+  const subjects=[...new Set(majors.flatMap(m=>Object.keys(m.weight_vector)))];
+  const nodesData=majors.map(m=>({...m}));
+  const linksData=[];
+  for(let i=0;i<nodesData.length;i++)
+    for(let j=i+1;j<nodesData.length;j++){
+      const sim=cosineSim(nodesData[i].weight_vector,nodesData[j].weight_vector,subjects);
+      if(sim>0.7)linksData.push({source:nodesData[i].id,target:nodesData[j].id,strength:sim});
     }
-
-  const width = document.getElementById('map-svg').clientWidth;
-  const height = document.getElementById('map-svg').clientHeight;
-
-  svgEl = d3.select('#map-svg');
-  gEl = d3.select('#map-g');
-  gEl.selectAll('*').remove();
-
-  zoomBehavior = d3.zoom().scaleExtent([0.2,4]).on('zoom', e => gEl.attr('transform', e.transform));
+  const width=document.getElementById('mapSvg').clientWidth;
+  const height=document.getElementById('mapSvg').clientHeight;
+  svgEl=d3.select('#mapSvg');gEl=d3.select('#mapG');gEl.selectAll('*').remove();
+  zoomBehavior=d3.zoom().scaleExtent([0.2,4]).on('zoom',e=>gEl.attr('transform',e.transform));
   svgEl.call(zoomBehavior);
-
-  const rScale = d3.scaleLinear().domain([15,30]).range([8,22]).clamp(true);
-
-  simulation = d3.forceSimulation(nodesData)
-    .force('link', d3.forceLink(linksData).id(d=>d.id).distance(80).strength(d=>d.strength*0.5))
-    .force('charge', d3.forceManyBody().strength(-200))
-    .force('center', d3.forceCenter(width/2, height/2))
-    .force('collision', d3.forceCollide(d=>rScale(d.entry_score||20)+10));
-
-  const link = gEl.append('g').selectAll('line').data(linksData).enter().append('line')
-    .attr('stroke','#475569').attr('stroke-opacity', d=>d.strength*0.5)
-    .attr('stroke-width', d=>d.strength*2);
-
-  const node = gEl.append('g').selectAll('g').data(nodesData).enter().append('g')
+  const rScale=d3.scaleLinear().domain([15,30]).range([8,22]).clamp(true);
+  simulation=d3.forceSimulation(nodesData)
+    .force('link',d3.forceLink(linksData).id(d=>d.id).distance(80).strength(d=>d.strength*0.5))
+    .force('charge',d3.forceManyBody().strength(-200))
+    .force('center',d3.forceCenter(width/2,height/2))
+    .force('collision',d3.forceCollide(d=>rScale(d.entry_score||20)+10));
+  const link=gEl.append('g').selectAll('line').data(linksData).enter().append('line')
+    .attr('stroke','#475569').attr('stroke-opacity',d=>d.strength*0.5).attr('stroke-width',d=>d.strength*2);
+  const node=gEl.append('g').selectAll('g').data(nodesData).enter().append('g')
     .style('cursor','pointer')
     .call(d3.drag()
-      .on('start',(e,d)=>{ if(!e.active) simulation.alphaTarget(0.3).restart(); d.fx=d.x; d.fy=d.y; })
-      .on('drag',(e,d)=>{ d.fx=e.x; d.fy=e.y; })
-      .on('end',(e,d)=>{ if(!e.active) simulation.alphaTarget(0); d.fx=null; d.fy=null; }))
+      .on('start',(e,d)=>{if(!e.active)simulation.alphaTarget(0.3).restart();d.fx=d.x;d.fy=d.y;})
+      .on('drag',(e,d)=>{d.fx=e.x;d.fy=e.y;})
+      .on('end',(e,d)=>{if(!e.active)simulation.alphaTarget(0);d.fx=null;d.fy=null;}))
     .on('click',(e,d)=>showDetail(d));
-
   node.append('circle')
-    .attr('r', d=>rScale(d.entry_score||20))
-    .attr('fill', d=>GROUP_COLORS[d.major_group]||DEFAULT_COLOR)
+    .attr('r',d=>rScale(d.entry_score||20))
+    .attr('fill',d=>GROUP_COLORS[d.major_group]||DEFAULT_COLOR)
     .attr('fill-opacity',0.85)
     .attr('stroke','#1e293b').attr('stroke-width',1.5);
-
   node.append('text')
     .text(d=>d.name.length>12?d.name.slice(0,12)+'…':d.name)
     .attr('text-anchor','middle').attr('dy','0.35em')
     .attr('font-size','8px').attr('fill','white').attr('pointer-events','none');
-
   simulation.on('tick',()=>{
-    link.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y)
-        .attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+    link.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
     node.attr('transform',d=>`translate(${d.x},${d.y})`);
   });
 }
 
-function showDetail(d) {
-  currentNode = d;
-  document.getElementById('dp-name').textContent = d.name;
-  document.getElementById('dp-university').textContent = d.university;
-  document.getElementById('dp-block').textContent = d.admission_block||'—';
-  document.getElementById('dp-group').textContent = d.major_group||'—';
-  document.getElementById('dp-fit').textContent = Math.round(d.fit_pct)+'%';
-  document.getElementById('dp-score').textContent = d.entry_score||'—';
-  const subjDiv = document.getElementById('dp-subjects');
-  subjDiv.innerHTML = '';
+function showDetail(d){
+  currentNode=d;
+  document.getElementById('dpName').textContent=d.name;
+  document.getElementById('dpUniversity').textContent=d.university;
+  document.getElementById('dpBlock').textContent=d.admission_block||'—';
+  document.getElementById('dpGroup').textContent=d.major_group||'—';
+  document.getElementById('dpFit').textContent=Math.round(d.fit_pct)+'%';
+  document.getElementById('dpScore').textContent=d.entry_score||'—';
+  const subjDiv=document.getElementById('dpSubjects');subjDiv.innerHTML='';
   Object.entries(d.weight_vector).sort((a,b)=>b[1]-a[1]).slice(0,3).forEach(([s,w])=>{
-    const el = document.createElement('div');
-    el.className = 'small text-light mb-1';
-    el.innerHTML = `<span class="text-muted">${s}:</span> trọng số ${(w*100).toFixed(0)}%`;
+    const el=document.createElement('div');el.className='text-xs text-gray-300 mb-1';
+    el.innerHTML=`<span class="text-gray-500">${s}:</span> trong so ${(w*100).toFixed(0)}%`;
     subjDiv.appendChild(el);
   });
-  document.getElementById('detail-panel').style.display='block';
+  document.getElementById('detailPanel').style.display='block';
 }
+function closePanel(){document.getElementById('detailPanel').style.display='none';currentNode=null;}
 
-function closePanel() { document.getElementById('detail-panel').style.display='none'; currentNode=null; }
-
-function addToCompare() {
-  if (!currentNode) return;
-  if (compareIds.size>=4) { alert('Tối đa 4 ngành'); return; }
+function addToCompare(){
+  if(!currentNode)return;
+  if(compareIds.size>=4){alert('Toi da 4 nganh');return;}
   compareIds.add(currentNode.id);
-  sessionStorage.setItem('compare_major_ids', JSON.stringify([...compareIds]));
-  alert(`Đã thêm "${currentNode.name}" vào danh sách so sánh (${compareIds.size}/4)`);
+  sessionStorage.setItem('compare_major_ids',JSON.stringify([...compareIds]));
+  alert('Da them "'+currentNode.name+'" vao danh sach so sanh ('+compareIds.size+'/4)');
 }
 
-function buildGroupFilters(majors) {
+function buildGroupFilters(majors){
   const groups=[...new Set(majors.map(m=>m.major_group).filter(Boolean))];
-  const container=document.getElementById('group-filters');
-  container.innerHTML='';
+  const c=document.getElementById('groupFilters');c.innerHTML='';
   groups.forEach(g=>{
-    const btn=document.createElement('span');
-    btn.className='badge'; btn.style.cssText=`background:${GROUP_COLORS[g]||DEFAULT_COLOR};cursor:pointer`;
-    btn.textContent=g; btn.dataset.active='1';
-    btn.onclick=()=>{ btn.style.opacity=btn.dataset.active==='1'?'0.4':'1'; btn.dataset.active=btn.dataset.active==='1'?'0':'1'; applyFilters(); };
-    container.appendChild(btn);
+    const tag=document.createElement('span');
+    tag.className='group-tag';tag.style.background=GROUP_COLORS[g]||DEFAULT_COLOR;tag.style.color='#fff';
+    tag.textContent=g;tag.dataset.active='1';
+    tag.onclick=()=>{tag.dataset.active=tag.dataset.active==='1'?'0':'1';applyFilters();};
+    c.appendChild(tag);
   });
 }
 
-let activeGroups = new Set();
-function applyFilters() {
-  activeGroups = new Set([...document.getElementById('group-filters').querySelectorAll('[data-active="0"]')].map(b=>b.textContent));
-  let filtered = allData;
-  const q = document.getElementById('map-search').value.toLowerCase();
-  if (q) filtered = filtered.filter(m=>(m.name+m.university).toLowerCase().includes(q));
-  if (document.getElementById('filter-fit-only').checked) filtered=filtered.filter(m=>m.fit_pct>50);
-  if (activeGroups.size>0) filtered=filtered.filter(m=>!activeGroups.has(m.major_group));
-  if (simulation) simulation.stop();
+function applyFilters(){
+  const hidden=new Set([...document.getElementById('groupFilters').querySelectorAll('[data-active="0"]')].map(b=>b.textContent));
+  let filtered=allData;
+  const q=document.getElementById('mapSearch').value.toLowerCase();
+  if(q)filtered=filtered.filter(m=>(m.name+m.university).toLowerCase().includes(q));
+  if(document.getElementById('filterFitOnly').checked)filtered=filtered.filter(m=>m.fit_pct>50);
+  if(hidden.size>0)filtered=filtered.filter(m=>!hidden.has(m.major_group));
+  if(simulation)simulation.stop();
   renderMap(filtered);
 }
 
 let searchTimer;
-document.getElementById('map-search').addEventListener('input',()=>{ clearTimeout(searchTimer); searchTimer=setTimeout(applyFilters,400); });
-document.getElementById('filter-fit-only').addEventListener('change',applyFilters);
+document.getElementById('mapSearch').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(applyFilters,400);});
+document.getElementById('filterFitOnly').addEventListener('change',applyFilters);
 
-function zoom(f) { svgEl.transition().duration(300).call(zoomBehavior.scaleBy,f); }
-function resetZoom() { svgEl.transition().duration(300).call(zoomBehavior.transform,d3.zoomIdentity); }
+function zoomIn(){svgEl.transition().duration(300).call(zoomBehavior.scaleBy,1.3);}
+function zoomOut(){svgEl.transition().duration(300).call(zoomBehavior.scaleBy,0.7);}
+function resetZoom(){svgEl.transition().duration(300).call(zoomBehavior.transform,d3.zoomIdentity);}
 
 init();
 </script>
