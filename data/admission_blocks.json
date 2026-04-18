@@ -24,12 +24,14 @@
     "Thể chất":   ["GDTC","QPAN"]
   },
   "group_to_clusters": {
-    "Kỹ thuật":   ["STEM"],
-    "Công nghệ":  ["STEM"],
-    "Y dược":     ["STEM"],
-    "Kinh tế":    ["STEM", "Ngôn ngữ"],
-    "Xã hội":     ["Xã hội", "Ngôn ngữ"],
-    "Nghệ thuật": ["Nghệ thuật", "Xã hội"]
+    "Kỹ thuật - Công nghệ": ["STEM"],
+    "Kinh tế - Quản trị":   ["STEM", "Ngôn ngữ"],
+    "Y Dược":               ["STEM"],
+    "Xã hội - Nhân văn":    ["Xã hội", "Ngôn ngữ"],
+    "Luật - Hành chính":    ["Xã hội"],
+    "Nghệ thuật":           ["Nghệ thuật", "Xã hội"],
+    "Sư phạm":              ["STEM", "Xã hội"],
+    "Nông Lâm":             ["STEM"]
   },
   "name_aliases": {
     "Toán": "Toán",

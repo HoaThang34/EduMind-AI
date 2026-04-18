@@ -10,11 +10,18 @@ from app import app
 from models import db, UniversityMajor, MajorEntryScore
 
 BLOCK_MAP = {
-    'Kỹ thuật': 'A1', 'Công nghệ': 'A1', 'Kinh tế': 'A1',
-    'Y dược': 'B00', 'Xã hội': 'D01', 'Nghệ thuật': 'C00',
+    'Kỹ thuật - Công nghệ': ['A00', 'A01', 'A00', 'A01', 'A00'],
+    'Kinh tế - Quản trị':   ['A01', 'D01', 'D01', 'A01', 'D07'],
+    'Y Dược':               ['B00', 'B00', 'B08', 'D07'],
+    'Xã hội - Nhân văn':    ['C00', 'D01', 'D14', 'C00'],
+    'Luật - Hành chính':    ['C00', 'D01', 'C00'],
+    'Nghệ thuật':           ['H00', 'V00', 'V01'],
+    'Sư phạm':              ['A01', 'C00', 'D01', 'B00'],
+    'Nông Lâm':             ['B00', 'A00', 'B00'],
 }
-DEFAULT_BLOCK = 'A1'
+DEFAULT_BLOCK = 'A01'
 DEFAULT_SCORE_2025 = 22.0
+VALID_BLOCKS = {'A00','A01','A02','B00','B08','C00','C03','C15','D01','D07','D14','V00','V01','H00','T00'}
 
 
 def seed():
@@ -22,8 +29,9 @@ def seed():
         majors = UniversityMajor.query.all()
         count = 0
         for major in majors:
-            if not major.admission_block:
-                major.admission_block = BLOCK_MAP.get(major.major_group, DEFAULT_BLOCK)
+            if not major.admission_block or major.admission_block not in VALID_BLOCKS:
+                choices = BLOCK_MAP.get(major.major_group, [DEFAULT_BLOCK])
+                major.admission_block = random.Random(major.id).choice(choices)
 
             base = major.entry_score or DEFAULT_SCORE_2025
             if not major.entry_score:
