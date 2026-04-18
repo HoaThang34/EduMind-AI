@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>So sánh ngành – EduMind AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background: #f5f5f5; font-family: 'Be Vietnam Pro', system-ui, sans-serif; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-light bg-white border-bottom px-3">
+  <div class="d-flex align-items-center gap-3">
+    <a href="/student/career/browse" class="text-decoration-none text-muted small">
+      <i class="fas fa-arrow-left me-1"></i>Duyệt ngành
+    </a>
+    <span class="text-muted">/</span>
+    <span class="fw-semibold small">So sánh ngành</span>
+  </div>
+  <span class="text-muted small">{{ student.name }}</span>
+</nav>
+
+<div class="container-fluid py-4" id="compare-app">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">So sánh ngành</h4>
+    <a href="/student/career/browse" class="btn btn-sm btn-outline-secondary">← Quay lại</a>
+  </div>
+
+  <div class="card mb-3 shadow-sm">
+    <div class="card-body">
+      <div class="d-flex flex-wrap gap-2 align-items-center" id="selected-majors"></div>
+      <div class="mt-2 position-relative" style="max-width:300px">
+        <input type="text" id="add-search" class="form-control form-control-sm"
+               placeholder="+ Thêm ngành (gõ để tìm)...">
+        <div id="add-dropdown" class="dropdown-menu w-100 d-none"
+             style="max-height:200px;overflow-y:auto;position:absolute;z-index:1000"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-3 shadow-sm">
+    <div class="card-header fw-bold">Radar so sánh môn học</div>
+    <div class="card-body d-flex justify-content-center">
+      <canvas id="radar-chart" style="max-width:500px;max-height:400px"></canvas>
+    </div>
+  </div>
+
+  <div class="card mb-3 shadow-sm">
+    <div class="card-header fw-bold">Xu hướng điểm chuẩn (2023–2025)</div>
+    <div class="card-body">
+      <canvas id="line-chart" height="120"></canvas>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header fw-bold">So sánh chi tiết</div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover mb-0">
+          <thead id="versus-thead"></thead>
+          <tbody id="versus-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+const COLORS = ['#3b82f6','#f59e0b','#10b981','#a78bfa'];
+let compareIds = new Set(JSON.parse(sessionStorage.getItem('compare_major_ids') || '[]'));
+let currentData = null, radarChart = null, lineChart = null, allMajorsCache = null;
+
+const urlIds = new URLSearchParams(location.search).get('major_ids') || '';
+if (urlIds) {
+  urlIds.split(',').filter(Boolean).forEach(id => compareIds.add(parseInt(id)));
+  sessionStorage.setItem('compare_major_ids', JSON.stringify([...compareIds]));
+}
+
+async function loadAndRender() {
+  if (!compareIds.size) { clearCharts(); return; }
+  const r = await fetch('/api/student/career/compare?major_ids=' + [...compareIds].join(','));
+  currentData = await r.json();
+  renderSelectedChips();
+  renderRadar(currentData);
+  renderLineChart(currentData);
+  renderVersusTable(currentData);
+}
+
+function renderSelectedChips() {
+  const container = document.getElementById('selected-majors');
+  container.innerHTML = '';
+  if (!currentData) return;
+  currentData.majors.forEach((m, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'badge d-flex align-items-center gap-1';
+    chip.style.cssText = `background:${COLORS[i]};font-size:0.85rem;padding:6px 10px`;
+    chip.innerHTML = `${m.name} — ${m.university}
+      <button class="btn-close btn-close-white btn-sm" style="font-size:0.6rem"
+              onclick="removeMajor(${m.id})"></button>`;
+    container.appendChild(chip);
+  });
+}
+
+function removeMajor(id) {
+  compareIds.delete(id);
+  sessionStorage.setItem('compare_major_ids', JSON.stringify([...compareIds]));
+  loadAndRender();
+}
+
+function renderRadar(data) {
+  if (radarChart) radarChart.destroy();
+  if (!data.majors.length) return;
+  const allLabels = [...new Set(data.majors.flatMap(m => m.radar.labels))];
+  const datasets = data.majors.map((m, i) => ({
+    label: `${m.name} (${m.university})`,
+    data: allLabels.map(l => { const idx = m.radar.labels.indexOf(l); return idx >= 0 ? m.radar.major_scores[idx] : 0; }),
+    borderColor: COLORS[i], backgroundColor: COLORS[i] + '33', borderWidth: 2
+  }));
+  if (data.student_scores && Object.keys(data.student_scores).length) {
+    datasets.push({
+      label: 'Điểm của bạn',
+      data: allLabels.map(l => data.student_scores[l] || 0),
+      borderColor: '#94a3b8', backgroundColor: '#94a3b822', borderWidth: 2, borderDash: [5,3]
+    });
+  }
+  radarChart = new Chart(document.getElementById('radar-chart'), {
+    type: 'radar',
+    data: { labels: allLabels, datasets },
+    options: { scales: { r: { min: 0, max: 10, ticks: { stepSize: 2 } } },
+               plugins: { legend: { position: 'bottom' } } }
+  });
+}
+
+function renderLineChart(data) {
+  if (lineChart) lineChart.destroy();
+  const datasets = data.majors.map((m, i) => ({
+    label: m.name,
+    data: m.entry_scores.map(s => ({ x: s.year, y: s.score })),
+    borderColor: COLORS[i], borderWidth: 2, pointRadius: 4, tension: 0.3, fill: false
+  }));
+  lineChart = new Chart(document.getElementById('line-chart'), {
+    type: 'line',
+    data: { datasets },
+    options: {
+      scales: {
+        x: { type: 'linear', min: 2022, max: 2026, ticks: { stepSize: 1, callback: v => Number.isInteger(v) ? v : '' } },
+        y: { title: { display: true, text: 'Điểm chuẩn' } }
+      },
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+}
+
+function renderVersusTable(data) {
+  const thead = document.getElementById('versus-thead');
+  const tbody = document.getElementById('versus-tbody');
+  thead.innerHTML = tbody.innerHTML = '';
+  if (!data.majors.length) return;
+
+  const headerRow = document.createElement('tr');
+  headerRow.innerHTML = '<th style="width:160px">Tiêu chí</th>';
+  data.majors.forEach((m, i) => {
+    headerRow.innerHTML += `<th style="color:${COLORS[i]}">${m.name}<br><small>${m.university}</small></th>`;
+  });
+  thead.appendChild(headerRow);
+
+  const allSubjects = [...new Set(data.majors.flatMap(m => m.weights.map(w => w.subject_name)))];
+  const rows = [
+    { label: '% Phù hợp', fn: m => `<strong class="${m.fit_pct>=70?'text-success':m.fit_pct>=50?'text-warning':'text-danger'}">${Math.round(m.fit_pct)}%</strong>`, numeric: m => m.fit_pct, higher: true },
+    { label: 'ĐC 2025', fn: m => m.entry_score || '—', numeric: m => m.entry_score||0, higher: false },
+    { label: 'Khối xét tuyển', fn: m => m.admission_block || '—', numeric: null },
+    { label: 'Xu hướng ĐC', fn: m => {
+        const s = m.entry_scores;
+        if (!s || s.length < 2) return '—';
+        const diff = (s[s.length-1].score - s[0].score).toFixed(1);
+        return diff > 0 ? `<span class="text-danger">↑ +${diff}</span>` : diff < 0 ? `<span class="text-success">↓ ${diff}</span>` : '→ 0';
+      }, numeric: null },
+    ...allSubjects.map(subj => ({
+      label: `Yêu cầu ${subj}`,
+      fn: (m, ss) => {
+        const w = m.weights.find(x => x.subject_name === subj);
+        if (!w) return '—';
+        const stu = ss[subj];
+        return stu !== undefined
+          ? `<span class="${stu>=w.min_score?'text-success':'text-danger'}">${w.min_score} ${stu>=w.min_score?'✓':'✗'}</span>`
+          : `${w.min_score}`;
+      },
+      numeric: m => { const w = m.weights.find(x => x.subject_name === subj); return w ? w.min_score : 0; },
+      higher: null
+    }))
+  ];
+
+  rows.forEach(rowDef => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="fw-bold text-muted small">${rowDef.label}</td>`;
+    const vals = rowDef.numeric ? data.majors.map(m => rowDef.numeric(m)) : null;
+    const best = vals && rowDef.higher !== null ? (rowDef.higher === false ? Math.min(...vals) : Math.max(...vals)) : null;
+    data.majors.forEach((m, i) => {
+      const cell = rowDef.fn(m, data.student_scores || {});
+      const isBest = vals !== null && best !== null && vals[i] === best;
+      tr.innerHTML += `<td ${isBest ? 'style="background:rgba(34,197,94,0.1)"' : ''}>${cell}</td>`;
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+function clearCharts() {
+  if (radarChart) radarChart.destroy();
+  if (lineChart) lineChart.destroy();
+  document.getElementById('versus-thead').innerHTML = '';
+  document.getElementById('versus-tbody').innerHTML = '';
+  document.getElementById('selected-majors').innerHTML = '';
+}
+
+let addTimer;
+document.getElementById('add-search').addEventListener('input', async function() {
+  clearTimeout(addTimer);
+  addTimer = setTimeout(async () => {
+    const q = this.value.trim();
+    if (!q) { document.getElementById('add-dropdown').classList.add('d-none'); return; }
+    if (!allMajorsCache) {
+      const r = await fetch('/api/student/career/browse');
+      allMajorsCache = (await r.json()).majors;
+    }
+    const filtered = allMajorsCache.filter(m =>
+      (m.name + m.university).toLowerCase().includes(q.toLowerCase()) && !compareIds.has(m.id)
+    ).slice(0, 8);
+    const dd = document.getElementById('add-dropdown');
+    dd.innerHTML = '';
+    filtered.forEach(m => {
+      const item = document.createElement('a');
+      item.className = 'dropdown-item small';
+      item.style.cursor = 'pointer';
+      item.textContent = `${m.name} — ${m.university}`;
+      item.onclick = () => {
+        if (compareIds.size >= 4) { alert('Tối đa 4 ngành'); return; }
+        compareIds.add(m.id);
+        sessionStorage.setItem('compare_major_ids', JSON.stringify([...compareIds]));
+        document.getElementById('add-search').value = '';
+        dd.classList.add('d-none');
+        loadAndRender();
+      };
+      dd.appendChild(item);
+    });
+    dd.classList.toggle('d-none', filtered.length === 0);
+  }, 300);
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#add-search')) document.getElementById('add-dropdown').classList.add('d-none');
+});
+
+loadAndRender();
+</script>
+</body>
+</html>
