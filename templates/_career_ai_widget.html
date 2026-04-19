@@ -1,0 +1,398 @@
+<style>
+  @keyframes careerAIBounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+  }
+  #careerAIPanel .loading-dot {
+    width: 6px; height: 6px; background: #94a3b8; border-radius: 50%;
+    display: inline-block; margin: 0 2px;
+    animation: careerAIBounce 1.4s infinite ease-in-out both;
+  }
+  #careerAIPanel .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+  #careerAIPanel .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+  #careerAIHistory { display: none; }
+  #careerAIHistory.open { display: block; }
+  #careerAIConfirm { display: none; }
+  #careerAIConfirm.open { display: flex; }
+</style>
+
+<button id="careerAIFab"
+  class="fixed bottom-4 right-4 w-11 h-11 bg-primary hover:bg-blue-700
+         rounded-full shadow-md text-white flex items-center justify-center
+         transition-colors z-40"
+  title="Cố vấn chọn ngành AI">
+  <i class="fas fa-comments"></i>
+</button>
+
+<div id="careerAIPanel"
+  class="hidden fixed z-50 bg-white border border-[#e5e5e5] shadow-lg flex-col overflow-hidden
+         max-md:inset-x-0 max-md:bottom-0 max-md:h-[74vh] max-md:rounded-t-2xl
+         md:bottom-4 md:right-4 md:w-[380px] md:h-[600px] md:rounded-2xl">
+
+  <div id="careerAIResizeLeft"
+    class="hidden md:block absolute left-0 top-6 bottom-6 w-1.5 cursor-ew-resize hover:bg-primary/20 rounded-r z-20"
+    title="Kéo để đổi rộng"></div>
+  <div id="careerAIResizeTop"
+    class="hidden md:block absolute top-0 left-6 right-6 h-1.5 cursor-ns-resize hover:bg-white/25 z-20"
+    title="Kéo để đổi cao"></div>
+  <div id="careerAIResizeCorner"
+    class="hidden md:block absolute top-0 left-0 w-3 h-3 cursor-nwse-resize z-30"
+    title="Kéo để đổi cả hai"></div>
+
+  <div class="bg-primary text-white px-3 py-2.5 flex items-center gap-2 relative">
+    <div class="w-6 h-6 bg-white text-primary rounded font-bold text-[11px]
+                flex items-center justify-center">AI</div>
+    <span class="text-sm font-semibold">Cố vấn chọn ngành</span>
+    <div class="ml-auto flex gap-0.5">
+      <button id="careerAIBtnHistory"
+        class="w-7 h-6 rounded hover:bg-white/15 text-white/85 flex items-center justify-center"
+        title="Lịch sử">
+        <i class="fas fa-clock-rotate-left text-xs"></i>
+      </button>
+      <button id="careerAIBtnNew"
+        class="w-7 h-6 rounded hover:bg-white/15 text-white/85 flex items-center justify-center"
+        title="Chat mới">
+        <i class="fas fa-pen-to-square text-xs"></i>
+      </button>
+      <button id="careerAIBtnClose"
+        class="w-7 h-6 rounded hover:bg-white/15 text-white/85 flex items-center justify-center"
+        title="Đóng">
+        <i class="fas fa-xmark text-sm"></i>
+      </button>
+    </div>
+
+    <div id="careerAIHistory"
+      class="absolute top-10 right-2 w-56 bg-white border border-[#e5e5e5]
+             rounded-xl shadow-lg z-10 text-gray-800 p-1">
+      <div class="text-[10px] uppercase text-gray-400 font-semibold px-2 py-1.5">
+        Lịch sử phân tích
+      </div>
+      <div id="careerAIHistoryList" class="max-h-64 overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <div id="careerAIMessages"
+    class="flex-1 overflow-y-auto p-3 bg-[#fafafa] space-y-2 relative">
+    <div id="careerAIConfirm"
+      class="absolute inset-0 bg-white/95 z-10 items-center justify-center p-4">
+      <div class="bg-white border border-[#e5e5e5] rounded-2xl p-4 max-w-[90%] shadow-md">
+        <p class="text-sm text-gray-800 mb-3">
+          <b>Bắt đầu phân tích mới?</b><br>
+          AI sẽ đọc lại điểm số mới nhất. Chat hiện tại vẫn lưu trong Lịch sử.
+        </p>
+        <div class="flex gap-2 justify-end">
+          <button id="careerAIConfirmCancel"
+            class="text-xs px-3 py-1.5 rounded border border-[#e5e5e5] hover:bg-gray-50">
+            Huỷ
+          </button>
+          <button id="careerAIConfirmOK"
+            class="text-xs px-3 py-1.5 rounded bg-primary hover:bg-blue-700 text-white">
+            Phân tích lại
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <form id="careerAIForm"
+    class="border-t border-[#e5e5e5] p-2.5 flex items-center gap-2 bg-white">
+    <input id="careerAIInput" type="text" autocomplete="off"
+      class="flex-1 text-sm bg-[#f5f5f5] border-none rounded-full px-4 py-2
+             focus:bg-white focus:ring-2 focus:ring-primary/30 outline-none"
+      placeholder='Hỏi thêm: vd "Nên học thêm môn nào?"'>
+    <button type="submit"
+      class="w-9 h-9 bg-primary hover:bg-blue-700 rounded-full text-white
+             flex items-center justify-center flex-shrink-0">
+      <i class="fas fa-paper-plane text-xs"></i>
+    </button>
+  </form>
+</div>
+
+<script>
+(function () {
+  const API = {
+    newSession: '/api/career/ai/new',
+    message: '/api/career/ai/message',
+    history: '/api/career/ai/history',
+    session: (id) => '/api/career/ai/session/' + encodeURIComponent(id),
+  };
+  const state = { isOpen: false, currentSessionId: null, isLoading: false };
+  const els = {
+    fab: document.getElementById('careerAIFab'),
+    panel: document.getElementById('careerAIPanel'),
+    btnHistory: document.getElementById('careerAIBtnHistory'),
+    btnNew: document.getElementById('careerAIBtnNew'),
+    btnClose: document.getElementById('careerAIBtnClose'),
+    history: document.getElementById('careerAIHistory'),
+    historyList: document.getElementById('careerAIHistoryList'),
+    messages: document.getElementById('careerAIMessages'),
+    confirm: document.getElementById('careerAIConfirm'),
+    confirmCancel: document.getElementById('careerAIConfirmCancel'),
+    confirmOK: document.getElementById('careerAIConfirmOK'),
+    form: document.getElementById('careerAIForm'),
+    input: document.getElementById('careerAIInput'),
+  };
+
+  function escapeHTML(s) {
+    return String(s)
+      .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+  }
+  function renderMarkdown(text) {
+    return escapeHTML(text)
+      .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+      .replace(/\n/g, '<br>');
+  }
+
+  function openPanel() {
+    state.isOpen = true;
+    els.panel.classList.remove('hidden');
+    els.panel.classList.add('flex');
+    els.fab.classList.add('max-md:hidden');
+    bootstrapSession();
+  }
+  function closePanel() {
+    state.isOpen = false;
+    els.panel.classList.add('hidden');
+    els.panel.classList.remove('flex');
+    els.fab.classList.remove('max-md:hidden');
+    els.history.classList.remove('open');
+  }
+
+  function appendMessage(role, text, opts) {
+    opts = opts || {};
+    const isUser = role === 'user';
+    const wrap = document.createElement('div');
+    wrap.className = 'flex ' + (isUser ? 'justify-end' : 'items-start gap-2');
+    const bubble = document.createElement('div');
+    bubble.className = isUser
+      ? 'bg-primary text-white rounded-2xl px-3 py-2 text-sm max-w-[85%]'
+      : 'bg-white border border-[#e5e5e5] rounded-2xl px-3 py-2 text-sm max-w-[92%] text-gray-800';
+    bubble.innerHTML = renderMarkdown(text);
+    if (opts.error) {
+      bubble.className = 'bg-red-50 border border-red-200 rounded-2xl px-3 py-2 text-sm max-w-[92%] text-red-800';
+    }
+    wrap.appendChild(bubble);
+    els.messages.appendChild(wrap);
+    scrollBottom();
+  }
+  function appendLoading() {
+    const wrap = document.createElement('div');
+    wrap.id = 'careerAILoading';
+    wrap.className = 'flex items-start gap-2';
+    wrap.innerHTML = '<div class="bg-white border border-[#e5e5e5] rounded-2xl px-3 py-2"><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>';
+    els.messages.appendChild(wrap);
+    scrollBottom();
+  }
+  function removeLoading() {
+    const el = document.getElementById('careerAILoading');
+    if (el) el.remove();
+  }
+  function clearMessages() {
+    [...els.messages.children].forEach((c) => {
+      if (c.id !== 'careerAIConfirm') c.remove();
+    });
+  }
+  function scrollBottom() {
+    els.messages.scrollTop = els.messages.scrollHeight;
+  }
+
+  async function bootstrapSession() {
+    clearMessages();
+    appendLoading();
+    try {
+      const r = await fetch(API.history, { credentials: 'same-origin' });
+      if (r.status === 401) { window.location.href = '/student/login'; return; }
+      const data = await r.json();
+      removeLoading();
+      if (data.sessions && data.sessions.length > 0) {
+        await loadSession(data.sessions[0].session_id);
+      } else {
+        await startNewSession();
+      }
+    } catch (e) {
+      removeLoading();
+      appendMessage('assistant', 'Lỗi kết nối. Thử mở lại panel.', { error: true });
+    }
+  }
+
+  async function startNewSession() {
+    clearMessages();
+    appendLoading();
+    try {
+      const r = await fetch(API.newSession, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+      });
+      removeLoading();
+      if (r.status === 401) { window.location.href = '/student/login'; return; }
+      const data = await r.json();
+      state.currentSessionId = data.session_id;
+      appendMessage('assistant', data.commentary);
+    } catch (e) {
+      removeLoading();
+      appendMessage('assistant', 'Lỗi kết nối khi sinh nhận xét. Thử lại sau.', { error: true });
+    }
+  }
+
+  async function loadSession(sid) {
+    clearMessages();
+    appendLoading();
+    try {
+      const r = await fetch(API.session(sid), { credentials: 'same-origin' });
+      removeLoading();
+      if (r.status === 401) { window.location.href = '/student/login'; return; }
+      if (r.status === 403 || r.status === 404) {
+        await startNewSession();
+        return;
+      }
+      const data = await r.json();
+      state.currentSessionId = data.session_id;
+      data.messages.forEach((m) => appendMessage(m.role, m.message));
+    } catch (e) {
+      removeLoading();
+      appendMessage('assistant', 'Không tải được lịch sử.', { error: true });
+    }
+  }
+
+  async function sendMessage(text) {
+    if (state.isLoading) return;
+    state.isLoading = true;
+    appendMessage('user', text);
+    appendLoading();
+    try {
+      const r = await fetch(API.message, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ message: text }),
+      });
+      removeLoading();
+      if (r.status === 401) { window.location.href = '/student/login'; return; }
+      if (r.status === 400) {
+        const err = await r.json();
+        if (err.error === 'session_expired') {
+          await startNewSession();
+          return;
+        }
+        appendMessage('assistant', 'Mình chưa hiểu câu hỏi, em diễn đạt khác được không?', { error: true });
+        return;
+      }
+      const data = await r.json();
+      appendMessage('assistant', data.reply || 'Mình chưa hiểu, em thử lại nhé.');
+    } catch (e) {
+      removeLoading();
+      appendMessage('assistant', 'Lỗi mạng. Thử lại sau.', { error: true });
+    } finally {
+      state.isLoading = false;
+    }
+  }
+
+  async function toggleHistory() {
+    const opening = !els.history.classList.contains('open');
+    if (opening) {
+      els.historyList.innerHTML = '<div class="text-xs text-gray-400 px-2 py-2">Đang tải...</div>';
+      els.history.classList.add('open');
+      try {
+        const r = await fetch(API.history, { credentials: 'same-origin' });
+        const data = await r.json();
+        if (!data.sessions || data.sessions.length === 0) {
+          els.historyList.innerHTML = '<div class="text-xs text-gray-400 px-2 py-2">Chưa có phiên nào</div>';
+          return;
+        }
+        els.historyList.innerHTML = data.sessions.map((s) => {
+          const active = s.session_id === state.currentSessionId;
+          const iconCls = active ? 'fas fa-circle-dot text-primary' : 'far fa-circle text-gray-400';
+          return '<div class="hist-item flex gap-2 items-start p-2 rounded hover:bg-gray-50 cursor-pointer text-sm" data-sid="' + escapeHTML(s.session_id) + '">' +
+            '<i class="' + iconCls + ' text-[10px] mt-1"></i>' +
+            '<div class="flex-1 min-w-0">' +
+              '<div class="truncate text-gray-800">' + escapeHTML(s.title || 'Phân tích') + '</div>' +
+              '<div class="text-[10px] text-gray-400">' + (s.msg_count || 0) + ' tin · ' + (s.last_at ? new Date(s.last_at).toLocaleDateString('vi-VN') : '') + '</div>' +
+            '</div></div>';
+        }).join('');
+        els.historyList.querySelectorAll('.hist-item').forEach((item) => {
+          item.addEventListener('click', () => {
+            els.history.classList.remove('open');
+            loadSession(item.dataset.sid);
+          });
+        });
+      } catch (e) {
+        els.historyList.innerHTML = '<div class="text-xs text-red-500 px-2 py-2">Lỗi tải lịch sử</div>';
+      }
+    } else {
+      els.history.classList.remove('open');
+    }
+  }
+
+  function showConfirm() { els.confirm.classList.add('open'); }
+  function hideConfirm() { els.confirm.classList.remove('open'); }
+
+  function initResize() {
+    if (!window.matchMedia('(min-width: 768px)').matches) return;
+    try {
+      const s = JSON.parse(localStorage.getItem('careerAISize') || 'null');
+      if (s && s.w && s.h) {
+        els.panel.style.width = clampW(s.w) + 'px';
+        els.panel.style.height = clampH(s.h) + 'px';
+      }
+    } catch (_) {}
+    attachResize(document.getElementById('careerAIResizeLeft'), 'w');
+    attachResize(document.getElementById('careerAIResizeTop'), 'n');
+    attachResize(document.getElementById('careerAIResizeCorner'), 'wn');
+  }
+  function clampW(w) {
+    return Math.min(Math.max(320, w | 0), Math.min(900, window.innerWidth - 32));
+  }
+  function clampH(h) {
+    return Math.min(Math.max(400, h | 0), window.innerHeight - 32);
+  }
+  function attachResize(h, dirs) {
+    if (!h) return;
+    h.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      try { h.setPointerCapture(e.pointerId); } catch (_) {}
+      const sx = e.clientX, sy = e.clientY;
+      const sw = els.panel.offsetWidth, sh = els.panel.offsetHeight;
+      document.body.style.userSelect = 'none';
+      function onMove(ev) {
+        if (dirs.indexOf('w') !== -1) els.panel.style.width = clampW(sw + (sx - ev.clientX)) + 'px';
+        if (dirs.indexOf('n') !== -1) els.panel.style.height = clampH(sh + (sy - ev.clientY)) + 'px';
+      }
+      function onUp() {
+        h.removeEventListener('pointermove', onMove);
+        h.removeEventListener('pointerup', onUp);
+        h.removeEventListener('pointercancel', onUp);
+        document.body.style.userSelect = '';
+        try {
+          localStorage.setItem('careerAISize', JSON.stringify({
+            w: els.panel.offsetWidth, h: els.panel.offsetHeight,
+          }));
+        } catch (_) {}
+      }
+      h.addEventListener('pointermove', onMove);
+      h.addEventListener('pointerup', onUp);
+      h.addEventListener('pointercancel', onUp);
+    });
+  }
+  initResize();
+
+  els.fab.addEventListener('click', () => state.isOpen ? closePanel() : openPanel());
+  els.btnClose.addEventListener('click', closePanel);
+  els.btnHistory.addEventListener('click', toggleHistory);
+  els.btnNew.addEventListener('click', showConfirm);
+  els.confirmCancel.addEventListener('click', hideConfirm);
+  els.confirmOK.addEventListener('click', async () => {
+    hideConfirm();
+    await startNewSession();
+  });
+  els.form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = els.input.value.trim();
+    if (!text) return;
+    els.input.value = '';
+    sendMessage(text);
+  });
+})();
+</script>

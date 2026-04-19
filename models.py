@@ -277,6 +277,7 @@ class ChatConversation(db.Model):
     role = db.Column(db.String(20), nullable=False)  # 'user' hoặc 'assistant'
     message = db.Column(db.Text, nullable=False)
     context_data = db.Column(db.Text, nullable=True)  # JSON metadata (student_id, etc.)
+    scope = db.Column(db.String(40), nullable=True, index=True)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, index=True)
     
     teacher = db.relationship('Teacher', backref=db.backref('chat_history', lazy=True))

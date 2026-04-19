@@ -74,6 +74,14 @@ def run():
         add_column(cur, "student_notification", "sender_id",   "INTEGER")
         add_column(cur, "student_notification", "sender_name", "VARCHAR(100)")
 
+    # 8. chat_conversation — scope for career_advisor (2026-04-19)
+    if "chat_conversation" in existing_tables:
+        add_column(cur, "chat_conversation", "scope", "VARCHAR(40)")
+        cur.execute(
+            "CREATE INDEX IF NOT EXISTS ix_chat_conversation_scope "
+            "ON chat_conversation(scope)"
+        )
+
     conn.commit()
     conn.close()
     print("Migration complete — không có data nào bị xóa.")

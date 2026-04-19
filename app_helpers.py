@@ -1116,3 +1116,6 @@ def calculate_fit_score(subject_averages, weights):
         })
     fit_pct = min(round(numerator / denominator * 100, 1), 100.0) if denominator else 0.0
     return {'fit_pct': fit_pct, 'gaps': gaps}
+
+
+

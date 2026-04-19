@@ -449,3 +449,172 @@ def admin_add_entry_score(major_id):
         db.session.add(MajorEntryScore(major_id=major_id, year=year, score=score))
     db.session.commit()
     return jsonify({'ok': True})
+
+
+# ====== Career AI Advisor endpoints ======
+import uuid
+import json as _json_career_ai
+from career_ai import run_career_ai_chat, SEED_PROMPT
+
+HISTORY_LIMIT = 10
+
+
+@career_bp.route('/api/career/ai/new', methods=['POST'])
+def api_career_ai_new():
+    student = _student()
+    if not student:
+        return jsonify({'error': 'unauthorized'}), 401
+
+    new_session_id = str(uuid.uuid4())
+    session['career_chat_session_id'] = new_session_id
+
+    commentary, _rounds = run_career_ai_chat(student, [], SEED_PROMPT)
+
+    from models import ChatConversation
+    msg = ChatConversation(
+        session_id=new_session_id,
+        student_id=student.id,
+        teacher_id=None,
+        role='assistant',
+        message=commentary,
+        context_data=_json_career_ai.dumps({'is_initial': True}),
+        scope='career_advisor',
+    )
+    db.session.add(msg)
+    db.session.commit()
+
+    return jsonify({
+        'session_id': new_session_id,
+        'commentary': commentary,
+        'created_at': msg.created_at.isoformat(),
+    })
+
+
+@career_bp.route('/api/career/ai/message', methods=['POST'])
+def api_career_ai_message():
+    student = _student()
+    if not student:
+        return jsonify({'error': 'unauthorized'}), 401
+
+    body = request.get_json(silent=True) or {}
+    user_message = (body.get('message') or '').strip()
+    if not user_message:
+        return jsonify({'error': 'message required'}), 400
+
+    session_id = session.get('career_chat_session_id')
+    if not session_id:
+        return jsonify({'error': 'session_expired'}), 400
+
+    from models import ChatConversation
+    owned = (ChatConversation.query
+             .filter_by(session_id=session_id, student_id=student.id,
+                        scope='career_advisor')
+             .first())
+    if not owned:
+        session.pop('career_chat_session_id', None)
+        return jsonify({'error': 'session_expired'}), 400
+
+    history_rows = (ChatConversation.query
+                    .filter_by(session_id=session_id, student_id=student.id,
+                               scope='career_advisor')
+                    .order_by(ChatConversation.created_at.desc())
+                    .limit(HISTORY_LIMIT).all())
+    history_rows.reverse()
+    history = [{'role': r.role, 'content': r.message} for r in history_rows]
+
+    user_row = ChatConversation(
+        session_id=session_id, student_id=student.id, teacher_id=None,
+        role='user', message=user_message, scope='career_advisor',
+    )
+    db.session.add(user_row)
+    db.session.commit()
+
+    reply, tool_rounds = run_career_ai_chat(student, history, user_message)
+
+    assistant_row = ChatConversation(
+        session_id=session_id, student_id=student.id, teacher_id=None,
+        role='assistant', message=reply, scope='career_advisor',
+    )
+    db.session.add(assistant_row)
+    db.session.commit()
+
+    return jsonify({'reply': reply, 'tool_rounds': tool_rounds})
+
+
+@career_bp.route('/api/career/ai/history', methods=['GET'])
+def api_career_ai_history():
+    student = _student()
+    if not student:
+        return jsonify({'error': 'unauthorized'}), 401
+
+    from models import ChatConversation
+    from sqlalchemy import func as _sa_func
+
+    rows = (db.session.query(
+                ChatConversation.session_id,
+                _sa_func.max(ChatConversation.created_at).label('last_at'),
+                _sa_func.count(ChatConversation.id).label('msg_count'))
+            .filter_by(student_id=student.id, scope='career_advisor')
+            .group_by(ChatConversation.session_id)
+            .order_by(_sa_func.max(ChatConversation.created_at).desc())
+            .all())
+
+    current_sid = session.get('career_chat_session_id')
+    sessions = []
+    for sid, last_at, msg_count in rows:
+        first_user = (ChatConversation.query
+                      .filter_by(session_id=sid, student_id=student.id,
+                                 role='user', scope='career_advisor')
+                      .order_by(ChatConversation.created_at.asc())
+                      .first())
+        if first_user and first_user.message:
+            title = first_user.message.strip()[:40]
+        else:
+            first_assist = (ChatConversation.query
+                            .filter_by(session_id=sid, student_id=student.id,
+                                       role='assistant', scope='career_advisor')
+                            .order_by(ChatConversation.created_at.asc())
+                            .first())
+            title = (first_assist.message[:40] if first_assist and first_assist.message
+                     else 'Phân tích định hướng')
+        sessions.append({
+            'session_id': sid,
+            'title': title,
+            'last_at': last_at.isoformat() if last_at else None,
+            'msg_count': msg_count,
+            'is_current': sid == current_sid,
+        })
+    return jsonify({'sessions': sessions})
+
+
+@career_bp.route('/api/career/ai/session/<session_id>', methods=['GET'])
+def api_career_ai_session_detail(session_id):
+    student = _student()
+    if not student:
+        return jsonify({'error': 'unauthorized'}), 401
+
+    from models import ChatConversation
+    rows = (ChatConversation.query
+            .filter_by(session_id=session_id, scope='career_advisor')
+            .order_by(ChatConversation.created_at.asc()).all())
+    if not rows:
+        return jsonify({'error': 'not_found'}), 404
+    if any(r.student_id != student.id for r in rows):
+        return jsonify({'error': 'forbidden'}), 403
+
+    messages = []
+    for r in rows:
+        entry = {
+            'role': r.role,
+            'message': r.message,
+            'created_at': r.created_at.isoformat() if r.created_at else None,
+        }
+        if r.context_data:
+            try:
+                meta = _json_career_ai.loads(r.context_data)
+                if meta.get('is_initial'):
+                    entry['is_initial'] = True
+            except (_json_career_ai.JSONDecodeError, TypeError):
+                pass
+        messages.append(entry)
+    return jsonify({'session_id': session_id, 'messages': messages})
