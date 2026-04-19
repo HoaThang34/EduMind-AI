@@ -46,8 +46,16 @@ def _fuzzy_match(q, major):
     return qn in acr
 
 
-_EXCLUDED_SUBJECTS = {'Tiếng Pháp', 'Tiếng Nhật', 'Tiếng Nga', 'Tiếng Hàn',
-                       'Tiếng Trung', 'Tiếng Đức'}
+_EXCLUDED_SUBJECTS = {
+    'Tiếng Pháp', 'Tiếng Nhật', 'Tiếng Nga', 'Tiếng Hàn', 'Tiếng Trung', 'Tiếng Đức',
+    'Giáo dục thể chất', 'Hoạt động Trải nghiệm', 'Hoạt động trải nghiệm, hướng nghiệp',
+    'Giáo dục Quốc phòng và An ninh', 'Giáo dục quốc phòng - An ninh',
+    'Giáo dục của Địa phương', 'Giáo dục địa phương',
+    'Khoa học tự nhiên', 'Khoa học xã hội', 'Kinh tế chính trị', 'Tư pháp',
+}
+
+def _filter_gaps(gaps):
+    return [g for g in gaps if g['subject_name'] not in _EXCLUDED_SUBJECTS]
 
 def _radar(major_id, averages, axes='union'):
     """Radar: axes='union' = môn khối ∪ môn HS có điểm; axes='core' = chỉ môn weight>=0.03."""
@@ -78,7 +86,7 @@ def career_main():
     target_data = None
     if target_major:
         fit = calculate_fit_score(averages, _weights_list(target_major))
-        target_data = {'major': target_major, 'fit_pct': fit['fit_pct'], 'gaps': fit['gaps']}
+        target_data = {'major': target_major, 'fit_pct': fit['fit_pct'], 'gaps': _filter_gaps(fit['gaps'])}
 
     pins = StudentPinnedMajor.query.filter_by(student_id=student.id).all()
     pinned_data = []
@@ -111,7 +119,7 @@ def api_radar_data():
     fit = calculate_fit_score(averages, wlist)
     return jsonify({
         'labels': labels, 'student_scores': stu_scores, 'major_scores': maj_scores,
-        'fit_pct': fit['fit_pct'], 'gaps': fit['gaps'],
+        'fit_pct': fit['fit_pct'], 'gaps': _filter_gaps(fit['gaps']),
         'major': {'id': major.id, 'name': major.name, 'university': major.university},
     })
 
@@ -203,7 +211,7 @@ def api_simulate():
             'admission_block': major.admission_block,
             'entry_score': major.entry_score,
             'fit_pct': fit['fit_pct'],
-            'gaps': fit['gaps'],
+            'gaps': _filter_gaps(fit['gaps']),
         })
     results.sort(key=lambda x: x['fit_pct'], reverse=True)
     return jsonify({'majors': results})
@@ -243,8 +251,8 @@ def api_compare():
             'admission_block': major.admission_block,
             'entry_score': major.entry_score,
             'fit_pct': fit['fit_pct'],
-            'gaps': fit['gaps'],
-            'weights': wlist,
+            'gaps': _filter_gaps(fit['gaps']),
+            'weights': [w for w in wlist if w['subject_name'] not in _EXCLUDED_SUBJECTS],
             'radar': {'labels': labels, 'student_scores': stu_scores, 'major_scores': maj_scores},
             'entry_scores': entry_scores_sorted,
         })
