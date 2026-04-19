@@ -189,6 +189,23 @@
 | Quản lý môn học | CRUD môn học với cấu hình cột điểm |
 | Phân công môn-lớp | Mỗi lớp có danh sách môn học riêng |
 
+### 16. Phân tích Số liệu & Định hướng Ngành Đại học
+
+| Tính năng | Mô tả |
+|-----------|-------|
+| **CSDL Ngành ĐH** | 500+ ngành từ 50+ trường đại học top đầu Việt Nam |
+| **Nhóm ngành** | Kỹ thuật, Y tế, Kinh tế, Sư phạm, CNTT, Khoa học Tự nhiên, Xã hội - Nhân văn, Nghệ thuật, Nông - Lâm |
+| **Fit Score** | Tính độ phù hợp: Σ(weight_i × f(score_i, min_i)) với trọng số môn chính 0.45, môn phụ 0.225 |
+| **Target Major** | Chọn 1 ngành mục tiêu để theo dõi độ phù hợp |
+| **Pin ngành** | Lưu tối đa 5 ngành quan tâm để so sánh |
+| **Browse & Filter** | Lọc theo nhóm ngành, khối thi (A00, A01, B00, C00, D01...), điểm chuẩn, độ phù hợp |
+| **Radar Chart** | So sánh điểm TB học sinh vs điểm yêu cầu ngành |
+| **Gap Analysis** | Hiển thị môn thiếu hụt (vd: "Toán -1.5 điểm") |
+| **Simulation** | Thử điểm giả định xem độ phù hợp thay đổi |
+| **AI Career Chat** | Chatbot tư vấn ngành với RAG + Function Calling (search_majors, get_major_detail) |
+| **Lịch sử điểm chuẩn** | Dữ liệu 2024-2025 từ tuyensinh247, baomoi |
+| **Thống kê ngành** | ~500 ngành, Y đa khoa cao nhất (28.5+), trung bình 22-24 điểm |
+
 ---
 
 ## Kiến Trúc AI
