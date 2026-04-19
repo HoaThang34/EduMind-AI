@@ -46,17 +46,20 @@ def _fuzzy_match(q, major):
     return qn in acr
 
 
+_EXCLUDED_SUBJECTS = {'Tiếng Pháp', 'Tiếng Nhật', 'Tiếng Nga', 'Tiếng Hàn',
+                       'Tiếng Trung', 'Tiếng Đức'}
+
 def _radar(major_id, averages, axes='union'):
     """Radar: axes='union' = môn khối ∪ môn HS có điểm; axes='core' = chỉ môn weight>=0.03."""
     weights = MajorSubjectWeight.query.filter_by(major_id=major_id).all()
     req = {w.subject_name: w.min_score for w in weights}
     wlist = [{'subject_name': w.subject_name, 'weight': w.weight, 'min_score': w.min_score}
              for w in weights]
-    core = {w.subject_name for w in weights if w.weight >= 0.03}
+    core = {w.subject_name for w in weights if w.weight >= 0.03} - _EXCLUDED_SUBJECTS
     if axes == 'core':
         labels = sorted(core)
     else:
-        labels = sorted(core | set(averages.keys()))
+        labels = sorted((core | set(averages.keys())) - _EXCLUDED_SUBJECTS)
     stu_scores = [averages.get(s, 0.0) for s in labels]
     maj_scores = [req.get(s, 0.0) for s in labels]
     return labels, stu_scores, maj_scores, wlist

@@ -19,7 +19,7 @@
   "clusters": {
     "STEM":       ["Toán","Lý","Hóa","Sinh","Tin học","Công nghệ"],
     "Xã hội":     ["Sử","Địa","GDCD","KTPL","Triết","Ngữ văn","Văn"],
-    "Ngôn ngữ":   ["Anh","Pháp","Đức","Nhật","Trung","Hàn","Nga"],
+    "Ngôn ngữ":   ["Anh","Đức","Trung"],
     "Nghệ thuật": ["Âm nhạc","Hội họa","Vẽ"],
     "Thể chất":   ["GDTC","QPAN"]
   },
@@ -65,17 +65,9 @@
     "Giáo dục quốc phòng - An ninh": "QPAN",
     "QPAN": "QPAN",
     "Triết học": "Triết",
-    "Tiếng Pháp": "Pháp",
-    "Pháp": "Pháp",
     "Tiếng Đức": "Đức",
     "Đức": "Đức",
-    "Tiếng Nhật": "Nhật",
-    "Nhật": "Nhật",
     "Tiếng Trung": "Trung",
-    "Trung": "Trung",
-    "Tiếng Hàn": "Hàn",
-    "Hàn": "Hàn",
-    "Tiếng Nga": "Nga",
-    "Nga": "Nga"
+    "Trung": "Trung"
   }
 }

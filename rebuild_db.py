@@ -70,12 +70,8 @@ def rebuild():
             Subject(name="Công nghệ", code="CN", description="Môn Công nghệ", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
             
             # Môn Ngoại ngữ 2
-            Subject(name="Tiếng Pháp", code="PHAP", description="Môn Tiếng Pháp", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
             Subject(name="Tiếng Đức", code="DUC", description="Môn Tiếng Đức", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
-            Subject(name="Tiếng Nhật", code="NHAT", description="Môn Tiếng Nhật", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
             Subject(name="Tiếng Trung", code="TRUNG", description="Môn Tiếng Trung", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
-            Subject(name="Tiếng Hàn", code="HAN", description="Môn Tiếng Hàn", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
-            Subject(name="Tiếng Nga", code="NGA", description="Môn Tiếng Nga", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
             
             # Môn Giáo dục thể chất và Quốc phòng
             Subject(name="Giáo dục thể chất", code="GDTC", description="Môn Giáo dục thể chất", num_tx_columns=2, num_gk_columns=1, num_hk_columns=1, is_pass_fail=True),
