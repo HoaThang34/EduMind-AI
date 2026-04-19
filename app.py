@@ -30,7 +30,10 @@ def musics_file(filename):
 
 
 app.config["SECRET_KEY"] = "chia-khoa-bi-mat-cua-ban-ne-123456"
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(basedir, "database.db")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
+    "EDUMIND_DB_URI",
+    "sqlite:///" + os.path.join(basedir, "database.db"),
+)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
@@ -57,6 +60,8 @@ from routes.grades import grades_bp
 app.register_blueprint(grades_bp)
 from routes.ai_engine import ai_engine_bp
 app.register_blueprint(ai_engine_bp)
+from routes.career import career_bp
+app.register_blueprint(career_bp)
 
 register_all_routes(app)
 
@@ -324,6 +329,54 @@ def ensure_class_subject_table():
         db.session.commit()
 
 
+def ensure_career_tables():
+    insp = inspect(db.engine)
+    if not insp.has_table("university_major"):
+        db.session.execute(text("""
+            CREATE TABLE university_major (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name VARCHAR(150) NOT NULL,
+                university VARCHAR(150) NOT NULL,
+                faculty VARCHAR(150),
+                major_group VARCHAR(50),
+                description TEXT,
+                created_at DATETIME,
+                UNIQUE(name, university)
+            )
+        """))
+    if not insp.has_table("major_subject_weight"):
+        db.session.execute(text("""
+            CREATE TABLE major_subject_weight (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                major_id INTEGER NOT NULL REFERENCES university_major(id),
+                subject_name VARCHAR(100) NOT NULL,
+                weight FLOAT NOT NULL,
+                min_score FLOAT NOT NULL,
+                UNIQUE(major_id, subject_name)
+            )
+        """))
+    if not insp.has_table("student_pinned_major"):
+        db.session.execute(text("""
+            CREATE TABLE student_pinned_major (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id INTEGER NOT NULL REFERENCES student(id),
+                major_id INTEGER NOT NULL REFERENCES university_major(id),
+                pinned_at DATETIME,
+                UNIQUE(student_id, major_id)
+            )
+        """))
+    if not insp.has_table("student_target_major"):
+        db.session.execute(text("""
+            CREATE TABLE student_target_major (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id INTEGER NOT NULL UNIQUE REFERENCES student(id),
+                major_id INTEGER NOT NULL REFERENCES university_major(id),
+                set_at DATETIME
+            )
+        """))
+    db.session.commit()
+
+
 def create_database():
     db.create_all()
     insp = inspect(db.engine)
@@ -343,6 +396,7 @@ def create_database():
     ensure_subject_is_pass_fail_column()
     ensure_teacher_class_assignment_table()
     ensure_class_subject_table()
+    ensure_career_tables()
     # AttendanceRecord table is auto-created by db.create_all()
     if not Teacher.query.first():
         hashed_pwd = generate_password_hash("admin")
@@ -361,4 +415,4 @@ with app.app_context():
     create_database()
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port = 5001)

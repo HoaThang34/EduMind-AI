@@ -1,0 +1,975 @@
+{
+  "Bảo hiểm|Học viện Tài chính": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Tài chính Doanh nghiệp|Học viện Tài chính": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Quản trị Kinh doanh|RMIT Việt Nam": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Khởi nghiệp Xã hội|ĐH FPT": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Khởi nghiệp và Đổi mới Sáng tạo|ĐH FPT": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Logistics và Quản lý Chuỗi cung ứng|ĐH Giao thông Vận tải": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Kinh tế Chính trị|ĐH Kinh tế - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Kinh tế Quốc tế|ĐH Kinh tế - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Nghiên cứu Phát triển|ĐH Kinh tế - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Bất động sản|ĐH Kinh tế Quốc dân": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Kinh tế|ĐH Kinh tế Quốc dân": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Kinh tế Đầu tư|ĐH Kinh tế Quốc dân": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Kế toán|ĐH Kinh tế Quốc dân": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Marketing|ĐH Kinh tế Quốc dân": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Quản lý Nguồn nhân lực|ĐH Kinh tế Quốc dân": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Quản trị Kinh doanh|ĐH Kinh tế Quốc dân": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Thống kê|ĐH Kinh tế Quốc dân": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Tài chính - Ngân hàng|ĐH Kinh tế Quốc dân": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Quản trị Du lịch và Lữ hành|ĐH Kinh tế TP.HCM": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Quản trị Khách sạn|ĐH Kinh tế TP.HCM": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Quản trị Kinh doanh|ĐH Kinh tế TP.HCM": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Tài chính|ĐH Kinh tế TP.HCM": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Kinh doanh Quốc tế|ĐH Ngoại thương": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Kế toán - Kiểm toán|ĐH Ngoại thương": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Logistic và Quản lý Chuỗi cung ứng|ĐH Ngoại thương": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Thương mại Quốc tế|ĐH Ngoại thương": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Kinh tế Nông nghiệp|ĐH Nông nghiệp Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Kinh doanh Thương mại|ĐH Thương mại": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kinh tế - Quản trị"
+  },
+  "Kiểm soát Không lưu|Học viện Hàng không Việt Nam": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "An toàn Thông tin|Học viện Kỹ thuật Mật mã": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Công nghệ Thông tin|RMIT Việt Nam": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Công nghệ May và Thời trang|ĐH Công nghiệp Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Công nghệ Ô tô|ĐH Công nghiệp Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "An toàn Thông tin|ĐH Công nghệ - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Khoa học Máy tính|ĐH Công nghệ - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Kỹ thuật Phần mềm|ĐH Công nghệ - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Mạng Máy tính và Truyền thông Dữ liệu|ĐH Công nghệ - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Thiết kế Vi mạch|ĐH Công nghệ - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Trí tuệ Nhân tạo|ĐH Công nghệ - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Điện tử Viễn thông|ĐH Công nghệ - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Công nghệ Thông tin|ĐH FPT": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Kỹ thuật Phần mềm|ĐH FPT": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Trí tuệ Nhân tạo|ĐH FPT": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Kỹ thuật Giao thông|ĐH Giao thông Vận tải": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Kỹ thuật Hàng hải|ĐH Hàng hải Việt Nam": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Hóa học|ĐH Khoa học Tự nhiên - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Khoa học Dữ liệu|ĐH Khoa học Tự nhiên - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Khoa học Tự nhiên|ĐH Khoa học Tự nhiên - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Khoa học Vũ trụ và Viễn thám|ĐH Khoa học Tự nhiên - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Toán học|ĐH Khoa học Tự nhiên - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Vật lý|ĐH Khoa học Tự nhiên - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Địa chất học|ĐH Khoa học Tự nhiên - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Hệ thống Thông tin|ĐH Kinh tế Quốc dân": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Kiến trúc|ĐH Kiến trúc Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Kiến trúc Cảnh quan|ĐH Kiến trúc Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Quy hoạch Vùng và Đô thị|ĐH Kiến trúc Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Kỹ thuật Dầu khí|ĐH Mỏ - Địa chất": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Tin học Ứng dụng|ĐH Sư phạm Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Kỹ thuật Tài nguyên nước|ĐH Thủy lợi": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Quản lý Đất đai|ĐH Tài nguyên và Môi trường Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Công nghệ Thông tin|ĐHBK Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Công nghệ Thực phẩm|ĐHBK Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Kỹ thuật Cơ điện tử|ĐHBK Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Kỹ thuật Hóa học|ĐHBK Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Kỹ thuật Hạt nhân|ĐHBK Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Kỹ thuật Môi trường|ĐHBK Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Kỹ thuật Vật liệu|ĐHBK Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Kỹ thuật Xây dựng|ĐHBK Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Kỹ thuật Điện|ĐHBK Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Kỹ thuật Điện tử - Viễn thông|ĐHBK Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Năng lượng Tái tạo|ĐHBK Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Vật lý Kỹ thuật|ĐHBK Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Điều khiển học|ĐHBK Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Công nghệ Thông tin|ĐHBK TP.HCM": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Kỹ thuật Hàng không|ĐHBK TP.HCM": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Kỹ thuật Sinh học|ĐHBK TP.HCM": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Kỹ thuật Ô tô|ĐHBK TP.HCM": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Công nghệ Nano|ĐHQG Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Kỹ thuật - Công nghệ"
+  },
+  "Quản lý Nhà nước|Học viện Hành chính Quốc gia": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Luật - Hành chính"
+  },
+  "Quản trị Nhà nước và Chính sách|ĐH Kinh tế Quốc dân": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Luật - Hành chính"
+  },
+  "Quan hệ Lao động|ĐH Lao động - Xã hội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Luật - Hành chính"
+  },
+  "Luật|ĐH Luật Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Luật - Hành chính"
+  },
+  "Luật Kinh tế|ĐH Luật Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Luật - Hành chính"
+  },
+  "Hành chính học|ĐH Nội vụ Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Luật - Hành chính"
+  },
+  "Âm nhạc học|Nhạc viện Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Nghệ thuật"
+  },
+  "Thiết kế Đồ họa|RMIT Việt Nam": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Nghệ thuật"
+  },
+  "Game Design|ĐH FPT": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Nghệ thuật"
+  },
+  "Thiết kế Nội thất|ĐH Mỹ thuật Công nghiệp": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Nghệ thuật"
+  },
+  "Thiết kế Đồ họa|ĐH Mỹ thuật Công nghiệp": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Nghệ thuật"
+  },
+  "Hội họa|ĐH Mỹ thuật Việt Nam": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Nghệ thuật"
+  },
+  "Điện ảnh|ĐH Sân khấu - Điện ảnh Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Nghệ thuật"
+  },
+  "Khoa học Môi trường|ĐH Khoa học Tự nhiên - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Nông Lâm"
+  },
+  "Lâm học|ĐH Lâm nghiệp": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Nông Lâm"
+  },
+  "Nuôi trồng Thủy sản|ĐH Nha Trang": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Nông Lâm"
+  },
+  "Chăn nuôi|ĐH Nông nghiệp Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Nông Lâm"
+  },
+  "Nông học|ĐH Nông nghiệp Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Nông Lâm"
+  },
+  "Thú y|ĐH Nông nghiệp Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Nông Lâm"
+  },
+  "Giáo dục Mầm non|ĐH Sư phạm Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Sư phạm"
+  },
+  "Giáo dục Tiểu học|ĐH Sư phạm Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Sư phạm"
+  },
+  "Quản lý Giáo dục|ĐH Sư phạm Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Sư phạm"
+  },
+  "Sư phạm Hóa học|ĐH Sư phạm Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Sư phạm"
+  },
+  "Sư phạm Sinh học|ĐH Sư phạm Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Sư phạm"
+  },
+  "Sư phạm Tiếng Anh|ĐH Sư phạm Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Sư phạm"
+  },
+  "Sư phạm Toán|ĐH Sư phạm Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Sư phạm"
+  },
+  "Sư phạm Văn|ĐH Sư phạm Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Sư phạm"
+  },
+  "Sư phạm Vật lý|ĐH Sư phạm Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Sư phạm"
+  },
+  "Sư phạm Tin học|ĐH Sư phạm TP.HCM": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Sư phạm"
+  },
+  "Dịch thuật|ĐH Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Xã hội - Nhân văn"
+  },
+  "Ngôn ngữ Hàn Quốc|ĐH Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Xã hội - Nhân văn"
+  },
+  "Ngôn ngữ Nga|ĐH Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Xã hội - Nhân văn"
+  },
+  "Ngôn ngữ Nhật|ĐH Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Xã hội - Nhân văn"
+  },
+  "Ngôn ngữ Pháp|ĐH Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Xã hội - Nhân văn"
+  },
+  "Ngôn ngữ Trung Quốc|ĐH Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Xã hội - Nhân văn"
+  },
+  "Địa lý|ĐH Khoa học Tự nhiên - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Xã hội - Nhân văn"
+  },
+  "Báo chí|ĐH Khoa học Xã hội và Nhân văn - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Xã hội - Nhân văn"
+  },
+  "Du lịch|ĐH Khoa học Xã hội và Nhân văn - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Xã hội - Nhân văn"
+  },
+  "Lịch sử|ĐH Khoa học Xã hội và Nhân văn - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Xã hội - Nhân văn"
+  },
+  "Ngôn ngữ Anh|ĐH Khoa học Xã hội và Nhân văn - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Xã hội - Nhân văn"
+  },
+  "Quan hệ Quốc tế|ĐH Khoa học Xã hội và Nhân văn - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Xã hội - Nhân văn"
+  },
+  "Triết học|ĐH Khoa học Xã hội và Nhân văn - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Xã hội - Nhân văn"
+  },
+  "Tâm lý học|ĐH Khoa học Xã hội và Nhân văn - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Xã hội - Nhân văn"
+  },
+  "Văn học|ĐH Khoa học Xã hội và Nhân văn - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Xã hội - Nhân văn"
+  },
+  "Xã hội học|ĐH Khoa học Xã hội và Nhân văn - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Xã hội - Nhân văn"
+  },
+  "Truyền thông Đa phương tiện|ĐH Kinh tế Quốc dân": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Xã hội - Nhân văn"
+  },
+  "Công tác Xã hội|ĐH Lao động - Xã hội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Xã hội - Nhân văn"
+  },
+  "Quản lý Thể thao|ĐH TDTT Bắc Ninh": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Xã hội - Nhân văn"
+  },
+  "Dược học|ĐH Dược Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Y Dược"
+  },
+  "Sinh học|ĐH Khoa học Tự nhiên - ĐHQGHN": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Y Dược"
+  },
+  "Phục hồi Chức năng|ĐH Y Dược TP.HCM": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Y Dược"
+  },
+  "Y khoa|ĐH Y Dược TP.HCM": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Y Dược"
+  },
+  "Điều dưỡng|ĐH Y Dược TP.HCM": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Y Dược"
+  },
+  "Quản lý Bệnh viện|ĐH Y Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Y Dược"
+  },
+  "Răng Hàm Mặt|ĐH Y Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Y Dược"
+  },
+  "Y học Cổ truyền|ĐH Y Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Y Dược"
+  },
+  "Y khoa|ĐH Y Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Y Dược"
+  },
+  "Y tế Công cộng|ĐH Y Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Y Dược"
+  },
+  "Điều dưỡng|ĐH Y Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Y Dược"
+  },
+  "Công nghệ Sinh học|ĐHBK Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Y Dược"
+  },
+  "Kỹ thuật Y sinh|ĐHBK Hà Nội": {
+    "block": null,
+    "scores": {},
+    "source": null,
+    "verified": false,
+    "major_group": "Y Dược"
+  }
+}

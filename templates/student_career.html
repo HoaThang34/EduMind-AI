@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Định hướng chọn ngành – EduMind AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Be Vietnam Pro"', 'system-ui', 'sans-serif'] },
+          colors: {
+            primary: { DEFAULT: '#0070f3', light: '#e8f0fe' },
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background: #f5f5f5; font-family: 'Be Vietnam Pro', system-ui, sans-serif; }
+    .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; }
+    .tag-ok    { background:#dcfce7; color:#166534; border:1px solid #bbf7d0; }
+    .tag-warn  { background:#fef9c3; color:#854d0e; border:1px solid #fde68a; }
+    .tag-fail  { background:#fee2e2; color:#991b1b; border:1px solid #fecaca; }
+    .fit-bar-inner { transition: width .4s ease; }
+    .pinned-row:hover { background:#fafafa; }
+    .pinned-row.active { background:#e8f0fe; border-left:3px solid #0070f3; }
+  </style>
+</head>
+<body class="min-h-screen">
+
+<!-- Nav -->
+<nav class="bg-white border-b border-[#e5e5e5] px-6 py-3 flex items-center gap-4">
+  <a href="{{ url_for('student.student_dashboard') }}" class="text-sm text-gray-500 hover:text-gray-800 flex items-center gap-1.5">
+    <i class="fas fa-arrow-left text-xs"></i> Dashboard
+  </a>
+  <span class="text-[#e5e5e5]">/</span>
+  <span class="text-sm font-semibold text-gray-800">Định hướng chọn ngành</span>
+  <div class="ml-auto flex items-center gap-3">
+    <span class="text-sm text-gray-500">{{ student.name }}</span>
+    <a href="{{ url_for('student.student_logout') }}" class="text-sm text-gray-400 hover:text-gray-700">Đăng xuất</a>
+  </div>
+</nav>
+
+<div class="max-w-7xl mx-auto px-4 py-6">
+  <div class="flex gap-4 mb-5 items-center">
+    <h1 class="text-lg font-bold text-gray-900">Phân tích năng lực & Định hướng ngành</h1>
+    <a href="{{ url_for('career.career_browse') }}"
+       class="ml-auto text-sm px-3 py-1.5 bg-[#0070f3] text-white rounded-md hover:bg-blue-700 font-medium">
+      <i class="fas fa-search mr-1.5"></i>Duyệt tất cả ngành
+    </a>
+  </div>
+
+  <!-- Navigation cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
+    <a href="/student/career/browse" class="card text-center text-decoration-none no-underline hover:shadow-md transition-shadow"
+       style="background:#fff;border:1px solid #e5e5e5;border-radius:8px;display:block;padding:16px 12px;text-decoration:none;">
+      <div class="font-bold text-[#0070f3] text-sm">Khám phá ngành</div>
+      <div class="text-[11px] text-gray-400 mt-0.5">Tìm kiếm và lọc tất cả ngành học</div>
+    </a>
+    <a href="/student/career/map" class="card text-center no-underline hover:shadow-md transition-shadow"
+       style="background:#fff;border:1px solid #e5e5e5;border-radius:8px;display:block;padding:16px 12px;text-decoration:none;">
+      <div class="font-bold text-green-600 text-sm">Bản đồ ngành</div>
+      <div class="text-[11px] text-gray-400 mt-0.5">Xem sơ đồ liên kết các ngành học</div>
+    </a>
+    <a href="/student/career/compare" class="card text-center no-underline hover:shadow-md transition-shadow"
+       style="background:#fff;border:1px solid #e5e5e5;border-radius:8px;display:block;padding:16px 12px;text-decoration:none;">
+      <div class="font-bold text-amber-600 text-sm">So sánh ngành</div>
+      <div class="text-[11px] text-gray-400 mt-0.5">So sánh chi tiết các ngành quan tâm</div>
+    </a>
+  </div>
+
+  <!-- Main grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4">
+
+    <!-- LEFT: Radar -->
+    <div class="card p-5">
+      <!-- Compare selector -->
+      <div class="flex items-center gap-3 mb-4">
+        <span class="text-xs text-gray-500 whitespace-nowrap">So sánh với:</span>
+        <select id="majorSelect"
+          class="text-sm border border-[#e5e5e5] rounded-md px-3 py-1.5 bg-white text-gray-800 font-medium focus:outline-none focus:border-blue-400 flex-1 max-w-xs">
+          {% if default_major %}
+          <option value="{{ default_major.id }}">{{ default_major.name }} — {{ default_major.university }}</option>
+          {% endif %}
+        </select>
+        <div id="fitBadge" class="text-sm font-bold px-3 py-1 rounded-md bg-[#e8f0fe] text-[#0070f3]">—%</div>
+      </div>
+
+      <!-- Legend -->
+      <div class="flex gap-4 mb-3">
+        <div class="flex items-center gap-1.5 text-xs text-gray-500">
+          <span class="inline-block w-3 h-3 rounded-full bg-[#0070f3]"></span>Điểm của bạn
+        </div>
+        <div class="flex items-center gap-1.5 text-xs text-gray-500">
+          <span class="inline-block w-3 h-1 border-t-2 border-dashed border-[#f97316]"></span>Yêu cầu ngành
+        </div>
+      </div>
+
+      <div class="relative" style="height:340px">
+        <canvas id="radarChart"></canvas>
+      </div>
+
+      <!-- Gap table -->
+      <div id="gapTable" class="mt-4"></div>
+    </div>
+
+    <!-- RIGHT: Sidebar -->
+    <div class="flex flex-col gap-4">
+
+      <!-- Target Major -->
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Ngành Mục tiêu</span>
+          <div class="flex items-center gap-3">
+            {% if target_data %}
+            <button id="targetToggleBtn" onclick="toggleTargetDetail()"
+              class="text-xs text-gray-500 hover:text-gray-800 flex items-center gap-1">
+              <i id="targetToggleIcon" class="fas fa-chevron-up text-[10px]"></i>
+              <span id="targetToggleLabel">Thu gọn</span>
+            </button>
+            {% endif %}
+            <button onclick="openTargetModal()"
+              class="text-xs text-[#0070f3] hover:underline">Đổi mục tiêu</button>
+          </div>
+        </div>
+
+        {% if target_data %}
+        <div class="mb-1">
+          <div class="font-semibold text-gray-900 text-sm">{{ target_data.major.name }}</div>
+          <div class="text-xs text-gray-500">{{ target_data.major.university }}</div>
+        </div>
+        <!-- Fit bar -->
+        <div class="flex items-center gap-2 my-2">
+          <div class="flex-1 bg-[#f5f5f5] rounded-full h-2">
+            <div class="fit-bar-inner h-2 rounded-full
+              {% if target_data.fit_pct >= 80 %}bg-green-500
+              {% elif target_data.fit_pct >= 60 %}bg-amber-400
+              {% else %}bg-red-400{% endif %}"
+              style="width:{{ target_data.fit_pct|round(0)|int }}%"></div>
+          </div>
+          <span class="text-sm font-bold tabular-nums
+            {% if target_data.fit_pct >= 80 %}text-green-600
+            {% elif target_data.fit_pct >= 60 %}text-amber-600
+            {% else %}text-red-600{% endif %}">
+            {{ target_data.fit_pct|round(1) }}%
+          </span>
+        </div>
+        <div id="targetDetail">
+        <!-- Gap list -->
+        <div class="space-y-1 mt-2">
+          {% for g in target_data.gaps %}
+          <div class="flex items-center justify-between text-xs py-1 border-b border-[#f0f0f0] last:border-0">
+            <span class="text-gray-700">{{ g.subject_name }}</span>
+            <div class="flex items-center gap-2">
+              <span class="tabular-nums text-gray-600">{{ g.student_score|round(1) }} / {{ g.min_score }}</span>
+              {% if g.status == 'ok' %}
+              <span class="tag-ok text-[10px] px-1.5 py-0.5 rounded font-medium">Đạt</span>
+              {% elif g.status == 'warn' %}
+              <span class="tag-warn text-[10px] px-1.5 py-0.5 rounded font-medium">−{{ (g.min_score - g.student_score)|abs|round(1) }}</span>
+              {% else %}
+              <span class="tag-fail text-[10px] px-1.5 py-0.5 rounded font-medium">−{{ (g.min_score - g.student_score)|abs|round(1) }}</span>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <!-- State banner -->
+        {% set fail_gaps = target_data.gaps | selectattr('status', 'ne', 'ok') | list %}
+        {% if fail_gaps %}
+        <div class="mt-3 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800">
+          <i class="fas fa-exclamation-triangle mr-1"></i>
+          Cần cải thiện: <strong>{{ fail_gaps | map(attribute='subject_name') | join(', ') }}</strong>
+        </div>
+        {% else %}
+        <div class="mt-3 p-2 bg-green-50 border border-green-200 rounded text-xs text-green-800">
+          <i class="fas fa-check-circle mr-1"></i>Bạn đã đáp ứng tất cả yêu cầu ngành!
+        </div>
+        {% endif %}
+        </div><!-- /targetDetail -->
+        {% else %}
+        <div class="text-sm text-gray-400 py-4 text-center">
+          Chưa đặt ngành mục tiêu.<br>
+          <button onclick="openTargetModal()" class="text-[#0070f3] hover:underline mt-1">Chọn ngay</button>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Pinned Majors -->
+      <div class="card p-4 flex-1">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Ngành đã ghim</span>
+          <a href="{{ url_for('career.career_browse') }}" class="text-xs text-[#0070f3] hover:underline">
+            <i class="fas fa-plus mr-1"></i>Thêm ngành
+          </a>
+        </div>
+
+        {% if pinned_data %}
+        <div class="space-y-1" id="pinnedList">
+          {% for p in pinned_data %}
+          <div class="pinned-row flex items-center gap-2 px-2 py-2 rounded-md cursor-pointer"
+               onclick="loadMajorRadar({{ p.major.id }}, '{{ p.major.name }} — {{ p.major.university }}')"
+               data-major-id="{{ p.major.id }}">
+            <div class="flex-1 min-w-0">
+              <div class="text-xs font-semibold text-gray-800 truncate">{{ p.major.name }}</div>
+              <div class="text-[11px] text-gray-400 truncate">{{ p.major.university }}</div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <span class="text-xs font-bold tabular-nums
+                {% if p.fit_pct >= 80 %}text-green-600
+                {% elif p.fit_pct >= 60 %}text-amber-600
+                {% else %}text-red-500{% endif %}">
+                {{ p.fit_pct|round(0)|int }}%
+              </span>
+              <button onclick="event.stopPropagation(); unpinMajor({{ p.major.id }}, this)"
+                class="text-gray-300 hover:text-red-400 text-xs px-1">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-sm text-gray-400 py-4 text-center">
+          Chưa ghim ngành nào.<br>
+          <a href="{{ url_for('career.career_browse') }}" class="text-[#0070f3] hover:underline mt-1 inline-block">Duyệt ngành</a>
+        </div>
+        {% endif %}
+      </div>
+
+    </div><!-- /sidebar -->
+  </div><!-- /grid -->
+</div>
+
+<!-- Modal: Set Target -->
+<div id="targetModal" class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4">
+  <div class="card w-full max-w-md p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-gray-900">Đặt ngành mục tiêu</h3>
+      <button onclick="closeTargetModal()" class="text-gray-400 hover:text-gray-700"><i class="fas fa-times"></i></button>
+    </div>
+    <input type="text" id="targetSearch" placeholder="Tìm tên ngành hoặc trường..."
+      class="w-full border border-[#e5e5e5] rounded-md px-3 py-2 text-sm mb-3 focus:outline-none focus:border-blue-400"
+      oninput="filterTargetList()">
+    <div id="targetList" class="max-h-64 overflow-y-auto space-y-1 text-sm"></div>
+    <div id="targetLoading" class="text-center text-gray-400 py-4 text-sm hidden">Đang tải...</div>
+  </div>
+</div>
+
+<script>
+// ── Radar chart setup ───────────────────────────────────────────────
+const initLabels = {{ radar_labels | tojson }};
+const initStudent = {{ radar_student | tojson }};
+const initMajor   = {{ radar_major | tojson }};
+{% if default_major %}
+const initFitPct  = {{ (target_data.fit_pct if target_data and target_data.major.id == default_major.id else 0) }};
+{% else %}
+const initFitPct = 0;
+{% endif %}
+
+const radarCtx = document.getElementById('radarChart').getContext('2d');
+const radarChart = new Chart(radarCtx, {
+  type: 'radar',
+  data: {
+    labels: initLabels,
+    datasets: [
+      {
+        label: 'Điểm của bạn',
+        data: initStudent,
+        backgroundColor: 'rgba(0,112,243,0.12)',
+        borderColor: '#0070f3',
+        borderWidth: 2,
+        pointBackgroundColor: '#0070f3',
+        pointRadius: 3,
+      },
+      {
+        label: 'Yêu cầu ngành',
+        data: initMajor,
+        backgroundColor: 'rgba(249,115,22,0.08)',
+        borderColor: '#f97316',
+        borderWidth: 2,
+        borderDash: [5, 4],
+        pointBackgroundColor: '#f97316',
+        pointRadius: 3,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      r: {
+        min: 0, max: 10,
+        ticks: { stepSize: 2, font: { size: 10 }, color: '#9ca3af' },
+        grid: { color: '#e5e5e5' },
+        pointLabels: { font: { size: 11 }, color: '#374151' },
+      }
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.raw}` } }
+    }
+  }
+});
+
+// Update fit badge
+function updateFitBadge(pct) {
+  const el = document.getElementById('fitBadge');
+  el.textContent = pct.toFixed(1) + '%';
+  if (pct >= 80) { el.className = 'text-sm font-bold px-3 py-1 rounded-md bg-green-50 text-green-700'; }
+  else if (pct >= 60) { el.className = 'text-sm font-bold px-3 py-1 rounded-md bg-amber-50 text-amber-700'; }
+  else { el.className = 'text-sm font-bold px-3 py-1 rounded-md bg-red-50 text-red-600'; }
+}
+
+// Render gap table
+function renderGapTable(gaps) {
+  const el = document.getElementById('gapTable');
+  if (!gaps || gaps.length === 0) { el.innerHTML = ''; return; }
+  let rows = gaps.map(g => {
+    const tag = g.status === 'ok'
+      ? `<span class="tag-ok text-[10px] px-1.5 py-0.5 rounded font-medium">Đạt</span>`
+      : g.status === 'warn'
+      ? `<span class="tag-warn text-[10px] px-1.5 py-0.5 rounded font-medium">−${Math.abs(g.gap).toFixed(1)}</span>`
+      : `<span class="tag-fail text-[10px] px-1.5 py-0.5 rounded font-medium">−${Math.abs(g.gap).toFixed(1)}</span>`;
+    return `<tr class="border-b border-[#f0f0f0] last:border-0">
+      <td class="py-1.5 text-xs text-gray-700">${g.subject_name}</td>
+      <td class="py-1.5 text-xs text-gray-500 tabular-nums text-right">Yêu cầu: ${g.min_score}</td>
+      <td class="py-1.5 text-xs tabular-nums text-right">${g.student_score.toFixed(1)}</td>
+      <td class="py-1.5 text-right pl-2">${tag}</td>
+    </tr>`;
+  }).join('');
+  el.innerHTML = `<div class="border border-[#e5e5e5] rounded-md overflow-hidden">
+    <table class="w-full">
+      <thead><tr class="bg-[#fafafa] text-[10px] text-gray-400 uppercase">
+        <th class="px-3 py-1.5 text-left">Môn</th>
+        <th class="px-3 py-1.5 text-right">Yêu cầu</th>
+        <th class="px-3 py-1.5 text-right">Của bạn</th>
+        <th class="px-3 py-1.5"></th>
+      </tr></thead>
+      <tbody class="divide-y divide-[#f0f0f0] px-3">${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+// Load radar for a major
+async function loadMajorRadar(majorId, label) {
+  const res = await fetch(`/api/student/career/radar-data?major_id=${majorId}`);
+  if (!res.ok) return;
+  const d = await res.json();
+
+  radarChart.data.labels = d.labels;
+  radarChart.data.datasets[0].data = d.student_scores;
+  radarChart.data.datasets[1].data = d.major_scores;
+  radarChart.update();
+  updateFitBadge(d.fit_pct);
+  renderGapTable(d.gaps);
+
+  document.querySelectorAll('.pinned-row').forEach(r => r.classList.remove('active'));
+  const activeRow = document.querySelector(`.pinned-row[data-major-id="${majorId}"]`);
+  if (activeRow) activeRow.classList.add('active');
+
+  const sel = document.getElementById('majorSelect');
+  let opt = [...sel.options].find(o => o.value == majorId);
+  if (!opt) {
+    opt = new Option(label || `${d.major.name} — ${d.major.university}`, majorId);
+    sel.add(opt);
+  }
+  sel.value = majorId;
+}
+
+// Dropdown change
+document.getElementById('majorSelect').addEventListener('change', function() {
+  if (this.value) loadMajorRadar(parseInt(this.value));
+});
+
+// Init
+{% if default_major %}
+loadMajorRadar({{ default_major.id }});
+{% endif %}
+
+// ── Toggle target detail ─────────────────────────────────────────────
+function toggleTargetDetail() {
+  const el = document.getElementById('targetDetail');
+  const icon = document.getElementById('targetToggleIcon');
+  const label = document.getElementById('targetToggleLabel');
+  const collapsed = el.style.display !== 'none';
+  el.style.display = collapsed ? 'none' : '';
+  icon.className = collapsed ? 'fas fa-chevron-down text-[10px]' : 'fas fa-chevron-up text-[10px]';
+  label.textContent = collapsed ? 'Mở rộng' : 'Thu gọn';
+  localStorage.setItem('targetDetailCollapsed', collapsed);
+}
+// Restore state
+(function(){
+  if(localStorage.getItem('targetDetailCollapsed')==='true'){
+    const el=document.getElementById('targetDetail');
+    if(el){el.style.display='none';
+      document.getElementById('targetToggleIcon').className='fas fa-chevron-down text-[10px]';
+      document.getElementById('targetToggleLabel').textContent='Mở rộng';}
+  }
+})();
+
+// ── Unpin ───────────────────────────────────────────────────────────
+async function unpinMajor(majorId, btn) {
+  const res = await fetch(`/api/student/career/pin/${majorId}`, { method: 'DELETE' });
+  if (res.ok) btn.closest('.pinned-row').remove();
+}
+
+// ── Target modal ────────────────────────────────────────────────────
+let allMajors = [];
+
+function openTargetModal() {
+  document.getElementById('targetModal').classList.remove('hidden');
+  if (allMajors.length === 0) loadAllMajors();
+}
+function closeTargetModal() {
+  document.getElementById('targetModal').classList.add('hidden');
+}
+document.getElementById('targetModal').addEventListener('click', function(e) {
+  if (e.target === this) closeTargetModal();
+});
+
+async function loadAllMajors() {
+  document.getElementById('targetLoading').classList.remove('hidden');
+  const res = await fetch('/api/student/career/browse');
+  const d = await res.json();
+  allMajors = d.majors || [];
+  document.getElementById('targetLoading').classList.add('hidden');
+  renderTargetList(allMajors);
+}
+
+function filterTargetList() {
+  const q = document.getElementById('targetSearch').value.toLowerCase();
+  const filtered = q ? allMajors.filter(m =>
+    m.name.toLowerCase().includes(q) || m.university.toLowerCase().includes(q)
+  ) : allMajors;
+  renderTargetList(filtered);
+}
+
+function renderTargetList(list) {
+  const el = document.getElementById('targetList');
+  if (list.length === 0) { el.innerHTML = '<div class="text-gray-400 py-4 text-center text-sm">Không tìm thấy ngành</div>'; return; }
+  el.innerHTML = list.slice(0, 60).map(m => `
+    <div class="flex items-center gap-2 px-2 py-2 rounded hover:bg-[#f5f5f5] cursor-pointer"
+         onclick="setTarget(${m.id}, '${m.name.replace(/'/g,"\\'")} — ${m.university.replace(/'/g,"\\'")}')">
+      <div class="flex-1 min-w-0">
+        <div class="text-xs font-semibold text-gray-800 truncate">${m.name}</div>
+        <div class="text-[11px] text-gray-400 truncate">${m.university}</div>
+      </div>
+      <span class="text-xs font-bold tabular-nums ${m.fit_pct >= 80 ? 'text-green-600' : m.fit_pct >= 60 ? 'text-amber-600' : 'text-red-500'}">${m.fit_pct.toFixed(0)}%</span>
+    </div>
+  `).join('');
+}
+
+window.addEventListener('pageshow', function(e) {
+  if (e.persisted) window.location.reload();
+});
+
+async function setTarget(majorId, label) {
+  const res = await fetch('/api/student/career/target', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ major_id: majorId })
+  });
+  if (res.ok) {
+    closeTargetModal();
+    window.location.reload();
+  }
+}
+</script>
+{% if student %}{% include '_career_ai_widget.html' %}{% endif %}
+</body>
+</html>

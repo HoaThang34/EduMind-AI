@@ -1065,3 +1065,57 @@ def register_template_extensions(app):
             is_subject_teacher=is_subject_teacher,
             assigned_class=assigned_class
         )
+
+
+def calculate_subject_averages(student_id, semester, school_year):
+    """Tính điểm trung bình từng môn: (avg_TX + avg_GK*2 + avg_HK*3) / 6.
+    Returns {subject_name: avg} — chỉ môn có đủ TX+GK+HK."""
+    from models import Grade, Subject
+    grades = Grade.query.filter_by(
+        student_id=student_id, semester=semester, school_year=school_year
+    ).all()
+    by_subject = {}
+    for g in grades:
+        by_subject.setdefault(g.subject_id, {'TX': [], 'GK': [], 'HK': []})
+        by_subject[g.subject_id][g.grade_type].append(g.score)
+    result = {}
+    for subject_id, data in by_subject.items():
+        if data['TX'] and data['GK'] and data['HK']:
+            avg = round(
+                (sum(data['TX']) / len(data['TX'])
+                 + sum(data['GK']) / len(data['GK']) * 2
+                 + sum(data['HK']) / len(data['HK']) * 3) / 6, 2)
+            subject = Subject.query.get(subject_id)
+            if subject:
+                result[subject.name] = avg
+    return result
+
+
+def calculate_fit_score(subject_averages, weights):
+    """Fit % với cap tại yêu cầu — điểm vượt không inflate.
+    Args:
+        subject_averages: {subject_name: score}
+        weights: [{subject_name, weight, min_score}]
+    Returns:
+        {fit_pct, gaps: [{subject_name, student_score, min_score, gap, status, weight}]}
+    """
+    numerator = denominator = 0.0
+    gaps = []
+    for w in weights:
+        score = subject_averages.get(w['subject_name'], 0.0)
+        numerator += min(score, w['min_score']) * w['weight']
+        denominator += w['min_score'] * w['weight']
+        gap = round(score - w['min_score'], 2)
+        gaps.append({
+            'subject_name': w['subject_name'],
+            'student_score': score,
+            'min_score': w['min_score'],
+            'gap': gap,
+            'status': 'ok' if gap >= 0 else ('warn' if gap >= -1.0 else 'fail'),
+            'weight': w['weight'],
+        })
+    fit_pct = min(round(numerator / denominator * 100, 1), 100.0) if denominator else 0.0
+    return {'fit_pct': fit_pct, 'gaps': gaps}
+
+
+

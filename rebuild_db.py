@@ -1,10 +1,26 @@
+"""
+XÓA TOÀN BỘ DATABASE và tạo lại từ đầu.
+CHỈ dùng khi setup lần đầu trên máy mới — KHÔNG dùng để migrate.
+Để thêm bảng/cột mới: dùng migrate.py
+
+Bắt buộc truyền --force để chạy:
+    python rebuild_db.py --force
+"""
+import sys
 import os
 from app import app, db
 from models import Teacher, SystemConfig, ViolationType, Subject, ClassRoom, ClassSubject
 from werkzeug.security import generate_password_hash
+from seed_majors import seed as seed_majors
+from seed_entry_scores import seed as seed_entry_scores
+from seed_major_weights import seed as seed_major_weights
 
 def rebuild():
-    # Xóa database cũ
+    if "--force" not in sys.argv:
+        print("⛔  rebuild_db.py XÓA TOÀN BỘ DATA. Truyền --force nếu thực sự muốn chạy.")
+        print("    Để migrate an toàn: python migrate.py")
+        sys.exit(1)
+
     db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "database.db")
     if os.path.exists(db_path):
         os.remove(db_path)
@@ -54,12 +70,8 @@ def rebuild():
             Subject(name="Công nghệ", code="CN", description="Môn Công nghệ", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
             
             # Môn Ngoại ngữ 2
-            Subject(name="Tiếng Pháp", code="PHAP", description="Môn Tiếng Pháp", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
             Subject(name="Tiếng Đức", code="DUC", description="Môn Tiếng Đức", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
-            Subject(name="Tiếng Nhật", code="NHAT", description="Môn Tiếng Nhật", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
             Subject(name="Tiếng Trung", code="TRUNG", description="Môn Tiếng Trung", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
-            Subject(name="Tiếng Hàn", code="HAN", description="Môn Tiếng Hàn", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
-            Subject(name="Tiếng Nga", code="NGA", description="Môn Tiếng Nga", num_tx_columns=3, num_gk_columns=1, num_hk_columns=1),
             
             # Môn Giáo dục thể chất và Quốc phòng
             Subject(name="Giáo dục thể chất", code="GDTC", description="Môn Giáo dục thể chất", num_tx_columns=2, num_gk_columns=1, num_hk_columns=1, is_pass_fail=True),
@@ -148,6 +160,15 @@ def rebuild():
         db.session.add_all(rules)
 
         db.session.commit()
+
+        # 5. Seed university majors + entry scores + weights
+        print("Seeding university majors...")
+        seed_majors()
+        print("Seeding entry scores...")
+        seed_entry_scores()
+        print("Seeding major weights (real scores + block distribution)...")
+        seed_major_weights()
+
         print("Đã khởi tạo dữ liệu mẫu thành công.")
         print("Tài khoản admin: admin / admin123")
 

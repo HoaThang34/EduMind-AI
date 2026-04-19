@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bản đồ ngành – EduMind AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>tailwind.config={theme:{extend:{fontFamily:{sans:['"Be Vietnam Pro"','system-ui','sans-serif']}}}}</script>
+  <style>
+    body { font-family:'Be Vietnam Pro',system-ui,sans-serif; overflow:hidden; background:#f5f5f5; height:100vh; margin:0; }
+    .gtag { transition:opacity .15s; }
+    .gtag.off { opacity:.25; }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="bg-white border-b border-[#e5e5e5] px-6 py-3 flex items-center gap-4 relative z-[100]">
+  <a href="{{ url_for('career.career_main') }}" class="text-sm text-gray-500 hover:text-gray-800 flex items-center gap-1.5">
+    <i class="fas fa-arrow-left text-xs"></i> Phân tích năng lực
+  </a>
+  <span class="text-[#e5e5e5]">/</span>
+  <span class="text-sm font-semibold text-gray-800">Bản đồ ngành</span>
+  <div class="ml-auto flex items-center gap-3">
+    <span class="text-sm text-gray-500">{{ student.name }}</span>
+  </div>
+</nav>
+
+<!-- Filter bar -->
+<div class="bg-white border-b border-[#e5e5e5] px-4 py-2.5 relative z-[100]">
+  <div class="flex flex-wrap gap-2.5 items-center">
+    <div class="relative min-w-[180px] max-w-[220px]">
+      <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+      <input type="text" id="mapSearch" placeholder="Tìm ngành hoặc trường..."
+        class="w-full pl-8 pr-3 py-1.5 text-sm border border-[#e5e5e5] rounded-md focus:outline-none focus:border-blue-400">
+    </div>
+    <div id="groupFilters" class="flex flex-wrap gap-1.5"></div>
+    <label class="flex items-center gap-1.5 cursor-pointer ml-1">
+      <input type="checkbox" id="filterFitOnly" class="w-3.5 h-3.5 rounded border-gray-300 text-[#0070f3]">
+      <span class="text-[11px] text-gray-500">Ẩn ngành &lt;50% fit</span>
+    </label>
+    <div class="flex gap-1.5 ml-auto">
+      <button onclick="zoomIn()" class="text-xs px-2.5 py-1 border border-[#e5e5e5] rounded-md bg-white hover:bg-[#f0f0f0] font-medium text-gray-600">+</button>
+      <button onclick="zoomOut()" class="text-xs px-2.5 py-1 border border-[#e5e5e5] rounded-md bg-white hover:bg-[#f0f0f0] font-medium text-gray-600">−</button>
+      <button onclick="resetView()" class="text-xs px-2.5 py-1 border border-[#e5e5e5] rounded-md bg-white hover:bg-[#f0f0f0] font-medium text-gray-600">
+        <i class="fas fa-undo text-[10px]"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Detail panel -->
+<div id="detailPanel" class="fixed right-0 top-0 bottom-0 w-[300px] bg-white border-l border-[#e5e5e5] z-[90] hidden overflow-y-auto shadow-[-2px_0_8px_rgba(0,0,0,.04)]" style="padding-top:100px">
+  <div class="px-4 pb-4">
+    <button onclick="closePanel()" class="absolute top-[104px] right-3 text-gray-400 hover:text-gray-700">
+      <i class="fas fa-times"></i>
+    </button>
+    <div class="font-semibold text-gray-900 text-sm" id="dpName"></div>
+    <div class="text-[11px] text-gray-500 mb-2" id="dpUniversity"></div>
+    <div class="flex gap-1.5 mb-3">
+      <span id="dpBlock" class="text-[10px] px-2 py-0.5 rounded bg-[#f0f0f0] text-gray-700"></span>
+      <span id="dpGroup" class="text-[10px] px-2 py-0.5 rounded bg-[#f0f0f0] text-gray-500"></span>
+    </div>
+    <div class="mb-2">
+      <span id="dpFit" class="text-xl font-bold"></span>
+      <span class="text-[11px] text-gray-400 ml-1">phù hợp</span>
+    </div>
+    <div class="text-xs text-gray-500 mb-3">Điểm chuẩn 2025: <strong id="dpScore" class="text-gray-900"></strong></div>
+    <div class="border-t border-[#e5e5e5] pt-2 mb-3">
+      <div class="text-[10px] text-gray-400 uppercase tracking-wide mb-1.5">Top môn yêu cầu</div>
+      <div id="dpSubjects"></div>
+    </div>
+    <button id="dpCompareBtn" onclick="addToCompare()"
+      class="w-full text-xs py-1.5 border border-[#e5e5e5] rounded-md bg-white hover:bg-[#f0f0f0] font-medium text-gray-700 text-center">
+      <i class="fas fa-plus mr-1"></i>Thêm so sánh
+    </button>
+
+    <!-- Compare stack (ghim ngành) -->
+    <div id="compareStack" class="mt-4 pt-3 border-t border-[#e5e5e5] hidden">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-[10px] uppercase tracking-wide text-gray-400 font-medium">
+          Đang so sánh <span id="csCount" class="text-gray-700">0</span>/4
+        </span>
+        <a href="{{ url_for('career.career_compare') }}" id="csGoBtn"
+           class="text-[11px] text-blue-600 hover:underline pointer-events-none opacity-40">
+          So sánh <i class="fas fa-arrow-right text-[9px] ml-0.5"></i>
+        </a>
+      </div>
+      <div id="csList" class="flex flex-col gap-1.5"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Legend -->
+<div class="fixed bottom-3 left-3 z-[90] bg-white border border-[#e5e5e5] rounded-lg px-3.5 py-2.5 text-[10px] text-gray-500 space-y-1 shadow-sm">
+  <div><span class="inline-block w-2 h-2 rounded-full bg-[#ef4444] mr-1.5 align-middle"></span><strong class="text-gray-700">Bạn</strong> — vị trí năng lực</div>
+  <div><span class="inline-block w-2 h-2 rounded-full bg-gray-400 mr-1.5 align-middle"></span>Ngành — màu = nhóm, gần bạn = fit cao, to = điểm chuẩn cao</div>
+  <div><span class="inline-block w-4 h-[2px] bg-gray-400 mr-1.5 align-middle"></span>Nối ngành — yêu cầu môn tương tự</div>
+  <div><span class="inline-block w-4 h-0 border-t border-dashed border-red-400 mr-1.5 align-middle"></span>Nối đỏ — top ngành phù hợp với bạn</div>
+</div>
+
+<svg id="mapSvg" width="100%" height="100%" style="background:#f5f5f5">
+  <defs>
+    <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <g id="mapG"></g>
+</svg>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+// ============================================================
+// CAREER MAP v2 — Connected Papers-style emergent layout
+// Spec: docs/superpowers/specs/2026-04-19-career-map-v2-design.md
+// ============================================================
+
+// Keys khớp với data (dùng dấu gạch ngang '-')
+const GC = {
+  'Kỹ thuật - Công nghệ': '#3b82f6',
+  'Kinh tế - Quản trị':   '#f59e0b',
+  'Y Dược':               '#10b981',
+  'Xã hội - Nhân văn':    '#8b5cf6',
+  'Nghệ thuật':           '#ec4899',
+  'Khoa học':             '#06b6d4',
+  'Nông Lâm':             '#84cc16',
+  'Sư phạm':              '#f97316',
+  'Luật - Hành chính':    '#6366f1',
+};
+const DEFAULT_COLOR = '#94a3b8';
+const STUDENT_ID = '__student__';
+
+// ---- Tunable params ----------------------------------------
+const EDGE_CAP            = 7;
+const EDGE_THRESHOLD      = 0.70;
+const STUDENT_EDGE_TOP_K  = 5;
+const CHARGE_STRENGTH     = -1400;
+const COLLIDE_PAD         = 48;
+const CENTER_STRENGTH     = 0.02;
+const LINK_DIST_BASE      = 480;
+const LINK_DIST_SPAN      = 420;
+const STU_DIST_BASE       = 540;
+const STU_DIST_SPAN       = 600;
+const ALPHA_DECAY         = 0.04;
+const ALPHA_MIN           = 0.01;
+const ZOOM_OUT_MAX        = 0.4;
+const ZOOM_IN_MIN         = 1.2;
+const TWEEN_MS            = 220;
+
+// Normalize major_group để fallback robust với dash variant
+function normGroupKey(s) {
+  return (s || '').replace(/[–—]/g, '-').replace(/\s+/g, ' ').trim();
+}
+const GC_NORM = Object.fromEntries(Object.entries(GC).map(([k, v]) => [normGroupKey(k), v]));
+
+// ---- Globals -----------------------------------------------
+let svgEl, gEl, zoomB, sim;
+let allNodes = [], allEdges = [], studentEdges = [];
+let nodeSel, linkSel, studentLinkSel;
+let curZoomTier = 'mid';
+let selectedId = null;
+let curDetailNode = null;
+let compareIds = new Set(JSON.parse(sessionStorage.getItem('compare_major_ids') || '[]'));
+let rawData = null;
+// Perf indices — tránh O(n) find() mỗi lần hover
+let nodeById = new Map();
+let neighborsOf = new Map();   // id -> Set<id>
+
+function gc(g) { return GC_NORM[normGroupKey(g)] || DEFAULT_COLOR; }
+
+// ---- Vector ops --------------------------------------------
+function l2normalize(vec) {
+  let ss = 0;
+  for (const k in vec) ss += vec[k] * vec[k];
+  const norm = Math.sqrt(ss);
+  if (norm === 0) return {};
+  const out = {};
+  for (const k in vec) out[k] = vec[k] / norm;
+  return out;
+}
+
+function cosine(a, b) {
+  let dot = 0;
+  for (const k in a) if (k in b) dot += a[k] * b[k];
+  return dot;
+}
+
+// ---- Node + edge builders ----------------------------------
+function buildNodes(data) {
+  const nodes = data.majors.map(m => ({
+    id: String(m.id),
+    name: m.name,
+    university: m.university,
+    major_group: m.major_group,
+    admission_block: m.admission_block,
+    entry_score: m.entry_score,
+    fit_pct: m.fit_pct,
+    weight_vector: m.weight_vector,
+    wNorm: l2normalize(m.weight_vector),
+    is_student: false,
+  }));
+  nodes.push({
+    id: STUDENT_ID,
+    name: 'Bạn',
+    fit_pct: 100,
+    weight_vector: data.student_vector || {},
+    wNorm: l2normalize(data.student_vector || {}),
+    is_student: true,
+  });
+  return nodes;
+}
+
+function buildEdges(nodes) {
+  const majorNodes = nodes.filter(n => !n.is_student);
+  const nearestOf = new Map();
+  for (const a of majorNodes) {
+    const scored = [];
+    for (const b of majorNodes) {
+      if (a.id === b.id) continue;
+      const s = cosine(a.wNorm, b.wNorm);
+      if (s >= EDGE_THRESHOLD) scored.push({ id: b.id, sim: s });
+    }
+    scored.sort((x, y) => y.sim - x.sim);
+    nearestOf.set(a.id, scored.slice(0, EDGE_CAP));
+  }
+  const seen = new Set();
+  const edges = [];
+  for (const a of majorNodes) {
+    for (const { id: bId, sim } of nearestOf.get(a.id) || []) {
+      const key = a.id < bId ? `${a.id}|${bId}` : `${bId}|${a.id}`;
+      if (seen.has(key)) continue;
+      const bTop = nearestOf.get(bId) || [];
+      if (!bTop.some(x => x.id === a.id)) continue;
+      seen.add(key);
+      edges.push({ source: a.id, target: bId, sim });
+    }
+  }
+  return edges;
+}
+
+function buildStudentEdges(nodes) {
+  const student = nodes.find(n => n.is_student);
+  if (!student || Object.keys(student.wNorm).length === 0) return [];
+  const majors = nodes.filter(n => !n.is_student);
+
+  // Top-1 per major_group để link đỏ tỏa đều các hướng, không lệch 1 bên.
+  // Yêu cầu fit ≥ 40 để tránh nhóm học sinh yếu cũng nối.
+  const bestByGroup = new Map();
+  for (const m of majors) {
+    if ((m.fit_pct || 0) < 40) continue;
+    const g = m.major_group || '_other';
+    const cur = bestByGroup.get(g);
+    if (!cur || m.fit_pct > cur.fit_pct) bestByGroup.set(g, m);
+  }
+
+  return [...bestByGroup.values()]
+    .sort((a, b) => b.fit_pct - a.fit_pct)
+    .map(m => ({ source: STUDENT_ID, target: m.id, fit_pct: m.fit_pct }));
+}
+
+function buildIndices() {
+  nodeById = new Map(allNodes.map(n => [n.id, n]));
+  neighborsOf = new Map();
+  const add = (a, b) => {
+    if (!neighborsOf.has(a)) neighborsOf.set(a, new Set());
+    neighborsOf.get(a).add(b);
+  };
+  for (const e of allEdges) {
+    const s = typeof e.source === 'object' ? e.source.id : e.source;
+    const t = typeof e.target === 'object' ? e.target.id : e.target;
+    add(s, t); add(t, s);
+  }
+  for (const e of studentEdges) {
+    const t = typeof e.target === 'object' ? e.target.id : e.target;
+    add(STUDENT_ID, t); add(t, STUDENT_ID);
+  }
+}
+
+// ---- Deterministic init positions --------------------------
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function seedPositions(nodes, seedInt) {
+  const rng = mulberry32(seedInt);
+  const W = document.getElementById('mapSvg').clientWidth;
+  const H = document.getElementById('mapSvg').clientHeight;
+  const cx = W / 2, cy = H / 2;
+  const golden = Math.PI * (3 - Math.sqrt(5));
+  const sorted = [...nodes].sort((a, b) => a.id.localeCompare(b.id));
+  sorted.forEach((n, i) => {
+    const angle = i * golden + rng() * 0.01;
+    const radius = 30 * Math.sqrt(i + 1);
+    n.x = cx + radius * Math.cos(angle);
+    n.y = cy + radius * Math.sin(angle);
+  });
+  const s = nodes.find(n => n.is_student);
+  if (s) { s.x = cx; s.y = cy; }
+}
+
+// ---- Geometry helpers --------------------------------------
+// Size = điểm chuẩn (entry_score). Fit đã được encode qua bán kính radial.
+const radiusByScore = d3.scaleLinear().domain([15, 29]).range([6, 20]).clamp(true);
+function nodeRadius(d) {
+  if (d.is_student) return 8;
+  const s = +d.entry_score;
+  return isFinite(s) && s > 0 ? radiusByScore(s) : 8;
+}
+
+// ---- Force simulation --------------------------------------
+function startSimulation() {
+  const W = document.getElementById('mapSvg').clientWidth;
+  const H = document.getElementById('mapSvg').clientHeight;
+  const cx = W / 2, cy = H / 2;
+
+  // Pin Bạn ở giữa
+  const student = allNodes.find(n => n.is_student);
+  if (student) { student.fx = cx; student.fy = cy; }
+
+  // Bán kính đích theo fit: fit cao → vòng trong, fit thấp → vòng ngoài
+  const MIN_R = 360;
+  const MAX_R = Math.min(W, H) * 1.30;
+  const targetRadius = d => {
+    if (d.is_student) return 0;
+    const t = 1 - (d.fit_pct || 0) / 100;
+    return MIN_R + (MAX_R - MIN_R) * t;
+  };
+
+  // Mỗi major_group giữ cung góc riêng → cụm tách bạch
+  const majorGroups = [...new Set(
+    allNodes.filter(n => !n.is_student).map(n => n.major_group).filter(Boolean)
+  )].sort();
+  const groupAngle = {};
+  majorGroups.forEach((g, i) => {
+    groupAngle[g] = (2 * Math.PI * i) / majorGroups.length - Math.PI / 2;
+  });
+  // Jitter nhỏ theo id để ngành cùng group không xếp chồng chính xác trên 1 tia
+  const angleFor = d => {
+    const base = groupAngle[d.major_group];
+    if (base === undefined) return null;
+    const h = [...String(d.id)].reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 0);
+    const jitter = ((h >>> 0) % 1000 / 1000 - 0.5) * 0.9;  // ±0.45 rad ≈ ±26°
+    return base + jitter;
+  };
+  const targetX = d => {
+    if (d.is_student) return cx;
+    const a = angleFor(d);
+    if (a === null) return cx;
+    return cx + targetRadius(d) * Math.cos(a);
+  };
+  const targetY = d => {
+    if (d.is_student) return cy;
+    const a = angleFor(d);
+    if (a === null) return cy;
+    return cy + targetRadius(d) * Math.sin(a);
+  };
+
+  allEdges.forEach(e => { e.kind = 'sim'; });
+  studentEdges.forEach(e => { e.kind = 'stu'; });
+  const simLinks = [...allEdges, ...studentEdges];
+
+  sim = d3.forceSimulation(allNodes)
+    .force('link', d3.forceLink(simLinks)
+      .id(d => d.id)
+      .distance(e => e.kind === 'stu'
+        ? STU_DIST_BASE + STU_DIST_SPAN * (1 - e.fit_pct / 100)
+        : LINK_DIST_BASE + LINK_DIST_SPAN * (1 - e.sim))
+      .strength(e => e.kind === 'stu'
+        ? 0.08 * (e.fit_pct / 100)
+        : 0.25 * e.sim))             // yếu → không phá cung góc
+    .force('charge', d3.forceManyBody().strength(CHARGE_STRENGTH))
+    .force('collide', d3.forceCollide(d => nodeRadius(d) + COLLIDE_PAD))
+    .force('x', d3.forceX(targetX).strength(0.35))
+    .force('y', d3.forceY(targetY).strength(0.35))
+    .alphaDecay(ALPHA_DECAY)
+    .alphaMin(ALPHA_MIN);
+
+  sim.on('tick', onTick);
+  sim.on('end', () => console.log('[career-map v2] simulation settled'));
+}
+
+function onTick() {
+  if (nodeSel) nodeSel.attr('transform', d => `translate(${d.x},${d.y})`);
+  if (linkSel) linkSel
+    .attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+    .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+  if (studentLinkSel) studentLinkSel
+    .attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+    .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+}
+
+// ---- Render ------------------------------------------------
+function render() {
+  svgEl = d3.select('#mapSvg');
+  gEl = d3.select('#mapG');
+  gEl.selectAll('*').remove();
+
+  const linkLayer    = gEl.append('g').attr('class', 'link-layer');
+  const stuLinkLayer = gEl.append('g').attr('class', 'stu-link-layer');
+  const nodeLayer    = gEl.append('g').attr('class', 'node-layer');
+
+  linkSel = linkLayer.selectAll('line.sim-link').data(allEdges).enter().append('line')
+    .attr('class', 'sim-link')
+    .attr('stroke', '#94a3b8')
+    .attr('stroke-width', d => 0.5 + d.sim * 1.2)
+    .attr('stroke-opacity', 0.25);
+
+  studentLinkSel = stuLinkLayer.selectAll('line.stu-link').data(studentEdges).enter().append('line')
+    .attr('class', 'stu-link')
+    .attr('stroke', '#ef4444')
+    .attr('stroke-width', 1.1)
+    .attr('stroke-dasharray', '3 2')
+    .attr('stroke-opacity', 0.6);
+
+  nodeSel = nodeLayer.selectAll('g.node').data(allNodes, d => d.id).enter().append('g')
+    .attr('class', d => 'node ' + (d.is_student ? 'student' : 'major'))
+    .style('cursor', d => d.is_student ? 'default' : 'pointer')
+    .call(d3.drag()
+      .filter(function () { return !this.__data__.is_student; })
+      .on('start', (e, d) => { if (!e.active) sim.alphaTarget(0.2).restart(); d.fx = d.x; d.fy = d.y; })
+      .on('drag',  (e, d) => { d.fx = e.x; d.fy = e.y; })
+      .on('end',   (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }))
+    .on('click', (e, d) => {
+      if (d.is_student) return;
+      d3.select(e.currentTarget).raise();
+      showDetail(d);
+    });
+
+  // Major circles
+  nodeSel.filter(d => !d.is_student)
+    .append('circle').attr('class', 'node-circle')
+    .attr('r', d => nodeRadius(d))
+    .attr('fill', d => gc(d.major_group)).attr('fill-opacity', 0.92)
+    .attr('stroke', '#fff').attr('stroke-width', 1.4);
+
+  // Major labels
+  nodeSel.filter(d => !d.is_student)
+    .append('text').attr('class', 'node-label')
+    .attr('dy', d => nodeRadius(d) + 10)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', '9px')
+    .attr('fill', '#374151')
+    .attr('pointer-events', 'none')
+    .attr('opacity', 0)
+    .text(d => d.name.length > 18 ? d.name.slice(0, 17) + '…' : d.name);
+
+  // Student: halos + dot + label
+  const stuG = nodeSel.filter(d => d.is_student);
+  stuG.append('circle').attr('r', 22).attr('fill', '#ef4444').attr('fill-opacity', 0.08);
+  stuG.append('circle').attr('r', 14).attr('fill', '#ef4444').attr('fill-opacity', 0.15);
+  stuG.append('circle').attr('r', 7).attr('fill', '#ef4444')
+    .attr('stroke', '#fff').attr('stroke-width', 2).attr('filter', 'url(#glow)');
+  const stuNode = allNodes.find(n => n.is_student);
+  const noScores = stuNode && Object.keys(stuNode.weight_vector || {}).length === 0;
+  stuG.append('text').attr('dy', -14).attr('text-anchor', 'middle')
+    .attr('font-size', '10px').attr('font-weight', '700').attr('fill', '#ef4444')
+    .text(noScores ? 'Bạn (chưa có điểm)' : 'Bạn');
+  if (noScores) stuG.attr('opacity', 0.6);
+
+  // Zoom
+  zoomB = d3.zoom().scaleExtent([0.3, 6]).on('zoom', e => {
+    gEl.attr('transform', e.transform);
+    onZoom(e.transform.k);
+  });
+  svgEl.call(zoomB);
+
+  // Click khoảng trống (không trúng node) → đóng panel chi tiết
+  svgEl.on('click', (e) => {
+    if (e.target.closest('g.node')) return;  // click vào node đã có handler riêng
+    if (selectedId) closePanel();
+  });
+}
+
+function onZoom(k) {
+  const tier = k < ZOOM_OUT_MAX ? 'out' : k >= ZOOM_IN_MIN ? 'in' : 'mid';
+  if (tier !== curZoomTier) {
+    curZoomTier = tier;
+    applyLOD();
+  }
+}
+
+// ---- Filters -----------------------------------------------
+function buildFilters() {
+  const groups = [...new Set(allNodes.filter(n => !n.is_student).map(n => n.major_group).filter(Boolean))];
+  const container = document.getElementById('groupFilters');
+  container.innerHTML = '';
+  groups.forEach(g => {
+    const tag = document.createElement('span');
+    tag.className = 'gtag text-[10px] px-2 py-0.5 rounded-full cursor-pointer font-medium border';
+    const col = gc(g);
+    tag.style.background = col + '15';
+    tag.style.color = col;
+    tag.style.borderColor = col + '40';
+    tag.dataset.active = '1';
+    tag.dataset.group = g;
+    tag.textContent = g;
+    tag.onclick = () => {
+      const on = tag.dataset.active === '1';
+      tag.dataset.active = on ? '0' : '1';
+      tag.classList.toggle('off', on);
+      applyLOD();
+    };
+    container.appendChild(tag);
+  });
+  document.getElementById('mapSearch').addEventListener('input', () => {
+    clearTimeout(window._careerMapSearchT);
+    window._careerMapSearchT = setTimeout(applyLOD, 300);
+  });
+  document.getElementById('filterFitOnly').addEventListener('change', applyLOD);
+}
+
+function nodePassesFilter(n) {
+  if (!n) return false;
+  if (n.is_student) return true;
+  const q = document.getElementById('mapSearch').value.trim().toLowerCase();
+  if (q && !((n.name || '') + ' ' + (n.university || '')).toLowerCase().includes(q)) return false;
+  const offGroups = new Set([...document.querySelectorAll('.gtag[data-active="0"]')].map(b => b.dataset.group));
+  if (offGroups.has(n.major_group)) return false;
+  if (document.getElementById('filterFitOnly').checked && n.fit_pct < 50) return false;
+  return true;
+}
+
+// ---- LOD + filter resolver ---------------------------------
+function isNeighbor(idA, idB) {
+  const set = neighborsOf.get(idA);
+  return !!(set && set.has(idB));
+}
+
+function layoutGrid(majors) {
+  if (sim) sim.stop();
+  const W = document.getElementById('mapSvg').clientWidth;
+  const H = document.getElementById('mapSvg').clientHeight;
+  const cx = W / 2, cy = H / 2;
+  const step = 80;
+  majors.forEach((m, i) => {
+    const col = i % 2;
+    m.x = cx + (col === 0 ? -step / 2 : step / 2);
+    m.y = cy + (Math.floor(i / 2) - majors.length / 4) * step;
+  });
+  const stu = allNodes.find(n => n.is_student);
+  if (stu) { stu.x = cx; stu.y = cy - majors.length * step / 2 - 40; }
+  onTick();
+}
+
+function applyLOD() {
+  if (!nodeSel) return;
+
+  const visibleMajors = allNodes.filter(n => !n.is_student && nodePassesFilter(n));
+  if (visibleMajors.length < 3 && visibleMajors.length > 0) {
+    layoutGrid(visibleMajors);
+  }
+
+  const tier = curZoomTier;
+  const hv = selectedId;           // fade chỉ khi click; hover không tác động
+  const hoverMode = !!hv;
+
+  // Base opacity theo fit × tier. Không hover: ngành fit≥70 full, thấp hơn hơi mờ.
+  // Khi hover: hovered + neighbors full, còn lại mờ rõ (0.22).
+  const nodeAlphaByFit = fit => {
+    if (fit >= 70) return 1.0;
+    if (fit >= 40) return tier === 'out' ? 0.55 : tier === 'mid' ? 0.85 : 1.0;
+    return tier === 'out' ? 0.30 : tier === 'mid' ? 0.55 : 0.90;
+  };
+  const simLinkAlpha = tier === 'out' ? 0 : tier === 'mid' ? 0.22 : 0.40;
+  const stuLinkAlpha = tier === 'out' ? 0.45 : tier === 'mid' ? 0.65 : 0.80;
+
+  nodeSel.style('opacity', d => {
+    if (d.is_student) return 1.0;
+    if (!nodePassesFilter(d)) return 0.05;
+    if (hoverMode) {
+      if (d.id === hv) return 1.0;
+      if (isNeighbor(hv, d.id)) return 1.0;
+      return 0.22;
+    }
+    return nodeAlphaByFit(d.fit_pct);
+  });
+  nodeSel.style('pointer-events', d => (d.is_student || nodePassesFilter(d)) ? null : 'none');
+
+  // Stroke bold hơn cho hovered/selected
+  nodeSel.select('circle.node-circle')
+    .attr('stroke', d => d.id === hv ? '#111827' : '#fff')
+    .attr('stroke-width', d => d.id === hv ? 2.4 : 1.4);
+
+  // Label: hiện ở zoom-in; ở mid chỉ hiện cho fit≥70 hoặc khi đang hover; luôn hiện cho hovered.
+  nodeSel.select('text.node-label')
+    .attr('opacity', d => {
+      if (d.is_student) return 1;
+      if (!nodePassesFilter(d)) return 0;
+      if (d.id === hv) return 1;
+      if (hoverMode && isNeighbor(hv, d.id)) return 1;
+      if (tier === 'out') return d.fit_pct >= 70 ? 0.7 : 0;  // zoom-out rất sâu: chỉ ngành top
+      if (tier === 'in')  return 1;
+      return d.fit_pct >= 40 ? 0.9 : 0.5;                   // mid: hiện gần như tất cả
+    });
+
+  linkSel.attr('stroke-opacity', d => {
+    const sId = typeof d.source === 'object' ? d.source.id : d.source;
+    const tId = typeof d.target === 'object' ? d.target.id : d.target;
+    const src = nodeById.get(sId);
+    const tgt = nodeById.get(tId);
+    if (!nodePassesFilter(src) || !nodePassesFilter(tgt)) return 0;
+    if (hoverMode) {
+      if (sId === hv || tId === hv) return Math.max(simLinkAlpha, 0.55);
+      return 0.04;
+    }
+    return simLinkAlpha;
+  });
+
+  studentLinkSel.attr('stroke-opacity', d => {
+    const tId = typeof d.target === 'object' ? d.target.id : d.target;
+    const tgt = nodeById.get(tId);
+    if (!tgt || !nodePassesFilter(tgt)) return 0;
+    if (hoverMode) {
+      if (hv === STUDENT_ID || tId === hv) return 0.9;
+      return 0.08;
+    }
+    if (selectedId && tId === selectedId) return 0.95;
+    return stuLinkAlpha;
+  });
+}
+
+// ---- Detail panel + compare --------------------------------
+function showDetail(d) {
+  if (d.is_student) return;
+  curDetailNode = d;
+  selectedId = d.id;
+  const panel = document.getElementById('detailPanel');
+  document.getElementById('dpName').textContent = d.name;
+  document.getElementById('dpUniversity').textContent = d.university || '—';
+  document.getElementById('dpBlock').textContent = d.admission_block || '—';
+  document.getElementById('dpGroup').textContent = d.major_group || '—';
+  const fitEl = document.getElementById('dpFit');
+  fitEl.textContent = Math.round(d.fit_pct) + '%';
+  fitEl.style.color = d.fit_pct >= 80 ? '#059669'
+                    : d.fit_pct >= 60 ? '#d97706' : '#dc2626';
+  document.getElementById('dpScore').textContent = d.entry_score || '—';
+  const sDiv = document.getElementById('dpSubjects');
+  sDiv.innerHTML = '';
+  Object.entries(d.weight_vector || {}).sort((a, b) => b[1] - a[1]).slice(0, 5).forEach(([s, w]) => {
+    const el = document.createElement('div');
+    el.style.cssText = 'font-size:11px;color:#374151;margin-bottom:3px;display:flex;justify-content:space-between';
+    el.innerHTML = `<span>${s}</span><span style="color:#9ca3af">${(w * 100).toFixed(0)}%</span>`;
+    sDiv.appendChild(el);
+  });
+  // Sync nút thêm so sánh theo trạng thái đã ghim
+  const btn = document.getElementById('dpCompareBtn');
+  const pinned = compareIds.has(d.id);
+  btn.innerHTML = pinned
+    ? '<i class="fas fa-check mr-1 text-green-600"></i>Đã ghim'
+    : '<i class="fas fa-plus mr-1"></i>Thêm so sánh';
+  btn.disabled = pinned;
+  btn.classList.toggle('opacity-60', pinned);
+
+  panel.classList.remove('hidden');
+  applyLOD();
+}
+
+function hideDetail() {
+  document.getElementById('detailPanel').classList.add('hidden');
+  curDetailNode = null;
+  selectedId = null;
+}
+
+function closePanel() {
+  hideDetail();
+  applyLOD();
+}
+
+function addToCompare() {
+  if (!curDetailNode) return;
+  if (compareIds.has(curDetailNode.id)) return;           // đã ghim rồi — bỏ qua
+  if (compareIds.size >= 4) { alert('Tối đa 4 ngành'); return; }
+  compareIds.add(curDetailNode.id);
+  persistCompare();
+  renderCompareStack();
+  if (curDetailNode) showDetail(curDetailNode);           // refresh nút panel
+}
+
+function removeFromCompare(id) {
+  if (!compareIds.delete(id)) return;
+  persistCompare();
+  renderCompareStack();
+  if (curDetailNode && curDetailNode.id === id) showDetail(curDetailNode);
+}
+
+function persistCompare() {
+  sessionStorage.setItem('compare_major_ids', JSON.stringify([...compareIds]));
+}
+
+function renderCompareStack() {
+  const wrap = document.getElementById('compareStack');
+  const list = document.getElementById('csList');
+  const count = document.getElementById('csCount');
+  const goBtn = document.getElementById('csGoBtn');
+  const ids = [...compareIds];
+
+  if (ids.length === 0) { wrap.classList.add('hidden'); return; }
+  wrap.classList.remove('hidden');
+  count.textContent = ids.length;
+
+  // Nút "So sánh" chỉ bật khi ≥ 2 ngành
+  if (ids.length >= 2) {
+    goBtn.classList.remove('pointer-events-none', 'opacity-40');
+  } else {
+    goBtn.classList.add('pointer-events-none', 'opacity-40');
+  }
+
+  list.innerHTML = '';
+  for (const id of ids) {
+    const n = nodeById.get(id);
+    if (!n) continue;
+    const row = document.createElement('div');
+    row.className = 'flex items-center gap-2 text-[11px]';
+    const dot = document.createElement('span');
+    dot.className = 'inline-block w-2 h-2 rounded-full shrink-0';
+    dot.style.background = gc(n.major_group);
+    const label = document.createElement('span');
+    label.className = 'truncate flex-1 text-gray-700 cursor-pointer hover:text-gray-900';
+    label.textContent = n.name;
+    label.title = `${n.name} — ${n.university || ''}`;
+    label.onclick = () => showDetail(n);
+    const x = document.createElement('button');
+    x.className = 'text-gray-400 hover:text-red-500 text-[10px] shrink-0';
+    x.innerHTML = '<i class="fas fa-times"></i>';
+    x.onclick = () => removeFromCompare(id);
+    row.append(dot, label, x);
+    list.appendChild(row);
+  }
+}
+
+// ---- Window exports ----------------------------------------
+window.closePanel = closePanel;
+window.addToCompare = addToCompare;
+window.removeFromCompare = removeFromCompare;
+window.zoomIn    = () => svgEl.transition().duration(250).call(zoomB.scaleBy, 1.4);
+window.zoomOut   = () => svgEl.transition().duration(250).call(zoomB.scaleBy, 0.7);
+window.resetView = () => svgEl.transition().duration(400).call(zoomB.transform, d3.zoomIdentity);
+
+// ---- Init --------------------------------------------------
+async function init() {
+  const r = await fetch('/api/student/career/map-data');
+  rawData = await r.json();
+  allNodes = buildNodes(rawData);
+  allEdges = buildEdges(allNodes);
+  studentEdges = buildStudentEdges(allNodes);
+  buildIndices();
+
+  const studentId = {{ student.id | tojson }};
+  const seed = (typeof studentId === 'number')
+    ? studentId
+    : Array.from(String(studentId)).reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 7);
+  seedPositions(allNodes, seed);
+
+  render();
+  startSimulation();
+  buildFilters();
+  applyLOD();
+  renderCompareStack();
+  console.log('[career-map v2] ready — nodes=', allNodes.length,
+              '| edges=', allEdges.length, '| student edges=', studentEdges.length);
+}
+
+init();
+</script>
+{% if student %}{% include '_career_ai_widget.html' %}{% endif %}
+</body>
+</html>

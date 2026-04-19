@@ -277,6 +277,7 @@ class ChatConversation(db.Model):
     role = db.Column(db.String(20), nullable=False)  # 'user' hoặc 'assistant'
     message = db.Column(db.Text, nullable=False)
     context_data = db.Column(db.Text, nullable=True)  # JSON metadata (student_id, etc.)
+    scope = db.Column(db.String(40), nullable=True, index=True)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, index=True)
     
     teacher = db.relationship('Teacher', backref=db.backref('chat_history', lazy=True))
@@ -570,3 +571,69 @@ class TeacherClassAssignment(db.Model):
     teacher = db.relationship("Teacher", foreign_keys=[teacher_id], backref="class_assignments")
     subject = db.relationship("Subject", backref="teacher_assignments")
     creator = db.relationship("Teacher", foreign_keys=[created_by])
+
+
+class UniversityMajor(db.Model):
+    __tablename__ = 'university_major'
+    __table_args__ = (
+        db.UniqueConstraint('name', 'university', 'admission_block', name='uq_major_university_block'),
+    )
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), nullable=False)
+    university = db.Column(db.String(150), nullable=False)
+    faculty = db.Column(db.String(150))
+    major_group = db.Column(db.String(50))
+    admission_block = db.Column(db.String(20))
+    entry_score = db.Column(db.Float)
+    description = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+    weights = db.relationship('MajorSubjectWeight', backref='major',
+                               cascade='all, delete-orphan', lazy=True)
+    pinned_by = db.relationship('StudentPinnedMajor', backref='major',
+                                 cascade='all, delete-orphan', lazy=True)
+    targeted_by = db.relationship('StudentTargetMajor', backref='major',
+                                   cascade='all, delete-orphan', lazy=True)
+    entry_scores = db.relationship('MajorEntryScore', backref='major',
+                                    cascade='all, delete-orphan', lazy=True)
+
+
+class MajorSubjectWeight(db.Model):
+    __tablename__ = 'major_subject_weight'
+    __table_args__ = (
+        db.UniqueConstraint('major_id', 'subject_name', name='uq_major_subject'),
+    )
+    id = db.Column(db.Integer, primary_key=True)
+    major_id = db.Column(db.Integer, db.ForeignKey('university_major.id'), nullable=False)
+    subject_name = db.Column(db.String(100), nullable=False)  # khớp Subject.name
+    weight = db.Column(db.Float, nullable=False)   # tổng các weight của 1 ngành = 1.0
+    min_score = db.Column(db.Float, nullable=False)  # điểm yêu cầu 0-10
+
+
+class StudentPinnedMajor(db.Model):
+    __tablename__ = 'student_pinned_major'
+    __table_args__ = (db.UniqueConstraint('student_id', 'major_id', name='uq_student_pinned_major'),)
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False, index=True)
+    major_id = db.Column(db.Integer, db.ForeignKey('university_major.id'), nullable=False)
+    pinned_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+
+class StudentTargetMajor(db.Model):
+    __tablename__ = 'student_target_major'
+    __table_args__ = (
+        db.UniqueConstraint('student_id', name='uq_student_target_major'),
+    )
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False, index=True)
+    major_id = db.Column(db.Integer, db.ForeignKey('university_major.id'), nullable=False)
+    set_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+
+class MajorEntryScore(db.Model):
+    __tablename__ = 'major_entry_score'
+    __table_args__ = (db.UniqueConstraint('major_id', 'year', name='uq_major_year'),)
+    id = db.Column(db.Integer, primary_key=True)
+    major_id = db.Column(db.Integer, db.ForeignKey('university_major.id'), nullable=False, index=True)
+    year = db.Column(db.Integer, nullable=False)
+    score = db.Column(db.Float, nullable=False)
