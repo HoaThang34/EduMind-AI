@@ -30,6 +30,7 @@
     .tag-fail  { background:#fee2e2; color:#991b1b; border:1px solid #fecaca; }
     .fit-bar-inner { transition: width .4s ease; }
     .pinned-row:hover { background:#fafafa; }
+    .pinned-row.active { background:#e8f0fe; border-left:3px solid #0070f3; }
   </style>
 </head>
 <body class="min-h-screen">
@@ -360,6 +361,10 @@ async function loadMajorRadar(majorId, label) {
   updateFitBadge(d.fit_pct);
   renderGapTable(d.gaps);
 
+  document.querySelectorAll('.pinned-row').forEach(r => r.classList.remove('active'));
+  const activeRow = document.querySelector(`.pinned-row[data-major-id="${majorId}"]`);
+  if (activeRow) activeRow.classList.add('active');
+
   const sel = document.getElementById('majorSelect');
   let opt = [...sel.options].find(o => o.value == majorId);
   if (!opt) {
@@ -451,6 +456,10 @@ function renderTargetList(list) {
     </div>
   `).join('');
 }
+
+window.addEventListener('pageshow', function(e) {
+  if (e.persisted) window.location.reload();
+});
 
 async function setTarget(majorId, label) {
   const res = await fetch('/api/student/career/target', {

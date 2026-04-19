@@ -34,10 +34,11 @@
     .btn-action:hover { background:#f0f0f0; }
     .btn-action.active { background:#0070f3; color:#fff; border-color:#0070f3; }
     .btn-action.active-target { background:#7c3aed; color:#fff; border-color:#7c3aed; }
-    .sort-pill { font-size:10px; padding:2px 8px; border-radius:4px; cursor:pointer; font-weight:500; transition:background .1s; }
+    .sort-pill { font-size:13px; padding:5px 14px; border-radius:6px; cursor:pointer; font-weight:500; transition:background .1s; }
     .sort-pill.active { background:#0070f3; color:#fff; }
     .sort-pill:not(.active) { background:#f0f0f0; color:#6b7280; }
     .filter-chip { font-size:10px; padding:2px 8px; border-radius:4px; background:#0070f3; color:#fff; cursor:pointer; }
+    .filter-active { background:#0070f3 !important; color:#fff !important; border-color:#0070f3 !important; }
     .spinner { width:32px; height:32px; border:3px solid #e5e5e5; border-top-color:#0070f3; border-radius:50%; animation:spin .6s linear infinite; }
     @keyframes spin { to { transform:rotate(360deg); } }
     input[type=range] { -webkit-appearance:none; height:4px; background:#e5e5e5; border-radius:2px; outline:none; }
@@ -81,6 +82,12 @@
       <option value="">Tất cả nhóm ngành</option>
       {% for g in groups %}<option value="{{ g }}">{{ g }}</option>{% endfor %}
     </select>
+    <button id="filterPinned" onclick="toggleFilterPinned()" class="text-sm px-2.5 py-1.5 border border-[#e5e5e5] rounded-md bg-white hover:bg-[#f0f0f0] font-medium text-gray-600">
+      <i class="fas fa-thumbtack mr-1 text-xs"></i>Đã ghim
+    </button>
+    <button id="filterCompare" onclick="toggleFilterCompare()" class="text-sm px-2.5 py-1.5 border border-[#e5e5e5] rounded-md bg-white hover:bg-[#f0f0f0] font-medium text-gray-600">
+      <i class="fas fa-check-square mr-1 text-xs"></i>Đã chọn
+    </button>
     <div class="flex items-center gap-1.5">
       <span class="text-[10px] text-gray-400 whitespace-nowrap">Phù hợp</span>
       <input type="range" id="fitRange" min="0" max="100" value="0" class="w-20">
@@ -90,8 +97,8 @@
   <!-- Sort + chips -->
   <div class="max-w-7xl mx-auto flex flex-wrap gap-2 items-center mt-2">
     <span class="text-[10px] text-gray-400">Sắp xếp:</span>
-    <span class="sort-pill active" data-sort="fit">Phù hợp nhất</span>
-    <span class="sort-pill" data-sort="score_desc">Điểm chuẩn cao → thấp</span>
+    <span class="sort-pill" data-sort="fit">Phù hợp nhất</span>
+    <span class="sort-pill active" data-sort="score_desc">Điểm chuẩn cao → thấp</span>
     <span class="sort-pill" data-sort="score_asc">Điểm chuẩn thấp → cao</span>
     <span class="sort-pill" data-sort="name">Tên A-Z</span>
     <div id="activeChips" class="flex gap-1 flex-wrap ml-2"></div>
@@ -142,8 +149,14 @@
 <script>
 let allMajors = [], allMajorsFullCache = [], simScores = {}, realScores = {};
 let compareIds = new Set(JSON.parse(sessionStorage.getItem('compare_major_ids') || '[]'));
-let currentSort = 'fit', simTimer = null, searchTimer = null;
+let currentSort = 'score_desc', simTimer = null, searchTimer = null;
+let showPinnedOnly = false, showCompareOnly = false;
 const miniCharts = {}, sparkCharts = {};
+
+// Pagination + lazy-chart (tránh render 600+ card cùng lúc)
+const BATCH_SIZE = 30;
+let currentSorted = [], renderedCount = 0;
+let loadMoreIO = null, cardIO = null;
 
 // ── Fetch & Filters ────────────────────────────────────────────────
 async function fetchMajors() {
@@ -167,21 +180,78 @@ async function fetchMajors() {
 }
 
 function renderGrid() {
-  const sorted = [...allMajors].sort((a, b) => {
+  let filtered = allMajors;
+  if (showPinnedOnly) filtered = filtered.filter(m => m.is_pinned);
+  if (showCompareOnly) filtered = filtered.filter(m => compareIds.has(m.id));
+  currentSorted = [...filtered].sort((a, b) => {
     if (currentSort === 'fit') return b.fit_pct - a.fit_pct;
     if (currentSort === 'score_desc') return (b.entry_score||0) - (a.entry_score||0);
     if (currentSort === 'score_asc') return (a.entry_score||0) - (b.entry_score||0);
     return a.name.localeCompare(b.name);
   });
+
+  // Reset charts + grid
   Object.values(miniCharts).forEach(c => c.destroy()); Object.keys(miniCharts).forEach(k => delete miniCharts[k]);
   Object.values(sparkCharts).forEach(c => c.destroy()); Object.keys(sparkCharts).forEach(k => delete sparkCharts[k]);
+  if (cardIO) cardIO.disconnect();
+  if (loadMoreIO) loadMoreIO.disconnect();
+
   const grid = document.getElementById('grid');
   const empty = document.getElementById('emptyState');
-  document.getElementById('countBadge').textContent = sorted.length + ' ngành';
-  if (sorted.length === 0) { grid.classList.add('hidden'); empty.classList.remove('hidden'); return; }
+  document.getElementById('countBadge').textContent = currentSorted.length + ' ngành';
+  grid.innerHTML = '';
+  renderedCount = 0;
+
+  if (currentSorted.length === 0) { grid.classList.add('hidden'); empty.classList.remove('hidden'); return; }
   empty.classList.add('hidden'); grid.classList.remove('hidden');
-  grid.innerHTML = sorted.map(m => majorCard(m)).join('');
-  sorted.forEach(m => { initMiniRadar(m); initSparkline(m); });
+
+  // Chỉ init Chart khi card vào viewport → scroll nhẹ + không lag khi render batch
+  cardIO = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const id = +entry.target.dataset.majorId;
+      const m = allMajors.find(x => x.id === id);
+      if (m) { initMiniRadar(m); initSparkline(m); }
+      cardIO.unobserve(entry.target);
+    });
+  }, { rootMargin: '200px' });
+
+  renderNextBatch();
+}
+
+function renderNextBatch() {
+  const grid = document.getElementById('grid');
+  const chunk = currentSorted.slice(renderedCount, renderedCount + BATCH_SIZE);
+  if (!chunk.length) return;
+  grid.insertAdjacentHTML('beforeend', chunk.map(majorCard).join(''));
+  renderedCount += chunk.length;
+
+  // Attach lazy-chart observer cho các card vừa mount
+  chunk.forEach(m => {
+    const el = document.getElementById('card-' + m.id);
+    if (el) cardIO.observe(el);
+  });
+
+  // Đặt/di dời sentinel về cuối lưới
+  let sentinel = document.getElementById('loadSentinel');
+  if (!sentinel) {
+    sentinel = document.createElement('div');
+    sentinel.id = 'loadSentinel';
+    sentinel.style.cssText = 'grid-column:1/-1;height:1px';
+  }
+  grid.appendChild(sentinel);
+
+  if (renderedCount < currentSorted.length) {
+    if (!loadMoreIO) {
+      loadMoreIO = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) renderNextBatch();
+      }, { rootMargin: '400px' });
+    }
+    loadMoreIO.observe(sentinel);
+  } else {
+    sentinel.remove();
+    if (loadMoreIO) loadMoreIO.disconnect();
+  }
 }
 
 // ── Card ────────────────────────────────────────────────────────────
@@ -206,7 +276,7 @@ function majorCard(m) {
     : `<button onclick="setTarget(${m.id},this)" class="btn-action"><i class="far fa-star mr-1"></i>Mục tiêu</button>`;
   const trend = getTrend(m.entry_scores);
 
-  return `<div class="card major-card p-4 flex flex-col gap-2.5" id="card-${m.id}">
+  return `<div class="card major-card p-4 flex flex-col gap-2.5" id="card-${m.id}" data-major-id="${m.id}">
     <div>
       <div class="flex items-start justify-between gap-2">
         <div class="flex-1 min-w-0">
@@ -268,6 +338,7 @@ function initMiniRadar(m) {
     },
     options:{
       responsive:false,
+      animation:false,
       layout:{padding:{top:4,bottom:4,left:8,right:8}},
       scales:{r:{min:0,max:10,ticks:{display:false},grid:{color:'#eee'},pointLabels:{font:{size:9},color:'#6b7280'}}},
       plugins:{legend:{display:false},tooltip:{enabled:true,callbacks:{title:items=>m.radar.labels[items[0].dataIndex]}}}
@@ -323,6 +394,18 @@ function clearCompare(){
   syncCompareUI();
 }
 function goCompare() { window.location.href='{{ url_for("career.career_compare") }}?major_ids='+[...compareIds].join(','); }
+
+// ── Filter toggles (pinned / compare) ───────────────────────────────
+function toggleFilterPinned() {
+  showPinnedOnly = !showPinnedOnly;
+  document.getElementById('filterPinned').classList.toggle('filter-active', showPinnedOnly);
+  renderGrid();
+}
+function toggleFilterCompare() {
+  showCompareOnly = !showCompareOnly;
+  document.getElementById('filterCompare').classList.toggle('filter-active', showCompareOnly);
+  renderGrid();
+}
 
 // ── Sort pills ──────────────────────────────────────────────────────
 document.querySelectorAll('.sort-pill').forEach(pill=>{

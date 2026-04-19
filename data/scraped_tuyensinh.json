@@ -1,0 +1,5083 @@
+{
+  "ĐHBK Hà Nội": {
+    "Kỹ thuật Thực phẩm (CT tiên tiến)": {
+      "code": "BF-E12",
+      "block": "A00; B00; D07",
+      "mark": 21.0
+    },
+    "Kỹ thuật sinh học (CT tiên tiến)": {
+      "code": "BF-E19",
+      "block": "B03; C01; C02; X02",
+      "mark": 20.0
+    },
+    "Kỹ thuật Sinh học": {
+      "code": "BF1",
+      "block": "A00; B00; D07",
+      "mark": 23.02
+    },
+    "Kỹ thuật Thực phẩm": {
+      "code": "BF2",
+      "block": "A00; B00; D07",
+      "mark": 23.38
+    },
+    "Kỹ thuật Hóa dược (CT tiên tiến)": {
+      "code": "CH-E11",
+      "block": "A00; B00; D07",
+      "mark": 21.38
+    },
+    "Kỹ thuật Hoá học": {
+      "code": "CH1",
+      "block": "A00; B00; D07",
+      "mark": 24.05
+    },
+    "Hoá học": {
+      "code": "CH2",
+      "block": "A00; B00; D07",
+      "mark": 23.19
+    },
+    "Công nghệ giáo dục": {
+      "code": "ED2",
+      "block": "A00; A01; B03; C01; C02; X02",
+      "mark": 23.8
+    },
+    "Quản lý giáo dục": {
+      "code": "ED3",
+      "block": "A00; A01; B03; C01; C02; X02",
+      "mark": 23.7
+    },
+    "Hệ thống điện và năng lượng tái tạo (CT tiên tiến)": {
+      "code": "EE-E18",
+      "block": "A00; A01",
+      "mark": 26.56
+    },
+    "Kỹ thuật Điều khiển - Tự động hoá (CT tiên tiến)": {
+      "code": "EE-E8",
+      "block": "A00; A01",
+      "mark": 28.12
+    },
+    "Tin học công nghiệp và Tự động hóa (Chương trình Việt - Pháp PFIEV)": {
+      "code": "EE-EP",
+      "block": "B03; C01; C02; X02",
+      "mark": 27.27
+    },
+    "Kỹ thuật Điện": {
+      "code": "EE1",
+      "block": "A00; A01",
+      "mark": 27.55
+    },
+    "Kỹ thuật Điều khiển - Tự động hoá": {
+      "code": "EE2",
+      "block": "A00; A01",
+      "mark": 28.48
+    },
+    "Phân tích kinh doanh (CT tiên tiến)": {
+      "code": "EM-E13",
+      "block": "A01; B03; C01; C02; D07; X02",
+      "mark": 23.56
+    },
+    "Logistics và Quản lý chuỗi cung ứng (CT tiên tiến)": {
+      "code": "EM-E14",
+      "block": "A01; B03; C01; C02; D07; X02",
+      "mark": 24.21
+    },
+    "Quản lý năng lượng": {
+      "code": "EM1",
+      "block": "A00; A01; B03; C01; C02; X02",
+      "mark": 24.2
+    },
+    "Quản lý công nghiệp": {
+      "code": "EM2",
+      "block": "A00; A01; B03; C01; C02; X02",
+      "mark": 24.4
+    },
+    "Quản trị kinh doanh": {
+      "code": "EM3",
+      "block": "A00; A01; B03; C01; C02; X02",
+      "mark": 24.8
+    },
+    "Kế toán": {
+      "code": "EM4",
+      "block": "A00; A01; B03; C01; C02; X02",
+      "mark": 24.63
+    },
+    "Tài chính - Ngân hàng": {
+      "code": "EM5",
+      "block": "A00; A01; B03; C01; C02; X02",
+      "mark": 24.8
+    },
+    "Truyền thông số và Kỹ thuật đa phương tiện (CT tiên tiến)": {
+      "code": "ET-E16",
+      "block": "A00; A01",
+      "mark": 26.62
+    },
+    "Kỹ thuật Điện tử - Viễn thông (CT tiên tiến)": {
+      "code": "ET-E4",
+      "block": "A00; A01",
+      "mark": 27.55
+    },
+    "Kỹ thuật Y sinh (CT tiên tiến)": {
+      "code": "ET-E5",
+      "block": "A00; A01",
+      "mark": 25.58
+    },
+    "Hệ thống nhúng thông minh và IoT (CT tiên tiến)": {
+      "code": "ET-E9",
+      "block": "A00; A01; D28",
+      "mark": 27.85
+    },
+    "Điện tử - Viễn thông - hợp tác với ĐH Leibniz Hannover (Đức)": {
+      "code": "ET-LUH",
+      "block": "A00; A01; D26",
+      "mark": 26.55
+    },
+    "Kỹ thuật Điện tử - Viễn thông": {
+      "code": "ET1",
+      "block": "A00; A01",
+      "mark": 28.07
+    },
+    "Kỹ thuật Y sinh": {
+      "code": "ET2",
+      "block": "B03; C01; C02; X02",
+      "mark": 26.32
+    },
+    "Kỹ thuật Môi trường": {
+      "code": "EV1",
+      "block": "A00; B00; D07",
+      "mark": 22.22
+    },
+    "Quản lý Tài nguyên và Môi trường": {
+      "code": "EV2",
+      "block": "A00; B00; D07",
+      "mark": 21.53
+    },
+    "Tiếng Anh KHKT và Công nghệ": {
+      "code": "FL1",
+      "block": "B03; C01; C02; X02",
+      "mark": 24.8
+    },
+    "Tiếng Anh chuyên nghiệp quốc tế": {
+      "code": "FL2",
+      "block": "B03; C01; C02; X02",
+      "mark": 24.8
+    },
+    "Tiếng Trung KHKT và Công nghệ": {
+      "code": "FL3",
+      "block": "B03; C01; C02; X02",
+      "mark": 25.36
+    },
+    "Kỹ thuật Nhiệt": {
+      "code": "HE1",
+      "block": "A00; A01",
+      "mark": 25.47
+    },
+    "Khoa học dữ liệu và Trí tuệ nhân tạo (CT tiên tiến)": {
+      "code": "IT-E10",
+      "block": "A00; A01",
+      "mark": 29.39
+    },
+    "An toàn không gian số - Cyber Security (CT Tiên tiến)": {
+      "code": "IT-E15",
+      "block": "A00; A01",
+      "mark": 28.69
+    },
+    "Công nghệ thông tin (Việt - Nhật)": {
+      "code": "IT-E6",
+      "block": "A00; A01; D28",
+      "mark": 27.97
+    },
+    "Công nghệ thông tin (Global ICT)": {
+      "code": "IT-E7",
+      "block": "A00; A01",
+      "mark": 28.66
+    },
+    "Công nghệ thông tin (Việt - Pháp)": {
+      "code": "IT-EP",
+      "block": "A00; A01; D29",
+      "mark": 27.83
+    },
+    "CNTT: Khoa học Máy tính": {
+      "code": "IT1",
+      "block": "A00; A01",
+      "mark": 29.19
+    },
+    "CNTT: Kỹ thuật Máy tính": {
+      "code": "IT2",
+      "block": "A00; A01",
+      "mark": 28.83
+    },
+    "Kỹ thuật Cơ điện tử (CT tiên tiến)": {
+      "code": "ME-E1",
+      "block": "A00; A01",
+      "mark": 26.74
+    },
+    "Cơ khí - Chế tạo máy - hợp tác với ĐH Griffith (Úc)": {
+      "code": "ME-GU",
+      "block": "A00; A01",
+      "mark": 25.0
+    },
+    "Cơ điện tử - hợp tác với ĐH Leibniz Hannover (Đức)": {
+      "code": "ME-LUH",
+      "block": "A00; A01; D26",
+      "mark": 26.19
+    },
+    "Cơ điện tử - hợp tác với ĐH Công nghệ Nagaoka (Nhật Bản)": {
+      "code": "ME-NUT",
+      "block": "A00; A01; D28",
+      "mark": 25.68
+    },
+    "Kỹ thuật Cơ điện tử": {
+      "code": "ME1",
+      "block": "B03; C01; C02; X02",
+      "mark": 27.9
+    },
+    "Kỹ thuật Cơ khí": {
+      "code": "ME2",
+      "block": "A00; A01",
+      "mark": 26.62
+    },
+    "Toán - Tin": {
+      "code": "MI1",
+      "block": "A00; A01",
+      "mark": 27.8
+    },
+    "Hệ thống thông tin quản lý": {
+      "code": "MI2",
+      "block": "A00; A01",
+      "mark": 27.72
+    },
+    "Khoa học và kỹ thuật vật liệu (CT tiên tiến)": {
+      "code": "MS-E3",
+      "block": "A00; A01; D07",
+      "mark": 23.7
+    },
+    "Kỹ thuật Vật liệu": {
+      "code": "MS1",
+      "block": "A00; A01; D07",
+      "mark": 25.39
+    },
+    "Kỹ thuật Vi điện tử và Công nghệ nano": {
+      "code": "MS2",
+      "block": "A00; A01; D07",
+      "mark": 28.25
+    },
+    "Công nghệ vật liệu Polyme và Compozit": {
+      "code": "MS3",
+      "block": "A00; A01; D07",
+      "mark": 25.16
+    },
+    "Kỹ thuật in": {
+      "code": "MS5",
+      "block": "A00; A01; D07",
+      "mark": 24.06
+    },
+    "Vật lý kỹ thuật": {
+      "code": "PH1",
+      "block": "A00; A01",
+      "mark": 26.41
+    },
+    "Kỹ thuật hạt nhân": {
+      "code": "PH2",
+      "block": "B03; C01; C02; X02",
+      "mark": 25.07
+    },
+    "Vật lý Y khoa": {
+      "code": "PH3",
+      "block": "A00; A01; A02",
+      "mark": 25.2
+    },
+    "Kỹ thuật Ô tô (CT tiên tiến)": {
+      "code": "TE-E2",
+      "block": "A00; A01",
+      "mark": 25.18
+    },
+    "Cơ khí hàng không (Chương trình Việt - Pháp PFIEV)": {
+      "code": "TE-EP",
+      "block": "A00; A01; D29",
+      "mark": 25.84
+    },
+    "Kỹ thuật Ô tô": {
+      "code": "TE1",
+      "block": "A00; A01",
+      "mark": 27.03
+    },
+    "Kỹ thuật Cơ khí động lực": {
+      "code": "TE2",
+      "block": "A00; A01",
+      "mark": 26.25
+    },
+    "Kỹ thuật Hàng không": {
+      "code": "TE3",
+      "block": "A00; A01",
+      "mark": 26.6
+    },
+    "Quản trị kinh doanh - hợp tác với ĐH Troy (Hoa Kỳ)": {
+      "code": "TROY-BA",
+      "block": "A00; A01; B03; C01; C02; X02",
+      "mark": 19.5
+    },
+    "Khoa học máy tính - hợp tác với ĐH Troy (Hoa Kỳ)": {
+      "code": "TROY-IT",
+      "block": "A00; A01; B03; C01; C02; X02",
+      "mark": 21.8
+    },
+    "Công nghệ Dệt - May": {
+      "code": "TX1",
+      "block": "A00; A01; D07",
+      "mark": 22.48
+    }
+  },
+  "ĐHBK TP.HCM": {},
+  "ĐH Công nghệ - ĐHQGHN": {
+    "Công nghệ thông tin": {
+      "code": "CN1",
+      "block": "A00; A01; X06; X26; D01",
+      "mark": 28.19
+    },
+    "Công nghệ nông nghiệp": {
+      "code": "CN10",
+      "block": "A00; A01; X06; X26; D01; B00",
+      "mark": 22.0
+    },
+    "Kỹ thuật điều khiển và tự động hóa": {
+      "code": "CN11",
+      "block": "A00; A01; X06; X26; D01",
+      "mark": 27.9
+    },
+    "Trí tuệ nhân tạo": {
+      "code": "CN12",
+      "block": "A00; A01; X06; X26; D01",
+      "mark": 27.75
+    },
+    "Kỹ thuật năng lượng": {
+      "code": "CN13",
+      "block": "A00; A01; X06; X26; D01",
+      "mark": 24.87
+    },
+    "Hệ thống thông tin": {
+      "code": "CN14",
+      "block": "A00; A01; X06; X26; D01",
+      "mark": 26.38
+    },
+    "Mạng máy tính và truyền thông dữ liệu": {
+      "code": "CN15",
+      "block": "A00; A01; X06; X26; D01",
+      "mark": 26.73
+    },
+    "Kỹ thuật Robot": {
+      "code": "CN17",
+      "block": "A00; A01; X06; X26; D01",
+      "mark": 26.0
+    },
+    "Thiết kế công nghiệp và Đồ họa": {
+      "code": "CN18",
+      "block": "A00; A01; X06; X26; D01",
+      "mark": 24.2
+    },
+    "Công nghệ vật liệu": {
+      "code": "CN19",
+      "block": "A00; A01; X06; X26; D01",
+      "mark": 25.6
+    },
+    "Kỹ thuật máy tính": {
+      "code": "CN2",
+      "block": "A00; A01; X06; X26; D01",
+      "mark": 27.0
+    },
+    "Khoa học dữ liệu": {
+      "code": "CN20",
+      "block": "A00; A01; X06; X26; D01",
+      "mark": 27.38
+    },
+    "Công nghệ sinh học": {
+      "code": "CN21",
+      "block": "A00; A01; X06; X26; D01; B00",
+      "mark": 22.13
+    },
+    "Vật lý kỹ thuật": {
+      "code": "CN3",
+      "block": "A00; A01; X06; X26; D01",
+      "mark": 25.2
+    },
+    "Cơ kỹ thuật": {
+      "code": "CN4",
+      "block": "A00; A01; X06; X26; D01",
+      "mark": 26.15
+    },
+    "Công nghệ kỹ thuật xây dựng": {
+      "code": "CN5",
+      "block": "A00; A01; X06; X26; D01",
+      "mark": 22.25
+    },
+    "Công nghệ kỹ thuật cơ điện tử": {
+      "code": "CN6",
+      "block": "A00; A01; X06; X26; D01",
+      "mark": 26.73
+    },
+    "Công nghệ hàng không vũ trụ": {
+      "code": "CN7",
+      "block": "A00; A01; X06; X26; D01",
+      "mark": 23.96
+    },
+    "Khoa học máy tính": {
+      "code": "CN8",
+      "block": "A00; A01; X06; X26; D01",
+      "mark": 27.86
+    },
+    "Công nghệ kỹ thuật điện tử - Viễn thông": {
+      "code": "CN9",
+      "block": "A00; A01; X06; X26; D01",
+      "mark": 26.63
+    }
+  },
+  "ĐH Khoa học Tự nhiên - ĐHQGHN": {
+    "Toán học": {
+      "code": "QHT01",
+      "block": "A00; A01; C01; D07; D08; X26",
+      "mark": 25.9
+    },
+    "Toán tin": {
+      "code": "QHT02",
+      "block": "A00; A01; C01; D07; D08; X26",
+      "mark": 25.5
+    },
+    "Vật lý học": {
+      "code": "QHT03",
+      "block": "A00; A01; A02; B00; C01; C02; D07; X02; X06; X26",
+      "mark": 24.65
+    },
+    "Khoa học vật liệu": {
+      "code": "QHT04",
+      "block": "A00; A01; A02; B00; C01; C02; D07; X02; X06; X26",
+      "mark": 24.2
+    },
+    "Công nghệ kỹ thuật hạt nhân": {
+      "code": "QHT05",
+      "block": "A00; A01; A02; B00; C01; C02; D07; X02; X06; X26",
+      "mark": 23.5
+    },
+    "Hoá học": {
+      "code": "QHT06",
+      "block": "A00; A05; A06; B00; C02; D07; X09; X10; X11; X12",
+      "mark": 23.9
+    },
+    "Công nghệ kỹ thuật hoá học": {
+      "code": "QHT07",
+      "block": "A00; A05; A06; B00; C02; D07; X09; X10; X11; X12",
+      "mark": 23.45
+    },
+    "Sinh học": {
+      "code": "QHT08",
+      "block": "A00; A02; B00; B01; B02; B03; B08; D07; D08; X13; X14; X15; X16",
+      "mark": 20.05
+    },
+    "Công nghệ sinh học": {
+      "code": "QHT09",
+      "block": "A00; A02; B00; B01; B02; B03; B08; D07; D08; X13; X14; X15; X16",
+      "mark": 22.05
+    },
+    "Địa lý tự nhiên": {
+      "code": "QHT10",
+      "block": "A00; A01; A04; A06; A07; B00; B02; C04; D01; D10; D20; X01; X21; X25",
+      "mark": 23.95
+    },
+    "Quản lý đất đai": {
+      "code": "QHT12",
+      "block": "A00; A01; A04; A06; A07; B00; B02; C04; D01; D10; D20; X01; X21; X25",
+      "mark": 22.27
+    },
+    "Khoa học môi trường": {
+      "code": "QHT13",
+      "block": "A00; A01; A02; B00; B03; C01; C02; D01; D07; D08; X09; X10; X11; X12; X13; X14; X15; X16",
+      "mark": 21.25
+    },
+    "Công nghệ kỹ thuật môi trường": {
+      "code": "QHT15",
+      "block": "A00; A01; A02; B00; B03; C01; C02; D01; D07; D08; X09; X10; X11; X12; X13; X14; X15; X16",
+      "mark": 21.55
+    },
+    "Khí tượng và khí hậu học": {
+      "code": "QHT16",
+      "block": "A00; A01; A02; A04; A06; B00; B02; B03; B08; C01; C02; C04; D01; D07; D10; X26",
+      "mark": 22.8
+    },
+    "Hải dương học": {
+      "code": "QHT17",
+      "block": "A00; A01; A02; A04; A06; B00; B02; B03; B08; C01; C02; C04; D01; D07; D10; X26",
+      "mark": 21.5
+    },
+    "Địa chất học": {
+      "code": "QHT18",
+      "block": "A00; A01; A04; A06; A07; B00; B03; C01; C02; C04; D01; D07; D08; D09; D10; X01; X05; X09; X21; X25",
+      "mark": 22.05
+    },
+    "Quản lý tài nguyên và môi trường": {
+      "code": "QHT20",
+      "block": "A00; A01; A04; A06; A07; B00; B03; C01; C02; C04; D01; D07; D08; D09; D10; X01; X05; X09; X21; X25",
+      "mark": 22.2
+    },
+    "Hoá dược": {
+      "code": "QHT43",
+      "block": "A00; A05; A06; B00; C02; D07; X09; X10; X11; X12",
+      "mark": 23.7
+    },
+    "Sinh dược học": {
+      "code": "QHT81",
+      "block": "A00; A02; B00; B01; B02; B03; B08; D07; D08; X13; X14; X15; X16",
+      "mark": 20.1
+    },
+    "Môi trường, sức khỏe và an toàn": {
+      "code": "QHT82",
+      "block": "A00; A01; A02; B00; B03; C01; C02; D01; D07; D08; X09; X10; X11; X12; X13; X14; X15; X16",
+      "mark": 21.2
+    },
+    "Khoa học thông tin địa không gian": {
+      "code": "QHT91",
+      "block": "A00; A01; A04; A06; A07; B00; B02; C04; D01; D10; D20; X01; X21; X25",
+      "mark": 23.5
+    },
+    "Tài nguyên và môi trường nước": {
+      "code": "QHT92",
+      "block": "A00; A01; A02; A04; A06; B00; B02; B03; B08; C01; C02; C04; D01; D07; D10; X26",
+      "mark": 21.1
+    },
+    "Khoa học dữ liệu": {
+      "code": "QHT93",
+      "block": "A00; A01; C01; D07; D08; X26",
+      "mark": 26.0
+    },
+    "Kỹ thuật điện tử và tin học": {
+      "code": "QHT94",
+      "block": "A00; A01; A02; B00; C01; C02; D07; X02; X06; X26",
+      "mark": 24.57
+    },
+    "Quản lý phát triển đô thị và bất động sản": {
+      "code": "QHT95",
+      "block": "A00; A01; A04; A06; A07; B00; B02; C04; D01; D10; D20; X01; X21; X25",
+      "mark": 22.9
+    },
+    "Khoa học và công nghệ thực phẩm": {
+      "code": "QHT96",
+      "block": "A00; A01; A02; B00; B03; C01; C02; D01; D07; D08; X09; X10; X11; X12; X13; X14; X15; X16",
+      "mark": 22.8
+    },
+    "Khoa học máy tính và thông tin": {
+      "code": "QHT98",
+      "block": "A00; A01; C01; D07; D08; X26",
+      "mark": 25.35
+    },
+    "Công nghệ Bán dẫn": {
+      "code": "QHT99",
+      "block": "A00; A01; A02; B00; C01; C02; D07; X02; X06; X26",
+      "mark": 25.55
+    }
+  },
+  "ĐH Khoa học Xã hội và Nhân văn - ĐHQGHN": {
+    "Báo chí": {
+      "code": "QHX01",
+      "block": "C00",
+      "mark": 28.2
+    },
+    "Chính trị học": {
+      "code": "QHX02",
+      "block": "C00",
+      "mark": 26.86
+    },
+    "Công tác xã hội": {
+      "code": "QHX03",
+      "block": "C00",
+      "mark": 26.99
+    },
+    "Điện ảnh và nghệ thuật đại chúng": {
+      "code": "QHX04",
+      "block": "C00",
+      "mark": 27.3
+    },
+    "Đông Nam Á học": {
+      "code": "QHX05",
+      "block": "D14",
+      "mark": 23.25
+    },
+    "Đông phương học": {
+      "code": "QHX06",
+      "block": "C00",
+      "mark": 28.0
+    },
+    "Hán Nôm": {
+      "code": "QHX07",
+      "block": "C00",
+      "mark": 25.76
+    },
+    "Hàn Quốc học": {
+      "code": "QHX08",
+      "block": "C00",
+      "mark": 27.83
+    },
+    "Khoa học quản lý": {
+      "code": "QHX09",
+      "block": "C00",
+      "mark": 26.68
+    },
+    "Lịch sử": {
+      "code": "QHX10",
+      "block": "C00",
+      "mark": 27.3
+    },
+    "Lưu trữ học": {
+      "code": "QHX11",
+      "block": "C00",
+      "mark": 26.04
+    },
+    "Ngôn ngữ học": {
+      "code": "QHX12",
+      "block": "C00",
+      "mark": 26.75
+    },
+    "Nhân học": {
+      "code": "QHX13",
+      "block": "C00",
+      "mark": 25.8
+    },
+    "Nhật Bản học": {
+      "code": "QHX14",
+      "block": "D01",
+      "mark": 21.75
+    },
+    "Quan hệ công chúng": {
+      "code": "QHX15",
+      "block": "C00",
+      "mark": 28.95
+    },
+    "Quản lý thông tin": {
+      "code": "QHX16",
+      "block": "C00",
+      "mark": 26.99
+    },
+    "Quản trị dịch vụ du lịch và lữ hành": {
+      "code": "QHX17",
+      "block": "C00",
+      "mark": 27.87
+    },
+    "Quản trị khách sạn": {
+      "code": "QHX18",
+      "block": "C00",
+      "mark": 27.49
+    },
+    "Quản trị văn phòng": {
+      "code": "QHX19",
+      "block": "C00",
+      "mark": 27.43
+    },
+    "Quốc tế học": {
+      "code": "QHX20",
+      "block": "C00",
+      "mark": 26.5
+    },
+    "Tâm lý học": {
+      "code": "QHX21",
+      "block": "C00",
+      "mark": 29.0
+    },
+    "Thông tin - Thư viện": {
+      "code": "QHX22",
+      "block": "C00",
+      "mark": 25.41
+    },
+    "Tôn giáo học": {
+      "code": "QHX23",
+      "block": "C00",
+      "mark": 25.0
+    },
+    "Triết học": {
+      "code": "QHX24",
+      "block": "C00",
+      "mark": 25.89
+    },
+    "Văn hóa học": {
+      "code": "QHX25",
+      "block": "C00",
+      "mark": 27.22
+    },
+    "Văn học": {
+      "code": "QHX26",
+      "block": "C00",
+      "mark": 27.5
+    },
+    "Việt Nam học": {
+      "code": "QHX27",
+      "block": "C00",
+      "mark": 26.62
+    },
+    "Xã hội học": {
+      "code": "QHX28",
+      "block": "C00",
+      "mark": 27.0
+    }
+  },
+  "ĐH Kinh tế Quốc dân": {
+    "Ngôn ngữ Anh": {
+      "code": "7220201",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.51
+    },
+    "Kinh tế học (ngành Kinh tế)": {
+      "code": "7310101_1",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.52
+    },
+    "Kinh tế và quản lý đô thị (ngành Kinh tế)": {
+      "code": "7310101_2",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.8
+    },
+    "Kinh tế và quản lý nguồn nhân lực (ngành Kinh tế)": {
+      "code": "7310101_3",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.79
+    },
+    "Kinh tế đầu tư": {
+      "code": "7310104",
+      "block": "A00; A01; D01; D07",
+      "mark": 27.5
+    },
+    "Kinh tế Đầu tư - CT CLC2": {
+      "code": "7310104_CLC2",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.5
+    },
+    "Kinh tế phát triển": {
+      "code": "7310105",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.77
+    },
+    "Kinh tế phát triển - CT CLC1": {
+      "code": "7310105_CLC1",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.25
+    },
+    "Kinh tế quốc tế": {
+      "code": "7310106",
+      "block": "A00; A01; D01; D07",
+      "mark": 28.13
+    },
+    "Kinh tế quốc tế - CT CLC3": {
+      "code": "7310106_CLC3",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.42
+    },
+    "Thống kê kinh tế": {
+      "code": "7310107",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.79
+    },
+    "Toán kinh tế": {
+      "code": "7310108",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.73
+    },
+    "Quan hệ công chúng": {
+      "code": "7320108",
+      "block": "A00; A01; D01; D07",
+      "mark": 28.07
+    },
+    "Quan hệ công chúng - CT CLC2": {
+      "code": "7320108_CLC2",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.5
+    },
+    "Quản trị kinh doanh": {
+      "code": "7340101",
+      "block": "A00; A01; D01; D07",
+      "mark": 27.1
+    },
+    "Quản trị Kinh doanh - CT CLC2": {
+      "code": "7340101_CLC2",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.5
+    },
+    "Quản trị kinh doanh - CT tiên tiến TT1": {
+      "code": "7340101_TT1",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.75
+    },
+    "Marketing": {
+      "code": "7340115",
+      "block": "A00; A01; D01; D07",
+      "mark": 28.12
+    },
+    "Digital Marketing - CT CLC3": {
+      "code": "7340115_CLC3",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.42
+    },
+    "Bất động sản": {
+      "code": "7340116",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.41
+    },
+    "Kinh doanh quốc tế": {
+      "code": "7340120",
+      "block": "A00; A01; D01; D07",
+      "mark": 28.6
+    },
+    "Quản trị Kinh doanh quốc tế - CT CLC3": {
+      "code": "7340120_CLC3",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.42
+    },
+    "Quản trị Kinh doanh quốc tế - CT tiên tiến TT2": {
+      "code": "7340120_TT2",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.5
+    },
+    "Kinh doanh thương mại": {
+      "code": "7340121",
+      "block": "A00; A01; D01; D07",
+      "mark": 28.0
+    },
+    "Thương mại điện tử": {
+      "code": "7340122",
+      "block": "A00; A01; D01; D07",
+      "mark": 28.83
+    },
+    "Thương mại điện tử - CT CLC3": {
+      "code": "7340122_CLC3",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.42
+    },
+    "Tài chính - Ngân hàng": {
+      "code": "7340201",
+      "block": "A00; A01; D01; D07",
+      "mark": 27.34
+    },
+    "Ngân hàng - CT CLC1": {
+      "code": "7340201_CLC1",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.25
+    },
+    "Tài chính doanh nghiệp - CT CLC3": {
+      "code": "7340201_CLC3",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.42
+    },
+    "Kế hoạch tài chính - CT tiên tiến TT1": {
+      "code": "7340201_TT1",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.75
+    },
+    "Tài chính - CT tiên tiến TT2": {
+      "code": "7340201_TT2",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.5
+    },
+    "Bảo hiểm": {
+      "code": "7340204",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.75
+    },
+    "Bảo hiểm tích hợp chứng chỉ ANZ1IF - CT CLC1": {
+      "code": "7340204_CLC1",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.25
+    },
+    "Kế toán": {
+      "code": "7340301",
+      "block": "A00; A01; D01; D07",
+      "mark": 27.1
+    },
+    "Kế toán - CT tiên tiến TT1": {
+      "code": "7340301_TT1",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.75
+    },
+    "Kiểm toán": {
+      "code": "7340302",
+      "block": "A00; A01; D01; D07",
+      "mark": 28.38
+    },
+    "Kiểm toán tích hợp chứng chỉ ACCA - CT CLC3": {
+      "code": "7340302_CLC3",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.42
+    },
+    "Khoa học quản lý": {
+      "code": "7340401",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.06
+    },
+    "Quản lý công": {
+      "code": "7340403",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.42
+    },
+    "Quản trị nhân lực": {
+      "code": "7340404",
+      "block": "A00; A01; D01; D07",
+      "mark": 27.1
+    },
+    "Quản trị nhân lực - CT CLC2": {
+      "code": "7340404_CLC2",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.5
+    },
+    "Hệ thống thông tin quản lý": {
+      "code": "7340405",
+      "block": "A00; A01; D01; D07",
+      "mark": 27.5
+    },
+    "Quan hệ lao động": {
+      "code": "7340408",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.0
+    },
+    "Quản lý dự án": {
+      "code": "7340409",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.63
+    },
+    "Luật": {
+      "code": "7380101",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.96
+    },
+    "Luật kinh tế": {
+      "code": "7380107",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.75
+    },
+    "Luật thương mại quốc tế": {
+      "code": "7380109",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.44
+    },
+    "Khoa học máy tính": {
+      "code": "7480101",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.27
+    },
+    "Hệ thống thông tin": {
+      "code": "7480104",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.38
+    },
+    "Công nghệ thông tin": {
+      "code": "7480201",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.89
+    },
+    "Công nghệ thông tin và chuyển đổi số - CT CLC1": {
+      "code": "7480201_CLC1",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.25
+    },
+    "An toàn thông tin": {
+      "code": "7480202",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.59
+    },
+    "Logistics và Quản lý chuỗi cung ứng": {
+      "code": "7510605",
+      "block": "A00; A01; D01; D07",
+      "mark": 28.61
+    },
+    "Logistics và Quản lý chuỗi cung ứng - CT CLC3": {
+      "code": "7510605_CLC3",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.42
+    },
+    "Kinh doanh nông nghiệp": {
+      "code": "7620114",
+      "block": "A00; A01; D01; D07",
+      "mark": 23.75
+    },
+    "Kinh tế nông nghiệp": {
+      "code": "7620115",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.35
+    },
+    "Quản trị dịch vụ du lịch và lữ hành": {
+      "code": "7810103",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.06
+    },
+    "Quản trị khách sạn": {
+      "code": "7810201",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.25
+    },
+    "Quản lý tài nguyên và môi trường": {
+      "code": "7850101",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.17
+    },
+    "Kinh tế tài nguyên thiên nhiên": {
+      "code": "7850102",
+      "block": "A00; A01; D01; D07",
+      "mark": 23.5
+    },
+    "Quản lý đất đai": {
+      "code": "7850103",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.38
+    },
+    "Quản trị kinh doanh (E-BBA)": {
+      "code": "EBBA",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.64
+    },
+    "Khởi nghiệp và phát triển kinh doanh (BBAE)/ngành QTKD": {
+      "code": "EP01",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.92
+    },
+    "Định phí Bảo hiểm \\u0026 Quản trị rủi ro (Actuary)": {
+      "code": "EP02",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.5
+    },
+    "Phân tích dữ liệu kinh tế (EDA)": {
+      "code": "EP03",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.78
+    },
+    "Kế toán tích hợp chứng chi quốc tế (JCAEW CFAB)": {
+      "code": "EP04",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.9
+    },
+    "Kinh doanh số (E-BDB)/ngành QTKD": {
+      "code": "EP05",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.4
+    },
+    "Phân tích kinh doanh (BA)/ngành QTKD": {
+      "code": "EP06",
+      "block": "A00; A01; D01; D07",
+      "mark": 27.5
+    },
+    "Quản trị điều hành thông minh (E-SOM) /ngành QTKD": {
+      "code": "EP07",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.1
+    },
+    "Quản trị chất lượng và Đổi mới (E-MQI)/ngành QTKD": {
+      "code": "EP08",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.2
+    },
+    "Công nghệ tài chính (BFT)/ngành TC-NH": {
+      "code": "EP09",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.29
+    },
+    "Tài chính và Đầu tư (BFI)/ngành TC-NH": {
+      "code": "EP10",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.27
+    },
+    "Quản trị khách sạn quốc tế (IHME)": {
+      "code": "EP11",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.25
+    },
+    "Kiểm toán tích hợp chứng chỉ quốc tế (ICAEW CFAB)": {
+      "code": "EP12",
+      "block": "A00; A01; D01; D07",
+      "mark": 27.25
+    },
+    "Kinh tế học tài chính (FE)/ngành Kinh tế": {
+      "code": "EP13",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.41
+    },
+    "Logistics và Quản lý chuỗi cung ứng tích hợp chứng chi quốc tế (LSIC)": {
+      "code": "EP14",
+      "block": "A00; A01; D01; D07",
+      "mark": 27.69
+    },
+    "Khoa học dữ liệu": {
+      "code": "EP15",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.13
+    },
+    "Trí tuệ nhân tạo": {
+      "code": "EP16",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.44
+    },
+    "Kỹ thuật phần mềm": {
+      "code": "EP17",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.7
+    },
+    "Quản trị giải trí và sự kiện": {
+      "code": "EP18",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.89
+    },
+    "Quản lý công và Chính sách (E-PMP)/ngành Kinh tế": {
+      "code": "EPMP",
+      "block": "A00; A01; D01; D07",
+      "mark": 23.0
+    },
+    "Quản trị lữ hành": {
+      "code": "POHE2",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.64
+    },
+    "Truyền thông Marketing": {
+      "code": "POHE3",
+      "block": "A00; A01; D01; D07",
+      "mark": 27.61
+    },
+    "Luật kinh doanh": {
+      "code": "POHE4",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.5
+    },
+    "Quản trị kinh doanh thương mại": {
+      "code": "POHE5",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.29
+    },
+    "Quản lý thị trường": {
+      "code": "POHE6",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.66
+    },
+    "Thẩm định giá": {
+      "code": "POHE7",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.55
+    }
+  },
+  "ĐH Kinh tế TP.HCM": {
+    "Tiếng Anh thương mại": {
+      "code": "7220201",
+      "block": "D01; D09",
+      "mark": 24.5
+    },
+    "Kinh tế  Top 38 thế giới theo ShanghaiRanking Consultancy 2024\\r\\nXem chi tiết": {
+      "code": "7310101",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 25.4
+    },
+    "Kinh tế chính trị": {
+      "code": "7310102",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 24.0
+    },
+    "Kinh tế đầu tư": {
+      "code": "7310104_01",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 24.05
+    },
+    "Thẩm định giá và Quản trị tài sản": {
+      "code": "7310104_02",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 22.8
+    },
+    "Thống kê kinh doanh": {
+      "code": "7310107",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 24.8
+    },
+    "Toán tài chính": {
+      "code": "7310108_01",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 24.0
+    },
+    "Phân tích rủi ro và định phí bảo hiểm": {
+      "code": "7310108_02",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 23.0
+    },
+    "Truyền thông số và thiết kế đa phương tiện": {
+      "code": "7320106",
+      "block": "A00; A01; D01; D07; D09; V00",
+      "mark": 26.3
+    },
+    "Quản trị kinh doanh": {
+      "code": "7340101_01",
+      "block": "A00;  A01;  D01;  D07;  D09",
+      "mark": 24.3
+    },
+    "Kinh doanh số": {
+      "code": "7340101_02",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 25.6
+    },
+    "Quản trị bệnh viện": {
+      "code": "7340101_03",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 22.8
+    },
+    "Quản trị bền vững doanh nghiệp và môi trường": {
+      "code": "7340101_04",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 23.6
+    },
+    "Marketing": {
+      "code": "7340115_01",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 26.5
+    },
+    "Công nghệ Marketing": {
+      "code": "7340115_02",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 26.65
+    },
+    "Bất động sản": {
+      "code": "7340116",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 22.8
+    },
+    "Kinh doanh quốc tế": {
+      "code": "7340120",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 26.3
+    },
+    "Kinh doanh thương mại": {
+      "code": "7340121",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 25.8
+    },
+    "Thương mại điện tử": {
+      "code": "7340122",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 26.1
+    },
+    "Tài chính công": {
+      "code": "7340201_01",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 23.8
+    },
+    "Thuế": {
+      "code": "7340201_02",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 23.5
+    },
+    "Ngân hàng": {
+      "code": "7340201_03",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 24.4
+    },
+    "Thị trường chứng khoán": {
+      "code": "7340201_04",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 23.1
+    },
+    "Tài chính": {
+      "code": "7340201_05",
+      "block": "A00;  A01;  D01;  D07;  D09",
+      "mark": 24.9
+    },
+    "Đầu tư tài chính": {
+      "code": "7340201_06",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 24.4
+    },
+    "Quản trị Hải quan - Ngoại thương": {
+      "code": "7340201_07",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 25.3
+    },
+    "Chương trình đào tạo nguồn nhân lực quốc tế ngành Tài chính - Ngân hàng": {
+      "code": "7340201_08",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 24.5
+    },
+    "Bảo hiểm": {
+      "code": "7340204",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 22.8
+    },
+    "Công nghệ tài chính": {
+      "code": "7340205",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 25.9
+    },
+    "Tài chính quốc tế": {
+      "code": "7340206",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 26.3
+    },
+    "Kế toán doanh nghiệp": {
+      "code": "7340301_01",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 23.4
+    },
+    "Kế toán công": {
+      "code": "7340301_02",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 24.0
+    },
+    "Chương trình Kế toán tích hợp chứng chỉ nghề nghiệp quốc tế ICAEW": {
+      "code": "7340301_03",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 23.0
+    },
+    "Chương trình Kế toán tích hợp chứng chỉ nghề nghiệp quốc tế ACCA": {
+      "code": "7340301_04",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 23.2
+    },
+    "Kiểm toán": {
+      "code": "7340302",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 25.7
+    },
+    "Quản lý công": {
+      "code": "7340403",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 23.0
+    },
+    "Quản trị nhân lực": {
+      "code": "7340404",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 24.8
+    },
+    "Hệ thống thông tin quản lý": {
+      "code": "7340405",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 25.0
+    },
+    "Luật kinh doanh quốc tế": {
+      "code": "7380101",
+      "block": "A00; A01; D01; D09",
+      "mark": 24.9
+    },
+    "Luật kinh tế": {
+      "code": "7380107",
+      "block": "A00; A01; D01; D09",
+      "mark": 24.65
+    },
+    "Khoa học dữ liệu": {
+      "code": "7460108_01",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.0
+    },
+    "Phân tích dữ liệu": {
+      "code": "7460108_02",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.4
+    },
+    "Khoa học máy tính": {
+      "code": "7480101",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.0
+    },
+    "Kỹ thuật phần mềm": {
+      "code": "7480103",
+      "block": "A00; A01; D01; D07",
+      "mark": 23.6
+    },
+    "Robot và Trí tuệ nhân tạo": {
+      "code": "7480107_01",
+      "block": "A00; A01; D01; D07",
+      "mark": 23.8
+    },
+    "Điều khiển thông minh và tự động hóa": {
+      "code": "7480107_02",
+      "block": "A00; A01; D01; D07",
+      "mark": 23.4
+    },
+    "Công nghệ thông tin": {
+      "code": "7480201_01",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.3
+    },
+    "Công nghệ nghệ thuật": {
+      "code": "7480201_02",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.9
+    },
+    "Công nghệ và đổi mới sáng tạo": {
+      "code": "7480201_03",
+      "block": "A00; A01; D01; D07",
+      "mark": 23.0
+    },
+    "An toàn thông tin": {
+      "code": "7480202",
+      "block": "A00; A01; D01; D07",
+      "mark": 23.8
+    },
+    "Logistics và Quản lý chuỗi cung ứng": {
+      "code": "7510605_01",
+      "block": "A00; A01; D01; D07",
+      "mark": 27.7
+    },
+    "Công nghệ Logistics": {
+      "code": "7510605_02",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.4
+    },
+    "Kiến trúc và thiết kế đô thị thông minh": {
+      "code": "7580104",
+      "block": "A00; A01; D01; V00; D09",
+      "mark": 23.0
+    },
+    "Kinh doanh nông nghiệp": {
+      "code": "7620114",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 23.0
+    },
+    "Quản trị dịch vụ du lịch và lữ hành": {
+      "code": "7810103",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 23.4
+    },
+    "Quản trị khách sạn": {
+      "code": "7810201_01",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 24.2
+    },
+    "Quản trị sự kiện và dịch vụ giải trí": {
+      "code": "7810201_02",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 25.5
+    },
+    "Cử nhân ISB ASEAN Co-op": {
+      "code": "ASA_Co-op",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 24.7
+    },
+    "Cử nhân Tài năng ISB BBus": {
+      "code": "ISB_CNTN",
+      "block": "A00; A01; D01; D07; D09",
+      "mark": 25.0
+    }
+  },
+  "ĐH Ngoại thương": {
+    "CT TC Kinh doanh quốc tế": {
+      "code": "KDQH1.1",
+      "block": "A00",
+      "mark": 28.0
+    },
+    "CT CLC Kinh doanh quốc tế": {
+      "code": "KDQH2.1",
+      "block": "A01; D01; D07",
+      "mark": 27.5
+    },
+    "CT ĐHNNQT Logistics và Quản lý chuỗi cung ứng": {
+      "code": "KDQH2.2",
+      "block": "A00; A01; D01; D07",
+      "mark": 27.6
+    },
+    "CT ĐHNNQT Kinh doanh quốc tế theo mô hình tiên tiến Nhật Bản": {
+      "code": "KDQH2.3",
+      "block": "A00; A01; D01; D06; D07",
+      "mark": 26.3
+    },
+    "CT ĐHNNQT Kinh doanh số": {
+      "code": "KDQH2.4",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.3
+    },
+    "CT TT i-Hons hợp tác với Đại học Queensland về Kinh doanh quốc tế và Phân tích dữ liệu kinh doanh": {
+      "code": "KDQH4.1",
+      "block": "A01; D01; D07",
+      "mark": 28.0
+    },
+    "Chương trình Khoa học máy tính và dữ liệu trong kinh tế và kinh doanh": {
+      "code": "KHMH2 .1",
+      "block": "A00; A01; D01; D07",
+      "mark": 36.59
+    },
+    "CT ĐHPTQT Kinh tế chính trị quốc tế": {
+      "code": "KTCH2.1",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.0
+    },
+    "CT TC Kinh tế đối ngoại": {
+      "code": "KTEH1.1",
+      "block": "A00",
+      "mark": 27.55
+    },
+    "CT CLC Kinh tế đối ngoại": {
+      "code": "KTEH2.1",
+      "block": "A01; D01; D07",
+      "mark": 27.5
+    },
+    "CT TT Kinh tế đối ngoại": {
+      "code": "KTEH4.1",
+      "block": "A01; D01; D07",
+      "mark": 28.5
+    },
+    "CT TC Kế toán - Kiếm toán": {
+      "code": "KTKH1.1",
+      "block": "A00",
+      "mark": 26.8
+    },
+    "CT ĐHNNQT ĐHNNQT Kế toán - Kiểm toán theo định hướng ACCA": {
+      "code": "KTKH2.1",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.7
+    },
+    "CT TC Kinh tế quốc tế": {
+      "code": "KTQH.1",
+      "block": "A00",
+      "mark": 26.7
+    },
+    "CT CLC Kinh tế quốc tế": {
+      "code": "KTQH2.1",
+      "block": "A01; D01; D07",
+      "mark": 26.4
+    },
+    "CT TC Luật thương mại quốc tế": {
+      "code": "LAWH1.1",
+      "block": "A00",
+      "mark": 25.7
+    },
+    "CT ĐHNNQT Luật Kinh doanh quốc tế theo mô hình thực hành nghề nghiệp": {
+      "code": "LAWH2.1",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.0
+    },
+    "CT ĐHNNQT Marketing số": {
+      "code": "MKTH2.1",
+      "block": "A00; A01; D01; D07",
+      "mark": 27.15
+    },
+    "CT TC Tiếng Anh thương mại": {
+      "code": "NNAH1.1",
+      "block": "D01",
+      "mark": 32.4
+    },
+    "CT CLC Tiếng Anh thương mại": {
+      "code": "NNAH2.1",
+      "block": "D01",
+      "mark": 35.3
+    },
+    "CT TC Tiếng Nhật thương mại": {
+      "code": "NNNH1.1",
+      "block": "D01; D06",
+      "mark": 30.0
+    },
+    "CT CLC Tiếng Nhật thương mại": {
+      "code": "NNNH2.1",
+      "block": "D06",
+      "mark": 30.0
+    },
+    "CT Tích hợp tiếng Pháp thương mại": {
+      "code": "NNPH1.1",
+      "block": "D01; D03",
+      "mark": 30.0
+    },
+    "CT TC Tiếng Trung Thương mại": {
+      "code": "NNTH1.1",
+      "block": "D01; D04",
+      "mark": 35.15
+    },
+    "CT CLC Tiếng Trung thương mại": {
+      "code": "NNTH2.1",
+      "block": "D04",
+      "mark": 35.0
+    },
+    "CT ĐHNNQT Quản trị khách sạn": {
+      "code": "QKSH2.1",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.2
+    },
+    "CT TC Quản trị kinh doanh": {
+      "code": "QTKH1.1",
+      "block": "A00",
+      "mark": 25.9
+    },
+    "CT CLC Quản trị kinh doanh": {
+      "code": "QTKH2.1",
+      "block": "A01; D01; D07",
+      "mark": 25.2
+    },
+    "CT TT Quản tri kinh doanh": {
+      "code": "QTKH4.1",
+      "block": "A01; D01; D07",
+      "mark": 25.5
+    },
+    "CT TC Tài chính - Ngân hàng": {
+      "code": "TCHH1.1",
+      "block": "A00",
+      "mark": 26.36
+    },
+    "CT CLC Tài chính - Ngân hàng": {
+      "code": "TCHH2.1",
+      "block": "A01; D01; D07",
+      "mark": 26.0
+    },
+    "CT TT Tài chính - Ngân hàng": {
+      "code": "TCHH4.1",
+      "block": "A01; D01; D07",
+      "mark": 27.0
+    }
+  },
+  "ĐH Thương mại": {
+    "Quản trị kinh doanh (Quản trị kinh doanh)": {
+      "code": "TM01",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 25.8
+    },
+    "Quản trị kinh doanh (Quản trị kinh doanh - Chương trình định hướng chuyên sâu nghề nghiệp quốc tế - IPOP)": {
+      "code": "TM02",
+      "block": "A01; D01; D07; D09; D10; X25; X26; X27; X28 ",
+      "mark": 25.4
+    },
+    "Quản trị kinh doanh (Khởi nghiệp và phát triển kinh doanh)": {
+      "code": "TM03",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 25.1
+    },
+    "Quản trị khách sạn (Quản trị khách sạn)": {
+      "code": "TM04",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 25.4
+    },
+    "Quản trị khách sạn (Quản trị khách sạn - Chương trình định hướng chuyên sâu nghề nghiệp quốc tế - IPOP)": {
+      "code": "TM05",
+      "block": "A01; D01; D07; D09; D10; X25; X26; X27; X28 ",
+      "mark": 25.1
+    },
+    "Quản trị dịch vụ du lịch và lữ hành (Quản trị dịch vụ du lịch và lữ hành)": {
+      "code": "TM06",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 24.8
+    },
+    "Marketing (Marketing Thương mại)": {
+      "code": "TM07",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 27.3
+    },
+    "Marketing (Marketing thương mại - Chương trình định hướng chuyên sâu nghề nghiệp quốc tế - IPOP)": {
+      "code": "TM08",
+      "block": "A01; D01; D07; D09; D10; X25; X26; X27; X28 ",
+      "mark": 26.3
+    },
+    "Marketing (Marketing số)": {
+      "code": "TM09",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 27.5
+    },
+    "Marketing (Quản trị Thương hiệu)": {
+      "code": "TM10",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 26.8
+    },
+    "Marketing (Quản trị thương hiệu - Chương trình định hướng chuyên sâu nghề nghiệp quốc tế - IPOP)": {
+      "code": "TM11",
+      "block": "A01; D01; D07; D09; D10; X25; X26; X27; X28 ",
+      "mark": 26.1
+    },
+    "Kế toán (Kế toán doanh nghiệp)": {
+      "code": "TM12",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 25.8
+    },
+    "Kế toán (Kế toán tích hợp chứng chỉ quốc tế ICAEW CFAB - Chương trình định hướng chuyên sâu nghề nghiệp quốc tế - IPOP)": {
+      "code": "TM13",
+      "block": "A01; D01; D07; D09; D10; X25; X26; X27; X28 ",
+      "mark": 24.0
+    },
+    "Kế toán (Kế toán công)": {
+      "code": "TM14",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 24.8
+    },
+    "Kiểm toán (Kiểm toán)": {
+      "code": "TM15",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 25.7
+    },
+    "Kiểm toán (Kiểm toán tích hợp chứng chỉ quốc tế ICAEW CFAB - Chương trình định hướng chuyên sâu nghề nghiệp quốc tế - IPOP)": {
+      "code": "TM16",
+      "block": "A01; D01; D07; D09; D10; X25; X26; X27; X28 ",
+      "mark": 24.0
+    },
+    "Logistics và Quản lý chuỗi cung ứng (Logistics và Quản lý chuỗi cung ứng)": {
+      "code": "TM17",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 27.8
+    },
+    "Logistics và Quản lý chuỗi cung ứng (Logistics và Xuất nhập khẩu - Chương trình định hướng chuyên sâu nghề nghiệp quốc tế - IPOP)": {
+      "code": "TM18",
+      "block": "A01; D01; D07; D09; D10; X25; X26; X27; X28 ",
+      "mark": 26.6
+    },
+    "Kinh doanh quốc tế (Thương mại quốc tế)": {
+      "code": "TM19",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 26.8
+    },
+    "Kinh doanh quốc tế (Thương mại quốc tế - Chương trình định hướng chuyên sâu nghề nghiệp quốc tế - IPOP)": {
+      "code": "TM20",
+      "block": "A01; D01; D07; D09; D10; X25; X26; X27; X28 ",
+      "mark": 26.3
+    },
+    "Kinh tế quốc tế (Kinh tế quốc tế)": {
+      "code": "TM21",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 26.6
+    },
+    "Kinh tế (Quản lý kinh tế)": {
+      "code": "TM22",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 25.1
+    },
+    "Kinh tế (Kinh tế và Quản lý đầu tư - Chương trình định hướng chuyên sâu nghề nghiệp quốc tế - IPOP)": {
+      "code": "TM23",
+      "block": "A01; D01; D07; D09; D10; X25; X26; X27; X28 ",
+      "mark": 24.7
+    },
+    "Tài chính - Ngân hàng (Tài chính - Ngân hàng thương mại)": {
+      "code": "TM24",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 26.1
+    },
+    "Tài chính - Ngân hàng (Tài chính - Ngân hàng thương mại - Chương trình định hướng chuyên sâu nghề nghiệp quốc tế - IPOP)": {
+      "code": "TM25",
+      "block": "A01; D01; D07; D09; D10; X25; X26; X27; X28 ",
+      "mark": 25.4
+    },
+    "Tài chính - Ngân hàng (Tài chính công)": {
+      "code": "TM26",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 25.2
+    },
+    "Tài chính - Ngân hàng (Công nghệ tài chính ngân hàng)": {
+      "code": "TM27",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 25.0
+    },
+    "Thương mại điện tử (Quản trị thương mại điện tử)": {
+      "code": "TM28",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 27.6
+    },
+    "Thương mại điện tử (Thương mại điện tử - Chương trình định hướng chuyên sâu nghề nghiệp quốc tế - IPOP)": {
+      "code": "TM29",
+      "block": "A01; D01; D07; D09; D10; X25; X26; X27; X28 ",
+      "mark": 26.5
+    },
+    "Thương mại điện tử (Kinh doanh số)": {
+      "code": "TM30",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 27.2
+    },
+    "Hệ thống thông tin quản lý (Quản trị Hệ thống thông tin)": {
+      "code": "TM31",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 24.8
+    },
+    "Hệ thống thông tin quản lý (Quản trị Hệ thống thông tin - Chương trình định hướng chuyên sâu nghề nghiệp quốc tế - IPOP)": {
+      "code": "TM32",
+      "block": "A01; D01; D07; D09; D10; X25; X26; X27; X28 ",
+      "mark": 24.2
+    },
+    "Ngôn ngữ Anh (Tiếng Anh thương mại)": {
+      "code": "TM33",
+      "block": "A01; D01; D07 ",
+      "mark": 26.1
+    },
+    "Luật kinh tế (Luật kinh tế)": {
+      "code": "TM34",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 25.4
+    },
+    "Luật kinh tế (Luật kinh doanh - Chương trình định hướng chuyên sâu nghề nghiệp quốc tế - IPOP)": {
+      "code": "TM35",
+      "block": "A01; D01; D07; D09; D10; X25; X26; X27; X28 ",
+      "mark": 24.7
+    },
+    "Luật kinh tế (Luật thương mại quốc tế)": {
+      "code": "TM36",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 25.1
+    },
+    "Quản trị nhân lực (Quản trị nhân lực doanh nghiệp)": {
+      "code": "TM37",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 25.6
+    },
+    "Quản trị nhân lực (Quản trị nhân lực doanh nghiệp - Chương trình định hướng chuyên sâu nghề nghiệp quốc tế - IPOP)": {
+      "code": "TM38",
+      "block": "A01; D01; D07; D09; D10; X25; X26; X27; X28 ",
+      "mark": 24.8
+    },
+    "Kinh tế số (Phân tích kinh doanh trong môi trường số)": {
+      "code": "TM39",
+      "block": "A00; A01; D01; D07 ",
+      "mark": 25.1
+    },
+    "Ngôn ngữ Trung Quốc (Tiếng Trung thương mại)": {
+      "code": "TM40",
+      "block": "A01; D01; D04; D07 ",
+      "mark": 27.4
+    },
+    "Ngôn ngữ Trung Quốc (Tiếng Trung thương mại - Chương trình định hướng chuyên sâu nghề nghiệp quốc tế - IPOP)": {
+      "code": "TM41",
+      "block": "D04(Gố",
+      "mark": 26.8
+    },
+    "Quản trị kinh doanh (Tiếng Pháp thương mại)": {
+      "code": "TM42",
+      "block": "A00; A01; D01; D03; D07 ",
+      "mark": 22.5
+    },
+    "Quản trị kinh doanh (Quản trị kinh doanh) - Khởi nghiệp (Thành lập doanh nghiệp) - Chương trình đào tạo song bằng quốc tế": {
+      "code": "TM43",
+      "block": "A01; D01; D07; D09; D10; X25; X26; X27; X28 ",
+      "mark": 22.5
+    },
+    "Marketing (Marketing thương mại) - Thương mại sản phẩm và dịch vụ (Bán hàng) - Chương trình đào tạo song bằng quốc tế": {
+      "code": "TM44",
+      "block": "A01; D01; D07; D09; D10; X25; X26; X27; X28 ",
+      "mark": 24.8
+    }
+  },
+  "ĐH Hà Nội": {
+    "Ngôn ngữ Anh": {
+      "code": "7220201",
+      "block": "D01",
+      "mark": 33.89
+    },
+    "Ngôn ngữ Anh - CTTT": {
+      "code": "7220201 TT",
+      "block": "D01",
+      "mark": 32.48
+    },
+    "Ngôn ngữ Nga": {
+      "code": "7220202",
+      "block": "D01; D02; D03",
+      "mark": 23.67
+    },
+    "Ngôn ngữ Pháp": {
+      "code": "7220203",
+      "block": "D01; D03",
+      "mark": 27.25
+    },
+    "Ngôn ngữ Trung Quốc": {
+      "code": "7220204",
+      "block": "D01; D04",
+      "mark": 34.35
+    },
+    "Ngôn ngữ Trung Quốc - CTTT": {
+      "code": "7220204 TT",
+      "block": "D01; D04",
+      "mark": 33.0
+    },
+    "Ngôn ngữ Đức": {
+      "code": "7220205",
+      "block": "D01; D05",
+      "mark": 28.35
+    },
+    "Ngôn ngữ Tây Ban Nha": {
+      "code": "7220206",
+      "block": "D01",
+      "mark": 27.08
+    },
+    "Ngôn ngữ Bồ Đào Nha": {
+      "code": "7220207",
+      "block": "D01; D04",
+      "mark": 23.35
+    },
+    "Ngôn ngữ Italia": {
+      "code": "7220208",
+      "block": "D01",
+      "mark": 25.08
+    },
+    "Ngôn ngữ Italia - CTTT": {
+      "code": "7220208 TT",
+      "block": "D01",
+      "mark": 22.1
+    },
+    "Ngôn ngữ Nhật": {
+      "code": "7220209",
+      "block": "D01; D06",
+      "mark": 29.0
+    },
+    "Ngôn ngữ Hàn Quốc": {
+      "code": "7220210",
+      "block": "D01; D04; DD2",
+      "mark": 32.07
+    },
+    "Ngôn ngữ Hàn Quốc - CTTT": {
+      "code": "7220210 TT",
+      "block": "D01; D04; DD2",
+      "mark": 28.17
+    },
+    "Nghiên cứu phát triển (dạy bằng tiếng Anh)": {
+      "code": "7310111",
+      "block": "D01",
+      "mark": 25.75
+    },
+    "Quốc tế học (dạy bằng tiếng Anh)": {
+      "code": "7310601",
+      "block": "D01",
+      "mark": 26.83
+    },
+    "Truyền thông đa phương tiện (dạy bằng tiếng Anh)": {
+      "code": "7320104",
+      "block": "D01",
+      "mark": 30.82
+    },
+    "Truyền thông doanh nghiệp (dạy bằng tiếng Pháp)": {
+      "code": "7320109",
+      "block": "D01; D03",
+      "mark": 26.35
+    },
+    "Quản trị Kinh doanh (dạy bằng tiếng Anh)": {
+      "code": "7340101",
+      "block": "D01",
+      "mark": 28.25
+    },
+    "Marketing (dạy bằng tiếng Anh)": {
+      "code": "7340115",
+      "block": "D01",
+      "mark": 30.17
+    },
+    "Tài chính - Ngân hàng (dạy bằng tiếng Anh)": {
+      "code": "7340201",
+      "block": "D01",
+      "mark": 26.1
+    },
+    "Công nghệ tài chính (dạy bằng tiếng Anh)": {
+      "code": "7340205",
+      "block": "A01; D01",
+      "mark": 27.25
+    },
+    "Kế toán (dạy bằng tiếng Anh)": {
+      "code": "7340301",
+      "block": "D01",
+      "mark": 26.67
+    },
+    "Công nghệ Thông tin (dạy bằng tiếng Anh)": {
+      "code": "7480201",
+      "block": "A01; D01; X26",
+      "mark": 26.02
+    },
+    "Công nghệ thông tin (dạy bằng tiếng Anh) - CTTT": {
+      "code": "7480201 TT",
+      "block": "A01; D01; X26",
+      "mark": 24.8
+    },
+    "Quản trị Dịch vụ Du lịch và Lữ hành (dạy bằng tiếng Anh)": {
+      "code": "7810103",
+      "block": "D01",
+      "mark": 27.58
+    },
+    "Quản trị dịch vụ du lịch và lữ hành (dạy bằng tiếng Anh) - CTTT": {
+      "code": "7810103 TT",
+      "block": "D01",
+      "mark": 23.08
+    }
+  },
+  "ĐH Sư phạm Hà Nội": {
+    "Quản lí giáo dục": {
+      "code": "7140114",
+      "block": "C03; D01; X01",
+      "mark": 24.68
+    },
+    "Giáo dục Mầm non": {
+      "code": "7140201",
+      "block": "M00",
+      "mark": 22.13
+    },
+    "Giáo dục Mầm non - Sư phạm Tiếng Anh": {
+      "code": "7140201K",
+      "block": "M01;  M02",
+      "mark": 21.5
+    },
+    "Giáo dục Tiểu học": {
+      "code": "7140202",
+      "block": "D01",
+      "mark": 25.1
+    },
+    "Giáo dục Tiểu học - Sư phạm Tiếng Anh": {
+      "code": "7140202K",
+      "block": "D01",
+      "mark": 24.99
+    },
+    "Giáo dục đặc biệt": {
+      "code": "7140203",
+      "block": "C00;  D01",
+      "mark": 27.55
+    },
+    "Giáo dục công dân": {
+      "code": "7140204",
+      "block": "X70; X74; X78",
+      "mark": 27.67
+    },
+    "Giáo dục chính trị": {
+      "code": "7140205",
+      "block": "X70; X74; X78",
+      "mark": 28.22
+    },
+    "Giáo dục thể chất": {
+      "code": "7140206",
+      "block": "T01;  T02",
+      "mark": 25.89
+    },
+    "Giáo dục Quốc phòng và An ninh": {
+      "code": "7140208",
+      "block": "C00; D01",
+      "mark": 27.27
+    },
+    "Sư phạm Toán học": {
+      "code": "7140209",
+      "block": "A00; A01",
+      "mark": 28.27
+    },
+    "Sư phạm Toán học (dạy Toán bằng tiếng Anh)": {
+      "code": "7140209K",
+      "block": "A01;D01",
+      "mark": 28.36
+    },
+    "Sư phạm Tin học": {
+      "code": "7140210",
+      "block": "A00; A01; X06",
+      "mark": 24.85
+    },
+    "Sư phạm Vật lí": {
+      "code": "7140211",
+      "block": "A00; A01",
+      "mark": 28.31
+    },
+    "Sư phạm Vật lí (dạy Toán bằng tiếng Anh)": {
+      "code": "7140211K",
+      "block": "A00;A01",
+      "mark": 27.78
+    },
+    "Sư phạm Hoá học": {
+      "code": "7140212",
+      "block": "A00;B00",
+      "mark": 28.37
+    },
+    "Sư phạm Hoá học (dạy Hóa học bằng tiếng Anh)": {
+      "code": "7140212K",
+      "block": "D07",
+      "mark": 26.13
+    },
+    "Sư phạm Sinh học": {
+      "code": "7140213",
+      "block": "B00; D08",
+      "mark": 26.27
+    },
+    "Sư phạm Ngữ văn": {
+      "code": "7140217",
+      "block": "C00;  D01",
+      "mark": 28.48
+    },
+    "Sư phạm Lịch sử": {
+      "code": "7140218",
+      "block": "C00; D14",
+      "mark": 29.06
+    },
+    "Sư phạm Địa lí": {
+      "code": "7140219",
+      "block": "C00; C04",
+      "mark": 28.79
+    },
+    "Sư phạm Âm nhạc": {
+      "code": "7140221",
+      "block": "N01; N02",
+      "mark": 23.75
+    },
+    "Sư phạm Mỹ thuật": {
+      "code": "7140222",
+      "block": "H01; H02",
+      "mark": 23.48
+    },
+    "Sư phạm Tiếng Anh": {
+      "code": "7140231",
+      "block": "D01",
+      "mark": 26.29
+    },
+    "Sư phạm Tiếng Pháp": {
+      "code": "7140233",
+      "block": "D01; D03",
+      "mark": 27.15
+    },
+    "Sư phạm Công nghệ": {
+      "code": "7140246",
+      "block": "A00;   A01;   X07;  X08",
+      "mark": 21.75
+    },
+    "Sư phạm Khoa học tự nhiên": {
+      "code": "7140247",
+      "block": "A00; B00",
+      "mark": 27.06
+    },
+    "Sư phạm Lịch sử - Địa lí": {
+      "code": "7140249",
+      "block": "C00",
+      "mark": 28.58
+    },
+    "Tiếng Việt và văn hóa Việt Nam (mới)": {
+      "code": "7220101",
+      "block": "C00;  D14",
+      "mark": 26.36
+    },
+    "Ngôn ngữ Anh": {
+      "code": "7220201",
+      "block": "D01",
+      "mark": 24.52
+    },
+    "Ngôn ngữ Trung Quốc": {
+      "code": "7220204",
+      "block": "D01; D04",
+      "mark": 26.76
+    },
+    "Triết học (Triết học Mác Lê-nin)": {
+      "code": "7229001",
+      "block": "C00; D14; X70",
+      "mark": 24.68
+    },
+    "Lịch sử (mới)": {
+      "code": "7229010",
+      "block": "C00; C03; D14",
+      "mark": 27.75
+    },
+    "Văn học": {
+      "code": "7229030",
+      "block": "C00; D01",
+      "mark": 27.64
+    },
+    "Chính trị học": {
+      "code": "7310201",
+      "block": "X70; X74; X78",
+      "mark": 25.1
+    },
+    "Xã hội học (mới)": {
+      "code": "7310301",
+      "block": "C00; D14; X70",
+      "mark": 25.8
+    },
+    "Tâm lý học (Tâm lý học trường học)": {
+      "code": "7310401",
+      "block": "D01; D14; D15",
+      "mark": 23.23
+    },
+    "Tâm lý học giáo dục": {
+      "code": "7310403",
+      "block": "D01; D14; D15",
+      "mark": 23.75
+    },
+    "Việt Nam học (Tuyển sinh người Việt Nam)": {
+      "code": "7310630",
+      "block": "D01;  D14",
+      "mark": 20.0
+    },
+    "Sinh học": {
+      "code": "7420101",
+      "block": "B00; B08",
+      "mark": 19.0
+    },
+    "Công nghệ sinh học (mới)": {
+      "code": "7420201",
+      "block": "A02; B00; B08",
+      "mark": 19.25
+    },
+    "Vật lí học (vật lí bán dẫn và kỹ thuật) (mới)": {
+      "code": "7440102",
+      "block": "A00; A01; X06",
+      "mark": 22.35
+    },
+    "Hóa học": {
+      "code": "7440112",
+      "block": "A00; B00; D07",
+      "mark": 23.0
+    },
+    "Toán học": {
+      "code": "7460101",
+      "block": "A00; A01",
+      "mark": 25.5
+    },
+    "Công nghệ thông tin": {
+      "code": "7480201",
+      "block": "A00; A01; X06",
+      "mark": 20.6
+    },
+    "Công tác xã hội": {
+      "code": "7760101",
+      "block": "C00; D14; X70",
+      "mark": 26.04
+    },
+    "Hỗ trợ giáo dục người khuyết tật": {
+      "code": "7760103",
+      "block": "C00; D01",
+      "mark": 25.28
+    },
+    "Quản trị dịch vụ du lịch và lữ hành": {
+      "code": "7810103",
+      "block": "D01; D14",
+      "mark": 20.25
+    }
+  },
+  "ĐH Sư phạm TP.HCM": {
+    "Giáo dục học": {
+      "code": "7140101",
+      "block": "D01",
+      "mark": 23.35
+    },
+    "Công nghệ giáo dục": {
+      "code": "7140103",
+      "block": "B08",
+      "mark": 20.0
+    },
+    "Quản lý giáo dục": {
+      "code": "7140114",
+      "block": "D01",
+      "mark": 24.42
+    },
+    "Giáo dục Mầm non": {
+      "code": "7140201",
+      "block": "M02",
+      "mark": 26.3
+    },
+    "Giáo dục Mầm non (trình độ đại học)": {
+      "code": "7140201_LA",
+      "block": "M02",
+      "mark": 25.63
+    },
+    "Giáo dục Tiểu học": {
+      "code": "7140202",
+      "block": "D01",
+      "mark": 25.94
+    },
+    "Giáo dục Đặc biệt": {
+      "code": "7140203",
+      "block": "D01",
+      "mark": 28.7
+    },
+    "Giáo dục Công dân": {
+      "code": "7140204",
+      "block": "D66",
+      "mark": 27.33
+    },
+    "Giáo dục Chính trị": {
+      "code": "7140205",
+      "block": "D66; X78",
+      "mark": 27.62
+    },
+    "Giáo dục Thể chất": {
+      "code": "7140206",
+      "block": "T01",
+      "mark": 26.52
+    },
+    "Giáo dục Quốc phòng - An ninh": {
+      "code": "7140208",
+      "block": "Q01",
+      "mark": 23.25
+    },
+    "Sư phạm Toán học": {
+      "code": "7140209",
+      "block": "A01",
+      "mark": 28.75
+    },
+    "Sư phạm Tin học": {
+      "code": "7140210",
+      "block": "B08",
+      "mark": 23.98
+    },
+    "Sư phạm Vật lý": {
+      "code": "7140211",
+      "block": "A01",
+      "mark": 28.92
+    },
+    "Sư phạm Hoá học": {
+      "code": "7140212",
+      "block": "D07",
+      "mark": 30.88
+    },
+    "Sư phạm Sinh học": {
+      "code": "7140213",
+      "block": "D08",
+      "mark": 26.71
+    },
+    "Sư phạm Ngữ văn": {
+      "code": "7140217",
+      "block": "D01",
+      "mark": 30.57
+    },
+    "Sư phạm Lịch sử": {
+      "code": "7140218",
+      "block": "D14",
+      "mark": 29.23
+    },
+    "Sư phạm Địa lý": {
+      "code": "7140219",
+      "block": "D15",
+      "mark": 29.33
+    },
+    "Sư phạm Tiếng Anh": {
+      "code": "7140231",
+      "block": "D01",
+      "mark": 26.79
+    },
+    "Sư phạm Tiếng Nga": {
+      "code": "7140232",
+      "block": "D01; D02",
+      "mark": 21.9
+    },
+    "Sư phạm Tiếng Pháp": {
+      "code": "7140233",
+      "block": "D01; D03",
+      "mark": 21.75
+    },
+    "Sư phạm Tiếng Trung Quốc": {
+      "code": "7140234",
+      "block": "D01; D04",
+      "mark": 25.39
+    },
+    "Sư phạm công nghệ": {
+      "code": "7140246",
+      "block": "A01",
+      "mark": 22.85
+    },
+    "Sư phạm khoa học tự nhiên": {
+      "code": "7140247",
+      "block": "B00",
+      "mark": 27.38
+    },
+    "Sư phạm Lịch sử - Địa lý": {
+      "code": "7140249",
+      "block": "A07",
+      "mark": 27.84
+    },
+    "Ngôn ngữ Anh": {
+      "code": "7220201",
+      "block": "D01",
+      "mark": 24.8
+    },
+    "Ngôn ngữ Nga": {
+      "code": "7220202",
+      "block": "D01; D02",
+      "mark": 18.25
+    },
+    "Ngôn ngữ Pháp": {
+      "code": "7220203",
+      "block": "D01; D03",
+      "mark": 19.0
+    },
+    "Ngôn ngữ Trung Quốc": {
+      "code": "7220204",
+      "block": "D01; D04",
+      "mark": 22.75
+    },
+    "Ngôn ngữ Nhật": {
+      "code": "7220209",
+      "block": "D01; D06",
+      "mark": 21.0
+    },
+    "Ngôn ngữ Hàn quốc": {
+      "code": "7220210",
+      "block": "D01; DD2",
+      "mark": 22.0
+    },
+    "Văn học": {
+      "code": "7229030",
+      "block": "D01",
+      "mark": 28.97
+    },
+    "Tâm lý học": {
+      "code": "7310401",
+      "block": "D01",
+      "mark": 28.0
+    },
+    "Tâm lý học giáo dục": {
+      "code": "7310403",
+      "block": "D01",
+      "mark": 27.32
+    },
+    "Địa lý học": {
+      "code": "7310501",
+      "block": "D15",
+      "mark": 27.23
+    },
+    "Quốc tế học": {
+      "code": "7310601",
+      "block": "D09",
+      "mark": 21.5
+    },
+    "Việt Nam học": {
+      "code": "7310630",
+      "block": "D01",
+      "mark": 27.45
+    },
+    "Sinh học ứng dụng": {
+      "code": "7420203",
+      "block": "D08",
+      "mark": 20.0
+    },
+    "Vật lý học": {
+      "code": "7440102",
+      "block": "A01",
+      "mark": 24.75
+    },
+    "Hoá học": {
+      "code": "7440112",
+      "block": "D07",
+      "mark": 26.25
+    },
+    "Toán ứng dụng": {
+      "code": "7460112",
+      "block": "A01",
+      "mark": 26.67
+    },
+    "Công nghệ thông tin": {
+      "code": "7480201",
+      "block": "B08",
+      "mark": 19.75
+    },
+    "Công tác xã hội": {
+      "code": "7760101",
+      "block": "A00",
+      "mark": 27.13
+    },
+    "Du lịch": {
+      "code": "7810101",
+      "block": "D01",
+      "mark": 27.39
+    }
+  },
+  "ĐH Y Hà Nội": {
+    "Tâm lý học": {
+      "code": "7310401",
+      "block": "C00",
+      "mark": 28.7
+    },
+    "Y khoa": {
+      "code": "7720101",
+      "block": "B00",
+      "mark": 28.13
+    },
+    "Y khoa Phân hiệu Thanh Hóa": {
+      "code": "7720101YHT",
+      "block": "B00",
+      "mark": 25.8
+    },
+    "Y học dự phòng": {
+      "code": "7720110",
+      "block": "B00",
+      "mark": 17.0
+    },
+    "Y học cổ truyền": {
+      "code": "7720115",
+      "block": "B00",
+      "mark": 23.5
+    },
+    "Điều dưỡng": {
+      "code": "7720301",
+      "block": "A00; B00",
+      "mark": 22.25
+    },
+    "Điều dưỡng Phân hiệu Thanh Hóa": {
+      "code": "7720301YHT",
+      "block": "A00; B00",
+      "mark": 17.0
+    },
+    "Hộ sinh": {
+      "code": "7720302",
+      "block": "A00; B00",
+      "mark": 20.35
+    },
+    "Dinh dưỡng": {
+      "code": "7720401",
+      "block": "A00; B00",
+      "mark": 18.75
+    },
+    "Răng - Hàm - Mặt": {
+      "code": "7720501",
+      "block": "B00",
+      "mark": 27.34
+    },
+    "Kỹ thuật phục hình răng": {
+      "code": "7720502",
+      "block": "A00; B00",
+      "mark": 21.85
+    },
+    "Kỹ thuật xét nghiệm y học": {
+      "code": "7720601",
+      "block": "A00; B00",
+      "mark": 23.72
+    },
+    "Kỹ thuật xét nghiệm y học Phân hiệu Thanh Hóa": {
+      "code": "7720601YHT",
+      "block": "A00; B00",
+      "mark": 18.35
+    },
+    "Kỹ thuật hình ảnh y học": {
+      "code": "7720602",
+      "block": "A00; B00",
+      "mark": 23.57
+    },
+    "Kỹ thuật phục hồi chức năng": {
+      "code": "7720603",
+      "block": "A00; B00",
+      "mark": 22.5
+    },
+    "Kỹ thuật phục hồi chức năng Phân hiệu Thanh Hóa": {
+      "code": "7720603YHT",
+      "block": "A00; B00",
+      "mark": 17.3
+    },
+    "Khúc xạ nhãn khoa": {
+      "code": "7720699",
+      "block": "A00; B00",
+      "mark": 23.23
+    },
+    "Y tế công cộng": {
+      "code": "7720701",
+      "block": "D01",
+      "mark": 21.2
+    },
+    "Công tác xã hội": {
+      "code": "7760101",
+      "block": "A00; B00; B08",
+      "mark": 17.0
+    }
+  },
+  "ĐH Y Dược TP.HCM": {
+    "Y khoa": {
+      "code": "7720101",
+      "block": "B00",
+      "mark": 27.34
+    },
+    "Y học dự phòng": {
+      "code": "7720110",
+      "block": "A00; B00",
+      "mark": 19.0
+    },
+    "Y học cổ truyền": {
+      "code": "7720115",
+      "block": "B00",
+      "mark": 21.5
+    },
+    "Dược học": {
+      "code": "7720201",
+      "block": "A00; B00",
+      "mark": 22.85
+    },
+    "Hóa dược": {
+      "code": "7720203",
+      "block": "A00; B00",
+      "mark": 23.65
+    },
+    "Điều dưỡng": {
+      "code": "7720301",
+      "block": "A00; B00",
+      "mark": 20.15
+    },
+    "Điều dưỡng chuyên ngành Gây mê hồi sức": {
+      "code": "7720301_03",
+      "block": "A00; B00",
+      "mark": 21.1
+    },
+    "Hộ sinh": {
+      "code": "7720302",
+      "block": "A00; B00",
+      "mark": 18.0
+    },
+    "Dinh dưỡng": {
+      "code": "7720401",
+      "block": "A00; B00",
+      "mark": 19.25
+    },
+    "Răng - Hàm - Mặt": {
+      "code": "7720501",
+      "block": "B00",
+      "mark": 26.45
+    },
+    "Kỹ thuật phục hình răng": {
+      "code": "7720502",
+      "block": "A00; B00",
+      "mark": 21.5
+    },
+    "Kỹ thuật xét nghiệm y học": {
+      "code": "7720601",
+      "block": "A00; B00",
+      "mark": 22.05
+    },
+    "Kỹ thuật hình ảnh y học": {
+      "code": "7720602",
+      "block": "A00; B00",
+      "mark": 21.0
+    },
+    "Kỹ thuật phục hồi chức năng": {
+      "code": "7720603",
+      "block": "A00; B00",
+      "mark": 21.0
+    },
+    "Y tế công cộng": {
+      "code": "7720701",
+      "block": "A00; B00",
+      "mark": 17.0
+    },
+    "Công tác xã hội": {
+      "code": "7760101",
+      "block": "A00; B00; B03; B08",
+      "mark": 17.25
+    }
+  },
+  "ĐH Dược Hà Nội": {
+    "Công nghệ sinh học": {
+      "code": "7420201",
+      "block": "B00",
+      "mark": 20.0
+    },
+    "Hóa học": {
+      "code": "7440112",
+      "block": "A00",
+      "mark": 20.85
+    },
+    "Dược học": {
+      "code": "7720201",
+      "block": "A00; B00",
+      "mark": 24.5
+    },
+    "Hóa dược": {
+      "code": "7720203",
+      "block": "A00",
+      "mark": 23.56
+    }
+  },
+  "ĐH Luật Hà Nội": {
+    "Ngôn ngữ Anh": {
+      "code": "7220201",
+      "block": "A01",
+      "mark": 23.49
+    },
+    "Luật": {
+      "code": "7380101",
+      "block": "C00",
+      "mark": 27.39
+    },
+    "Luật (Đào tạo tại Phân hiệu Đắk Lắk)": {
+      "code": "7380101PH",
+      "block": "C00",
+      "mark": 22.99
+    },
+    "Luật Kinh tế": {
+      "code": "7380107",
+      "block": "C00",
+      "mark": 28.79
+    },
+    "Luật Thương mại quốc tế": {
+      "code": "7380109",
+      "block": "A01",
+      "mark": 24.44
+    }
+  },
+  "ĐH Công nghiệp Hà Nội": {
+    "Thiết kế thời trang": {
+      "code": "7210404",
+      "block": "D01; D14",
+      "mark": 20.75
+    },
+    "Ngôn ngữ Anh": {
+      "code": "7220201",
+      "block": "D01",
+      "mark": 21.35
+    },
+    "Ngôn ngữ Trung Quốc": {
+      "code": "7220204",
+      "block": "D01; D04",
+      "mark": 23.0
+    },
+    "Ngôn ngữ Trung Quốc (LK2+2 với ĐHKHKT Quảng Tây)": {
+      "code": "7220204LK",
+      "block": "D01; D04",
+      "mark": 22.5
+    },
+    "Ngôn ngữ Nhật": {
+      "code": "7220209",
+      "block": "D01; D06",
+      "mark": 20.0
+    },
+    "Ngôn ngữ Hàn Quốc": {
+      "code": "7220210",
+      "block": "D01; DD2",
+      "mark": 21.5
+    },
+    "Ngôn ngữ học": {
+      "code": "7229020",
+      "block": "D01; D14",
+      "mark": 20.0
+    },
+    "Kinh tế đầu tư": {
+      "code": "7310104",
+      "block": "A01; D01; X25",
+      "mark": 21.25
+    },
+    "Trung Quốc học": {
+      "code": "7310612",
+      "block": "D01; D04",
+      "mark": 21.55
+    },
+    "Quản trị kinh doanh": {
+      "code": "7340101",
+      "block": "A01; D01; X25",
+      "mark": 20.25
+    },
+    "Phân tích dữ liệu kinh doanh": {
+      "code": "73401012",
+      "block": "A01; D01; X25",
+      "mark": 20.0
+    },
+    "Marketing": {
+      "code": "7340115",
+      "block": "A01; D01; X25",
+      "mark": 22.5
+    },
+    "Tài chính - Ngân hàng": {
+      "code": "7340201",
+      "block": "A01; D01; X25",
+      "mark": 20.75
+    },
+    "Kế toán": {
+      "code": "7340301",
+      "block": "A01; D01; X25",
+      "mark": 20.0
+    },
+    "Kế toán (CTĐT bằng tiếng Anh)": {
+      "code": "7340301TA",
+      "block": "A01; D01; X25",
+      "mark": 20.25
+    },
+    "Kiểm toán": {
+      "code": "7340302",
+      "block": "A01; D01; X25",
+      "mark": 20.0
+    },
+    "Quản trị nhân lực": {
+      "code": "7340404",
+      "block": "A01; D01; X25",
+      "mark": 21.25
+    },
+    "Quản trị văn phòng": {
+      "code": "7340406",
+      "block": "A01; D01; X25",
+      "mark": 20.0
+    },
+    "Khoa học máy tính": {
+      "code": "7480101",
+      "block": "A00; A01; X06; X07",
+      "mark": 23.72
+    },
+    "Khoa học máy tính (CTĐT bằng tiếng Anh)": {
+      "code": "7480101TA",
+      "block": "A00; A01; X06; X07",
+      "mark": 20.45
+    },
+    "Mạng máy tính và truyền thông dữ liệu": {
+      "code": "7480102",
+      "block": "A00; A01; X06; X07",
+      "mark": 21.7
+    },
+    "Kỹ thuật phần mềm": {
+      "code": "7480103",
+      "block": "A00; A01; X06; X07",
+      "mark": 21.75
+    },
+    "Hệ thống thông tin": {
+      "code": "7480104",
+      "block": "A00; A01; X06; X07",
+      "mark": 21.1
+    },
+    "Công nghệ kỹ thuật máy tính": {
+      "code": "7480108",
+      "block": "A00; A01; X06; X07",
+      "mark": 21.85
+    },
+    "Công nghệ thông tin": {
+      "code": "7480201",
+      "block": "A00; A01; X06; X07",
+      "mark": 23.09
+    },
+    "Công nghệ đa phương tiện": {
+      "code": "74802012",
+      "block": "A00; A01; X06; X07",
+      "mark": 22.25
+    },
+    "An toàn thông tin": {
+      "code": "74802021",
+      "block": "A00; A01; X06; X07",
+      "mark": 23.43
+    },
+    "Công nghệ kỹ thuật cơ khí": {
+      "code": "7510201",
+      "block": "A00; A01; X06; X07",
+      "mark": 23.72
+    },
+    "Công nghệ kỹ thuật khuôn mẫu": {
+      "code": "75102012",
+      "block": "A00; A01; X06; X07",
+      "mark": 22.5
+    },
+    "Thiết kế cơ khí và kiểu dáng công nghiệp": {
+      "code": "75102013",
+      "block": "A00; A01; X06; X07",
+      "mark": 21.35
+    },
+    "Công nghệ kỹ thuật cơ khí (CTĐT bằng tiếng Anh)": {
+      "code": "7510201TA",
+      "block": "A00; A01; X06; X07",
+      "mark": 20.45
+    },
+    "Công nghệ kỹ thuật cơ điện tử": {
+      "code": "7510203",
+      "block": "A00; A01; X06; X07",
+      "mark": 25.17
+    },
+    "Robot và trí tuệ nhân tạo": {
+      "code": "75102032",
+      "block": "A00; A01; X06; X07",
+      "mark": 24.3
+    },
+    "Công nghệ kỹ thuật cơ điện tử ô tô": {
+      "code": "75102033",
+      "block": "A00; A01; X06; X07",
+      "mark": 23.93
+    },
+    "Công nghệ kỹ thuật ô tô": {
+      "code": "7510205",
+      "block": "A00; A01; X06; X07",
+      "mark": 22.5
+    },
+    "Công nghệ kỹ thuật ô tô (CTĐT bằng tiếng Anh)": {
+      "code": "7510205TA",
+      "block": "A00; A01; X06; X07",
+      "mark": 20.0
+    },
+    "Công nghệ kỹ thuật nhiệt": {
+      "code": "7510206",
+      "block": "A00; A01; X06; X07",
+      "mark": 21.85
+    },
+    "Công nghệ kỹ thuật điện, điện tử": {
+      "code": "7510301",
+      "block": "A00; A01; X06; X07",
+      "mark": 23.93
+    },
+    "Công nghệ kỹ thuật điện, điện tử (CTĐT bằng tiếng Anh)": {
+      "code": "7510301TA",
+      "block": "A00; A01; X06; X07",
+      "mark": 20.1
+    },
+    "Công nghệ kỹ thuật điện tử - viễn thông": {
+      "code": "7510302",
+      "block": "A00; A01; X06; X07",
+      "mark": 22.75
+    },
+    "Công nghệ kỹ thuật điện tử y sinh": {
+      "code": "75103021",
+      "block": "A00; A01; X06; X07",
+      "mark": 20.6
+    },
+    "Công nghệ kỹ thuật điện tử - viễn thông (CTĐT bằng tiếng Anh)": {
+      "code": "7510302TA",
+      "block": "A00; A01; X06; X07",
+      "mark": 20.0
+    },
+    "Công nghệ kỹ thuật điều khiển và tự động hóa": {
+      "code": "7510303",
+      "block": "A00; A01; X06; X07",
+      "mark": 26.27
+    },
+    "Kỹ thuật sản xuất thông minh": {
+      "code": "75103031",
+      "block": "A00; A01; X06; X07",
+      "mark": 22.5
+    },
+    "Công nghệ kỹ thuật hóa học": {
+      "code": "7510401",
+      "block": "A00; B00; C02; D07",
+      "mark": 20.25
+    },
+    "Công nghệ kỹ thuật môi trường": {
+      "code": "7510406",
+      "block": "A00; B00; C02; D07",
+      "mark": 18.75
+    },
+    "Logistics và quản lý chuỗi cung ứng": {
+      "code": "7510605",
+      "block": "A01; D01; X25",
+      "mark": 22.76
+    },
+    "Năng lượng tái tạo": {
+      "code": "75190071",
+      "block": "A00; A01; X06; X07",
+      "mark": 20.75
+    },
+    "Kỹ thuật cơ khí động lực": {
+      "code": "7520116",
+      "block": "A00; A01; X06; X07",
+      "mark": 22.5
+    },
+    "Kỹ thuật hệ thống công nghiệp": {
+      "code": "7520118",
+      "block": "A00; A01; X06; X07",
+      "mark": 21.75
+    },
+    "Công nghệ thực phẩm": {
+      "code": "7540101",
+      "block": "A00; B00; C02; D07",
+      "mark": 20.6
+    },
+    "Công nghệ vật liệu dệt, may": {
+      "code": "7540203",
+      "block": "A01; D01; X27",
+      "mark": 18.25
+    },
+    "Công nghệ dệt, may": {
+      "code": "7540204",
+      "block": "A01; D01; X27",
+      "mark": 18.0
+    },
+    "Hóa dược": {
+      "code": "7720203",
+      "block": "A00; B00; C02; D07",
+      "mark": 21.35
+    },
+    "Du lịch": {
+      "code": "7810101",
+      "block": "D01; D14; D15",
+      "mark": 21.85
+    },
+    "Du lịch (CTĐT bằng tiếng Anh)": {
+      "code": "7810101TA",
+      "block": "D01; D14; D15",
+      "mark": 18.0
+    },
+    "Quản trị dịch vụ du lịch và lữ hành": {
+      "code": "7810103",
+      "block": "D01; D14; D15",
+      "mark": 22.25
+    },
+    "Quản trị dịch vụ du lịch và lữ hành (CTĐT bằng tiếng Anh)": {
+      "code": "7810103TA",
+      "block": "D01; D14; D15",
+      "mark": 18.1
+    },
+    "Quản trị khách sạn": {
+      "code": "7810201",
+      "block": "D01; D14; D15",
+      "mark": 21.75
+    },
+    "Quản trị khách sạn (CTĐT bằng tiếng Anh)": {
+      "code": "7810201TA",
+      "block": "D01; D14; D15",
+      "mark": 18.25
+    },
+    "Quản trị nhà hàng và dịch vụ ăn uống": {
+      "code": "7810202",
+      "block": "D01; D14; D15",
+      "mark": 20.85
+    },
+    "Quản trị nhà hàng và dịch vụ ăn uống (CTĐT bằng tiếng Anh)": {
+      "code": "7810202TA",
+      "block": "D01; D14; D15",
+      "mark": 18.6
+    }
+  },
+  "ĐH Giao thông Vận tải": {
+    "Ngôn ngữ Anh": {
+      "code": "7220201",
+      "block": "D01; D09; D10",
+      "mark": 25.33
+    },
+    "Kinh tế (chuyên ngành: kinh tế và quản lý đầu tư, kinh tế bưu chính viễn thông)": {
+      "code": "7310101",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.15
+    },
+    "Quản trị kinh doanh": {
+      "code": "7340101",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.41
+    },
+    "Quản trị kinh doanh (Chương trình CLC Quản trị kinh doanh Việt-Anh)": {
+      "code": "7340101 QT",
+      "block": "A00; A01; D01; D07",
+      "mark": 22.63
+    },
+    "Tài chính - Ngân hàng": {
+      "code": "7340201",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.86
+    },
+    "Kế toán (chuyên ngành Kế toán tổng hợp)": {
+      "code": "7340301",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.41
+    },
+    "Kế toán (Chương trình CLC Kế toán tổng hợp Việt-Anh)": {
+      "code": "7340301 QT",
+      "block": "A00; A01; D01; D07",
+      "mark": 21.15
+    },
+    "Toán ứng dụng (chuyên ngành toán tin ứng dụng)": {
+      "code": "7460112",
+      "block": "A00; A01; D01; D07; X06",
+      "mark": 24.15
+    },
+    "Khoa học máy tính": {
+      "code": "7480101",
+      "block": "A00; A01; D07; X06",
+      "mark": 24.35
+    },
+    "Kỹ thuật máy tính (theo hướng chuyên sâu vi mạch bán dẫn, bao gồm lớp kỹ sư tài năng)": {
+      "code": "7480106",
+      "block": "A00; A01; D07; X06",
+      "mark": 23.95
+    },
+    "Công nghệ thông tin": {
+      "code": "7480201",
+      "block": "A00; A01; D07; X06",
+      "mark": 23.7
+    },
+    "Công nghệ thông tin (Chương trình CLC Công nghệ thông tin Việt-Anh)": {
+      "code": "7480201 QT",
+      "block": "A00; A01; D07; X06",
+      "mark": 23.1
+    },
+    "Logistics và quản lý chuỗi cung ứng": {
+      "code": "7510605",
+      "block": "A00; A01; D01; D07",
+      "mark": 27.52
+    },
+    "Kỹ thuật cơ khí (chuyên ngành: Công nghệ chế tạo cơ khí, Tự động hoá thiết kế cơ khí)": {
+      "code": "7520103",
+      "block": "A00; A01; D07; X06",
+      "mark": 25.95
+    },
+    "Kỹ thuật cơ khí (Chương trình CLC Cơ khí ô tô Việt - Anh)": {
+      "code": "7520103 QT",
+      "block": "A00; A01; D01; D07; X06",
+      "mark": 22.78
+    },
+    "Kỹ thuật robot (chuyên ngành Kỹ thuật robot và trí tuệ nhân tạo)": {
+      "code": "7520107",
+      "block": "A00; A01; D07; X06",
+      "mark": 24.2
+    },
+    "Kỹ thuật cơ điện tử": {
+      "code": "7520114",
+      "block": "A00; A01; D07; X06",
+      "mark": 24.93
+    },
+    "Kỹ thuật nhiệt (chuyên ngành: Kỹ thuật nhiệt lạnh và điều hoà không khí)": {
+      "code": "7520115",
+      "block": "A00; A01; D01; D07; X06",
+      "mark": 24.71
+    },
+    "Kỹ thuật cơ khí động lực (chuyên ngành: Kỹ thuật phương tiện đường sắt, Máy xây dựng, Kỹ thuật máy động lực)": {
+      "code": "7520116",
+      "block": "A00; A01; D01; D07; X06",
+      "mark": 23.82
+    },
+    "Kỹ thuật cơ khí động lực (chuyên ngành Kỹ thuật phương tiện đường sắt tốc độ cao)": {
+      "code": "7520116 DS",
+      "block": "A00; A01; D01; D07; X06",
+      "mark": 22.63
+    },
+    "Kỹ thuật ô tô (bao gồm lớp kỹ sư tài năng)": {
+      "code": "7520130",
+      "block": "A00; A01; D07",
+      "mark": 23.66
+    },
+    "Kỹ thuật điện (chuyên ngành: Trang bị điện trong công nghiệp và GTVT, Hệ thống điện trong giao thông và công nghiệp)": {
+      "code": "7520201",
+      "block": "A00; A01; D07; X06",
+      "mark": 23.88
+    },
+    "Kỹ thuật điện (chuyên ngành Hệ thống điện đường sắt tốc độ cao, đường sắt đô thị)": {
+      "code": "7520201 DS",
+      "block": "A00; A01; D07; X06",
+      "mark": 23.39
+    },
+    "Kỹ thuật điện tử - viễn thông (chuyên ngành: Kỹ thuật viễn thông, Kỹ thuật thông tin và truyền thông, Kỹ thuật điện tử và tin học công nghiệp)": {
+      "code": "7520207",
+      "block": "A00; A01; D07; X06",
+      "mark": 23.67
+    },
+    "Kỹ thuật điều khiển và tự động hoá (chuyên ngành: Tự động hoá)": {
+      "code": "7520216",
+      "block": "A00; A01; D07; X06",
+      "mark": 25.42
+    },
+    "Kỹ thuật điều khiển và tự động hoá (chuyên ngành Điều khiển và thông tin tín hiệu đường sắt hiện đại)": {
+      "code": "7520216 DS",
+      "block": "A00; A01; D07; X06",
+      "mark": 24.39
+    },
+    "Kỹ thuật điều khiển và tự động hoá (chuyên ngành Hệ thống giao thông thông minh)": {
+      "code": "7520216-GTTM",
+      "block": "A00; A01; D07; X06",
+      "mark": 25.56
+    },
+    "Kỹ thuật môi trường": {
+      "code": "7520320",
+      "block": "A00; B00; D01; D07; X06",
+      "mark": 21.38
+    },
+    "Kiến trúc": {
+      "code": "7580101",
+      "block": "A00; A01; V00; V01",
+      "mark": 23.52
+    },
+    "Quản lý đô thị và công trình": {
+      "code": "7580106",
+      "block": "A00; A01; D01; D07; X06",
+      "mark": 22.62
+    },
+    "Kỹ thuật xây dựng (chuyên ngành: Xây dựng dân dụng và công nghiệp, Kết cấu xây dựng, Vật liệu và công nghệ xây dựng)": {
+      "code": "7580201",
+      "block": "A00; A01; D01; D07; X06",
+      "mark": 22.44
+    },
+    "Kỹ thuật xây dựng (Chương trình tiên tiến Kỹ thuật xây dựng công trình GT)": {
+      "code": "7580201 QT",
+      "block": "A00; A01; D01; D07; X06",
+      "mark": 19.71
+    },
+    "Kỹ thuật xây dựng công trình thủy": {
+      "code": "7580202",
+      "block": "A00; A01; D01; D07; X06",
+      "mark": 20.48
+    },
+    "Kỹ thuật xây dựng công trình giao thông (chuyên ngành: Cầu đường bộ, Đường bộ và kỹ thuật giao thông, Cầu và kết cấu, ĐS/ ĐS đô thị, XD sân bay cảng hàng không, Công trình GT đô thị)": {
+      "code": "7580205",
+      "block": "A00; A01; D01; D07; X06",
+      "mark": 17.94
+    },
+    "Kỹ thuật xây dựng công trình giao thông (chuyên ngành đường sắt tốc độ cao)": {
+      "code": "7580205 DS",
+      "block": "A00; A01; D01; D07; X06",
+      "mark": 22.47
+    },
+    "Kỹ thuật xây dựng công trình giao thông (Chương trình CLC Cầu-Đường bộ Việt-Pháp)": {
+      "code": "7580205 QT1",
+      "block": "A00; A01; D03; D07; X06",
+      "mark": 20.01
+    },
+    "Kỹ thuật xây dựng công trình giao thông (Chương trình CLC Cầu-Đường bộ Việt-Anh)": {
+      "code": "7580205 QT2",
+      "block": "A00; A01; D01; D07; X06",
+      "mark": 17.25
+    },
+    "Kỹ thuật xây dựng công trình giao thông (Chương trình CLC Công trình giao thông đô thị Việt-Nhật)": {
+      "code": "7580205 QT3",
+      "block": "A00; A01; D01; D07; X06",
+      "mark": 16.19
+    },
+    "Kỹ thuật cơ sở hạ tầng (chuyên ngành: cơ sở hạ tầng kỹ thuật đô thị)": {
+      "code": "7580210",
+      "block": "A00; A01; D01; D07; X06",
+      "mark": 22.28
+    },
+    "Kỹ thuật an toàn giao thông (Ngành tuyển sinh các năm trước: Công nghệ kỹ thuật giao thông - Chuyên ngành: Kỹ thuật an toàn giao thông)": {
+      "code": "7580215",
+      "block": "A00; A01; D01; D07; X06",
+      "mark": 21.44
+    },
+    "Kinh tế xây dựng (chuyên ngành: Kinh tế và quản lý đầu tư xây dựng)": {
+      "code": "7580301",
+      "block": "A00; A01; D01; D07; X06",
+      "mark": 24.08
+    },
+    "Kinh tế xây dựng (Chương trình CLC Kinh tế xây dựng công trình GT Việt-Anh)": {
+      "code": "7580301 QT",
+      "block": "A00; A01; D01; D07; X06",
+      "mark": 20.52
+    },
+    "Quản lý xây dựng": {
+      "code": "7580302",
+      "block": "A00; A01; D01; D07; X06",
+      "mark": 23.24
+    },
+    "Quản lý xây dựng (Chương trình CLC Quản lý xây dựng Việt - Anh)": {
+      "code": "7580302 QT",
+      "block": "A00; A01; D01; D07; X06",
+      "mark": 16.36
+    },
+    "Quản trị dịch vụ du lịch và lữ hành": {
+      "code": "7810103",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.02
+    },
+    "Khai thác vận tải (chuyên ngành: Vận tải - Thương mại quốc tế, Quy hoạch và quản lý GTVT đô thị, Vận tải - Kinh tế đường bộ và thành phố, Vận tải đường sắt)": {
+      "code": "7840101",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.99
+    },
+    "Khai thác vận tải (chuyên ngành Khai thác và quản lý đường sắt tốc độ cao, Khai thác và quản lý đường sắt đô thị)": {
+      "code": "7840101 DS",
+      "block": "A00; A01; D01; D07",
+      "mark": 21.29
+    },
+    "Kinh tế vận tải (chuyên ngành: Kinh tế vận tải ô tô, Kinh tế vận tải hàng không, Kinh tế vận tải đường sắt, Kinh tế vận tải thuỷ bộ)": {
+      "code": "7840104",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.07
+    }
+  },
+  "ĐH Thủy lợi": {
+    "Xây dựng và quản lý công trình thủy (Kỹ thuật xây dựng công trình thủy)": {
+      "code": "TLA101",
+      "block": "A00; A01; D01; D07; C01; C02; X02; X06",
+      "mark": 18.48
+    },
+    "Kỹ thuật tài nguyên nước": {
+      "code": "TLA102",
+      "block": "A00; A01; D01; D07; C01; C02; X02; X06",
+      "mark": 18.49
+    },
+    "Tài nguyên nước và môi trường (Thủy văn học)": {
+      "code": "TLA103",
+      "block": "A00; A01; D01; D07; C01; C02; X02; X06",
+      "mark": 18.0
+    },
+    "Kỹ thuật xây dựng dân dụng và công nghiệp (Kỹ thuật xây dựng)": {
+      "code": "TLA104",
+      "block": "A00; A01; D01; D07; C01; C02; X02; X06",
+      "mark": 18.76
+    },
+    "Kỹ thuật cơ khí": {
+      "code": "TLA105",
+      "block": "A00; A01; D01; D07; C01; X02; X06; X26",
+      "mark": 22.6
+    },
+    "Công nghệ thông tin": {
+      "code": "TLA106",
+      "block": "A00; A01; D01; D07; C01; X02; X06; X26",
+      "mark": 23.23
+    },
+    "Kỹ thuật cấp thoát nước": {
+      "code": "TLA107",
+      "block": "A00; A01; D01; D07; C01; C02; X02; X06",
+      "mark": 18.0
+    },
+    "Kỹ thuật môi trường": {
+      "code": "TLA109",
+      "block": "A00; A01; D01; D07; C01; C02; X02; X10",
+      "mark": 17.75
+    },
+    "Xây dựng và quản lý hạ tầng đô thị (Kỹ thuật cơ sở hạ tầng)": {
+      "code": "TLA110",
+      "block": "A00; A01; D01; D07; C01; C02; X02; X06",
+      "mark": 19.0
+    },
+    "Công nghệ kỹ thuật xây dựng": {
+      "code": "TLA111",
+      "block": "A00; A01; D01; D07; C01; C02; X02; X06",
+      "mark": 19.48
+    },
+    "Kỹ thuật điện": {
+      "code": "TLA112",
+      "block": "A00; A01; D01; D07; C01; X02; X06; X26",
+      "mark": 22.0
+    },
+    "Kỹ thuật xây dựng công trình giao thông (gồm các chương trình: Công nghệ và kỹ thuật xây dựng cầu, đường; Công nghệ và kỹ thuật Đường sắt tốc độ cao và đường sắt đô thị)": {
+      "code": "TLA113",
+      "block": "A00; A01; D01; D07; C01; C02; X02; X06",
+      "mark": 18.5
+    },
+    "Quản lý xây dựng": {
+      "code": "TLA114",
+      "block": "A00; A01; D01; D07; C01; C02; X02; X06",
+      "mark": 19.96
+    },
+    "Hệ thống thông tin": {
+      "code": "TLA116",
+      "block": "A00; A01; D01; D07; C01; X02; X06; X26",
+      "mark": 21.75
+    },
+    "Kỹ thuật phần mềm": {
+      "code": "TLA117",
+      "block": "A00; A01; D01; D07; C01; X02; X06; X26",
+      "mark": 21.55
+    },
+    "Kỹ thuật hóa học": {
+      "code": "TLA118",
+      "block": "A00; D07; C02; C05; B00; X09; X10",
+      "mark": 20.5
+    },
+    "Công nghệ sinh học": {
+      "code": "TLA119",
+      "block": "A02; B00; D08; B01; B02; B03; X13; X14",
+      "mark": 18.76
+    },
+    "Kỹ thuật cơ điện tử": {
+      "code": "TLA120",
+      "block": "A00; A01; D01; D07; C01; X02; X06; X26",
+      "mark": 23.33
+    },
+    "Kỹ thuật điều khiển và tự động hóa": {
+      "code": "TLA121",
+      "block": "A00; A01; D01; D07; C01; X02; X06; X26",
+      "mark": 24.1
+    },
+    "Công nghệ chế tạo máy (Công nghệ sản xuất tiên tiến, tự động hóa thiết kế cơ khí)": {
+      "code": "TLA122",
+      "block": "A00; A01; D01; D07; C01; X02; X06; X26",
+      "mark": 20.75
+    },
+    "Kỹ thuật ô tô": {
+      "code": "TLA123",
+      "block": "A00; A01; D01; D07; C01; X02; X06; X26",
+      "mark": 22.5
+    },
+    "Kỹ thuật điện tử - viễn thông (gồm các chương trình: Kỹ thuật điện tử -viễn thông; Công nghệ bán dẫn và thiết kế vi mạch)": {
+      "code": "TLA124",
+      "block": "A00; A01; D01; D07; C01; X02; X06; X26",
+      "mark": 22.5
+    },
+    "Trí tuệ nhân tạo và khoa học dữ liệu": {
+      "code": "TLA126",
+      "block": "A00; A01; D01; D07; C01; X02; X06; X26",
+      "mark": 22.12
+    },
+    "An ninh mạng": {
+      "code": "TLA127",
+      "block": "A00; A01; D01; D07; C01; X02; X06; X26",
+      "mark": 22.04
+    },
+    "Kỹ thuật Robot và Điều khiển thông minh": {
+      "code": "TLA128",
+      "block": "A00; A01; D01; D07; C01; X02; X06; X26",
+      "mark": 21.15
+    },
+    "Chương trình tiên tiến ngành Kỹ thuật xây dựng": {
+      "code": "TLA201",
+      "block": "A00; A01; D01; D07; C01; X02; X26",
+      "mark": 17.0
+    },
+    "Chương trình tiên tiến ngành Kỹ thuật tài nguyên nước": {
+      "code": "TLA202",
+      "block": "A00; A01; D01; D07; C01; X02; X26",
+      "mark": 17.35
+    },
+    "Ngôn ngữ Anh": {
+      "code": "TLA203",
+      "block": "A01; D01; D07; D08; D09; D10; D14; D15",
+      "mark": 22.59
+    },
+    "Ngôn ngữ Trung Quốc": {
+      "code": "TLA204",
+      "block": "D01; D04; D45; D55; D63; X37",
+      "mark": 25.45
+    },
+    "Luật": {
+      "code": "TLA301",
+      "block": "C00; C03; C04; D01; D14; D15; X01",
+      "mark": 25.17
+    },
+    "Luật kinh tế": {
+      "code": "TLA302",
+      "block": "C00; C03; C04; D01; D14; D15; X01",
+      "mark": 25.5
+    },
+    "Kinh tế": {
+      "code": "TLA401",
+      "block": "A00; A01; D01; D07; C01; X02; X26",
+      "mark": 21.91
+    },
+    "Quản trị kinh doanh": {
+      "code": "TLA402",
+      "block": "A00; A01; D01; D07; C01; X02; X26",
+      "mark": 22.1
+    },
+    "Kế toán": {
+      "code": "TLA403",
+      "block": "A00; A01; D01; D07; C01; X02; X26",
+      "mark": 22.25
+    },
+    "Kinh tế xây dựng": {
+      "code": "TLA404",
+      "block": "A00; A01; D01; D07; C01; X02; X26",
+      "mark": 20.73
+    },
+    "Thương mại điện tử": {
+      "code": "TLA405",
+      "block": "A00; A01; D01; D07; C01; X02; X26",
+      "mark": 22.98
+    },
+    "Quản trị dịch vụ du lịch và lữ hành": {
+      "code": "TLA406",
+      "block": "A01; D01; D07; D09; D10",
+      "mark": 21.48
+    },
+    "Logistics và quản lý chuỗi cung ứng": {
+      "code": "TLA407",
+      "block": "A00; A01; D01; D07; C01; X02; X26",
+      "mark": 23.0
+    },
+    "Tài chính - Ngân hàng": {
+      "code": "TLA408",
+      "block": "A00; A01; D01; D07; C01; X02; X26",
+      "mark": 22.26
+    },
+    "Kiểm toán": {
+      "code": "TLA409",
+      "block": "A00; A01; D01; D07; C01; X02; X26",
+      "mark": 21.44
+    },
+    "Kinh tế số": {
+      "code": "TLA410",
+      "block": "A00; A01; D01; D07; C01; X02; X26",
+      "mark": 22.11
+    },
+    "Chương trình Kế toán tích hợp chứng chỉ quốc tể": {
+      "code": "TLA411",
+      "block": "A00; A01; D01; D07; C01; X02; X26",
+      "mark": 18.09
+    },
+    "Chương trình Công nghệ tài chính": {
+      "code": "TLA412",
+      "block": "A00; A01; D01; D07; C01; X02; X26",
+      "mark": 19.5
+    }
+  },
+  "ĐH Mỏ - Địa chất": {
+    "Ngôn ngữ Anh": {
+      "code": "7220201",
+      "block": "D01; D09; D10; D14; D15; D66; D78; D96",
+      "mark": 22.0
+    },
+    "Ngôn ngữ Trung Quốc": {
+      "code": "7220204",
+      "block": "C00; C03; D01; D04; D09; D14; D66; D78",
+      "mark": 25.5
+    },
+    "Quản trị kinh doanh": {
+      "code": "7340101",
+      "block": "A00; A01; C04; D01; D07; D09; D10; D84",
+      "mark": 23.0
+    },
+    "Tài chính - Ngân hàng": {
+      "code": "7340201",
+      "block": "A00; A01; C01; D01; D07; D09; D10; D84",
+      "mark": 23.0
+    },
+    "Kế toán": {
+      "code": "7340301",
+      "block": "A00; A01; C01; D01; D07; D09; D10; D84",
+      "mark": 22.75
+    },
+    "Địa chất học": {
+      "code": "7440201",
+      "block": "A00; A04; A06; C01; C04; D01; D07; D10",
+      "mark": 15.5
+    },
+    "Quản lý và phân tích dữ liệu khoa học": {
+      "code": "7440229",
+      "block": "A00; A01; A04; A06; B00; B02; B08; D07",
+      "mark": 16.0
+    },
+    "Khoa học dữ liệu": {
+      "code": "7460108",
+      "block": "A00; A01; D01; D07; X06; X10; X26; X27",
+      "mark": 20.0
+    },
+    "Công nghệ thông tin": {
+      "code": "7480201",
+      "block": "A00; A01; D01; D07; X06; X10; X26; X27",
+      "mark": 21.5
+    },
+    "Địa tin học": {
+      "code": "7480206",
+      "block": "A00; A01; C02; C03; C04; D01; D10",
+      "mark": 16.0
+    },
+    "Công nghệ kỹ thuật điện, điện tử": {
+      "code": "7510301",
+      "block": "A00; A01; C01; D01; X06",
+      "mark": 24.0
+    },
+    "Công nghệ kỹ thuật hóa học": {
+      "code": "7510401",
+      "block": "A00; A01; A02; A05; A06; B00; C02; D07",
+      "mark": 19.0
+    },
+    "Quản lý công nghiệp": {
+      "code": "7510601",
+      "block": "A00; A01; C04; D01; D07; D09; D10; D84",
+      "mark": 20.5
+    },
+    "Kỹ thuật cơ khí": {
+      "code": "7520103",
+      "block": "A00; A01; C01; D01; X06",
+      "mark": 22.5
+    },
+    "Kỹ thuật Robot": {
+      "code": "7520107",
+      "block": "A00; A01; C01; D01; X06",
+      "mark": 21.0
+    },
+    "Kỹ thuật cơ điện tử": {
+      "code": "7520114",
+      "block": "A00; A01; C01; D01; X06",
+      "mark": 23.5
+    },
+    "Kỹ thuật cơ khí động lực": {
+      "code": "7520116",
+      "block": "A00; A01; C01; D01; X06",
+      "mark": 19.0
+    },
+    "Kỹ thuật không gian": {
+      "code": "7520121",
+      "block": "A01; A04; A09; B02; C04; D01; D10; D84",
+      "mark": 15.0
+    },
+    "Kỹ thuật ô tô": {
+      "code": "7520130",
+      "block": "A00; A01; C01; D01; X06",
+      "mark": 23.0
+    },
+    "Kỹ thuật điện": {
+      "code": "7520201",
+      "block": "A00; A01; C01; D01; X06",
+      "mark": 21.5
+    },
+    "Kỹ thuật điều khiển và tự động hoá": {
+      "code": "7520216",
+      "block": "A00; A01; C01; D01; X06",
+      "mark": 25.25
+    },
+    "Kỹ thuật hoá học": {
+      "code": "7520301",
+      "block": "A00; A01; A02; A05; A06; B00; C02; D07",
+      "mark": 19.0
+    },
+    "Kỹ thuật vật liệu": {
+      "code": "7520309",
+      "block": "A00; A01; A02; A03; A04; A10; C01; D01",
+      "mark": 16.0
+    },
+    "Kỹ thuật môi trường": {
+      "code": "7520320",
+      "block": "A00; A01; A04; A09; B00; C01; C04; D01",
+      "mark": 15.5
+    },
+    "Kỹ thuật địa chất": {
+      "code": "7520501",
+      "block": "A00; A01; C01; C02; C04; D01; D07; D10",
+      "mark": 15.0
+    },
+    "Kỹ thuật địa vật lý": {
+      "code": "7520502",
+      "block": "A00; A01; A04; A06; B00; B02; B08; D07",
+      "mark": 15.0
+    },
+    "Kỹ thuật trắc địa - bản đồ": {
+      "code": "7520503",
+      "block": "A00; A01; C04; D01; D10",
+      "mark": 15.25
+    },
+    "Đá quý Đá mỹ nghệ": {
+      "code": "7520505",
+      "block": "A00; A04; C01; C02; C04; D01; D10; D15",
+      "mark": 15.5
+    },
+    "Kỹ thuật mỏ": {
+      "code": "7520601",
+      "block": "A00; A01; B03; C02; C03; C04; D01; D10",
+      "mark": 17.0
+    },
+    "Kỹ thuật dầu khí": {
+      "code": "7520604",
+      "block": "A00; A01; B00; B02; B08; C02; D01; D07",
+      "mark": 17.0
+    },
+    "Kỹ thuật khí thiên nhiên": {
+      "code": "7520605",
+      "block": "A00; A01; B00; B02; B08; C02; D01; D07",
+      "mark": 16.0
+    },
+    "Công nghệ số trong thăm dò và khai thác tài nguyên thiên nhiên": {
+      "code": "7520606",
+      "block": "A00; A01; A04; A06; B00; B02; B08; D07",
+      "mark": 16.0
+    },
+    "Kỹ thuật tuyển khoáng": {
+      "code": "7520607",
+      "block": "A00; A01; B03; C02; C03; C04; D01; D10",
+      "mark": 17.0
+    },
+    "Quản lý đô thị và công trình": {
+      "code": "7580106",
+      "block": "A00; A07; C01; C02; C04; D01; D07; D10",
+      "mark": 15.0
+    },
+    "Quản lý phát triển đô thị và bất động sản": {
+      "code": "7580109",
+      "block": "A00; A01; C02; C03; C04; D01; D10",
+      "mark": 20.0
+    },
+    "Kỹ thuật xây dựng": {
+      "code": "7580201",
+      "block": "A00; A01; A10; B04; C01; C02; C04; D01",
+      "mark": 19.5
+    },
+    "Xây dựng công trình ngầm thành phố và Hệ thống tàu điện ngầm": {
+      "code": "7580204",
+      "block": "A00; A01; A10; B04; C01; C02; C04; D01",
+      "mark": 16.0
+    },
+    "Kỹ thuật xây dựng công trình giao thông": {
+      "code": "7580205",
+      "block": "A00; A01; C01; C04; D01",
+      "mark": 18.5
+    },
+    "Địa kỹ thuật xây dựng": {
+      "code": "7580211",
+      "block": "A00; A01; A02; C02; C04; D01; D07; D10",
+      "mark": 15.0
+    },
+    "Kỹ thuật tài nguyên nước": {
+      "code": "7580212",
+      "block": "A00; A01; A04; C01; C02; C04; D01; D07",
+      "mark": 15.0
+    },
+    "Quản lý xây dựng": {
+      "code": "7580302",
+      "block": "A00; A01; A10; B04; C01; C02; C04; D01",
+      "mark": 21.0
+    },
+    "Hoá dược": {
+      "code": "7720203",
+      "block": "A00; A01; A06; A11; B00; C02; D01; D07",
+      "mark": 19.0
+    },
+    "Du lịch địa chất": {
+      "code": "7810105",
+      "block": "A04; A06; A07; C03; C04; D01; D07; D10",
+      "mark": 20.0
+    },
+    "Quản lý tài nguyên và môi trường": {
+      "code": "7850101",
+      "block": "A00; A07; A09; B00; C04; C14; D01; D10",
+      "mark": 18.5
+    },
+    "Quản lý đất đai": {
+      "code": "7850103",
+      "block": "A00; A01; A09; C04; D01; D10",
+      "mark": 18.5
+    },
+    "Quản lý tài nguyên khoáng sản": {
+      "code": "7850196",
+      "block": "A00; A01; A04; A06; B00; C04; D01; D10",
+      "mark": 15.5
+    },
+    "An toàn, Vệ sinh lao động": {
+      "code": "7850202",
+      "block": "A00; A01; B03; C02; C03; C04; D01; D10",
+      "mark": 17.0
+    }
+  },
+  "ĐH Nông nghiệp Hà Nội": {
+    "Thú y": {
+      "code": "HVN01",
+      "block": "A00; A01; B00; C03; C04; D01; D07; X01; X07; X08 ",
+      "mark": 20.5
+    },
+    "Chăn nuôi thú y - Thủy sản": {
+      "code": "HVN02",
+      "block": "A00; A01; B00; C03; C04; D01; D07; X01; X03; X04 ",
+      "mark": 17.0
+    },
+    "Nông nghiệp và Cảnh quan": {
+      "code": "HVN03",
+      "block": "A00; A01; B00; C03; C04; D01; D07; X01; X07; X08 ",
+      "mark": 17.0
+    },
+    "Công nghệ kỹ thuật ô tô và Cơ điện tử": {
+      "code": "HVN04",
+      "block": "A00; A01; C01; C02; C03; C04; D01; X01; X07; X08 ",
+      "mark": 21.0
+    },
+    "Kỹ thuật cơ khí": {
+      "code": "HVN05",
+      "block": "A00; A01; C01; C02; C03; C04; D01; X01; X07; X08 ",
+      "mark": 21.5
+    },
+    "Kỹ thuật điện, Điện tử và Tự động hóa": {
+      "code": "HVN06",
+      "block": "A00; A01; C01; C02; C03; C04; D01; X01; X07; X08 ",
+      "mark": 22.0
+    },
+    "Logistics và Quản lý chuỗi cung ứng": {
+      "code": "HVN07",
+      "block": "A00; A01; A07; C01; C02; C03; C04; D01; X01 ",
+      "mark": 21.0
+    },
+    "Kế toán, Quản trị kinh doanh và Thương mại": {
+      "code": "HVN08",
+      "block": "A00; A01; A07; C01; C02; C03; C04; D01; X01 ",
+      "mark": 17.0
+    },
+    "Công nghệ sinh học và Công nghệ dược liệu": {
+      "code": "HVN09",
+      "block": "A00; A01; B00; B02; B08; C03; D01; X07; X08; X13 ",
+      "mark": 20.5
+    },
+    "Công nghệ thực phẩm và Chế biến": {
+      "code": "HVN10",
+      "block": "A00; A01; B00; C03; C04; D01; D07; X01; X07; X08 ",
+      "mark": 21.0
+    },
+    "Kinh tế và Quản lý": {
+      "code": "HVN11",
+      "block": "A00; A01; A07; C01; C02; C03; C04; D01; X01 ",
+      "mark": 17.0
+    },
+    "Xã hội học": {
+      "code": "HVN12",
+      "block": "C00; C01; C03; D01; D14; D15; X03; X04; X70; X74 ",
+      "mark": 22.0
+    },
+    "Luật": {
+      "code": "HVN13",
+      "block": "C00; C01; C03; D01; D14; D15; X03; X04; X70; X74 ",
+      "mark": 23.3
+    },
+    "Công nghệ thông tin và Kỹ thuật số": {
+      "code": "HVN14",
+      "block": "A00; A01; C01; C02; C03; D01; X02; X03; X04; X07; X08 ",
+      "mark": 19.6
+    },
+    "Quản lý đất đai, Bất động sản và Môi trường": {
+      "code": "HVN15",
+      "block": "A00; A01; A07; C01; C02; C03; C04; D01; X01 ",
+      "mark": 18.3
+    },
+    "Khoa học Môi trường": {
+      "code": "HVN16",
+      "block": "A00; A01; B00; C03; C04; D01; D07; X01; X07; X08 ",
+      "mark": 21.0
+    },
+    "Ngôn ngữ Anh": {
+      "code": "HVN17",
+      "block": "A01; D01; D09; D10; D11; D14; D15; X25; X78 ",
+      "mark": 21.2
+    },
+    "Sư phạm Công nghệ": {
+      "code": "HVN18",
+      "block": "A00; A01; B00; C01; C02; C03; D01; X03; X04; X07; X08 ",
+      "mark": 24.1
+    },
+    "Du lịch": {
+      "code": "HVN19",
+      "block": "A00; A01; A07; C01; C02; C03; C04; D01; X01 ",
+      "mark": 23.3
+    }
+  },
+  "ĐH Lâm nghiệp": {
+    "Kinh tế": {
+      "code": "7310101",
+      "block": "A01; C00; D01; D14; D15; X01; X26; X70; X74; X78",
+      "mark": 16.2
+    },
+    "Quản trị kinh doanh": {
+      "code": "7340101",
+      "block": "A01; C00; D01; D14; D15; X01; X26; X70; X74; X78",
+      "mark": 15.2
+    },
+    "Bất động sản": {
+      "code": "7340116",
+      "block": "C00; C03; C04; D01; X01; X02",
+      "mark": 15.5
+    },
+    "Tài chính - Ngân hàng": {
+      "code": "7340201",
+      "block": "A01; C00; D01; D14; D15; X01; X26; X70; X74; X78",
+      "mark": 17.0
+    },
+    "Kế toán": {
+      "code": "7340301",
+      "block": "A01; C00; D01; D14; D15; X01; X26; X70; X74; X78",
+      "mark": 16.0
+    },
+    "Công nghệ sinh học": {
+      "code": "7420201",
+      "block": "A00; B00; B03; C02; D01; D10; X02; X04",
+      "mark": 15.0
+    },
+    "Hệ thống thông tin": {
+      "code": "7480104",
+      "block": "A00; A01; C01; C02; D01; X02; X03; X06; X26; X56",
+      "mark": 15.2
+    },
+    "Công nghệ kỹ thuật cơ điện tử": {
+      "code": "7510203",
+      "block": "A00; A01; C01; C02; D01; X02; X03; X06; X26; X56",
+      "mark": 15.3
+    },
+    "Công nghệ kỹ thuật ô tô": {
+      "code": "7510205",
+      "block": "A00; A01; C01; C02; D01; X02; X03; X06; X26; X57",
+      "mark": 15.2
+    },
+    "Logistics và Quản lý chuỗi cung ứng": {
+      "code": "7510605",
+      "block": "A01; C00; D01; D14; D15; X01; X26; X70; X74; X78",
+      "mark": 16.5
+    },
+    "Kỹ thuật cơ khí": {
+      "code": "7520103",
+      "block": "A00; A01; C01; C02; D01; X02; X03; X06; X26; X56",
+      "mark": 15.2
+    },
+    "Kỹ thuật hệ thống công nghiệp": {
+      "code": "7520118",
+      "block": "A00; A01; C01; C02; D01; X02; X03; X06; X26; X56",
+      "mark": 20.1
+    },
+    "Công nghệ chế biến lâm sản": {
+      "code": "7549001",
+      "block": "A00; B00; C01; C02; C03; D01; X01; X03; X07; X27",
+      "mark": 15.0
+    },
+    "Kiến trúc cảnh quan": {
+      "code": "7580102",
+      "block": "C04; H00; V01; X01; X02; X03; X07; X57; X71; Y09",
+      "mark": 16.0
+    },
+    "Thiết kế nội thất": {
+      "code": "7580108",
+      "block": "A01; C00; C03; D01; D14; H00; V01; X01; X03; X07",
+      "mark": 16.5
+    },
+    "Kỹ thuật xây dựng": {
+      "code": "7580201",
+      "block": "A00; A01; C01; C02; D01; X02; X03; X06; X26; X56",
+      "mark": 15.8
+    },
+    "Chăn nuôi": {
+      "code": "7620105",
+      "block": "A00; B00; B03; C02; D01; D10; X02; X04",
+      "mark": 16.5
+    },
+    "Khoa học cây trồng": {
+      "code": "7620110",
+      "block": "A00; B00; B02; C03; C04; D01; D07; X12; X16",
+      "mark": 19.0
+    },
+    "Lâm sinh": {
+      "code": "7620205",
+      "block": "A01; B00; B03; C02; C04; D01; X02; X04; X12; X26",
+      "mark": 15.0
+    },
+    "Lâm nghiệp": {
+      "code": "7620210",
+      "block": "A01; B00; C00; C02; X02; X04; X06; X12; X26; X74",
+      "mark": 15.0
+    },
+    "Quản lý tài nguyên rừng": {
+      "code": "7620211",
+      "block": "A07; B03; C01; C02; C03; C04; D01; X01; X02; X04",
+      "mark": 15.1
+    },
+    "Thú y": {
+      "code": "7640101",
+      "block": "A00; B00; B03; C02; D01; D10; X02; X04",
+      "mark": 15.3
+    },
+    "Công tác xã hội": {
+      "code": "7760101",
+      "block": "A01; C00; D01; D14; D15; X01; X26; X70; X74; X78",
+      "mark": 16.0
+    },
+    "Quản trị dịch vụ Du lịch và Lữ hành": {
+      "code": "7810103",
+      "block": "A01; C00; D01; D14; D15; X01; X26; X70; X74; X78",
+      "mark": 16.7
+    },
+    "Quản lý tài nguyên và Môi trường": {
+      "code": "7850101",
+      "block": "A07; B03; C01; C02; C03; C04; D01; X01; X02; X04",
+      "mark": 16.0
+    },
+    "Quản lý đất đai": {
+      "code": "7850103",
+      "block": "C04; D01; D14; D15; X01; X02; X04; X26; X74; X78",
+      "mark": 16.6
+    },
+    "Du lịch sinh thái": {
+      "code": "7850104",
+      "block": "A07; B03; C01; C02; C03; C04; D01; X01; X02; X04",
+      "mark": 16.0
+    },
+    "Quản lý tài nguyên thiên nhiên": {
+      "code": "7850106",
+      "block": "A07; B03; C01; C02; C03; C04; D01; X01; X02; X04",
+      "mark": 16.1
+    }
+  },
+  "ĐH Kiến trúc Hà Nội": {
+    "Kinh tế đầu tư": {
+      "code": "7310104",
+      "block": "A00; C01; C02; D01; X03; X04",
+      "mark": 20.6
+    },
+    "Kinh tế phát triển": {
+      "code": "7310105",
+      "block": "A00; C01; C02; D01; X03; X04",
+      "mark": 19.85
+    },
+    "Công nghệ thông tin": {
+      "code": "7480201",
+      "block": "A00; C01; D01; X02; X03; X04",
+      "mark": 21.0
+    },
+    "Công nghệ đa phương tiện (Chuyên ngành của ngành Công nghệ thông tin)": {
+      "code": "7480201_1",
+      "block": "A00; C01; D01; X02; X03; X04",
+      "mark": 21.85
+    },
+    "Công nghệ game (Chuyên ngành thuộc ngành Công nghệ thông tin)": {
+      "code": "7480201_2",
+      "block": "A00; C01; D01; X02; X03; X04",
+      "mark": 21.75
+    },
+    "Công nghệ kỹ thuật vật liệu xây dựng": {
+      "code": "7510105",
+      "block": "A00; C01; C02; D01; X03; X04",
+      "mark": 20.5
+    },
+    "Xây dựng dân dụng và công nghiệp (Chuyên ngành thuộc ngành Kỹ thuật xâv dựng)": {
+      "code": "7580201",
+      "block": "A00; C01; C02; D01; X03; X04",
+      "mark": 20.75
+    },
+    "Xây dựng công trình ngầm dô thị (Chuyên ngành thuộc ngành Kỹ thuật xây dựng)": {
+      "code": "7580201_1",
+      "block": "A00; C01; C02; D01; X03; X04",
+      "mark": 18.35
+    },
+    "Quản lý dự án xây dựng (Chuyên ngành thuộc ngành Kỹ thuật xây dựng)": {
+      "code": "7580201_2",
+      "block": "A00; C01; C02; D01; X03; X04",
+      "mark": 19.98
+    },
+    "Kỹ thuật xây dựng công trình giao thông": {
+      "code": "7580205",
+      "block": "A00; C01; C02; D01; X03; X04",
+      "mark": 16.1
+    },
+    "Kỹ thuật hạ tầng đô thị (Chuyên ngành thuộc ngành Kỹ thuật cơ sở hạ tầng)": {
+      "code": "7580210",
+      "block": "A00; C01; C02; D01; X03; X04",
+      "mark": 16.1
+    },
+    "Kỹ thuật môi trường đô thị (Chuyên ngành thuộc ngành Kỹ thuật cơ sở hạ tầng)": {
+      "code": "7580210_1",
+      "block": "A00; C01; C02; D01; X03; X04",
+      "mark": 16.1
+    },
+    "Công nghệ cơ điện công trình (Chuyên ngành thuộc ngành Kỹ thuật cơ sở hạ tầng)": {
+      "code": "7580210_2",
+      "block": "A00; C01; C02; D01; X03; X04",
+      "mark": 16.1
+    },
+    "Kỹ thuật cấp thoát nước": {
+      "code": "7580213",
+      "block": "A00; C01; C02; D01; X03; X04",
+      "mark": 16.1
+    },
+    "Kinh tế Xây dựng": {
+      "code": "7580301",
+      "block": "A00; C01; C02; D01; X03; X04",
+      "mark": 20.85
+    },
+    "Quản lý xây dựng": {
+      "code": "7580302",
+      "block": "A00; C01; C02; D01; X03; X04",
+      "mark": 19.5
+    },
+    "Quản lý bất động sản (Chuyên ngành thuộc ngành Quản lý xây dựng)": {
+      "code": "7580302_1",
+      "block": "A00; C01; C02; D01; X03; X04",
+      "mark": 18.6
+    },
+    "Quản lý vận tải và Logistics (Chuyên ngành thuộc ngành Quản lý xây dựng)": {
+      "code": "7580302_2",
+      "block": "A00; C01; C02; D01; X03; X04",
+      "mark": 22.0
+    }
+  },
+  "ĐH Tài nguyên và Môi trường Hà Nội": {
+    "Ngôn ngữ Anh": {
+      "code": "7220201",
+      "block": "A01; D01; D07; D08; D14; D15; X25; X26; X27; X28; X78; X79",
+      "mark": 26.4
+    },
+    "Quản trị kinh doanh": {
+      "code": "7340101",
+      "block": "A00; A01; B03; C00; C01; C02; C03; C04; D01; X01; X02; X03; X04",
+      "mark": 26.0
+    },
+    "Marketing": {
+      "code": "7340115",
+      "block": "A00; A01; B03; C00; C01; C02; C03; C04; D01; X01; X02; X03; X04",
+      "mark": 26.65
+    },
+    "Bất động sản": {
+      "code": "7340116",
+      "block": "A00; A01; B03; C00; C01; C02; C03; C04; D01; X01; X02; X03; X04",
+      "mark": 23.85
+    },
+    "Kế toán": {
+      "code": "7340301",
+      "block": "A00; A01; A07; B03; C01; C02; C03; C04; D01; X01; X02; X03; X04",
+      "mark": 25.25
+    },
+    "Luật": {
+      "code": "7380101",
+      "block": "A00; A01; C00; C01; C02; C03; C04; D01; X01; X02; X17; X70",
+      "mark": 25.5
+    },
+    "Khí tượng và khí hậu học": {
+      "code": "7440222",
+      "block": "A00; A01; B00; B03; C01; C02; C03; C04; D01; X01; X02; X03; X04",
+      "mark": 15.0
+    },
+    "Thủy văn học": {
+      "code": "7440224",
+      "block": "A00; A01; B00; B03; C01; C02; C03; C04; D01; X01; X02; X03; X04",
+      "mark": 15.0
+    },
+    "Biến đổi khí hậu và phát triển bền vững": {
+      "code": "7440298",
+      "block": "A00; B03; C00; C01; C02; C03; C04; D01; D15; X01; X02; X03; X04",
+      "mark": 15.0
+    },
+    "Công nghệ thông tin": {
+      "code": "7480201",
+      "block": "A00; A01; B00; B03; C01; C02; C04; D01; X02; X03; X04; X06; X26",
+      "mark": 24.35
+    },
+    "Công nghệ kỹ thuật môi trường": {
+      "code": "7510406",
+      "block": "A00; A01; B00; B03; C01; C02; D01; D07; D08; X02; X03; X04; X09",
+      "mark": 15.5
+    },
+    "Logistics và Quản ký chuỗi cung ứng": {
+      "code": "7510605",
+      "block": "A00; A01; B03; C00; C01; C02; C03; C04; D01; X01; X02; X03; X04",
+      "mark": 26.5
+    },
+    "Kỹ thuật địa chất": {
+      "code": "7520501",
+      "block": "A00; A01; B03; C01; C02; C03; C04; D01; D15; X01; X02; X03; X04",
+      "mark": 15.0
+    },
+    "Ký thuật trắc địa - bản đồ": {
+      "code": "7520503",
+      "block": "A00; A01; B03; C01; C02; C03; C04; D01; D15; X01; X02; X03; X04",
+      "mark": 15.0
+    },
+    "Kỹ thuật trắc địa - bản đồ": {
+      "code": "7520503PH",
+      "block": "A00; A01; B03; C01; C02; C03; C04; D01; D15; X01; X02; X03; X04",
+      "mark": 15.0
+    },
+    "Đảm bảo chất lượng và an toàn thực phẩm": {
+      "code": "7540106",
+      "block": "A00; A01; B00; B03; C01; C02; D01; D07; D08; X02; X03; X04; X13",
+      "mark": 15.0
+    },
+    "Quản trị dịch vụ du lịch và lữ hành": {
+      "code": "7810103",
+      "block": "A00; A01; B03; C00; C01; C02; C03; C04; D01; X01; X02; X03; X04",
+      "mark": 25.6
+    },
+    "Quản trị khách sạn": {
+      "code": "7810201",
+      "block": "A00; A01; B03; C00; C01; C02; C03; C04; D01; X01; X02; X03; X04",
+      "mark": 25.6
+    },
+    "Quản lý tài nguyên và môi trường": {
+      "code": "7850101",
+      "block": "A00; B00; B03; C01; C02; C03; C04; D01; D15; X01; X02; X03; X04",
+      "mark": 21.25
+    },
+    "Kinh tế tài nguyên thiên nhiên": {
+      "code": "7850102",
+      "block": "A00; A01; A07; B03; C01; C02; C03; C04; D01; X01; X02; X03; X04",
+      "mark": 15.0
+    },
+    "Quản lý đất đai": {
+      "code": "7850103",
+      "block": "A00; B00; B03; C00; C01; C02; C03; C04; D01; X01; X02; X03; X04",
+      "mark": 23.5
+    },
+    "Quản lý tài nguyên nước": {
+      "code": "7850198",
+      "block": "A00; A01; B00; B03; C01; C02; C03; C04; D01; X01; X02; X03; X04",
+      "mark": 15.0
+    },
+    "Quản lý biển": {
+      "code": "7850199",
+      "block": "A00; A01; B00; B03; C01; C02; C03; C04; D01; X01; X02; X03; X04",
+      "mark": 15.0
+    }
+  },
+  "ĐH Nha Trang": {
+    "Ngôn ngữ Anh (04 chuyên ngành: Biên - phiên dịch; Tiếng Anh du lịch; Giảng dạy Tiếng Anh; Song ngữ Anh -Trung)": {
+      "code": "7220201",
+      "block": "D01",
+      "mark": 23.58
+    },
+    "Kinh tế (02 chuyên ngành: Kinh tế thủy sản; Quản lý kinh tế)": {
+      "code": "7310101",
+      "block": "D01; X01; X02; C04",
+      "mark": 19.81
+    },
+    "Kinh tế phát triển": {
+      "code": "7310105",
+      "block": "D01; X01; X02; C04",
+      "mark": 19.81
+    },
+    "Quản trị kinh doanh": {
+      "code": "7340101",
+      "block": "D01; X01; X02; C04",
+      "mark": 22.64
+    },
+    "Quản trị kinh doanh (Chương trình đặc biệt)": {
+      "code": "7340101A",
+      "block": "X02;X01;D01",
+      "mark": 22.64
+    },
+    "Marketing": {
+      "code": "7340115",
+      "block": "D01; X01; X02; C04",
+      "mark": 25.47
+    },
+    "Kinh doanh thương mại": {
+      "code": "7340121",
+      "block": "D01; X01; X02; C04",
+      "mark": 22.64
+    },
+    "Tài chính - Ngân hàng (02 chuyên ngành: Tài chính - Ngân hàng; Công nghệ tài chính)": {
+      "code": "7340201",
+      "block": "D01; X01; X02; C04",
+      "mark": 22.64
+    },
+    "Tài chính - Ngân hàng (Chương trình đặc biệt)": {
+      "code": "7340201A",
+      "block": "X02;X01;D01",
+      "mark": 22.64
+    },
+    "Kế toán": {
+      "code": "7340301",
+      "block": "D01; X01; X02; C04",
+      "mark": 21.7
+    },
+    "Kế toán (Chương trình đặc biệt)": {
+      "code": "7340301A",
+      "block": "X02;X01;D01",
+      "mark": 21.7
+    },
+    "Kiểm toán": {
+      "code": "7340302",
+      "block": "D01; X01; X02; C04",
+      "mark": 21.7
+    },
+    "Hệ thống thông tin quản lý": {
+      "code": "7340405",
+      "block": "D01; X01; X02; X03; X04",
+      "mark": 19.81
+    },
+    "Luật (02 chuyên ngành: Luật; Luật kinh tế)": {
+      "code": "7380101",
+      "block": "D01; X01; C03; C04",
+      "mark": 25.47
+    },
+    "Công nghệ sinh học": {
+      "code": "7420201",
+      "block": "B03; C02; X03; X04; D01",
+      "mark": 18.87
+    },
+    "Công nghệ sinh học (Chương trình Minh Phú -NTU)": {
+      "code": "7420201MP",
+      "block": "B03;C02;X03;X04;D01",
+      "mark": 18.87
+    },
+    "Khoa học máy tính": {
+      "code": "7480101",
+      "block": "X02; C01; X03; X04; D01",
+      "mark": 20.75
+    },
+    "Công nghệ thông tin": {
+      "code": "7480201",
+      "block": "X02; C01; X03; X04; D01",
+      "mark": 20.75
+    },
+    "Công nghệ thông tin (Chương trình đặc biệt)": {
+      "code": "7480201A",
+      "block": "X02;C01;X03;X04;D01",
+      "mark": 20.75
+    },
+    "Công nghệ thông tin Việt Nhật": {
+      "code": "7480201B",
+      "block": "X02;C01;X03;X04;D01",
+      "mark": 20.75
+    },
+    "Công nghệ chế tạo máy": {
+      "code": "7510202",
+      "block": "C01; X02; X03; X04; D01",
+      "mark": 18.87
+    },
+    "Kỹ thuật cơ khí (02 chuyên ngành: Kỹ thuật cơ khí; Thiết kế và chế tạo số)": {
+      "code": "7520103",
+      "block": "C01; X02; X03; X04; D01",
+      "mark": 19.81
+    },
+    "Cơ khí thủy sản thông minh (Chương trình Minh Phú - NTU)": {
+      "code": "7520103MP",
+      "block": "C01;X02;X03;X04;D01",
+      "mark": 18.87
+    },
+    "Kỹ thuật cơ điện tử": {
+      "code": "7520114",
+      "block": "C01; X02; X03; X04; D01",
+      "mark": 19.81
+    },
+    "Kỹ thuật nhiệt": {
+      "code": "7520115",
+      "block": "C01; X02; X03; X04; D01",
+      "mark": 18.87
+    },
+    "Kỹ thuật cơ khí động lực": {
+      "code": "7520116",
+      "block": "C01; X02; X03; X04; D01",
+      "mark": 18.87
+    },
+    "Kỹ thuật tàu thủy": {
+      "code": "7520122",
+      "block": "C01; X02; X03; X04; D01",
+      "mark": 19.34
+    },
+    "Kỹ thuật ô tô": {
+      "code": "7520130",
+      "block": "C01; X02; X03; X04; D01",
+      "mark": 20.28
+    },
+    "Kỹ thuật điện (chuyên ngành Kỹ thuật điện, điện tử)": {
+      "code": "7520201",
+      "block": "C01; X02; X03; X04; D01",
+      "mark": 20.28
+    },
+    "Kỹ thuật biển": {
+      "code": "7520206",
+      "block": "C01; X02; X03; X04; D01",
+      "mark": 18.87
+    },
+    "Kỹ thuật điều khiển và tự động hóa": {
+      "code": "7520216",
+      "block": "C01; X02; X03; X04; D01",
+      "mark": 19.81
+    },
+    "Kỹ thuật hoá học": {
+      "code": "7520301",
+      "block": "B03; C02; X03; X04; D01",
+      "mark": 18.87
+    },
+    "Kỹ thuật môi trường (02 chuyên ngành: Kỹ thuật môi trường; Quản lý môi trường và an toàn vệ sinh lao động)": {
+      "code": "7520320",
+      "block": "B03; C02; X03; X04; D01",
+      "mark": 18.87
+    },
+    "Công nghệ thực phẩm (02 chuyên ngành: Công nghệ thực phẩm; Dinh dưỡng và ẩm thực)": {
+      "code": "7540101",
+      "block": "B03; C02; X03; X04; D01",
+      "mark": 19.34
+    },
+    "Công nghệ chế biến thuỷ sản (02 chuyên ngành: Công nghệ chế biến thủy sản; Công nghệ sau thu hoạch)": {
+      "code": "7540105",
+      "block": "B03; C02; X03; X04; D01",
+      "mark": 18.87
+    },
+    "Công nghệ chế biến thuỷ sản (chương trình Hải Vương - NTU)": {
+      "code": "7540105HV",
+      "block": "B03;C02;X03;X04;D01",
+      "mark": 18.87
+    },
+    "Công nghệ chế biến thuỷ sản (Chương trình Minh Phú - NTU)": {
+      "code": "7540105MP",
+      "block": "B03;C02;X03;X04;D01",
+      "mark": 18.87
+    },
+    "Đảm bảo chất lượng và an toàn thưc phẩm": {
+      "code": "7540106",
+      "block": "B03; C02; X03; X04; D01",
+      "mark": 18.87
+    },
+    "Kỹ thuật xây dựng (02 chuyên ngành: Kỹ thuật xây dựng; Quản lý xây dựng)": {
+      "code": "7580201",
+      "block": "C01; X02; X03; X04; D01",
+      "mark": 18.87
+    },
+    "Kỹ thuật xây dựng công trình giao thông": {
+      "code": "7580205",
+      "block": "C01; X02; X03; X04; D01",
+      "mark": 18.87
+    },
+    "Nuôi trồng thuỷ sản": {
+      "code": "7620301",
+      "block": "B03; C02; X03; X04; D01",
+      "mark": 18.87
+    },
+    "Nuôi trồng thuỷ sản (Chương trình Minh Phú - NTU)": {
+      "code": "7620301MP",
+      "block": "B03;C02;X03;X04;D01",
+      "mark": 18.87
+    },
+    "Khoa học thủy sản (02 chuyên ngành: Khoa học thủy sản, Khai thác thủy sản)": {
+      "code": "7620303",
+      "block": "B03; C02; X03; X04; D01",
+      "mark": 18.87
+    },
+    "Quản lý thuỷ sản": {
+      "code": "7620305",
+      "block": "B03; C02; X02; X03; X04; D01",
+      "mark": 18.87
+    },
+    "Quản trị dịch vụ du lịch và lữ hành": {
+      "code": "7810103",
+      "block": "D01; X01; X02; C03; C04",
+      "mark": 23.58
+    },
+    "Quản trị dịch vụ du lịch lữ hành (Chương trình đặc biệt)": {
+      "code": "7810103A",
+      "block": "D01;X01;C03;C04",
+      "mark": 23.58
+    },
+    "Quản trị dịch vụ du lịch và lữ hành (Chương trình song ngữ Pháp - Việt)": {
+      "code": "7810103P",
+      "block": "D01;X01;C03;C04;D03",
+      "mark": 21.7
+    },
+    "Quản trị khách sạn": {
+      "code": "7810201",
+      "block": "D01; X01; X02; C03; C04",
+      "mark": 23.58
+    },
+    "Quản trị khách sạn (Chương trình đặc biệt)": {
+      "code": "7810201A",
+      "block": "D01;X01;C03;C04",
+      "mark": 23.58
+    },
+    "Khoa học hàng hải (02 chuyên ngành: Khoa học hàng hải; Quản lý hàng hải và Logistics)": {
+      "code": "7840106",
+      "block": "C01; X02; X03; X04; D01",
+      "mark": 22.64
+    }
+  },
+  "ĐH FPT": {
+    "Ngôn ngữ Anh": {
+      "code": "7220201",
+      "block": "A;B;C01;C02;C03;C04",
+      "mark": 21.0
+    },
+    "Ngôn ngữ Trung Quốc": {
+      "code": "7220204",
+      "block": "A;B;C01;C02;C03;C04",
+      "mark": 21.0
+    },
+    "Ngôn ngữ Nhật": {
+      "code": "7220209",
+      "block": "A;B;C01;C02;C03;C04",
+      "mark": 21.0
+    },
+    "Ngôn ngữ Hàn Quốc": {
+      "code": "7220210",
+      "block": "A;B;C01;C02;C03;C04",
+      "mark": 21.0
+    },
+    "Công nghệ truyền thông": {
+      "code": "7320106",
+      "block": "A;B;C01;C02;C03;C04",
+      "mark": 21.0
+    },
+    "Quản trị kinh doanh": {
+      "code": "7340101",
+      "block": "A;B;C01;C02;C03;C04",
+      "mark": 21.0
+    },
+    "Công nghệ thông tin": {
+      "code": "7480201",
+      "block": "A;B;C01;C02;C03;C04",
+      "mark": 21.0
+    }
+  },
+  "RMIT Việt Nam": {},
+  "Học viện Tài chính": {
+    "Tiếng Anh tài chính kế toán": {
+      "code": "7220201",
+      "block": "A01; D01; D07",
+      "mark": 24.1
+    },
+    "Kinh tế và quản lý nguồn lực tài chính": {
+      "code": "7310101",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.43
+    },
+    "Kinh tế chính trị - tài chính": {
+      "code": "7310102",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.92
+    },
+    "Kinh tế đầu tư": {
+      "code": "7310104",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.56
+    },
+    "Kinh tế đầu tư (Theo định hướng ACCA)": {
+      "code": "7310104QT12.01",
+      "block": "A01; D01; D07",
+      "mark": 22.82
+    },
+    "Toán tài chính": {
+      "code": "7310108",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.57
+    },
+    "Quản trị doanh nghiệp; Quản trị kinh doanh du lịch": {
+      "code": "7340101",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.98
+    },
+    "Quản trị doanh nghiệp (Theo định hướng ICAEW CFAB)": {
+      "code": "7340101QT03.01",
+      "block": "A01; D01; D07",
+      "mark": 22.58
+    },
+    "Marketing": {
+      "code": "7340115",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.23
+    },
+    "Digital Marketing (Theo định hướng ICDL)": {
+      "code": "7340115QT11.02",
+      "block": "A01; D01; D07",
+      "mark": 23.44
+    },
+    "Thẩm định giá và kinh doanh bất động sản": {
+      "code": "7340116",
+      "block": "A00; A01; D01; D07",
+      "mark": 21.51
+    },
+    "Thẩm định giá và kinh doanh bất động sản (Theo định hướng ACCA)": {
+      "code": "7340116QT09.01",
+      "block": "A01; D01; D07",
+      "mark": 21.0
+    },
+    "Kinh doanh quốc tế (Theo định hướng ICAEW CFAB)": {
+      "code": "7340120QT15.01",
+      "block": "A01; D01; D07",
+      "mark": 24.89
+    },
+    "Tài chính - Ngân hàng 1 (CN Thuế;  Hải quan và Nghiệp vụ ngoại thương;  Tài chính quốc tế": {
+      "code": "73402011",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.47
+    },
+    "Tài chính - Ngân hàng 2 (CN Tài chính doanh nghiệp; Phân tích tài chính)": {
+      "code": "73402012",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.31
+    },
+    "Tài chính - Ngân hàng 3 (CN Ngân hàng;  Đầu tư tài chính)": {
+      "code": "73402013",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.4
+    },
+    "Thuế và Quản trị thuế (Theo định hướng ACCA)": {
+      "code": "7340201QT01.01",
+      "block": "A01; D01; D07",
+      "mark": 21.0
+    },
+    "Hải quan và Logistics (Theo định hướng FIATA)": {
+      "code": "7340201QT01.06",
+      "block": "A01; D01; D07",
+      "mark": 21.3
+    },
+    "Phân tích tài chính (Theo định hướng ICAEW CFAB)": {
+      "code": "7340201QT01.09",
+      "block": "A01; D01; D07",
+      "mark": 21.0
+    },
+    "Tài chính doanh nghiệp (Theo định hướng ACCA)": {
+      "code": "7340201QT01.11",
+      "block": "A01; D01; D07",
+      "mark": 21.0
+    },
+    "Ngân hàng (Theo định hướng ICAEW CFAB)": {
+      "code": "7340201QT01.15",
+      "block": "A01; D01; D07",
+      "mark": 21.0
+    },
+    "Đầu tư tài chính (Theo định hướng ICAEW CFAB)": {
+      "code": "7340201QT01.19",
+      "block": "A01; D01; D07",
+      "mark": 21.0
+    },
+    "Tài chính bảo hiểm": {
+      "code": "7340204",
+      "block": "A00; A01; D01; D07",
+      "mark": 22.56
+    },
+    "Kế toán doanh nghiệp; Kế toán công": {
+      "code": "7340301",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.01
+    },
+    "Kế toán doanh nghiệp (Theo định hướng ACCA)": {
+      "code": "7340301QT02.01",
+      "block": "A01; D01; D07",
+      "mark": 21.5
+    },
+    "Kế toán quản trị và Kiểm soát quản lý (Theo định hướng CMA)": {
+      "code": "7340301QT02.02",
+      "block": "A01; D01; D07",
+      "mark": 21.0
+    },
+    "Kế toán công (Theo định hướng ACCA)": {
+      "code": "7340301QT02.03",
+      "block": "A01; D01; D07",
+      "mark": 21.5
+    },
+    "Kiểm toán": {
+      "code": "7340302",
+      "block": "A00; A01; D01; D07",
+      "mark": 26.6
+    },
+    "Kiểm toán (Theo định hướng ICAEW CFAB)": {
+      "code": "7340302QT10.01",
+      "block": "A01; D01; D07",
+      "mark": 21.5
+    },
+    "Quản lý tài chính công": {
+      "code": "7340403",
+      "block": "A00; A01; D01; D07",
+      "mark": 22.55
+    },
+    "Tin học tài chính kế toán": {
+      "code": "7340405",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.07
+    },
+    "Luật kinh doanh": {
+      "code": "7380101",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.12
+    },
+    "Khoa học dữ liệu trong tài chính": {
+      "code": "7460108",
+      "block": "A00; A01; D01; D07",
+      "mark": 25.52
+    },
+    "Trí tuệ nhân tạo trong tài chính kế toán": {
+      "code": "7480201",
+      "block": "A00; A01; D01; D07",
+      "mark": 24.97
+    }
+  },
+  "Học viện Hành chính Quốc gia": {
+    "Ngôn ngữ Anh": {
+      "code": "7220201-Hà Nội",
+      "block": "D01; D10; D14; D15",
+      "mark": 24.0
+    },
+    "Chuyên ngành Văn hóa Du lịch thuộc ngành Văn hóa học": {
+      "code": "7229040-01-Hà Nội",
+      "block": "C00; X74",
+      "mark": 25.9
+    },
+    "Chuyên ngành Văn hóa Truyền thông thuộc ngành Văn hóa học": {
+      "code": "7229040-02-Hà Nội",
+      "block": "C00; X74",
+      "mark": 25.9
+    },
+    "Chuyên ngành Quản lý di sản văn hóa và phát triển du lịch thuộc ngành Quản lý văn hóa": {
+      "code": "7229042-01-Hà Nội",
+      "block": "C00; X74",
+      "mark": 25.55
+    },
+    "Quản lý văn hóa": {
+      "code": "7229042-Hà Nội",
+      "block": "C00; X74",
+      "mark": 25.55
+    },
+    "Chuyên ngành Kinh tế du lịch thuộc ngành Kinh tể": {
+      "code": "7310101-01-Hà Nội",
+      "block": "A00; A01; A07; C01; D01",
+      "mark": 23.5
+    },
+    "Kinh tế": {
+      "code": "7310101-Hà Nội",
+      "block": "A00; A01; A07; C01; D01",
+      "mark": 23.5
+    },
+    "Chuyên ngành Chính sách công thuộc ngành Chính trị học": {
+      "code": "7310201-01-Hà Nội",
+      "block": "C00; X74; X01",
+      "mark": 25.35
+    },
+    "Chính trị học": {
+      "code": "7310201-Hà Nội",
+      "block": "C00; X74; X01",
+      "mark": 25.35
+    },
+    "Xây dựng Đảng và chính quyền nhà nước": {
+      "code": "7310202-Hà Nội",
+      "block": "C00; X70; X01",
+      "mark": 25.85
+    },
+    "Quản lý nhà nước": {
+      "code": "7310205-Hà Nội",
+      "block": "C00",
+      "mark": 25.75
+    },
+    "Chuyên ngành Quản trị thông tin thuộc ngành Thông tin - thư viện": {
+      "code": "7320201-01-Hà Nội",
+      "block": "X70; C00; X74",
+      "mark": 24.35
+    },
+    "Thông tin - thư viện": {
+      "code": "7320201-Hà Nội",
+      "block": "X70; C00; X74",
+      "mark": 24.35
+    },
+    "Chuyên ngành Văn thư - Lưu trữ thuộc ngành Lưu trữ học": {
+      "code": "7320303-01-Hà Nội",
+      "block": "C00; X70; X74",
+      "mark": 25.9
+    },
+    "Lưu trữ học": {
+      "code": "7320303-Hà Nội",
+      "block": "C00; X70; X74",
+      "mark": 23.0
+    },
+    "Quản trị nhân lực": {
+      "code": "7340404-Hà Nội",
+      "block": "C00",
+      "mark": 26.2
+    },
+    "Chuyên ngành Thư ký văn phòng doanh nghiệp thuộc ngành Quản trị văn phòng": {
+      "code": "7340406-01-Hà Nội",
+      "block": "C00",
+      "mark": 26.05
+    },
+    "Quản trị văn phòng": {
+      "code": "7340406-Hà Nội",
+      "block": "C00",
+      "mark": 26.05
+    },
+    "Chuyên ngành Thanh tra thuộc ngành Luật": {
+      "code": "7380101-01-Hà Nội",
+      "block": "C00",
+      "mark": 26.0
+    },
+    "Luật": {
+      "code": "7380101-Hà Nội",
+      "block": "C00",
+      "mark": 26.7
+    },
+    "Chuyên ngành Hệ thống thông tin thương mại điện tử thuộc ngành Hệ thống thông tin": {
+      "code": "7480104-01-Hà Nội",
+      "block": "A00; A01; D01; X06; X26",
+      "mark": 19.75
+    },
+    "Hệ thống thông tin": {
+      "code": "7480104-Hà Nội",
+      "block": "A00; A01; D01; X06; X26",
+      "mark": 19.75
+    },
+    "Quản trị dịch vụ du lịch và lữ hành": {
+      "code": "7810103-Hà Nội",
+      "block": "D01; D14; D15",
+      "mark": 24.4
+    }
+  },
+  "Học viện Kỹ thuật Mật mã": {
+    "Công nghệ thông tin": {
+      "code": "7480201KMA",
+      "block": "A00; A01; X26; X06",
+      "mark": 24.17
+    },
+    "An toàn thông tin": {
+      "code": "7480202KMA",
+      "block": "A00; A01; X26; X06",
+      "mark": 24.42
+    },
+    "Kỹ thuật điện tử - viễn thông": {
+      "code": "7520207",
+      "block": "A00; A01; X06",
+      "mark": 23.48
+    }
+  },
+  "Học viện Hàng không Việt Nam": {
+    "Ngôn ngữ Anh": {
+      "code": "7220201",
+      "block": "A01; B08; D01; D07; D09; D10; D11; D12; D13; D14; D15; X25; X26; X27; X28; X78; X79; X80; X81 ",
+      "mark": 20.0
+    },
+    "Quản trị kinh doanh": {
+      "code": "7340101",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C00; C01; C02; C03; C04; C05; C06; C07; C08; C09; C10; C11; C12; C13; D01; D07; D09; D10; D11; D12; D13; D14; D15; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; ",
+      "mark": 21.0
+    },
+    "Kinh doanh số (Ngành: QTKD)": {
+      "code": "7340101D",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C00; C01; C02; C03; C04; C05; C06; C07; C08; C09; C10; C11; C12; C13; D01; D07; D09; D10; D11; D12; D13; D14; D15; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; ",
+      "mark": 20.0
+    },
+    "Quản trị Hàng không (học bằng Tiếng Anh)": {
+      "code": "7340101E",
+      "block": "A01; B08; D01; D07; D09; D10; D11; D12; D13; D14; D15; X25; X26; X27; X28; X78; X79; X80; X81 ",
+      "mark": 21.0
+    },
+    "Marketing": {
+      "code": "7340115",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C00; C01; C02; C03; C04; C05; C06; C07; C08; C09; C10; C11; C12; C13; D01; D07; D09; D10; D11; D12; D13; D14; D15; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; ",
+      "mark": 24.5
+    },
+    "Thương mại quốc tế (Ngành: Kinh doanh quốc tế)": {
+      "code": "7340120",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C00; C01; C02; C03; C04; C05; C06; C07; C08; C09; C10; C11; C12; C13; D01; D07; D09; D10; D11; D12; D13; D14; D15; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; ",
+      "mark": 23.0
+    },
+    "Quản trị nhân lực": {
+      "code": "7340404",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C00; C01; C02; C03; C04; C05; C06; C07; C08; C09; C10; C11; C12; C13; D01; D07; D09; D10; D11; D12; D13; D14; D15; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; ",
+      "mark": 21.5
+    },
+    "Trí tuệ nhân tạo và Dữ liệu lớn (Ngành: CNTT)": {
+      "code": "7480201B",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C01; C02; C03; C04; D01; D07; D09; D10; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; X16; X17; X18; X19; X20; X21; X22; X23; X24; X25; X26; X27; X28; X53; X54; ",
+      "mark": 18.0
+    },
+    "Trí tuệ nhân tạo và Internet vạn vật (Ngành: CNTT)": {
+      "code": "7480201I",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C01; C02; C03; C04; D01; D07; D09; D10; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; X16; X17; X18; X19; X20; X21; X22; X23; X24; X25; X26; X27; X28; X53; X54; ",
+      "mark": 18.0
+    },
+    "Công nghệ phần mềm và Trí tuệ nhân tạo (Ngành: CNTT)": {
+      "code": "7480201S",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C01; C02; C03; C04; D01; D07; D09; D10; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; X16; X17; X18; X19; X20; X21; X22; X23; X24; X25; X26; X27; X28; X53; X54; ",
+      "mark": 18.0
+    },
+    "Quản lý và khai thác cảng HK (Ngành: CNKT Công trình xây dựng)": {
+      "code": "7510102Q",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C01; C02; C03; C04; D01; D07; D09; D10; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; X16; X17; X18; X19; X20; X21; X22; X23; X24; X25; X26; X27; X28; X53; X54; ",
+      "mark": 20.0
+    },
+    "Xây dựng và phát triển cảng HK (Ngành: CNKT Công trình xây dựng)": {
+      "code": "7510102X",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C01; C02; C03; C04; D01; D07; D09; D10; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; X16; X17; X18; X19; X20; X21; X22; X23; X24; X25; X26; X27; X28; X53; X54; ",
+      "mark": 18.0
+    },
+    "Điện tử ứng dụng và Trí tuệ nhân tạo (AI) (Ngành: CNKT Điện tử viễn thông)": {
+      "code": "7510302A",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C01; C02; C03; C04; D01; D07; D09; D10; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; X16; X17; X18; X19; X20; X21; X22; X23; X24; X25; X26; X27; X28; X53; X54; ",
+      "mark": 18.0
+    },
+    "Điện tử viễn thông và Trí tuệ nhân tạo (Ngành: CNKT Điện tử viễn thông)": {
+      "code": "7510302V",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C01; C02; C03; C04; D01; D07; D09; D10; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; X16; X17; X18; X19; X20; X21; X22; X23; X24; X25; X26; X27; X28; X53; X54; ",
+      "mark": 20.0
+    },
+    "Điện tự động cảng HK (Ngành: CNKT Điều khiển và tự động hóa)": {
+      "code": "7510303A",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C01; C02; C03; C04; D01; D07; D09; D10; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; X16; X17; X18; X19; X20; X21; X22; X23; X24; X25; X26; X27; X28; X53; X54; ",
+      "mark": 20.0
+    },
+    "Thiết bị bay không người lái và Robotics (Ngành: CNKT Điều khiển và tự động hóa)": {
+      "code": "7510303U",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C01; C02; C03; C04; D01; D07; D09; D10; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; X16; X17; X18; X19; X20; X21; X22; X23; X24; X25; X26; X27; X28; X53; X54; ",
+      "mark": 18.0
+    },
+    "Kỹ thuật hàng không": {
+      "code": "7520120",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C01; C02; C03; C04; D01; D07; D09; D10; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; X16; X17; X18; X19; X20; X21; X22; X23; X24; X25; X26; X27; X28; X53; X54; ",
+      "mark": 24.5
+    },
+    "Kỹ thuật hàng không (học bằng Tiếng Anh)": {
+      "code": "7520120E",
+      "block": "A01; B08; D01; D07; D09; D10; X25; X26; X27; X28 ",
+      "mark": 24.0
+    },
+    "Kỹ thuật bảo dưỡng tàu bay (Ngành: Kỹ thuật HK)": {
+      "code": "7520120M",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C01; C02; C03; C04; D01; D07; D09; D10; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; X16; X17; X18; X19; X20; X21; X22; X23; X24; X25; X26; X27; X28; X53; X54; ",
+      "mark": 24.0
+    },
+    "Kỹ thuật thiết bị bay không người lái (Ngành: Kỹ thuật HK)": {
+      "code": "7520120U",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C01; C02; C03; C04; D01; D07; D09; D10; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; X16; X17; X18; X19; X20; X21; X22; X23; X24; X25; X26; X27; X28; X53; X54; ",
+      "mark": 20.0
+    },
+    "Quản trị dịch vụ thương mại hàng không": {
+      "code": "7810103A",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C00; C01; C02; C03; C04; C05; C06; C07; C08; C09; C10; C11; C12; C13; D01; D07; D09; D10; D11; D12; D13; D14; D15; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; ",
+      "mark": 23.5
+    },
+    "Quản trị khách sạn nhà hàng": {
+      "code": "7810103H",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C00; C01; C02; C03; C04; C05; C06; C07; C08; C09; C10; C11; C12; C13; D01; D07; D09; D10; D11; D12; D13; D14; D15; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; ",
+      "mark": 22.0
+    },
+    "Quản trị lữ hành": {
+      "code": "7810103T",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C00; C01; C02; C03; C04; C05; C06; C07; C08; C09; C10; C11; C12; C13; D01; D07; D09; D10; D11; D12; D13; D14; D15; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; ",
+      "mark": 22.0
+    },
+    "Quản lý hoạt động bay; Hệ thống kỹ thuật quản lý bay": {
+      "code": "7840102",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C01; C02; C03; C04; D01; D07; D09; D10; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; X16; X17; X18; X19; X20; X21; X22; X23; X24; X25; X26; X27; X28; X53; X54; ",
+      "mark": 25.0
+    },
+    "Quản lý hoạt động bay (học bằng Tiếng Anh); Quản lý và khai thác bay (học bằng Tiếng Anh)": {
+      "code": "7840102E",
+      "block": "A01; B08; D01; D07; D09; D10; X25; X26; X27; X28 ",
+      "mark": 27.0
+    },
+    "Logistics và Quản lý Chuỗi cung ứng; Logistics và Vận tải đa phương thức": {
+      "code": "7840104",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C00; C01; C02; C03; C04; C05; C06; C07; C08; C09; C10; C11; C12; C13; D01; D07; D09; D10; D11; D12; D13; D14; D15; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; ",
+      "mark": 23.5
+    },
+    "Logistics và Vận tải đa phương thức (học bằng Tiếng Anh)": {
+      "code": "7840104E",
+      "block": "A01; B08; D01; D07; D09; D10; D11; D12; D13; D14; D15; X25; X26; X27; X28; X78; X79; X80; X81 ",
+      "mark": 22.0
+    },
+    "Kinh tế Hàng không (Ngành: Kinh tế vận tải)": {
+      "code": "7840104K",
+      "block": "A00; A01; A02; A03; A04; A05; A06; A07; B00; B01; B02; B03; B08; C00; C01; C02; C03; C04; C05; C06; C07; C08; C09; C10; C11; C12; C13; D01; D07; D09; D10; D11; D12; D13; D14; D15; X01; X02; X03; X04; X05; X06; X07; X08; X09; X10; X11; X12; X13; X14; X15; ",
+      "mark": 23.0
+    }
+  },
+  "ĐH Lao động - Xã hội": {
+    "Ngôn ngữ Anh": {
+      "code": "7220201",
+      "block": "D14",
+      "mark": 21.0
+    },
+    "Kinh tế": {
+      "code": "7310101",
+      "block": "A00;A01;D01",
+      "mark": 18.2
+    },
+    "Tâm lý học": {
+      "code": "7310401",
+      "block": "C00",
+      "mark": 24.3
+    },
+    "Quản trị kinh doanh": {
+      "code": "7340101",
+      "block": "A00;A01;D01",
+      "mark": 14.0
+    },
+    "Tài chính - Ngân hàng": {
+      "code": "7340201",
+      "block": "A00;A01;D01",
+      "mark": 14.0
+    },
+    "Bảo hiểm": {
+      "code": "7340204",
+      "block": "A00;A01;D01",
+      "mark": 14.0
+    },
+    "Bảo hiểm - Tài chính": {
+      "code": "7340207",
+      "block": "A00;A01;D01",
+      "mark": 14.0
+    },
+    "Kế toán": {
+      "code": "7340301",
+      "block": "A00;A01;D01",
+      "mark": 14.0
+    },
+    "Kiểm toán": {
+      "code": "7340302",
+      "block": "A00;A01;D01",
+      "mark": 14.0
+    },
+    "Quản trị nhân lực": {
+      "code": "7340404",
+      "block": "A00;A01;D01",
+      "mark": 15.0
+    },
+    "Hệ thống thông tin quản lý": {
+      "code": "7340405",
+      "block": "A00;A01;D01",
+      "mark": 14.0
+    },
+    "Luật kinh tế": {
+      "code": "7380107",
+      "block": "A00;A01;D01",
+      "mark": 18.0
+    },
+    "Công nghệ thông tin": {
+      "code": "7480201",
+      "block": "A00;A01;D01",
+      "mark": 14.0
+    },
+    "Công tác xã hội": {
+      "code": "7760101",
+      "block": "C00",
+      "mark": 23.6
+    },
+    "Quản trị dịch vụ du lịch và lữ hành": {
+      "code": "7810103",
+      "block": "A00;A01;D01",
+      "mark": 17.78
+    }
+  },
+  "ĐH Nội vụ Hà Nội": {
+    "Ngôn ngữ Anh, chuyên ngành Biên - phiên dịch thuộc ngành Ngôn ngữ Anh chuyên ngành Tiếng Anh du lịch thuộc ngành Ngôn ngữ Anh": {
+      "code": "7220201",
+      "block": "D01;D14;D15",
+      "mark": 23.75
+    },
+    "Chuyên ngành Văn hóa du lịch thuộc ngành Văn hóa học chuyên ngành Văn hóa truyền thông thuộc ngành văn hóa học": {
+      "code": "7229040",
+      "block": "C00",
+      "mark": 22.25
+    },
+    "Quản lý văn hóa\\n(Chuyên ngành Quản lý di sản văn hóa và phát triển du lịch thuộc ngành Quản lí văn hóa)": {
+      "code": "7229042",
+      "block": "C00",
+      "mark": 18.0
+    },
+    "Kinh tế": {
+      "code": "7310101",
+      "block": "A00;A01;A07;D01",
+      "mark": 23.5
+    },
+    "Chính trị học (Chuyên ngành Chính sách công)": {
+      "code": "7310201",
+      "block": "C14;C20",
+      "mark": 18.0
+    },
+    "Xây dựng Đảng và chính quyền nhà nước": {
+      "code": "7310202",
+      "block": "C19;C20",
+      "mark": 18.5
+    },
+    "Quản lý nhà nước": {
+      "code": "7310205",
+      "block": "C20",
+      "mark": 24.0
+    },
+    "Thông tin - thư viện, chuyên ngành Quản trị thông tin thuộc ngành thông tin - thư viện": {
+      "code": "7320201",
+      "block": "C20",
+      "mark": 18.0
+    },
+    "Lưu trữ học (Chuyên ngành Văn thư - Lưu trữ)": {
+      "code": "7320303",
+      "block": "C19;C20",
+      "mark": 18.0
+    },
+    "Lưu trữ học - Chuyên ngành Văn thư - lưu trữ thuộc ngành Lưu trữ học": {
+      "code": "7320303TP-HCM",
+      "block": "C19",
+      "mark": 16.0
+    },
+    "Quản trị nhân lực": {
+      "code": "7340404",
+      "block": "C00",
+      "mark": 27.0
+    },
+    "Quản trị văn phòng": {
+      "code": "7340406",
+      "block": "C20",
+      "mark": 26.75
+    },
+    "Luật (Chuyên ngành Thanh tra)": {
+      "code": "7380101",
+      "block": "C00",
+      "mark": 26.25
+    },
+    "Hệ thông thông tin\\n(Chuyên ngành Hệ thống thông tin thương mại điện tử)": {
+      "code": "7480104",
+      "block": "A00;A01;D01;D10",
+      "mark": 19.75
+    },
+    "Quản trị dịch vụ du lịch và lữ hành": {
+      "code": "7810103",
+      "block": "C00",
+      "mark": 25.25
+    }
+  },
+  "ĐH TDTT Bắc Ninh": {
+    "Giáo dục thể chất": {
+      "code": "7140206",
+      "block": "T00; T01; T02; T05; T06",
+      "mark": 27.39
+    },
+    "Y sinh học TDTT": {
+      "code": "7729001",
+      "block": "T00; T01; T02; T05; T06",
+      "mark": 18.0
+    },
+    "Quản lý TDTT": {
+      "code": "7810301",
+      "block": "T00; T01; T02; T05; T06",
+      "mark": 24.5
+    },
+    "Huấn luyện thể thao": {
+      "code": "7810302",
+      "block": "T00; T01; T02; T05; T06",
+      "mark": 18.0
+    }
+  },
+  "ĐH Mỹ thuật Công nghiệp": {},
+  "ĐH Mỹ thuật Việt Nam": {},
+  "ĐH Sân khấu - Điện ảnh Hà Nội": {},
+  "Nhạc viện Hà Nội": {
+    "Âm nhạc học": {
+      "code": "7210201",
+      "block": "0",
+      "mark": 22.0
+    },
+    "Sáng tác âm nhạc": {
+      "code": "7210203",
+      "block": "0",
+      "mark": 22.0
+    },
+    "Chỉ huy âm nhạc": {
+      "code": "7210204",
+      "block": "0",
+      "mark": 22.0
+    },
+    "Thanh nhạc": {
+      "code": "7210205",
+      "block": "0",
+      "mark": 22.0
+    },
+    "Biểu diễn nhạc cụ phương tây": {
+      "code": "7210207",
+      "block": "0",
+      "mark": 22.0
+    },
+    "Piano": {
+      "code": "7210208",
+      "block": "0",
+      "mark": 22.0
+    },
+    "Nhạc Jazz": {
+      "code": "7210209",
+      "block": "0",
+      "mark": 22.0
+    },
+    "Biểu diễn nhạc cụ truyền thống": {
+      "code": "7210210",
+      "block": "0",
+      "mark": 22.0
+    }
+  }
+}

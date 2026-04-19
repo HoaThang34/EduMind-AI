@@ -1,18 +1,116 @@
 """Derive MajorSubjectWeight rows (min_score + weight) for all majors.
 
 Công thức:
-- Môn khối (3): main = entry/3 + 0.2, 2 môn phụ chia đều phần còn lại. Weight 0.30.
-- Môn cùng cluster (không trong khối): random [5.0, 7.0], seed theo major_id. Weight 0.03.
-- Môn không liên quan: random [3.0, 4.5], seed theo major_id. Weight 0.0.
+- Môn chính của ngành (1): weight 0.45, min_score = entry/3 + 0.2 (cap 10).
+- 2 môn phụ trong khối: weight 0.225 mỗi môn, min_score = (entry - main_score)/2.
+- Môn cùng cluster (không trong khối): weight 0.03, min_score random [5.0, 7.0].
+- Môn không liên quan: weight 0.0, min_score random [3.0, 4.5].
+
+"Môn chính" = block.main mặc định, được override theo tên ngành:
+  - Y/Dược/Sinh-học → Sinh hoặc Hóa (tùy block)
+  - Vật lý/Điện/Hạt nhân → Lý
+  - Ngôn ngữ X → môn ngoại ngữ X
+  - Văn học/Báo chí → Văn, Lịch sử → Sử, v.v.
+  - Hội họa/Kiến trúc/Thiết kế → Vẽ
+Override chỉ apply khi môn ưu tiên có trong khối; nếu không giữ block.main.
 """
 import json
 import random
+import re
 import sys
 import os
 from pathlib import Path
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, basedir)
+
+
+# Ordered — first keyword match wins. Keyword khớp substring của tên ngành (lowercase).
+# Môn ưu tiên phải là canonical name trong admission_blocks.json.
+_MAIN_OVERRIDE_RULES = [
+    # Y / Dược
+    ('y khoa', 'Sinh'),
+    ('y học cổ truyền', 'Sinh'),
+    ('y học dự phòng', 'Sinh'),
+    ('y tế công cộng', 'Sinh'),
+    ('răng hàm mặt', 'Sinh'),
+    ('điều dưỡng', 'Sinh'),
+    ('phục hồi chức năng', 'Sinh'),
+    ('thú y', 'Sinh'),
+    ('quản lý bệnh viện', 'Sinh'),
+    ('dược', 'Hóa'),
+    # Sinh học / Nông lâm
+    ('công nghệ sinh học', 'Sinh'),
+    ('kỹ thuật sinh học', 'Sinh'),
+    ('sư phạm sinh', 'Sinh'),
+    ('sinh học', 'Sinh'),
+    ('nông học', 'Sinh'),
+    ('lâm học', 'Sinh'),
+    ('chăn nuôi', 'Sinh'),
+    ('nuôi trồng thủy sản', 'Sinh'),
+    ('khoa học môi trường', 'Sinh'),
+    ('kỹ thuật y sinh', 'Sinh'),
+    # Hóa
+    ('kỹ thuật hóa', 'Hóa'),
+    ('sư phạm hóa', 'Hóa'),
+    ('hóa học', 'Hóa'),
+    ('công nghệ thực phẩm', 'Hóa'),
+    # Vật lý / Điện tử / Năng lượng
+    ('sư phạm vật lý', 'Lý'),
+    ('vật lý', 'Lý'),
+    ('kỹ thuật hạt nhân', 'Lý'),
+    ('công nghệ nano', 'Lý'),
+    ('năng lượng tái tạo', 'Lý'),
+    ('thiết kế vi mạch', 'Lý'),
+    ('kỹ thuật điện', 'Lý'),
+    ('điện tử viễn thông', 'Lý'),
+    ('khoa học vũ trụ', 'Lý'),
+    # Ngôn ngữ
+    ('sư phạm tiếng anh', 'Anh'),
+    ('ngôn ngữ anh', 'Anh'),
+    ('tiếng anh', 'Anh'),
+    ('ngôn ngữ nhật', 'Nhật'),
+    ('tiếng nhật', 'Nhật'),
+    ('ngôn ngữ hàn', 'Hàn'),
+    ('tiếng hàn', 'Hàn'),
+    ('ngôn ngữ trung', 'Trung'),
+    ('tiếng trung', 'Trung'),
+    ('ngôn ngữ pháp', 'Pháp'),
+    ('tiếng pháp', 'Pháp'),
+    ('ngôn ngữ nga', 'Nga'),
+    ('tiếng nga', 'Nga'),
+    # Văn / Xã hội
+    ('sư phạm văn', 'Văn'),
+    ('văn học', 'Văn'),
+    ('ngữ văn', 'Văn'),
+    ('báo chí', 'Văn'),
+    ('truyền thông đa phương tiện', 'Văn'),
+    ('lịch sử', 'Sử'),
+    ('sử học', 'Sử'),
+    ('địa lý', 'Địa'),
+    ('địa chất', 'Địa'),
+    # Nghệ thuật
+    ('hội họa', 'Vẽ'),
+    ('kiến trúc', 'Vẽ'),
+    ('thiết kế', 'Vẽ'),
+    ('mỹ thuật', 'Vẽ'),
+    ('điện ảnh', 'Vẽ'),
+    ('âm nhạc', 'Âm nhạc'),
+    # Toán / Tin học (giữ mặc định A-block, nhưng explicit)
+    ('sư phạm toán', 'Toán'),
+    ('toán học', 'Toán'),
+    ('sư phạm tin', 'Tin học'),
+    ('tin học ứng dụng', 'Tin học'),
+]
+
+
+def resolve_main_subject(major_name, block_subjects, default_main):
+    """Chọn môn chính của ngành. Ưu tiên rule đầu tiên match mà môn ưu tiên nằm trong khối."""
+    name = (major_name or '').lower()
+    for keyword, preferred in _MAIN_OVERRIDE_RULES:
+        if keyword in name and preferred in block_subjects:
+            return preferred
+    return default_main
 
 
 def derive_weights(major, blocks_data, all_subject_names):
@@ -46,7 +144,7 @@ def derive_weights(major, blocks_data, all_subject_names):
         return canonical_to_db.get(canonical)  # None nếu không có trong DB
 
     entry = major.entry_score
-    main_subj = block_info['main']
+    main_subj = resolve_main_subject(major.name, block_info['subjects'], block_info['main'])
     main_score = round(min(entry / 3 + 0.2, 10.0), 1)
     other_score = round((entry - main_score) / 2, 1)
 
@@ -54,14 +152,18 @@ def derive_weights(major, blocks_data, all_subject_names):
     weights = []
     used_db_names = set()  # các DB name đã được assign
 
-    # (a) Block subjects
+    # (a) Block subjects: main 0.45, 2 phụ 0.225 mỗi môn (tổng block = 0.9)
     for canon in block_info['subjects']:
         db_name = to_db_name(canon)
         if not db_name or db_name in used_db_names:
             continue
         used_db_names.add(db_name)
-        score = main_score if canon == main_subj else other_score
-        weights.append({'subject_name': db_name, 'min_score': score, 'weight': 0.30})
+        is_main = (canon == main_subj)
+        weights.append({
+            'subject_name': db_name,
+            'min_score': main_score if is_main else other_score,
+            'weight': 0.45 if is_main else 0.225,
+        })
 
     # (b) Related cluster subjects
     clusters_for_group = blocks_data['group_to_clusters'].get(major.major_group, ['STEM'])
