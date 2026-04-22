@@ -1,0 +1,14 @@
+CHALLENGE 1 – TỐI ƯU HÓA OCR VÀ CƠ CHẾ TỰ HỌC
+Mục tiêu: Kiểm tra năng lực xử lý dữ liệu viết tay phức tạp (toàn học, sơ đồ) và khả năng tự cải thiện của mô hình AI dựa trên phản hồi của con người.
+Yêu cầu đội thực hiện:
+
+Tính chính xác mô hình OCR hiện tại:
+Trình bày phương pháp nhận diện các ký tự đặc biệt và cấu trúc sơ đồ viết tay của học sinh.
+Thiết lập vòng lặp Active Learning:
+Giải thích cơ chế khi giáo viên sửa lỗi nhận diện, dữ liệu đó được quay vòng để tái huấn luyện (retrain) giúp AI thông minh hơn như thế nào.
+
+Checkpoint / Minh chứng cần nộp:
+
+01 Video/Ảnh so sánh: Kết quả nhận diện một bài toán viết tay trước và sau khi được AI xử lý/giao viên chỉnh sửa.
+01 Sơ đồ quy trình Active Learning: Mô tả luồng dữ liệu từ “Lỗi sai của AI” → “Giáo viên sửa” → “AI cập nhật tri thức”.
+Minh chứng trong sản phẩm: “Giáo viên sửa” → “AI cập nhật tri thức”.

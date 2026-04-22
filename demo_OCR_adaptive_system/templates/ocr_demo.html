@@ -1,0 +1,791 @@
+{% extends "base.html" %}
+{% block title %}OCR Adaptive — Demo{% endblock %}
+
+{% block content %}
+<div>
+    <div class="mb-4 sm:mb-5 flex flex-wrap items-end justify-between gap-3">
+        <div>
+            <h1 class="text-base sm:text-xl font-semibold tracking-tight">
+                Nhận diện viết tay · Vòng lặp tự học hệ thống
+            </h1>
+            <p class="text-muted-foreground text-[12px] sm:text-[13px] leading-snug mt-0.5">
+                <span class="font-mono">VLM</span> đọc ảnh →
+                <span class="font-mono">Validator</span> kiểm tra →
+                <span class="font-mono">Reasoning agent</span> tra <span class="font-mono">Error Library</span> (Qdrant) →
+                Giáo viên sửa → auto-diff rút rule → nạp lại ngữ cảnh.
+            </p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4">
+
+        <!-- LEFT COLUMN -->
+        <section class="lg:col-span-4 xl:col-span-4 space-y-3 sm:space-y-4">
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title"><span class="font-mono text-[11px] text-muted-foreground">01</span> Ảnh đầu vào</span>
+                </div>
+                <div class="panel-body">
+                    <div id="source-tabs" class="inline-flex rounded-md border border-[hsl(220,13%,88%)] p-0.5 mb-2.5 text-[11px] font-mono">
+                        <button data-src="file" class="src-tab px-2.5 py-1 rounded-[4px] transition">
+                            <i class="fas fa-folder-open text-[10px] mr-1"></i>file
+                        </button>
+                        <button data-src="camera" class="src-tab px-2.5 py-1 rounded-[4px] transition">
+                            <i class="fas fa-camera text-[10px] mr-1"></i>camera
+                        </button>
+                    </div>
+
+                    <div id="src-file" class="src-panel">
+                        <div id="upload-area"
+                            class="border border-dashed border-[hsl(220,13%,82%)] rounded-md p-5 text-center hover:border-[hsl(222,47%,35%)] hover:bg-[hsl(210,20%,98%)] transition-colors cursor-pointer">
+                            <input type="file" id="image-upload" accept="image/*" capture="environment" class="hidden">
+                            <i class="fas fa-image text-lg text-muted-foreground"></i>
+                            <p class="text-[13px] font-medium mt-1.5">Chọn file từ máy / kéo thả</p>
+                            <p class="text-[11px] text-muted-foreground font-mono mt-0.5">.jpg .png .webp · ≤ 15MB</p>
+                        </div>
+                    </div>
+
+                    <div id="src-camera" class="src-panel hidden">
+                        <div class="rounded-md border border-[hsl(220,13%,91%)] overflow-hidden bg-black aspect-video flex items-center justify-center">
+                            <video id="cam-video" playsinline autoplay muted class="w-full h-full object-contain bg-black"></video>
+                        </div>
+                        <div class="flex gap-1.5 mt-2">
+                            <button id="cam-start" class="btn-outline flex-1 text-[12px]">
+                                <i class="fas fa-video text-[11px]"></i> Bật camera
+                            </button>
+                            <button id="cam-shot" class="btn-primary flex-1 text-[12px] hidden">
+                                <i class="fas fa-circle text-[10px]"></i> Chụp
+                            </button>
+                            <button id="cam-stop" class="btn-outline text-[12px] hidden" title="Tắt camera">
+                                <i class="fas fa-stop text-[10px]"></i>
+                            </button>
+                        </div>
+                        <p class="text-[10px] text-muted-foreground font-mono mt-1.5">Cần quyền truy cập camera · http://localhost chấp nhận được</p>
+                    </div>
+
+                    <div id="image-preview-container" class="hidden relative rounded-md overflow-hidden border border-[hsl(220,13%,91%)] mt-2.5">
+                        <img id="image-preview" src="" class="w-full h-auto max-h-52 object-contain bg-[hsl(210,20%,98%)]">
+                        <button id="remove-image"
+                            class="absolute top-1.5 right-1.5 w-7 h-7 bg-white border border-[hsl(220,13%,85%)] hover:bg-[hsl(210,20%,96%)] text-[hsl(222,47%,11%)] rounded flex items-center justify-center shadow-sm">
+                            <i class="fas fa-xmark text-xs"></i>
+                        </button>
+                        <div id="preview-meta" class="absolute left-1.5 bottom-1.5 px-1.5 py-0.5 rounded bg-black/70 text-white text-[10px] font-mono"></div>
+                    </div>
+
+                    <button id="process-ocr-btn" disabled class="btn-primary w-full mt-3">
+                        <i class="fas fa-play text-[11px]"></i> Chạy pipeline
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title"><span class="font-mono text-[11px] text-muted-foreground">02</span> Chế độ chạy</span>
+                </div>
+                <div class="panel-body">
+                    <p class="text-[11px] text-muted-foreground mb-2.5">
+                        Chạy <span class="font-mono">fresh</span> để thấy baseline, sau đó bật <span class="font-mono">with_library</span> để so sánh cải thiện.
+                    </p>
+                    <div class="grid grid-cols-1 gap-1.5">
+                        <label class="mode-opt">
+                            <input type="radio" name="mode" value="auto" checked class="mt-0.5">
+                            <div class="flex-1 text-[12px]">
+                                <div class="font-medium">auto <span class="text-muted-foreground font-normal">— v1 fresh, vN có library</span></div>
+                            </div>
+                        </label>
+                        <label class="mode-opt">
+                            <input type="radio" name="mode" value="fresh" class="mt-0.5">
+                            <div class="flex-1 text-[12px]">
+                                <div class="font-medium">fresh <span class="text-muted-foreground font-normal">— không inject rule/exemplar</span></div>
+                            </div>
+                        </label>
+                        <label class="mode-opt">
+                            <input type="radio" name="mode" value="with_library" class="mt-0.5">
+                            <div class="flex-1 text-[12px]">
+                                <div class="font-medium">with_library <span class="text-muted-foreground font-normal">— inject top-k rule từ Qdrant</span></div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title"><i class="fas fa-database text-[10px]"></i> Error Library</span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="badge badge-secondary"><span id="rules-count">0</span> rule</span>
+                        <button id="delete-selected-btn" type="button" title="Xoá các rule đã chọn" disabled
+                            class="text-[10px] px-2 py-0.5 rounded border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed transition">
+                            <i class="fas fa-trash text-[9px] mr-1"></i>Xoá đã chọn (<span id="selected-count">0</span>)
+                        </button>
+                        <button id="clear-rules-btn" type="button" title="Xoá toàn bộ rule đã học"
+                            class="text-[10px] px-2 py-0.5 rounded border border-red-400 text-red-700 hover:bg-red-50 transition">
+                            <i class="fas fa-trash-alt text-[9px] mr-1"></i>Xoá hết
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div id="rules-list" class="space-y-1.5 max-h-60 overflow-y-auto">
+                        <div class="text-[11px] text-muted-foreground italic">Chưa có rule nào. Sửa lỗi để hệ thống học.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT COLUMN -->
+        <section class="lg:col-span-8 xl:col-span-8 space-y-3 sm:space-y-4">
+
+            <div id="empty-state" class="panel">
+                <div class="panel-body p-8 text-center">
+                    <i class="fas fa-square-caret-right text-2xl text-muted-foreground"></i>
+                    <h3 class="text-sm font-semibold mt-2">Chưa có inference</h3>
+                    <p class="text-muted-foreground text-[12px] mt-1 max-w-sm mx-auto">
+                        Chọn ảnh ở cột trái → <span class="font-mono">Chạy pipeline</span>. Mỗi lần chạy sẽ log lại đầy đủ bước ở khung <span class="font-mono">Run trace</span>.
+                    </p>
+                </div>
+            </div>
+
+            <div id="run-trace-card" class="hidden panel">
+                <div class="panel-header">
+                    <span class="panel-title"><i class="fas fa-list-check text-[10px]"></i> Run trace</span>
+                    <span class="flex items-center gap-2 text-[11px] font-mono text-muted-foreground">
+                        <span id="trace-status" class="inline-flex items-center gap-1">
+                            <span class="dot-pulse"></span> running
+                        </span>
+                        <span>·</span>
+                        <span>total=<span id="trace-total">—</span></span>
+                    </span>
+                </div>
+                <div id="trace-list" class="py-1.5 max-h-[360px] overflow-y-auto"></div>
+            </div>
+
+            <div id="result-card" class="hidden panel">
+                <div class="panel-header">
+                    <span class="panel-title"><i class="fas fa-file-lines text-[10px]"></i> Kết quả nhận diện</span>
+                    <div class="flex items-center gap-1.5">
+                        <span id="version-badge" class="badge badge-indigo">v?</span>
+                        <span id="type-badge" class="badge badge-secondary">type</span>
+                        <span id="validator-badge" class="badge badge-secondary">validator</span>
+                        <span id="reasoning-badge" class="badge badge-secondary hidden">reasoning</span>
+                    </div>
+                </div>
+
+                <div class="panel-body space-y-3">
+                    <div>
+                        <div class="divider-label mb-1.5">nội dung</div>
+                        <div id="rendered-content" class="p-2.5 bg-[hsl(210,20%,98%)] rounded border border-[hsl(220,13%,91%)] min-h-[48px] text-[13px]"></div>
+                    </div>
+
+                    <div id="notes-section" class="hidden">
+                        <div class="divider-label mb-1.5">ghi chú của AI</div>
+                        <div id="notes-box" class="p-2.5 bg-[hsl(38,90%,98%)] border border-[hsl(38,80%,88%)] rounded text-[12px] text-[hsl(32,80%,25%)]"></div>
+                    </div>
+
+                    <div id="conditions-section" class="hidden">
+                        <div class="divider-label mb-1.5">điều kiện ảnh</div>
+                        <div id="conditions-list" class="flex flex-wrap gap-1"></div>
+                    </div>
+
+                    <details class="rounded border border-[hsl(220,13%,91%)] bg-[hsl(210,20%,98%)]">
+                        <summary class="cursor-pointer select-none p-2 text-[11px] font-mono text-muted-foreground hover:text-foreground">
+                            <i class="fas fa-code text-[9px] mr-1"></i> json output
+                        </summary>
+                        <pre id="raw-json" class="text-[11px] p-2.5 overflow-x-auto text-[hsl(222,47%,25%)]"></pre>
+                    </details>
+                </div>
+
+                <div class="border-t border-[hsl(220,13%,91%)] panel-body bg-[hsl(210,20%,98%)] rounded-b-md">
+                    <div class="divider-label mb-2">giáo viên sửa lại (nếu sai)</div>
+                    <div id="correction-area"></div>
+                    <div class="mt-2.5">
+                        <label class="text-[11px] text-muted-foreground font-mono">teacher_note <span class="opacity-60">(optional)</span></label>
+                        <input id="teacher-note" class="input-shadcn mt-1" placeholder="VD: giấy quăn góc phải, ký hiệu học sinh hay viết khác chuẩn…">
+                    </div>
+                    <div class="mt-3 flex flex-col sm:flex-row gap-2 justify-end">
+                        <button id="rerun-btn" class="btn-outline w-full sm:w-auto" disabled>
+                            <i class="fas fa-rotate text-[11px]"></i> Chạy lại (with_library)
+                        </button>
+                        <button id="submit-correction-btn" class="btn-primary w-full sm:w-auto">
+                            <i class="fas fa-check text-[11px]"></i> Lưu bản sửa &amp; cập nhật library
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="history-card" class="hidden panel">
+                <div class="panel-header">
+                    <span class="panel-title"><i class="fas fa-clock-rotate-left text-[10px]"></i> History — cùng ảnh</span>
+                    <span id="history-count" class="badge badge-secondary">0</span>
+                </div>
+                <div id="history-list" class="panel-body space-y-1.5"></div>
+            </div>
+
+        </section>
+    </div>
+</div>
+
+<template id="tpl-math">
+    <label class="text-[11px] font-mono text-muted-foreground">latex</label>
+    <textarea class="input-shadcn font-mono text-[12px] mt-1" rows="2" data-field="latex"></textarea>
+    <div class="mt-2 p-2 bg-white border border-[hsl(220,13%,91%)] rounded text-[13px] overflow-x-auto" data-preview></div>
+</template>
+<template id="tpl-text">
+    <label class="text-[11px] font-mono text-muted-foreground">text</label>
+    <textarea class="input-shadcn text-[13px] mt-1" rows="3" data-field="text"></textarea>
+</template>
+<template id="tpl-diagram">
+    <label class="text-[11px] font-mono text-muted-foreground">graph.json (nodes/edges)</label>
+    <textarea class="input-shadcn font-mono text-[11px] mt-1" rows="8" data-field="graph"></textarea>
+    <p class="text-[11px] text-muted-foreground mt-1">Chỉnh trực tiếp JSON. Mọi <span class="font-mono">edge.from/to</span> phải tồn tại trong <span class="font-mono">nodes</span>.</p>
+</template>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+const uploadArea = $('upload-area');
+const imageUpload = $('image-upload');
+const imagePreview = $('image-preview');
+const imagePreviewContainer = $('image-preview-container');
+const previewMeta = $('preview-meta');
+const removeImageBtn = $('remove-image');
+const processBtn = $('process-ocr-btn');
+const emptyState = $('empty-state');
+const resultCard = $('result-card');
+const historyCard = $('history-card');
+const traceCard = $('run-trace-card');
+const traceList = $('trace-list');
+const traceStatus = $('trace-status');
+const traceTotal = $('trace-total');
+const submitBtn = $('submit-correction-btn');
+const rerunBtn = $('rerun-btn');
+
+let currentResult = null;
+let currentImageHash = null;
+let currentFile = null;
+
+// --- Webcam state (khai báo sớm để stopCamera dùng được trong setSourceTab) ---
+const camVideo = $('cam-video');
+const camStart = $('cam-start');
+const camShot = $('cam-shot');
+const camStop = $('cam-stop');
+let camStream = null;
+
+function stopCamera() {
+    if (camStream) {
+        camStream.getTracks().forEach(t => t.stop());
+        camStream = null;
+    }
+    if (camVideo) camVideo.srcObject = null;
+    if (camStart) camStart.classList.remove('hidden');
+    if (camShot) camShot.classList.add('hidden');
+    if (camStop) camStop.classList.add('hidden');
+}
+
+// --- Source tabs ---
+const srcTabs = document.querySelectorAll('.src-tab');
+const srcFile = $('src-file');
+const srcCamera = $('src-camera');
+function setSourceTab(kind) {
+    srcTabs.forEach(t => t.classList.toggle('active', t.dataset.src === kind));
+    srcFile.classList.toggle('hidden', kind !== 'file');
+    srcCamera.classList.toggle('hidden', kind !== 'camera');
+    if (kind !== 'camera') stopCamera();
+}
+srcTabs.forEach(t => t.addEventListener('click', () => setSourceTab(t.dataset.src)));
+setSourceTab('file');
+
+function acceptFile(f) {
+    if (!f) return;
+    if (!f.type.startsWith('image/')) { alert('File không phải ảnh'); return; }
+    currentFile = f;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        imagePreview.src = ev.target.result;
+        imagePreviewContainer.classList.remove('hidden');
+        const kb = (f.size / 1024).toFixed(0);
+        previewMeta.textContent = `${f.name.length > 28 ? f.name.slice(0,25)+'…' : f.name} · ${kb} KB`;
+        processBtn.disabled = false;
+    };
+    reader.readAsDataURL(f);
+}
+
+uploadArea.addEventListener('click', () => imageUpload.click());
+imageUpload.addEventListener('change', (e) => acceptFile(e.target.files[0]));
+
+// drag & drop
+['dragenter', 'dragover'].forEach(ev => uploadArea.addEventListener(ev, (e) => {
+    e.preventDefault(); e.stopPropagation();
+    uploadArea.classList.add('bg-[hsl(210,20%,96%)]', 'border-[hsl(222,47%,35%)]');
+}));
+['dragleave', 'drop'].forEach(ev => uploadArea.addEventListener(ev, (e) => {
+    e.preventDefault(); e.stopPropagation();
+    uploadArea.classList.remove('bg-[hsl(210,20%,96%)]', 'border-[hsl(222,47%,35%)]');
+}));
+uploadArea.addEventListener('drop', (e) => {
+    const f = e.dataTransfer?.files?.[0];
+    if (f) acceptFile(f);
+});
+
+removeImageBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    imageUpload.value = '';
+    imagePreview.src = '';
+    currentFile = null;
+    imagePreviewContainer.classList.add('hidden');
+    processBtn.disabled = true;
+});
+
+// --- Webcam capture (camVideo/camStart/camShot/camStop/camStream & stopCamera đã khai báo ở trên) ---
+async function startCamera() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Trình duyệt không hỗ trợ camera (hoặc đang chạy qua http không phải localhost).');
+        return;
+    }
+    const oldLabel = camStart.innerHTML;
+    camStart.disabled = true;
+    camStart.innerHTML = '<i class="fas fa-spinner fa-spin text-[11px]"></i> Đang bật…';
+    const tries = [
+        { video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+        { video: { width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+        { video: true, audio: false },
+    ];
+    let lastErr = null;
+    for (const c of tries) {
+        try {
+            camStream = await navigator.mediaDevices.getUserMedia(c);
+            break;
+        } catch (e) { lastErr = e; camStream = null; }
+    }
+    camStart.disabled = false;
+    camStart.innerHTML = oldLabel;
+    if (!camStream) {
+        const name = lastErr && (lastErr.name || lastErr.message) || 'unknown';
+        alert('Không mở được camera: ' + name + '\n(Cần quyền truy cập · chỉ hoạt động trên localhost hoặc https.)');
+        return;
+    }
+    camVideo.srcObject = camStream;
+    try { await camVideo.play(); } catch (_) { /* autoplay bị chặn không sao */ }
+    camStart.classList.add('hidden');
+    camShot.classList.remove('hidden');
+    camStop.classList.remove('hidden');
+}
+function captureFromCamera() {
+    if (!camStream) return;
+    const w = camVideo.videoWidth, h = camVideo.videoHeight;
+    if (!w || !h) { alert('Camera chưa sẵn sàng'); return; }
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(camVideo, 0, 0, w, h);
+    canvas.toBlob((blob) => {
+        if (!blob) return;
+        const file = new File([blob], `cam_${Date.now()}.jpg`, { type: 'image/jpeg' });
+        acceptFile(file);
+        stopCamera();
+    }, 'image/jpeg', 0.92);
+}
+camStart.addEventListener('click', startCamera);
+camShot.addEventListener('click', captureFromCamera);
+camStop.addEventListener('click', stopCamera);
+window.addEventListener('beforeunload', stopCamera);
+
+function getMode() {
+    const el = document.querySelector('input[name="mode"]:checked');
+    return el ? el.value : 'auto';
+}
+
+processBtn.addEventListener('click', () => runInfer(false));
+
+async function runInfer(forceWithLibrary) {
+    if (!currentFile) return;
+    emptyState.classList.add('hidden');
+    resultCard.classList.add('hidden');
+    startTrace();
+
+    const fd = new FormData();
+    fd.append('image', currentFile);
+    fd.append('mode', forceWithLibrary ? 'with_library' : getMode());
+
+    let finalResult = null;
+    let errorDetail = null;
+    let lastTms = 0;
+    try {
+        const r = await fetch('/api/infer_stream', { method: 'POST', body: fd });
+        if (!r.ok || !r.body) throw new Error('HTTP ' + r.status);
+
+        const reader = r.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let buf = '';
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buf += decoder.decode(value, { stream: true });
+            let idx;
+            while ((idx = buf.indexOf('\n')) >= 0) {
+                const line = buf.slice(0, idx).trim();
+                buf = buf.slice(idx + 1);
+                if (!line) continue;
+                let ev;
+                try { ev = JSON.parse(line); } catch { continue; }
+                if (ev.type === 'step') {
+                    appendStep(ev.data);
+                    if (typeof ev.data.t_ms === 'number') lastTms = ev.data.t_ms;
+                } else if (ev.type === 'open') {
+                    currentImageHash = ev.hash || null;
+                } else if (ev.type === 'result') {
+                    finalResult = ev.data;
+                } else if (ev.type === 'error') {
+                    const stepHint = ev.step ? `[${ev.step}] ` : '';
+                    const statusHint = ev.status_code ? ` (status ${ev.status_code})` : '';
+                    errorDetail = `${stepHint}${ev.detail || ev.kind || 'lỗi không rõ'}${statusHint}`;
+                }
+            }
+        }
+
+        if (errorDetail) throw new Error(errorDetail);
+        if (!finalResult) throw new Error('Không nhận được kết quả cuối');
+
+        currentResult = finalResult;
+        currentImageHash = finalResult.image_hash || currentImageHash;
+        finishTrace('ok', finalResult.total_ms ?? lastTms);
+        renderResult(finalResult);
+        await loadHistory(currentImageHash);
+        await loadRules();
+    } catch (e) {
+        finishTrace('error', lastTms);
+        appendStep({ t_ms: lastTms, step: 'client.error', status: 'error', detail: e.message || String(e) });
+        alert('Lỗi: ' + (e.message || e));
+    }
+}
+
+// --- Run trace ---
+function startTrace() {
+    traceCard.classList.remove('hidden');
+    traceList.innerHTML = '';
+    traceStatus.innerHTML = '<span class="dot-pulse"></span> running';
+    traceTotal.textContent = '—';
+    appendStep({ t_ms: 0, step: 'client.upload', status: 'start', detail: 'Đang gửi ảnh lên server…' });
+}
+
+function appendStep(ev) {
+    const row = document.createElement('div');
+    row.className = 'step-row ' + (ev.status || 'info');
+    const iconMap = {
+        info: '·', start: '▶', ok: '✓', warn: '!', error: '×', end: '■',
+    };
+    row.innerHTML = `
+        <div class="step-t">${formatT(ev.t_ms)}</div>
+        <div class="step-icon ${ev.status || 'info'}">${iconMap[ev.status] || '·'}</div>
+        <div>
+            <div class="step-name">${escapeHtml(ev.step || '-')}</div>
+            ${ev.detail ? `<div class="step-detail">${escapeHtml(ev.detail)}</div>` : ''}
+        </div>
+    `;
+    traceList.appendChild(row);
+    traceList.scrollTop = traceList.scrollHeight;
+}
+
+function formatT(ms) {
+    if (ms == null) return '';
+    if (ms < 1000) return ms + ' ms';
+    return (ms / 1000).toFixed(2) + ' s';
+}
+
+function finishTrace(status, totalMs) {
+    if (status === 'ok') {
+        traceStatus.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-[hsl(142,60%,40%)]"></span> done';
+    } else if (status === 'error') {
+        traceStatus.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-[hsl(0,70%,50%)]"></span> error';
+    }
+    if (totalMs != null) traceTotal.textContent = formatT(totalMs);
+}
+
+// --- Result render ---
+function renderResult(data) {
+    resultCard.classList.remove('hidden');
+    $('version-badge').textContent = data.version;
+    const out = data.output || {};
+    $('type-badge').textContent = 'type:' + (out.type || '?');
+    const v = data.validator || {};
+    const vb = $('validator-badge');
+    vb.textContent = v.pass ? 'validator:pass' : 'validator:' + (v.reason || 'fail');
+    vb.className = 'badge ' + (v.pass ? 'badge-success' : 'badge-destructive');
+
+    const reasoning = data.reasoning;
+    const rb = $('reasoning-badge');
+    if (reasoning) {
+        rb.classList.remove('hidden');
+        rb.textContent = 'reasoning:' + (reasoning.verdict || '?');
+        rb.className = 'badge ' + (reasoning.verdict === 'accept' ? 'badge-success' : 'badge-warning');
+    } else {
+        rb.classList.add('hidden');
+    }
+
+    const rendered = $('rendered-content');
+    rendered.innerHTML = '';
+    if (out.type === 'math' && out.latex) {
+        try { katex.render(out.latex, rendered, { throwOnError: false, displayMode: true }); }
+        catch { rendered.textContent = out.latex; }
+    } else if (out.type === 'text') {
+        rendered.textContent = out.text || '(trống)';
+    } else if (out.type === 'diagram') {
+        rendered.innerHTML = renderGraphHTML(out.graph || {});
+    } else {
+        rendered.textContent = JSON.stringify(out, null, 2);
+    }
+
+    const notes = (out.notes || '').trim();
+    if (notes) {
+        $('notes-section').classList.remove('hidden');
+        $('notes-box').textContent = notes;
+    } else {
+        $('notes-section').classList.add('hidden');
+    }
+
+    const conds = out.conditions || [];
+    const cList = $('conditions-list');
+    cList.innerHTML = '';
+    if (conds.length) {
+        $('conditions-section').classList.remove('hidden');
+        conds.forEach(c => {
+            const span = document.createElement('span');
+            span.className = 'badge ' + (c === 'ok' ? 'badge-success' : 'badge-warning');
+            span.textContent = c;
+            cList.appendChild(span);
+        });
+    } else {
+        $('conditions-section').classList.add('hidden');
+    }
+
+    $('raw-json').textContent = JSON.stringify(out, null, 2);
+    buildCorrectionArea(out);
+    rerunBtn.disabled = false;
+}
+
+function renderGraphHTML(graph) {
+    const nodes = graph.nodes || [];
+    const edges = graph.edges || [];
+    let h = '<div class="text-[12px]">';
+    h += `<div class="font-mono text-[11px] text-muted-foreground mb-1">nodes (${nodes.length})</div>`;
+    h += '<ul class="list-disc pl-5 space-y-0.5 mb-2">';
+    nodes.forEach(n => {
+        h += `<li><span class="font-mono text-[hsl(220,70%,40%)]">${n.id}</span> <span class="text-muted-foreground">[${n.type||'-'}]</span> ${escapeHtml(n.text||'')}</li>`;
+    });
+    h += '</ul>';
+    h += `<div class="font-mono text-[11px] text-muted-foreground mb-1">edges (${edges.length})</div>`;
+    h += '<ul class="list-disc pl-5 space-y-0.5">';
+    edges.forEach(e => {
+        h += `<li><span class="font-mono">${e.from} → ${e.to}</span>${e.label?' : '+escapeHtml(e.label):''}</li>`;
+    });
+    h += '</ul></div>';
+    return h;
+}
+
+function escapeHtml(s) {
+    return (s||'').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function buildCorrectionArea(out) {
+    const area = $('correction-area');
+    area.innerHTML = '';
+    const type = out.type || 'text';
+    let tpl;
+    if (type === 'math') tpl = $('tpl-math');
+    else if (type === 'diagram') tpl = $('tpl-diagram');
+    else tpl = $('tpl-text');
+    area.appendChild(tpl.content.cloneNode(true));
+
+    if (type === 'math') {
+        const ta = area.querySelector('[data-field="latex"]');
+        const prev = area.querySelector('[data-preview]');
+        ta.value = out.latex || '';
+        const render = () => {
+            try { katex.render(ta.value, prev, { throwOnError: false }); }
+            catch { prev.textContent = ta.value; }
+        };
+        ta.addEventListener('input', render);
+        render();
+    } else if (type === 'text') {
+        area.querySelector('[data-field="text"]').value = out.text || '';
+    } else if (type === 'diagram') {
+        area.querySelector('[data-field="graph"]').value = JSON.stringify(out.graph || {nodes:[],edges:[]}, null, 2);
+    }
+}
+
+function collectCorrected() {
+    const out = (currentResult && currentResult.output) || {};
+    const type = out.type || 'text';
+    const area = $('correction-area');
+    if (type === 'math') {
+        return { type, latex: area.querySelector('[data-field="latex"]').value };
+    }
+    if (type === 'text') {
+        return { type, text: area.querySelector('[data-field="text"]').value };
+    }
+    if (type === 'diagram') {
+        const raw = area.querySelector('[data-field="graph"]').value;
+        try { return { type, graph: JSON.parse(raw) }; }
+        catch { alert('Graph JSON không hợp lệ'); return null; }
+    }
+    return { type, ...out };
+}
+
+submitBtn.addEventListener('click', async () => {
+    if (!currentResult) return;
+    const corrected = collectCorrected();
+    if (!corrected) return;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-[11px]"></i> Đang lưu & rút rule…';
+    try {
+        const r = await fetch('/api/correction', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                inference_id: currentResult.inference_id,
+                corrected,
+                teacher_note: $('teacher-note').value || '',
+            }),
+        });
+        const data = await r.json();
+        if (data.error) throw new Error(data.error);
+        const tags = (data.diff && data.diff.error_tags) || [];
+        await loadRules();
+        await loadHistory(currentImageHash);
+        submitBtn.disabled = false;
+        const parts = ['Đã lưu'];
+        if (tags.length) parts.push(tags.join(','));
+        if (data.rule) parts.push('+rule');
+        submitBtn.innerHTML = '<i class="fas fa-check text-[11px] text-emerald-400"></i> ' + parts.join(' · ');
+        setTimeout(() => {
+            submitBtn.innerHTML = '<i class="fas fa-check text-[11px]"></i> Lưu bản sửa & cập nhật library';
+        }, 1600);
+        return;
+    } catch (e) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle text-[11px] text-red-400"></i> Lỗi: ' + (e.message || e);
+        setTimeout(() => {
+            submitBtn.innerHTML = '<i class="fas fa-check text-[11px]"></i> Lưu bản sửa & cập nhật library';
+        }, 2400);
+    }
+});
+
+rerunBtn.addEventListener('click', () => runInfer(true));
+
+async function loadRules() {
+    try {
+        const r = await fetch('/api/rules');
+        const data = await r.json();
+        const list = $('rules-list');
+        $('rules-count').textContent = data.rules.length;
+        if (!data.rules.length) {
+            list.innerHTML = '<div class="text-[11px] text-muted-foreground italic">Chưa có rule nào. Sửa lỗi để hệ thống học.</div>';
+            return;
+        }
+        list.innerHTML = '';
+        data.rules.forEach(r => {
+            const d = document.createElement('label');
+            d.className = 'p-2 rounded border border-[hsl(220,13%,91%)] bg-white flex items-start gap-2 cursor-pointer hover:border-orange-300 has-[:checked]:border-orange-400 has-[:checked]:bg-orange-50/40 transition';
+            d.innerHTML = `
+                <input type="checkbox" class="rule-check mt-0.5" data-id="${r.id}">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-1.5 mb-1">
+                        <span class="badge badge-indigo">${escapeHtml(r.content_type||'?')}</span>
+                        <span class="badge badge-secondary">${escapeHtml(r.error_tag||'generic')}</span>
+                        <span class="text-[10px] text-muted-foreground ml-auto font-mono">#${r.id}</span>
+                    </div>
+                    <div class="text-[12px] text-[hsl(222,47%,20%)] leading-snug">${escapeHtml(r.rule_text||'')}</div>
+                </div>
+            `;
+            list.appendChild(d);
+        });
+        list.querySelectorAll('.rule-check').forEach(cb => cb.addEventListener('change', updateSelectedCount));
+        updateSelectedCount();
+    } catch (e) { /* ignore */ }
+}
+
+function getSelectedRuleIds() {
+    return Array.from(document.querySelectorAll('.rule-check:checked'))
+        .map(cb => parseInt(cb.dataset.id, 10))
+        .filter(n => Number.isFinite(n));
+}
+
+function updateSelectedCount() {
+    const n = getSelectedRuleIds().length;
+    const btn = $('delete-selected-btn');
+    const span = $('selected-count');
+    if (span) span.textContent = n;
+    if (btn) btn.disabled = n === 0;
+}
+
+async function loadHistory(hash) {
+    if (!hash) return;
+    try {
+        const r = await fetch('/api/history/' + hash);
+        const data = await r.json();
+        const infs = data.inferences || [];
+        if (!infs.length) { historyCard.classList.add('hidden'); return; }
+        historyCard.classList.remove('hidden');
+        $('history-count').textContent = infs.length + ' lần';
+        const list = $('history-list');
+        list.innerHTML = '';
+        infs.forEach((inf) => {
+            let preview = '';
+            try {
+                const o = JSON.parse(inf.vlm_output);
+                if (o.type === 'math') preview = o.latex || '';
+                else if (o.type === 'text') preview = (o.text || '').slice(0, 120);
+                else if (o.type === 'diagram') preview = `${(o.graph?.nodes||[]).length} node / ${(o.graph?.edges||[]).length} edge`;
+            } catch {}
+            const rulesUsed = inf.used_rules ? JSON.parse(inf.used_rules) : [];
+            const d = document.createElement('div');
+            d.className = 'p-2 rounded border border-[hsl(220,13%,91%)] flex items-start gap-2';
+            d.innerHTML = `
+                <span class="badge badge-indigo shrink-0">${escapeHtml(inf.version||'v?')}</span>
+                <div class="flex-1 min-w-0">
+                    <div class="text-[12px] text-[hsl(222,47%,20%)] truncate font-mono">${escapeHtml(preview)}</div>
+                    <div class="text-[10px] text-muted-foreground mt-0.5 font-mono">
+                        ${inf.validator_pass ? 'validator:pass' : 'validator:' + escapeHtml(inf.validator_reason||'fail')}
+                        · rules=${rulesUsed.length}
+                    </div>
+                </div>
+            `;
+            list.appendChild(d);
+        });
+    } catch (e) { /* ignore */ }
+}
+
+async function deleteRules(ids) {
+    const isAll = !ids;
+    const confirmMsg = isAll
+        ? 'Xoá TOÀN BỘ rule trong Error Library? Không thể hoàn tác.'
+        : `Xoá ${ids.length} rule đã chọn?`;
+    if (!confirm(confirmMsg)) return;
+    try {
+        const r = await fetch('/api/rules', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: isAll ? '{}' : JSON.stringify({ ids }),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'HTTP ' + r.status);
+        alert(`Đã xoá: Qdrant ${data.qdrant_deleted} · SQLite ${data.sqlite_deleted}`);
+        await loadRules();
+    } catch (e) {
+        alert('Lỗi xoá: ' + (e.message || e));
+    }
+}
+
+const clearRulesBtn = $('clear-rules-btn');
+if (clearRulesBtn) clearRulesBtn.addEventListener('click', () => deleteRules(null));
+
+const deleteSelectedBtn = $('delete-selected-btn');
+if (deleteSelectedBtn) {
+    deleteSelectedBtn.addEventListener('click', () => {
+        const ids = getSelectedRuleIds();
+        if (!ids.length) return;
+        deleteRules(ids);
+    });
+}
+
+loadRules();
+</script>
+{% endblock %}
